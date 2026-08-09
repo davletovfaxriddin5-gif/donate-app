@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Top-Up | Donat xizmati</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0d16;
+    --panel:#12172a;
+    --panel-2:#171d34;
+    --line:rgba(255,255,255,0.08);
+    --text:#eef0fa;
+    --text-dim:#8a90ac;
+    --pubg:#ff9a3c;
+    --pubg-glow:rgba(255,154,60,0.35);
+    --ml:#7c5cff;
+    --ml-glow:rgba(124,92,255,0.35);
+    --accent:var(--pubg);
+    --accent-glow:var(--pubg-glow);
+    --danger:#ff5c7a;
+    --ok:#2fe0a8;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(600px 300px at 100% -10%, var(--accent-glow), transparent 60%),
+      var(--bg);
+    color:var(--text);
+    font-family:'Manrope',sans-serif;
+    min-height:100vh;
+    padding:18px 16px 40px;
+    transition:background 0.5s ease;
+  }
+  .eyebrow{
+    font-family:'Chakra Petch',sans-serif;
+    font-size:12px;
+    letter-spacing:0.18em;
+    text-transform:uppercase;
+    color:var(--text-dim);
+    margin:0 0 4px;
+  }
+  h1{
+    font-family:'Chakra Petch',sans-serif;
+    font-size:26px;
+    font-weight:700;
+    margin:0 0 18px;
+    letter-spacing:0.01em;
+  }
+  .tabs{
+    display:flex;
+    gap:8px;
+    margin-bottom:18px;
+  }
+  .tab{
+    flex:1;
+    padding:12px 10px;
+    border-radius:14px;
+    background:var(--panel);
+    border:1px solid var(--line);
+    text-align:center;
+    cursor:pointer;
+    transition:all 0.25s ease;
+    position:relative;
+    overflow:hidden;
+  }
+  .tab .name{
+    font-family:'Chakra Petch',sans-serif;
+    font-weight:600;
+    font-size:14px;
+    display:block;
+  }
+  .tab .sub{
+    font-size:11px;
+    color:var(--text-dim);
+    display:block;
+    margin-top:2px;
+  }
+  .tab.active{
+    border-color:var(--accent);
+    box-shadow:0 0 0 1px var(--accent), 0 8px 24px -8px var(--accent-glow);
+    background:linear-gradient(180deg, var(--panel-2), var(--panel));
+  }
+  .tab.active .name{ color:var(--accent); }
+
+  .card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:16px;
+    margin-bottom:14px;
+  }
+  label{
+    display:block;
+    font-size:12px;
+    color:var(--text-dim);
+    margin-bottom:8px;
+    font-weight:600;
+    letter-spacing:0.02em;
+  }
+  .row{ display:flex; gap:10px; }
+  .row > div{ flex:1; }
+  input[type=text], input[type=tel]{
+    width:100%;
+    background:#0d1220;
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:12px 12px;
+    color:var(--text);
+    font-family:'Manrope',sans-serif;
+    font-size:15px;
+    outline:none;
+    transition:border-color 0.2s ease;
+  }
+  input:focus{ border-color:var(--accent); }
+  input::placeholder{ color:#4b5170; }
+
+  .hint{
+    font-size:11.5px;
+    color:var(--text-dim);
+    margin-top:8px;
+    line-height:1.4;
+  }
+
+  .pkg-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+  }
+  .pkg{
+    background:var(--panel-2);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:14px 12px;
+    cursor:pointer;
+    transition:all 0.2s ease;
+    text-align:left;
+  }
+  .pkg .amt{
+    font-family:'Chakra Petch',sans-serif;
+    font-weight:700;
+    font-size:17px;
+  }
+  .pkg .unit{
+    font-size:11px;
+    color:var(--text-dim);
+    margin-left:3px;
+    font-weight:500;
+  }
+  .pkg .price{
+    font-size:13px;
+    color:var(--text-dim);
+    margin-top:6px;
+  }
+  .pkg.selected{
+    border-color:var(--accent);
+    background:linear-gradient(155deg, var(--panel-2), rgba(255,255,255,0.02));
+    box-shadow:0 0 0 1px var(--accent);
+  }
+  .pkg.selected .price{ color:var(--accent); }
+
+  .summary{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-size:13px;
+    color:var(--text-dim);
+    padding:2px 2px 0;
+  }
+  .summary b{ color:var(--text); font-family:'Chakra Petch',sans-serif; }
+
+  .submit{
+    width:100%;
+    padding:16px;
+    border-radius:14px;
+    border:none;
+    background:var(--accent);
+    color:#0a0d16;
+    font-family:'Chakra Petch',sans-serif;
+    font-weight:700;
+    font-size:15px;
+    letter-spacing:0.01em;
+    cursor:pointer;
+    margin-top:6px;
+    transition:opacity 0.2s ease, transform 0.1s ease;
+  }
+  .submit:active{ transform:scale(0.98); }
+  .submit:disabled{ opacity:0.4; cursor:not-allowed; }
+
+  .error{
+    font-size:12px;
+    color:var(--danger);
+    margin-top:8px;
+    display:none;
+  }
+  .error.show{ display:block; }
+</style>
+</head>
+<body>
+
+  <p class="eyebrow">O'yin hisobini to'ldirish</p>
+  <h1>Top-Up markazi</h1>
+
+  <div class="tabs">
+    <div class="tab active" data-game="pubg" onclick="selectGame('pubg')">
+      <span class="name">PUBG Mobile</span>
+      <span class="sub">UC to'ldirish</span>
+    </div>
+    <div class="tab" data-game="ml" onclick="selectGame('ml')">
+      <span class="name">Mobile Legends</span>
+      <span class="sub">Diamond to'ldirish</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <label>O'yinchi ma'lumotlari</label>
+    <div class="row" id="idRow">
+      <div>
+        <input type="text" id="playerId" inputmode="numeric" placeholder="Player ID">
+      </div>
+      <div id="serverWrap" style="display:none;">
+        <input type="text" id="serverId" inputmode="numeric" placeholder="Server (zone) ID">
+      </div>
+    </div>
+    <p class="hint" id="idHint">PUBG Mobile ID raqamingizni o'yin profilingizdan nusxalab qo'ying.</p>
+  </div>
+
+  <div class="card">
+    <label>Miqdorni tanlang</label>
+    <div class="pkg-grid" id="pkgGrid"></div>
+  </div>
+
+  <div class="card">
+    <label>Aloqa uchun telefon raqam</label>
+    <input type="tel" id="phone" placeholder="+998 __ ___ __ __">
+    <p class="hint">To'lov tasdiqlangach, shu raqam orqali siz bilan bog'lanamiz.</p>
+  </div>
+
+  <div class="card" style="margin-bottom:16px;">
+    <div class="summary">
+      <span>Tanlangan o'yin</span>
+      <b id="sumGame">PUBG Mobile</b>
+    </div>
+    <div class="summary" style="margin-top:8px;">
+      <span>Jami</span>
+      <b id="sumTotal">—</b>
+    </div>
+    <p class="error" id="errorMsg">Iltimos, ID va miqdorni to'ldiring.</p>
+    <button class="submit" id="submitBtn" onclick="submitOrder()">Buyurtmani yuborish</button>
+  </div>
+
+<script>
+  const tg = window.Telegram ? window.Telegram.WebApp : null;
+  if (tg) { tg.ready(); tg.expand(); }
+
+  const packages = {
+    pubg: [
+      {amt:60, unit:'UC', price:'12 000 so\'m'},
+      {amt:325, unit:'UC', price:'58 000 so\'m'},
+      {amt:660, unit:'UC', price:'112 000 so\'m'},
+      {amt:1800, unit:'UC', price:'290 000 so\'m'},
+    ],
+    ml: [
+      {amt:56, unit:'Diamond', price:'11 000 so\'m'},
+      {amt:278, unit:'Diamond', price:'52 000 so\'m'},
+      {amt:571, unit:'Diamond', price:'104 000 so\'m'},
+      {amt:1454, unit:'Diamond', price:'255 000 so\'m'},
+    ]
+  };
+
+  let currentGame = 'pubg';
+  let selectedPkg = null;
+
+  function renderPackages(){
+    const grid = document.getElementById('pkgGrid');
+    grid.innerHTML = '';
+    packages[currentGame].forEach((p, i) => {
+      const div = document.createElement('div');
+      div.className = 'pkg';
+      div.onclick = () => selectPkg(i, div);
+      div.innerHTML = `<span class="amt">${p.amt}<span class="unit">${p.unit}</span></span><div class="price">${p.price}</div>`;
+      grid.appendChild(div);
+    });
+    selectedPkg = null;
+    updateSummary();
+  }
+
+  function selectPkg(i, el){
+    document.querySelectorAll('.pkg').forEach(e => e.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedPkg = packages[currentGame][i];
+    updateSummary();
+  }
+
+  function selectGame(game){
+    currentGame = game;
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelector(`.tab[data-game="${game}"]`).classList.add('active');
+
+    const root = document.documentElement;
+    if (game === 'pubg'){
+      root.style.setProperty('--accent', 'var(--pubg)');
+      root.style.setProperty('--accent-glow', 'var(--pubg-glow)');
+      document.getElementById('serverWrap').style.display = 'none';
+      document.getElementById('playerId').placeholder = 'Player ID';
+      document.getElementById('idHint').textContent = "PUBG Mobile ID raqamingizni o'yin profilingizdan nusxalab qo'ying.";
+      document.getElementById('sumGame').textContent = 'PUBG Mobile';
+    } else {
+      root.style.setProperty('--accent', 'var(--ml)');
+      root.style.setProperty('--accent-glow', 'var(--ml-glow)');
+      document.getElementById('serverWrap').style.display = 'block';
+      document.getElementById('playerId').placeholder = 'User ID';
+      document.getElementById('idHint').textContent = "User ID va Server (Zone) ID ni o'yin profilingizdan oling.";
+      document.getElementById('sumGame').textContent = 'Mobile Legends';
+    }
+    renderPackages();
+  }
+
+  function updateSummary(){
+    document.getElementById('sumTotal').textContent = selectedPkg
+      ? `${selectedPkg.amt} ${selectedPkg.unit} — ${selectedPkg.price}`
+      : '—';
+  }
+
+  function submitOrder(){
+    const playerId = document.getElementById('playerId').value.trim();
+    const serverId = document.getElementById('serverId').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const errorEl = document.getElementById('errorMsg');
+
+    const needsServer = currentGame === 'ml';
+    if (!playerId || !selectedPkg || !phone || (needsServer && !serverId)){
+      errorEl.classList.add('show');
+      return;
+    }
+    errorEl.classList.remove('show');
+
+    const order = {
+      game: currentGame,
+      playerId,
+      serverId: needsServer ? serverId : null,
+      package: selectedPkg,
+      phone
+    };
+
+    if (tg){
+      tg.sendData(JSON.stringify(order));
+      tg.close();
+    } else {
+      alert('Test rejimi (Telegram tashqarisida):\n' + JSON.stringify(order, null, 2));
+    }
+  }
+
+  renderPackages();
+</script>
+</body>
+</html>
