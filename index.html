@@ -299,13 +299,20 @@ function haptic(t){ try{ tg && tg.HapticFeedback && tg.HapticFeedback.impactOccu
 function notify(t){ try{ tg && tg.HapticFeedback && tg.HapticFeedback.notificationOccurred(t||'success'); }catch(e){} }
 function openLink(url){
   haptic();
-  toast('DEBUG: bosildi');
   try{
-    if(tg && tg.openLink){ tg.openLink(url); }
-    else{ window.open(url,'_blank'); }
-  }catch(e){
-    toast('DEBUG xato: '+e.message);
-    try{ window.open(url,'_blank'); }catch(e2){}
+    if (tg) {
+      if (url.startsWith('https://t.me/') && tg.openTelegramLink) {
+        tg.openTelegramLink(url);
+      } else if (tg.openLink) {
+        tg.openLink(url);
+      } else {
+        window.open(url, '_blank');
+      }
+    } else {
+      window.open(url, '_blank');
+    }
+  } catch (e) {
+    window.open(url, '_blank');
   }
 }
 
