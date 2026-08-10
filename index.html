@@ -324,7 +324,7 @@ if(tg){
   try{ tg.setHeaderColor && tg.setHeaderColor('#0B1120'); tg.setBackgroundColor && tg.setBackgroundColor('#0B1120'); }catch(e){}
   tgUser = tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user : null;
   tg.onEvent('backButtonClicked', onBack);
-}
+
 function openLink(url){
   haptic();
   if(tg && tg.openTelegramLink && url.indexOf('t.me')>-1){
