@@ -302,17 +302,17 @@ function openLink(url){
   try{
     if (tg) {
       if (url.startsWith('https://t.me/') && tg.openTelegramLink) {
-        tg.openTelegramLink(url);
+        tg.openTelegramLink('https://t.me/dv1mm_garant');
       } else if (tg.openLink) {
         tg.openLink(url);
       } else {
         window.open(url, '_blank');
       }
     } else {
-      window.open(url, '_blank');
+      window.open('https://t.me/dv1mm_garant', '_blank');
     }
-  } catch (e) {
-    window.open(url, '_blank');
+  } catch(e){
+    window.open('https://t.me/dv1mm_garant', '_blank');
   }
 }
 
