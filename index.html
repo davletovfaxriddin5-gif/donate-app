@@ -46,7 +46,6 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
 input{font-family:inherit}
 ::-webkit-scrollbar{display:none}
 
-/* ---------- Profile row ---------- */
 .profile{display:flex;align-items:center;justify-content:space-between;margin-bottom:15px}
 .profile .who{display:flex;align-items:center;gap:10px;min-width:0}
 .avatar{width:42px;height:42px;border-radius:50%;flex-shrink:0;background:var(--blue-grad);
@@ -58,7 +57,6 @@ input{font-family:inherit}
   padding:6px 12px;border-radius:999px;font-weight:700;font-size:13.5px}
 .coin .dot{width:14px;height:14px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#FFE07A,#F0B429)}
 
-/* ---------- Balance card ---------- */
 .balance{background:var(--blue-grad);border-radius:20px;padding:17px 18px 15px;margin-bottom:20px;
   box-shadow:0 12px 32px -12px rgba(63,85,246,.55);position:relative;overflow:hidden}
 .balance::after{content:"";position:absolute;right:-40px;top:-40px;width:140px;height:140px;border-radius:50%;
@@ -72,10 +70,8 @@ input{font-family:inherit}
 .bal-btn:active{transform:scale(.96);background:rgba(255,255,255,.22)}
 .bal-btn svg{width:20px;height:20px;stroke:#fff;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 
-/* ---------- Section label ---------- */
 .sec-lbl{font-size:11px;font-weight:700;letter-spacing:1.2px;color:var(--faint);text-transform:uppercase;margin:18px 2px 10px}
 
-/* ---------- Games grid ---------- */
 .games{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
 .game{position:relative}
 .game .tile{position:relative;width:100%;aspect-ratio:1;border-radius:15px;overflow:hidden;
@@ -94,13 +90,11 @@ input{font-family:inherit}
 .game .nm{text-align:center;font-size:10.5px;font-weight:600;color:var(--dim);margin-top:7px;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.2px;text-transform:uppercase}
 
-/* ---------- Back header ---------- */
 .back-row{display:flex;align-items:center;margin-bottom:14px}
 .back-btn{display:flex;align-items:center;gap:5px;background:var(--card);border:1px solid var(--stroke);
   padding:9px 13px 9px 10px;border-radius:12px;font-weight:700;font-size:13.5px}
 .back-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
 
-/* ---------- Game detail ---------- */
 .gd-head{display:flex;align-items:center;gap:13px;background:var(--card);border:1px solid var(--stroke);
   border-radius:var(--radius);padding:14px;margin-bottom:16px}
 .gd-head .ic{width:60px;height:60px;border-radius:15px;overflow:hidden;flex-shrink:0;display:grid;place-items:center;
@@ -108,11 +102,9 @@ input{font-family:inherit}
 .gd-head .ic img{width:100%;height:100%;object-fit:cover}
 .gd-head .nm{font-weight:800;font-size:19px;letter-spacing:-.4px;line-height:1.1;text-transform:uppercase}
 .gd-head .cur{font-size:17px;margin-top:3px}
-
 .saved-ids{display:flex;gap:9px;overflow-x:auto;padding:2px 0 4px;margin-bottom:16px}
 .saved-ids .chip{background:var(--card);border:1px solid var(--stroke);border-radius:12px;padding:10px 14px;
   white-space:nowrap;font-size:12.5px;color:var(--dim);flex-shrink:0}
-
 .form-card{background:var(--card);border:1px solid var(--stroke);border-radius:var(--radius);padding:15px;margin-bottom:18px}
 .form-card .lbl{font-size:11px;font-weight:700;letter-spacing:1px;color:var(--faint);text-transform:uppercase;margin-bottom:8px}
 .inp-wrap{position:relative;margin-bottom:14px}
@@ -128,12 +120,10 @@ input{font-family:inherit}
 .check-btn{background:var(--blue-grad);border-radius:12px;padding:0 18px;font-weight:700;font-size:13.5px;color:#fff;
   white-space:nowrap;box-shadow:0 8px 20px -8px rgba(63,85,246,.6)}
 .check-btn:active{transform:scale(.98)}
-
 .region-tabs{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:16px}
 .region-tabs .rt{background:var(--card);border:1px solid var(--stroke);border-radius:12px;padding:10px 14px;
   font-weight:700;font-size:13px;display:flex;align-items:center;gap:6px;color:var(--dim);transition:.15s}
 .region-tabs .rt.on{background:var(--blue);color:#fff;border-color:transparent}
-
 .pkg-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding-bottom:8px}
 .pkg{position:relative;background:var(--card);border:1.5px solid rgba(240,169,60,.45);border-radius:14px;
   padding:13px 11px;display:flex;align-items:center;gap:10px;transition:.14s;text-align:left;overflow:hidden}
@@ -149,7 +139,6 @@ input{font-family:inherit}
   padding:2px 7px;border-radius:7px;letter-spacing:.3px}
 .pkg .info .a.small{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:105px}
 
-/* pinned buy */
 .buy-bar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom) + 14px);
   width:calc(100% - 28px);max-width:432px;z-index:60}
 .buy-btn{width:100%;background:var(--blue-grad);border-radius:15px;padding:15px;font-weight:800;font-size:15px;
@@ -157,25 +146,20 @@ input{font-family:inherit}
 .buy-btn:active{transform:scale(.99)}
 .buy-btn:disabled{opacity:.5;box-shadow:none}
 
-/* ---------- Titles ---------- */
 .page-title{font-weight:800;font-size:23px;letter-spacing:-.6px;margin:4px 2px 14px}
 
-/* ---------- Segmented toggle ---------- */
 .seg{display:flex;background:var(--card);border:1px solid var(--stroke);border-radius:15px;padding:5px;margin-bottom:14px}
 .seg button{flex:1;padding:11px;border-radius:11px;font-weight:700;font-size:14px;color:var(--dim);transition:.15s}
 .seg button.on{background:var(--blue);color:#fff}
-
 .chips{display:flex;gap:9px;overflow-x:auto;padding-bottom:4px;margin-bottom:14px}
 .chips .c{background:var(--card);border:1px solid var(--stroke);border-radius:999px;padding:9px 16px;
   font-weight:700;font-size:13.5px;color:var(--dim);white-space:nowrap;transition:.15s}
 .chips .c.on{background:var(--blue);color:#fff;border-color:transparent}
-
 .refresh-btn{width:100%;background:var(--blue-soft);border:1px solid rgba(63,85,246,.3);border-radius:14px;
   padding:13px;font-weight:700;font-size:14px;color:#9CA9FF;display:flex;align-items:center;justify-content:center;gap:9px;margin-bottom:16px}
 .refresh-btn:active{transform:scale(.99)}
 .refresh-btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 
-/* ---------- Order card ---------- */
 .order{background:var(--card);border:1px solid var(--stroke);border-radius:var(--radius);padding:15px;margin-bottom:12px}
 .order .top{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .order .g{display:flex;align-items:center;gap:10px}
@@ -196,13 +180,11 @@ input{font-family:inherit}
 .badge-st.wait{color:var(--gold);background:rgba(240,169,60,.14)}
 .order .date{color:var(--faint);font-size:12px;margin-top:10px}
 
-/* ---------- Empty ---------- */
 .empty{text-align:center;padding:50px 24px;color:var(--dim)}
 .empty .em{font-size:40px;margin-bottom:14px}
 .empty h3{font-weight:800;font-size:16px;color:var(--text);margin:0 0 6px}
 .empty p{font-size:12.5px;margin:0}
 
-/* ---------- Settings ---------- */
 .set-profile{background:var(--card);border:1px solid var(--stroke);border-radius:var(--radius);padding:15px;margin-bottom:18px}
 .set-profile .top{display:flex;align-items:center;gap:12px}
 .set-profile .nm{font-weight:800;font-size:16.5px;font-style:italic}
@@ -216,17 +198,14 @@ input{font-family:inherit}
 .stat .v{font-weight:800;font-size:18px;margin-top:4px}
 .stat .v.gold{color:var(--gold)}
 .stat .v small{font-size:12px;font-weight:600;color:var(--dim);margin-left:4px}
-
 .big-btn{width:100%;background:var(--blue-soft);border:1px solid rgba(63,85,246,.35);border-radius:14px;
   padding:14px 16px;display:flex;align-items:center;gap:12px;font-weight:700;font-size:14px;margin-bottom:8px;transition:.15s}
 .big-btn:active{transform:scale(.99)}
 .big-btn .ic{width:38px;height:38px;border-radius:11px;background:var(--blue);display:grid;place-items:center;flex-shrink:0}
 .big-btn .ic svg{width:20px;height:20px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-
 .lang-toggle{display:flex;background:var(--card);border:1px solid var(--stroke);border-radius:15px;padding:5px;margin-bottom:8px}
 .lang-toggle button{flex:1;padding:12px;border-radius:11px;font-weight:700;font-size:14px;color:var(--dim);transition:.15s}
 .lang-toggle button.on{background:var(--blue);color:#fff}
-
 .svc-list{background:var(--card);border:1px solid var(--stroke);border-radius:var(--radius);overflow:hidden}
 .svc{display:flex;align-items:center;gap:12px;padding:14px 16px;transition:.12s;width:100%;text-align:left}
 .svc:active{background:rgba(255,255,255,.03)}
@@ -242,7 +221,6 @@ input{font-family:inherit}
 .switch.on{background:var(--blue)}
 .switch.on::after{left:21px}
 
-/* ---------- Top-up ---------- */
 .guide-btn{width:100%;background:var(--blue-soft);border:1px solid rgba(63,85,246,.35);border-radius:14px;
   padding:14px 16px;display:flex;align-items:center;gap:12px;margin-bottom:18px;transition:.15s}
 .guide-btn:active{transform:scale(.99)}
@@ -255,7 +233,6 @@ input{font-family:inherit}
 .pay .box{width:50px;height:50px;border-radius:12px;display:grid;place-items:center;overflow:hidden}
 .pay .nm{font-size:12.5px;font-weight:700;color:#1a2236;text-align:center}
 
-/* ---------- Bottom nav ---------- */
 .nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:460px;z-index:70;
   height:calc(var(--nav-h) + env(safe-area-inset-bottom));padding:0 12px env(safe-area-inset-bottom);
   display:flex;align-items:center;gap:8px}
@@ -272,21 +249,17 @@ input{font-family:inherit}
 .rent .g{display:flex;align-items:center;gap:4px}
 .rent .g svg{width:18px;height:18px}
 
-/* ---------- Toast ---------- */
 .toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 12px);transform:translateX(-50%) translateY(-20px);
   background:var(--card-2);border:1px solid var(--stroke-2);color:#fff;padding:12px 18px;border-radius:13px;
   font-size:13px;font-weight:600;z-index:99;opacity:0;transition:.25s;box-shadow:0 12px 30px rgba(0,0,0,.5);
   pointer-events:none;max-width:88%;text-align:center}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
-
 <div class="wrap"><div id="app"></div></div>
 
-<!-- Bottom nav -->
 <nav class="nav">
   <div class="nav-inner">
     <button class="nav-item on" data-tab="home">
@@ -314,9 +287,6 @@ input{font-family:inherit}
 <div class="toast" id="toast"></div>
 
 <script>
-/* =========================================================
-   TELEGRAM SDK
-   ========================================================= */
 const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
 let tgUser = null;
 if(tg){
@@ -324,7 +294,9 @@ if(tg){
   try{ tg.setHeaderColor && tg.setHeaderColor('#0B1120'); tg.setBackgroundColor && tg.setBackgroundColor('#0B1120'); }catch(e){}
   tgUser = tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user : null;
   tg.onEvent('backButtonClicked', onBack);
-
+}
+function haptic(t){ try{ tg && tg.HapticFeedback && tg.HapticFeedback.impactOccurred(t||'light'); }catch(e){} }
+function notify(t){ try{ tg && tg.HapticFeedback && tg.HapticFeedback.notificationOccurred(t||'success'); }catch(e){} }
 function openLink(url){
   haptic();
   if(tg && tg.openTelegramLink && url.indexOf('t.me')>-1){
@@ -336,28 +308,22 @@ function openLink(url){
   try{ window.open(url,'_blank'); }catch(e){}
 }
 
-/* ⬇️ SOZLAMALAR — o'zingiznikiga o'zgartiring */
 const ADMIN_USERNAME = 'dv1mm_garant';
 const CHANNEL_USERNAME = 'savdo_mlbb1';
 const GUIDE_URL = 'https://telegra.ph/';
 
-/* demo balans/keshbek — keyin backend'dan keladi */
 let balance = 0;
 let cashback = 0;
 let currentLang = 'uz';
 
-/* =========================================================
-   O'YINLAR — NARXLARNI SHU YERDA TAHRIRLANG (so'mda)
-   img: o'z rasm URL'ingizni qo'ysangiz tile'da chiqadi.
-   ========================================================= */
 const GAMES = [
   { id:'pubg', name:'PUBG MOBILE', glyph:'🎯', star:'on', badge:'Global', img:'',
     cur:'UC', region:false,
     idFields:[{key:'playerId',label:"O'YINCHI ID",ph:'Player ID kiriting'}],
     packages:[
-      {a:'60',   c:'UC', p:12000},
-      {a:'325',  c:'UC', p:58000, hit:true},
-      {a:'660',  c:'UC', p:112000, hit:true},
+      {a:'60', c:'UC', p:12000},
+      {a:'325', c:'UC', p:58000, hit:true},
+      {a:'660', c:'UC', p:112000, hit:true},
       {a:'1800', c:'UC', p:290000},
       {a:'3850', c:'UC', p:580000},
       {a:'8100', c:'UC', p:1150000},
@@ -375,7 +341,7 @@ const GAMES = [
     cur:'💎', region:true,
     idFields:[{key:'playerId',label:"O'YINCHI ID",ph:"O'yinchi ID kiriting"},{key:'serverId',label:'SERVER ID',ph:'Server ID kiriting'}],
     packages:[
-      {a:'55',  c:'💎', p:10000, hit:true, x2:true},
+      {a:'55', c:'💎', p:10000, hit:true, x2:true},
       {a:'165', c:'💎', p:30500, hit:true, x2:true},
       {a:'275', c:'💎', p:48500, hit:true, x2:true},
       {a:'565', c:'💎', p:99600, hit:true, x2:true},
@@ -386,7 +352,7 @@ const GAMES = [
     cur:'⭐', region:false,
     idFields:[{key:'username',label:'KIMGA (@username)',ph:'@username'}],
     packages:[
-      {a:'50',  c:'⭐', p:10500},
+      {a:'50', c:'⭐', p:10500},
       {a:'100', c:'⭐', p:21000, hit:true},
       {a:'250', c:'⭐', p:52000},
       {a:'500', c:'⭐', p:99000},
@@ -395,11 +361,12 @@ const GAMES = [
     cur:'', region:false,
     idFields:[{key:'username',label:'KIMGA (@username)',ph:'@username'}],
     packages:[
-      {a:'3 oy',  c:'', p:145000, txt:true},
-      {a:'6 oy',  c:'', p:260000, txt:true},
+      {a:'3 oy', c:'', p:145000, txt:true},
+      {a:'6 oy', c:'', p:260000, txt:true},
       {a:'12 oy', c:'', p:430000, txt:true},
     ]},
 ];
+
 const REGIONS = [
   {code:'uzb', label:'UZB / 🌐 Global', flag:'🇺🇿'},
   {code:'ru', label:'RU', flag:'🇷🇺'},
@@ -409,9 +376,6 @@ const REGIONS = [
   {code:'my', label:'MY', flag:'🇲🇾'},
 ];
 
-/* =========================================================
-   HOLAT + YO'NALISH
-   ========================================================= */
 let view = 'home', curGame = null, selPkg = null, curRegion = 'uzb';
 let histTab = 'orders', histFilter = 'all';
 const app = document.getElementById('app');
@@ -433,9 +397,6 @@ function onBack(){ haptic(); if(view==='game') go('home'); else if(view==='topup
 document.querySelectorAll('.nav-item').forEach(n=> n.addEventListener('click', ()=>{ haptic(); go(n.dataset.tab); }));
 function rent(){ haptic(); toast("Ijaraga bo'limi tez orada 🔜"); }
 
-/* =========================================================
-   PROFILE (umumiy)
-   ========================================================= */
 function profileRow(){
   const name = tgUser ? (tgUser.first_name||'Foydalanuvchi') : 'Foydalanuvchi';
   const un = tgUser && tgUser.username ? '@'+tgUser.username : '@user';
@@ -450,44 +411,37 @@ function profileRow(){
   </div>`;
 }
 
-/* =========================================================
-   HOME
-   ========================================================= */
 function renderHome(){
   app.innerHTML = profileRow() + `
-    <div class="balance">
-      <div class="lbl">Balans</div>
-      <div class="amt">${fmt(balance)}<small>so'm</small></div>
-      <div class="bal-actions">
-        <button class="bal-btn" onclick="go('topup')">
-          <svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="2.5"/><path d="M3 10h18M16 15h2"/></svg>
-          Hisobni to'ldirish
-        </button>
-        <button class="bal-btn" onclick="openLink('https://t.me/${ADMIN_USERNAME}')">
-          <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H8l-4 4V5a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2z"/></svg>
-          Qo'llab-quvvatlash
-        </button>
-      </div>
+  <div class="balance">
+    <div class="lbl">Balans</div>
+    <div class="amt">${fmt(balance)}<small>so'm</small></div>
+    <div class="bal-actions">
+      <button class="bal-btn" onclick="go('topup')">
+        <svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="2.5"/><path d="M3 10h18M16 15h2"/></svg>
+        Hisobni to'ldirish
+      </button>
+      <button class="bal-btn" onclick="openLink('https://t.me/${ADMIN_USERNAME}')">
+        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H8l-4 4V5a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2z"/></svg>
+        Qo'llab-quvvatlash
+      </button>
     </div>
-    <div class="games">
-      ${GAMES.map(g=>`
-        <button class="game" onclick="openGame('${g.id}')">
-          <div class="tile">
-            ${g.img ? `<img src="${g.img}" alt="">` : `<span class="glyph">${g.glyph}</span>`}
-            <span class="star ${g.star}">★</span>
-            <span class="badge">${g.badge}</span>
-            ${g.maint ? `<span class="maint"><span>TEXNIK ISH</span></span>` : ''}
-          </div>
-          <div class="nm">${g.name}</div>
-        </button>`).join('')}
-    </div>`;
+  </div>
+  <div class="games">
+    ${GAMES.map(g=>`
+      <button class="game" onclick="openGame('${g.id}')">
+        <div class="tile">
+          ${g.img ? `<img src="${g.img}" alt="">` : `<span class="glyph">${g.glyph}</span>`}
+          <span class="star ${g.star}">★</span>
+          <span class="badge">${g.badge}</span>
+          ${g.maint ? `<span class="maint"><span>TEXNIK ISH</span></span>` : ''}
+        </div>
+        <div class="nm">${g.name}</div>
+      </button>`).join('')}
+  </div>`;
 }
 
-/* =========================================================
-   GAME DETAIL
-   ========================================================= */
 function openGame(id){ haptic(); curGame = GAMES.find(g=>g.id===id); selPkg = null; curRegion='uzb'; go('game'); }
-
 function savedIds(gameId){ try{ return JSON.parse(localStorage.getItem('mt_ids_'+gameId)||'[]'); }catch(e){ return []; } }
 function saveId(gameId, val){ try{ let a=savedIds(gameId); a=a.filter(x=>x!==val); a.unshift(val); localStorage.setItem('mt_ids_'+gameId, JSON.stringify(a.slice(0,6))); }catch(e){} }
 
@@ -495,39 +449,34 @@ function renderGame(){
   const g = curGame;
   const ids = savedIds(g.id);
   app.innerHTML = `
-    <div class="back-row"><button class="back-btn" onclick="go('home')"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>Orqaga</button></div>
-    <div class="gd-head">
-      <div class="ic">${g.img?`<img src="${g.img}">`:g.glyph}</div>
-      <div><div class="nm">${g.name}</div><div class="cur">${g.cur||''}</div></div>
-    </div>
-
-    ${ids.length ? `<div class="sec-lbl" style="margin-top:0">Saqlangan ID'lar</div>
-      <div class="saved-ids">${ids.map(v=>`<button class="chip" onclick="fillId('${v}')">${v}</button>`).join('')}</div>` : ''}
-
-    <div class="form-card">
-      ${g.idFields.map((f,i)=>{
-        const isLast = i===g.idFields.length-1;
-        const inp = `<div class="inp-wrap"><input class="inp" id="fld_${f.key}" placeholder="${f.ph}" autocomplete="off"><span class="info-i">i</span></div>`;
-        return `<div class="lbl">${f.label}</div>` + (isLast && g.idFields.length>1
-          ? `<div class="row-inp">${inp}<button class="check-btn" onclick="checkId()">Tekshirish</button></div>`
-          : inp);
-      }).join('')}
-      ${g.idFields.length===1 ? `<button class="check-btn" style="width:100%;margin-top:14px;padding:13px" onclick="checkId()">Tekshirish</button>`:''}
-    </div>
-
-    <div class="sec-lbl" style="margin-top:0">Mahsulotni tanlang</div>
-    ${g.region ? `<div class="region-tabs">${REGIONS.map(r=>`<button class="rt ${r.code==='uzb'?'on':''}" data-r="${r.code}" onclick="pickRegion('${r.code}')">${r.flag} ${r.label}</button>`).join('')}</div>` : ''}
-
-    <div class="pkg-grid">
-      ${g.packages.map((p,i)=>`
-        <button class="pkg ${p.txt?'txt-only':''}" data-i="${i}" onclick="pickPkg(${i})">
-          ${p.hit?`<span class="hit">HIT</span>`:''}
-          <span class="pic"><span class="em">${p.txt?'🎁':(p.c==='💎'?'💎':p.c==='⭐'?'⭐':'🪙')}</span>${p.x2?`<span class="x2">x2</span>`:''}</span>
-          <span class="info"><span class="a ${p.txt?'small':''}">${p.a}${p.c&&p.c.length<=2?' '+p.c:''}</span><span class="p">${fmt(p.p)} so'm</span></span>
-        </button>`).join('')}
-    </div>
-
-    <div class="buy-bar"><button class="buy-btn" id="buyBtn" disabled onclick="buy()">Sotib olish</button></div>`;
+  <div class="back-row"><button class="back-btn" onclick="go('home')"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>Orqaga</button></div>
+  <div class="gd-head">
+    <div class="ic">${g.img?`<img src="${g.img}">`:g.glyph}</div>
+    <div><div class="nm">${g.name}</div><div class="cur">${g.cur||''}</div></div>
+  </div>
+  ${ids.length ? `<div class="sec-lbl" style="margin-top:0">Saqlangan ID'lar</div>
+  <div class="saved-ids">${ids.map(v=>`<button class="chip" onclick="fillId('${v}')">${v}</button>`).join('')}</div>` : ''}
+  <div class="form-card">
+    ${g.idFields.map((f,i)=>{
+      const isLast = i===g.idFields.length-1;
+      const inp = `<div class="inp-wrap"><input class="inp" id="fld_${f.key}" placeholder="${f.ph}" autocomplete="off"><span class="info-i">i</span></div>`;
+      return `<div class="lbl">${f.label}</div>` + (isLast && g.idFields.length>1
+        ? `<div class="row-inp">${inp}<button class="check-btn" onclick="checkId()">Tekshirish</button></div>`
+        : inp);
+    }).join('')}
+    ${g.idFields.length===1 ? `<button class="check-btn" style="width:100%;margin-top:14px;padding:13px" onclick="checkId()">Tekshirish</button>`:''}
+  </div>
+  <div class="sec-lbl" style="margin-top:0">Mahsulotni tanlang</div>
+  ${g.region ? `<div class="region-tabs">${REGIONS.map(r=>`<button class="rt ${r.code==='uzb'?'on':''}" data-r="${r.code}" onclick="pickRegion('${r.code}')">${r.flag} ${r.label}</button>`).join('')}</div>` : ''}
+  <div class="pkg-grid">
+    ${g.packages.map((p,i)=>`
+      <button class="pkg ${p.txt?'txt-only':''}" data-i="${i}" onclick="pickPkg(${i})">
+        ${p.hit?`<span class="hit">HIT</span>`:''}
+        <span class="pic"><span class="em">${p.txt?'🎁':(p.c==='💎'?'💎':p.c==='⭐'?'⭐':'🪙')}</span>${p.x2?`<span class="x2">x2</span>`:''}</span>
+        <span class="info"><span class="a ${p.txt?'small':''}">${p.a}${p.c&&p.c.length<=2?' '+p.c:''}</span><span class="p">${fmt(p.p)} so'm</span></span>
+      </button>`).join('')}
+  </div>
+  <div class="buy-bar"><button class="buy-btn" id="buyBtn" disabled onclick="buy()">Sotib olish</button></div>`;
 }
 function fillId(v){ haptic(); const first=curGame.idFields[0].key; const el=document.getElementById('fld_'+first); if(el){ el.value=v.split(' ')[0]; } }
 function pickRegion(c){ haptic(); curRegion=c; document.querySelectorAll('.rt').forEach(r=>r.classList.toggle('on', r.dataset.r===c)); }
@@ -535,7 +484,6 @@ function pickPkg(i){ haptic(); selPkg=i; document.querySelectorAll('.pkg').forEa
   const b=document.getElementById('buyBtn'); if(b) b.disabled=false; }
 function checkId(){ const el=document.getElementById('fld_'+curGame.idFields[0].key); const v=(el&&el.value||'').trim();
   if(!v){ notify('error'); toast('Avval ID kiriting'); return; } notify('success'); toast('✅ ID tekshirildi'); }
-
 function buy(){
   const g=curGame;
   if(selPkg===null){ notify('error'); toast('Paketni tanlang'); return; }
@@ -549,39 +497,32 @@ function buy(){
     tgUser: tgUser?{id:tgUser.id,username:tgUser.username,name:tgUser.first_name}:null,
     status:'wait', createdAt:new Date().toISOString() };
   saveOrder(order); notify('success');
-  // backend tayyor bo'lsa: fetch('/api/order',{...}); + tg.sendData(JSON.stringify(order));
   if(tg&&tg.sendData){ try{ tg.sendData(JSON.stringify(order)); }catch(e){} }
   toast('✅ Buyurtma qabul qilindi');
   setTimeout(()=>go('history'), 700);
 }
 
-/* =========================================================
-   HISTORY
-   ========================================================= */
 function saveOrder(o){ try{ const a=getOrders(); a.unshift(o); localStorage.setItem('mt_orders', JSON.stringify(a.slice(0,60))); }catch(e){} }
 function getOrders(){ try{ return JSON.parse(localStorage.getItem('mt_orders')||'[]'); }catch(e){ return []; } }
-
 function renderHistory(){
   let orders=getOrders();
   if(histFilter==='done') orders=orders.filter(o=>o.status==='done');
   if(histFilter==='wait') orders=orders.filter(o=>o.status==='wait');
   if(histFilter==='cancel') orders=orders.filter(o=>o.status==='cancel');
-
   app.innerHTML = profileRow() + `
-    <div class="page-title">Tarix</div>
-    <div class="seg">
-      <button class="${histTab==='orders'?'on':''}" onclick="setHistTab('orders')">Buyurtmalar</button>
-      <button class="${histTab==='finance'?'on':''}" onclick="setHistTab('finance')">Moliya</button>
-    </div>
-    <div class="chips">
-      <button class="c ${histFilter==='all'?'on':''}" onclick="setFilter('all')">Barchasi</button>
-      <button class="c ${histFilter==='done'?'on':''}" onclick="setFilter('done')">Bajarildi</button>
-      <button class="c ${histFilter==='wait'?'on':''}" onclick="setFilter('wait')">Kutilmoqda</button>
-      <button class="c ${histFilter==='cancel'?'on':''}" onclick="setFilter('cancel')">Bekor qilingan</button>
-    </div>
-    <button class="refresh-btn" onclick="refreshStatus()"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.6-6.4M21 4v5h-5"/></svg>Statusni yangilash</button>
-    <div id="histList"></div>`;
-
+  <div class="page-title">Tarix</div>
+  <div class="seg">
+    <button class="${histTab==='orders'?'on':''}" onclick="setHistTab('orders')">Buyurtmalar</button>
+    <button class="${histTab==='finance'?'on':''}" onclick="setHistTab('finance')">Moliya</button>
+  </div>
+  <div class="chips">
+    <button class="c ${histFilter==='all'?'on':''}" onclick="setFilter('all')">Barchasi</button>
+    <button class="c ${histFilter==='done'?'on':''}" onclick="setFilter('done')">Bajarildi</button>
+    <button class="c ${histFilter==='wait'?'on':''}" onclick="setFilter('wait')">Kutilmoqda</button>
+    <button class="c ${histFilter==='cancel'?'on':''}" onclick="setFilter('cancel')">Bekor qilingan</button>
+  </div>
+  <button class="refresh-btn" onclick="refreshStatus()"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.6-6.4M21 4v5h-5"/></svg>Statusni yangilash</button>
+  <div id="histList"></div>`;
   const list=document.getElementById('histList');
   if(!orders.length){
     list.innerHTML=`<div class="empty"><div class="em">🧾</div><h3>Hozircha bo'sh</h3><p>Buyurtma bergach bu yerda ko'rinadi.</p></div>`;
@@ -594,7 +535,7 @@ function renderHistory(){
     return `<div class="order">
       <div class="top">
         <div class="g"><div class="ic">${o.img?`<img src="${o.img}">`:o.glyph}</div>
-          <div><div class="nm">${o.game}</div><div class="sub">${o.package}</div></div></div>
+        <div><div class="nm">${o.game}</div><div class="sub">${o.package}</div></div></div>
         <div class="price">-${fmt(o.price)}<small>so'm</small></div>
       </div>
       <div class="sep"></div>
@@ -608,9 +549,6 @@ function setHistTab(t){ haptic(); if(t==='finance'){ toast("Moliya bo'limi tez o
 function setFilter(f){ haptic(); histFilter=f; renderHistory(); }
 function refreshStatus(){ haptic('medium'); notify('success'); toast('🔄 Statuslar yangilandi'); }
 
-/* =========================================================
-   SETTINGS
-   ========================================================= */
 function renderSettings(){
   const name = tgUser?(tgUser.first_name||'Foydalanuvchi'):'Foydalanuvchi';
   const un = tgUser&&tgUser.username?'@'+tgUser.username:'@user';
@@ -619,50 +557,47 @@ function renderSettings(){
   const photo = tgUser&&tgUser.photo_url?`<img src="${tgUser.photo_url}">`:initial;
   const reduced = document.body.classList.contains('reduce-motion');
   app.innerHTML = `
-    <div class="set-profile">
-      <div class="top">
-        <div class="avatar" style="width:52px;height:52px;font-size:19px">${photo}</div>
-        <div><div class="nm">${name}</div><div class="un">${un}</div>
-          <button class="id-chip" onclick="copyId('${uid}')">ID: ${uid} <svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg></button>
-        </div>
-      </div>
-      <div class="stat-row">
-        <div class="stat"><div class="k">Balans</div><div class="v">${fmt(balance)}<small>so'm</small></div></div>
-        <div class="stat"><div class="k">Keshbek</div><div class="v gold">${cashback}</div></div>
+  <div class="set-profile">
+    <div class="top">
+      <div class="avatar" style="width:52px;height:52px;font-size:19px">${photo}</div>
+      <div><div class="nm">${name}</div><div class="un">${un}</div>
+      <button class="id-chip" onclick="copyId('${uid}')">ID: ${uid} <svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg></button>
       </div>
     </div>
-
-    <div class="sec-lbl" style="margin-top:0">Telefon raqami</div>
-    <button class="big-btn" onclick="sharePhone()">
-      <span class="ic"><svg viewBox="0 0 24 24"><path d="M5 4h3l2 5-2.5 1.5a11 11 0 0 0 5 5L16 13l5 2v3a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg></span>
-      Telefon raqamini ulashish
+    <div class="stat-row">
+      <div class="stat"><div class="k">Balans</div><div class="v">${fmt(balance)}<small>so'm</small></div></div>
+      <div class="stat"><div class="k">Keshbek</div><div class="v gold">${cashback}</div></div>
+    </div>
+  </div>
+  <div class="sec-lbl" style="margin-top:0">Telefon raqami</div>
+  <button class="big-btn" onclick="sharePhone()">
+    <span class="ic"><svg viewBox="0 0 24 24"><path d="M5 4h3l2 5-2.5 1.5a11 11 0 0 0 5 5L16 13l5 2v3a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg></span>
+    Telefon raqamini ulashish
+  </button>
+  <div class="sec-lbl">Til</div>
+  <div class="lang-toggle">
+    <button class="${currentLang==='uz'?'on':''}" onclick="setLang('uz')">O'zbekcha</button>
+    <button class="${currentLang==='ru'?'on':''}" onclick="setLang('ru')">Русский</button>
+  </div>
+  <div class="sec-lbl">Xizmatlar</div>
+  <div class="svc-list">
+    <button class="svc" onclick="invite()">
+      <span class="ic" style="background:#6C4BF0"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0M17 8h4M19 6v4"/></svg></span>
+      <span class="txt"><div class="t">Do'stlarni taklif qilish</div><div class="s">Do'stlaringizni taklif qilib bonus tangalar yutib oling</div></span>
+      <span class="arw">›</span>
     </button>
-
-    <div class="sec-lbl">Til</div>
-    <div class="lang-toggle">
-      <button class="${currentLang==='uz'?'on':''}" onclick="setLang('uz')">O'zbekcha</button>
-      <button class="${currentLang==='ru'?'on':''}" onclick="setLang('ru')">Русский</button>
-    </div>
-
-    <div class="sec-lbl">Xizmatlar</div>
-    <div class="svc-list">
-      <button class="svc" onclick="invite()">
-        <span class="ic" style="background:#6C4BF0"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0M17 8h4M19 6v4"/></svg></span>
-        <span class="txt"><div class="t">Do'stlarni taklif qilish</div><div class="s">Do'stlaringizni taklif qilib bonus tangalar yutib oling</div></span>
-        <span class="arw">›</span>
-      </button>
-      <button class="svc" onclick="openLink('https://t.me/${ADMIN_USERNAME}')">
-        <span class="ic" style="background:#2E7BC0"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H8l-4 4V5a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2z"/></svg></span>
-        <span class="txt"><div class="t">Qo'llab-quvvatlash</div><div class="s">Savollar bo'yicha 24/7 yordam chati orqali bog'laning</div></span>
-        <span class="arw">›</span>
-      </button>
-      <button class="svc" onclick="toggleMotion(this)">
-        <span class="ic" style="background:#3A4358"><svg viewBox="0 0 24 24"><path d="M12 3v2M12 19v2M5 12H3M21 12h-2M6 6l1.5 1.5M16.5 16.5L18 18"/></svg></span>
-        <span class="txt"><div class="t">Animatsiyalarni kamaytirish</div><div class="s">Sekin qurilmalarda tezroq ishlashi uchun</div></span>
-        <span class="switch ${reduced?'on':''}"></span>
-      </button>
-    </div>
-    <p style="text-align:center;color:var(--faint);font-size:12px;margin-top:18px">minatoh.uz • © 2026</p>`;
+    <button class="svc" onclick="openLink('https://t.me/${ADMIN_USERNAME}')">
+      <span class="ic" style="background:#2E7BC0"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H8l-4 4V5a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2z"/></svg></span>
+      <span class="txt"><div class="t">Qo'llab-quvvatlash</div><div class="s">Savollar bo'yicha 24/7 yordam chati orqali bog'laning</div></span>
+      <span class="arw">›</span>
+    </button>
+    <button class="svc" onclick="toggleMotion(this)">
+      <span class="ic" style="background:#3A4358"><svg viewBox="0 0 24 24"><path d="M12 3v2M12 19v2M5 12H3M21 12h-2M6 6l1.5 1.5M16.5 16.5L18 18"/></svg></span>
+      <span class="txt"><div class="t">Animatsiyalarni kamaytirish</div><div class="s">Sekin qurilmalarda tezroq ishlashi uchun</div></span>
+      <span class="switch ${reduced?'on':''}"></span>
+    </button>
+  </div>
+  <p style="text-align:center;color:var(--faint);font-size:12px;margin-top:18px">minatoh.uz • © 2026</p>`;
 }
 function copyId(id){ haptic(); try{ navigator.clipboard.writeText(id); }catch(e){} toast('ID nusxalandi'); }
 function setLang(l){ haptic(); currentLang=l; renderSettings(); }
@@ -671,35 +606,28 @@ function invite(){ haptic(); const link = tgUser&&tgUser.id ? `https://t.me/${CH
   if(tg&&tg.openTelegramLink){ tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent('Arzon donat — minatoh!')}`); } else toast('Telegramda ishlaydi'); }
 function toggleMotion(el){ haptic(); const on=document.body.classList.toggle('reduce-motion'); el.querySelector('.switch').classList.toggle('on', on); }
 
-/* =========================================================
-   TOP-UP
-   ========================================================= */
 function renderTopup(){
   app.innerHTML = profileRow() + `
-    <div class="page-title">Hisobni to'ldirish</div>
-    <p style="color:var(--dim);font-size:13.5px;margin:-6px 2px 18px">To'lov usulini tanlang</p>
-    <button class="guide-btn" onclick="openLink('${GUIDE_URL}')">
-      <span class="ic">📖</span><span class="t">Qo'llanma</span><span class="r">Telegraph</span>
+  <div class="page-title">Hisobni to'ldirish</div>
+  <p style="color:var(--dim);font-size:13.5px;margin:-6px 2px 18px">To'lov usulini tanlang</p>
+  <button class="guide-btn" onclick="openLink('${GUIDE_URL}')">
+    <span class="ic">📖</span><span class="t">Qo'llanma</span><span class="r">Telegraph</span>
+  </button>
+  <div class="pay-grid">
+    <button class="pay" onclick="payMethod('SBP')">
+      <span class="box" style="background:#f4f6fb;font-size:24px">💳</span><span class="nm">SBP</span>
     </button>
-    <div class="pay-grid">
-      <button class="pay" onclick="payMethod('SBP')">
-        <span class="box" style="background:#f4f6fb;font-size:24px">💳</span><span class="nm">SBP</span>
-      </button>
-      <button class="pay" onclick="payMethod('Telegram Stars')">
-        <span class="box" style="background:#1b1533;font-size:26px">⭐</span><span class="nm">Telegram Stars</span>
-      </button>
-    </div>`;
+    <button class="pay" onclick="payMethod('Telegram Stars')">
+      <span class="box" style="background:#1b1533;font-size:26px">⭐</span><span class="nm">Telegram Stars</span>
+    </button>
+  </div>`;
 }
 function payMethod(m){ haptic('medium'); toast(m+' — tez orada ulanadi 💳'); }
 
-/* =========================================================
-   TOAST
-   ========================================================= */
 let tt;
 function toast(msg){ const el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show');
   clearTimeout(tt); tt=setTimeout(()=>el.classList.remove('show'),2600); }
 
-/* start */
 go('home');
 </script>
 </body>
