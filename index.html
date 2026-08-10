@@ -325,9 +325,16 @@ if(tg){
   tgUser = tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user : null;
   tg.onEvent('backButtonClicked', onBack);
 }
-function haptic(t){ try{ tg && tg.HapticFeedback && tg.HapticFeedback.impactOccurred(t||'light'); }catch(e){} }
-function notify(t){ try{ tg && tg.HapticFeedback && tg.HapticFeedback.notificationOccurred(t||'success'); }catch(e){} }
-function openLink(url){ haptic(); if(tg&&tg.openTelegramLink&&url.indexOf('t.me')>-1)tg.openTelegramLink(url); else if(tg&&tg.openLink)tg.openLink(url); else window.open(url,'_blank'); }
+function openLink(url){
+  haptic();
+  if(tg && tg.openTelegramLink && url.indexOf('t.me')>-1){
+    try{ tg.openTelegramLink(url); return; }catch(e){}
+  }
+  if(tg && tg.openLink){
+    try{ tg.openLink(url); return; }catch(e){}
+  }
+  try{ window.open(url,'_blank'); }catch(e){}
+}
 
 /* ⬇️ SOZLAMALAR — o'zingiznikiga o'zgartiring */
 const ADMIN_USERNAME = 'dv1mm_garant';
