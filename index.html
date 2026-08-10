@@ -300,8 +300,14 @@ function notify(t){ try{ tg && tg.HapticFeedback && tg.HapticFeedback.notificati
 function openLink(url){
   haptic();
   try{
-    if (tg && tg.openLink) {
-      tg.openLink(url);
+    if (tg) {
+      if (url.startsWith('https://t.me/') && tg.openTelegramLink) {
+        tg.openTelegramLink(url);
+      } else if (tg.openLink) {
+        tg.openLink(url);
+      } else {
+        window.location.href = url;
+      }
     } else {
       window.location.href = url;
     }
