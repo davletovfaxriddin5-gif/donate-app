@@ -534,8 +534,32 @@ function renderGame(){
   </div>
   <div class="buy-bar"><button class="buy-btn" id="buyBtn" disabled onclick="buy()">Sotib olish</button></div>`;
 }
-function fillId(v){ haptic(); const first=curGame.idFields[0].key; const el=document.getElementById('fld_'+first); if(el){ el.value=v.split(' ')[0]; } }
-function pickRegion(c){ haptic(); curRegion=c; document.querySelectorAll('.rt').forEach(r=>r.classList.toggle('on', r.dataset.r===c)); }
+async function checkId() {
+  const playerId = (document.getElementById('fld_playerId')?.value || '').trim();
+  const serverId = (document.getElementById('fld_serverId')?.value || '').trim();
+
+  if (!playerId || !serverId) {
+    notify('error');
+    toast('ID va Server kiriting');
+    return;
+  }
+
+  try {
+    const response = await fetch(`/api/check-ml?id=${playerId}&server=${serverId}`);
+    const data = await response.json();
+
+    if (data.success) {
+      notify('success');
+      toast(`Topildi: ${data.username} (${data.country})`);
+    } else {
+      notify('error');
+      toast('ID yoki Server noto‘g‘ri');
+    }
+  } catch (e) {
+    notify('error');
+    toast('Tekshirishda xatolik');
+  }
+}
 function pickPkg(i){ haptic(); selPkg=i; document.querySelectorAll('.pkg').forEach(el=>el.classList.toggle('sel', +el.dataset.i===i));
   const b=document.getElementById('buyBtn'); if(b) b.disabled=false; }
 const ID_RULES = {
