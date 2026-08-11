@@ -349,7 +349,16 @@ const RU = {
   "Moliya bo'limi tez orada":"Раздел «Финансы» скоро",
   "✅ Buyurtma qabul qilindi":"✅ Заказ принят","✅ ID tekshirildi":"✅ ID проверен",
   "🔄 Statuslar yangilandi":"🔄 Статусы обновлены",
-  "Haftalik propusk":"Недельный пропуск","Sumerechniy":"Сумеречный"
+ "Haftalik propusk":"Недельный пропуск","Sumerechniy":"Сумеречный",
+  "Quyidagi kartaga o'tkazma qiling":"Переведите на карту ниже",
+  "Karta raqami":"Номер карты","Kanal":"Канал",
+  "QANCHA O'TKAZDINGIZ (so'm)":"СКОЛЬКО ВЫ ПЕРЕВЕЛИ (сум)",
+  "QANCHA O'TKAZDINGIZ (rubl)":"СКОЛЬКО ВЫ ПЕРЕВЕЛИ (руб)",
+  "To'ladim":"Я оплатил","Masalan: 50000":"Например: 50000",
+  "Karta raqami nusxalandi":"Номер карты скопирован",
+  "Summani kiriting":"Введите сумму",
+  "✅ Yuborildi, tez orada tasdiqlanadi":"✅ Отправлено, скоро подтвердим",
+  "HISOB TO'LDIRISH":"ПОПОЛНЕНИЕ СЧЁТА"
 };
 const UZ = {}; for(const k in RU) UZ[RU[k]] = k;
 function tr(s){ const m = currentLang==='ru' ? RU : UZ; const k = (s||'').trim(); return m[k] ? m[k] : s; }
