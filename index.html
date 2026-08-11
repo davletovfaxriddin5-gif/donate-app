@@ -307,6 +307,9 @@ const CHANNEL_USERNAME = 'savdo_mlbb1';
 const GUIDE_URL = 'https://t.me/savdo_mlbb1';
 const BOT_USERNAME = 'minatoh_bot';
 const APP_SHORT_NAME = 'app';
+const CARD_NUMBER = '9860 1606 3393 9915';
+const CARD_HOLDER = 'Faxriddin Davlatov';
+const CARD_BANK = 'Humo';
 
 let balance = 0;
 let cashback = 0;
@@ -678,20 +681,73 @@ function shareRef(link){ haptic(); openLink(`https://t.me/share/url?url=${encode
 function toggleMotion(el){ haptic(); const on=document.body.classList.toggle('reduce-motion'); el.querySelector('.switch').classList.toggle('on', on); }
 
 function renderTopup(){
+
   app.innerHTML = profileRow() + `
+
   <div class="page-title">Hisobni to'ldirish</div>
-  <p style="color:var(--dim);font-size:13.5px;margin:-6px 2px 18px">To'lov usulini tanlang</p>
+
+  <p style="color:var(--dim);font-size:13.5px;margin:-6px 2px 18px">Quyidagi kartaga o'tkazma qiling</p>
+
+  <div style="background:var(--card);border:1px solid var(--stroke);border-radius:var(--radius);padding:16px;margin-bottom:14px">
+
+    <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--faint);text-transform:uppercase;margin-bottom:8px">Karta raqami</div>
+
+    <div style="font-weight:800;font-size:21px;letter-spacing:1px">${CARD_NUMBER}</div>
+
+    <div style="color:var(--dim);font-size:13px;margin-top:5px">${CARD_HOLDER} &middot; ${CARD_BANK}</div>
+
+    <button class="big-btn" style="margin:14px 0 0;justify-content:center;background:var(--card-2)" onclick="copyCard()">Nusxalash</button>
+
+  </div>
+
+  <div class="form-card">
+
+    <div class="lbl">QANCHA O'TKAZDINGIZ</div>
+
+    <div class="inp-wrap"><input class="inp" id="topAmount" inputmode="numeric" placeholder="Masalan: 50000"></div>
+
+    <button class="check-btn" style="width:100%;margin-top:14px;padding:13px" onclick="sendTopup()">To'ladim</button>
+
+  </div>
+
   <button class="guide-btn" onclick="openLink('${GUIDE_URL}')">
-    <span class="ic">📖</span><span class="t">Qo'llanma</span><span class="r">Telegraph</span>
-  </button>
-  <div class="pay-grid">
-    <button class="pay" onclick="payMethod('SBP')">
-      <span class="box" style="background:#f4f6fb;font-size:24px">💳</span><span class="nm">SBP</span>
-    </button>
-    <button class="pay" onclick="payMethod('Telegram Stars')">
-      <span class="box" style="background:#1b1533;font-size:26px">⭐</span><span class="nm">Telegram Stars</span>
-    </button>
-  </div>`;
+
+    <span class="ic">📖</span><span class="t">Qo'llanma</span><span class="r">Kanal</span>
+
+  </button>`;
+
+}
+
+function copyCard(){ haptic(); try{ navigator.clipboard.writeText(CARD_NUMBER.replace(/\s/g,'')); }catch(e){} notify('success'); toast('Karta raqami nusxalandi'); }
+
+function sendTopup(){
+
+  const el=document.getElementById('topAmount');
+
+  const amt=Number(((el&&el.value)||'').replace(/\D/g,''));
+
+  if(!amt){ notify('error'); toast('Summani kiriting'); return; }
+
+  const order={ id:'TP'+Date.now().toString().slice(-8), game:"HISOB TO'LDIRISH", package:fmt(amt)+" so'm",
+
+    price:amt, details:{ summa:fmt(amt)+" so'm" }, region:null, status:'wait', createdAt:new Date().toISOString() };
+
+  fetch('/api/order', {
+
+    method: 'POST',
+
+    headers: { 'Content-Type': 'application/json' },
+
+    body: JSON.stringify({ order: order, initData: (tg && tg.initData) || '' })
+
+  }).then(function(r){ return r.json(); }).then(function(d){
+
+    if(d && d.ok){ notify('success'); toast("✅ Yuborildi, tez orada tasdiqlanadi"); if(el) el.value=''; }
+
+    else { notify('error'); toast("⚠️ Xato: " + ((d && d.error) || 'yuborilmadi')); }
+
+  }).catch(function(){ notify('error'); toast("⚠️ Aloqa yo'q"); });
+
 }
 function payMethod(m){ haptic('medium'); toast(m+' — tez orada ulanadi 💳'); }
 
