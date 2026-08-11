@@ -310,6 +310,9 @@ const APP_SHORT_NAME = 'app';
 const CARD_NUMBER = '9860 1606 3393 9915';
 const CARD_HOLDER = 'Faxriddin Davlatov';
 const CARD_BANK = 'Humo';
+const CARD2_NUMBER = '2202 2084 9695 4109';
+const CARD2_HOLDER = 'Фахриддин Давлатов';
+const CARD2_BANK = 'Sberbank';
 
 let balance = 0;
 let cashback = 0;
@@ -433,7 +436,7 @@ function go(v){
   else if(v==='game') renderGame();
   else if(v==='history') renderHistory();
   else if(v==='settings') renderSettings();
-  else if(v==='topup') renderTopup();
+  else if(v==='topup'){ topMethod=null; renderTopup(); }
 }
 function onBack(){ haptic(); if(view==='game') go('home'); else if(view==='topup') go('home'); else go('home'); }
 document.querySelectorAll('.nav-item').forEach(n=> n.addEventListener('click', ()=>{ haptic(); go(n.dataset.tab); }));
