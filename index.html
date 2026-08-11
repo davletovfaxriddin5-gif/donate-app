@@ -536,9 +536,14 @@ function buy(){
     tgUser: tgUser?{id:tgUser.id,username:tgUser.username,name:tgUser.first_name}:null,
     status:'wait', createdAt:new Date().toISOString() };
   saveOrder(order); notify('success');
-  if(tg&&tg.sendData){ try{ tg.sendData(JSON.stringify(order)); }catch(e){} }
-  toast('✅ Buyurtma qabul qilindi');
-  setTimeout(()=>go('history'), 700);
+fetch('/api/order', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ order: order, initData: (tg && tg.initData) || '' })
+  }).then(function(r){ return r.json(); }).then(function(d){
+    if(d && d.ok){ toast('✅ Buyurtma qabul qilindi'); setTimeout(function(){ go('history'); }, 700); }
+    else { notify('error'); toast("⚠️ Xato: " + ((d && d.error) || 'yuborilmadi')); }
+  }).catch(function(){ notify('error'); toast("⚠️ Aloqa yo'q"); });  
 }
 
 function saveOrder(o){ try{ const a=getOrders(); a.unshift(o); localStorage.setItem('mt_orders', JSON.stringify(a.slice(0,60))); }catch(e){} }
