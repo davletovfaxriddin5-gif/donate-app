@@ -358,7 +358,9 @@ const RU = {
   "Karta raqami nusxalandi":"Номер карты скопирован",
   "Summani kiriting":"Введите сумму",
   "✅ Yuborildi, tez orada tasdiqlanadi":"✅ Отправлено, скоро подтвердим",
-  "HISOB TO'LDIRISH":"ПОПОЛНЕНИЕ СЧЁТА"
+  "HISOB TO'LDIRISH":"ПОПОЛНЕНИЕ СЧЁТА",
+  "✅ Format to'g'ri":"✅ Формат верный",
+  "faqat raqam bo'lishi kerak":"должны быть только цифры"
 };
 const UZ = {}; for(const k in RU) UZ[RU[k]] = k;
 function tr(s){ const m = currentLang==='ru' ? RU : UZ; const k = (s||'').trim(); return m[k] ? m[k] : s; }
@@ -536,11 +538,34 @@ function fillId(v){ haptic(); const first=curGame.idFields[0].key; const el=docu
 function pickRegion(c){ haptic(); curRegion=c; document.querySelectorAll('.rt').forEach(r=>r.classList.toggle('on', r.dataset.r===c)); }
 function pickPkg(i){ haptic(); selPkg=i; document.querySelectorAll('.pkg').forEach(el=>el.classList.toggle('sel', +el.dataset.i===i));
   const b=document.getElementById('buyBtn'); if(b) b.disabled=false; }
-function checkId(){ const el=document.getElementById('fld_'+curGame.idFields[0].key); const v=(el&&el.value||'').trim();
-  if(!v){ notify('error'); toast('Avval ID kiriting'); return; } notify('success'); toast('✅ ID tekshirildi'); }
+const ID_RULES = {
+  pubg:     { playerId:[10,12] },
+  freefire: { playerId:[8,12] },
+  mlbb:     { playerId:[6,11], serverId:[3,6] }
+};
+function badFormat(gameId, key, v){
+  const r = ID_RULES[gameId] && ID_RULES[gameId][key];
+  if(!r) return null;
+  if(!/^\d+$/.test(v)) return "faqat raqam bo'lishi kerak";
+  if(v.length < r[0] || v.length > r[1]) return r[0]+'-'+r[1]+' ta raqam bo'lishi kerak';
+  return null;
+}
+function checkId(){
+  const g=curGame;
+  for(const f of g.idFields){
+    const el=document.getElementById('fld_'+f.key);
+    const v=(el&&el.value||'').trim();
+    if(!v){ notify('error'); toast(f.label+' kiriting'); return false; }
+    const bad=badFormat(g.id, f.key, v);
+    if(bad){ notify('error'); toast(f.label+': '+bad); return false; }
+  }
+  notify('success'); toast("✅ Format to'g'ri");
+  return true;
+}
 function buy(){
   const g=curGame;
   if(selPkg===null){ notify('error'); toast('Paketni tanlang'); return; }
+  if(!checkId()) return;
   const p=g.packages[selPkg];
   const details={};
   for(const f of g.idFields){ const v=(document.getElementById('fld_'+f.key)?.value||'').trim();
