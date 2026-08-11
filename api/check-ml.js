@@ -12,33 +12,35 @@ export default async function handler(req, res) {
     const response = await fetch(
       `https://aluu.in/api/check/mlbb-check?user_id=${id}&server_id=${server}`,
       {
+        method: 'GET',
         headers: {
-          'x-api-key': process.env.ALUU_API_KEY
+          'x-api-key': process.env.ALUU_API_KEY,
+          'Accept': 'application/json'
         }
       }
     );
 
     const data = await response.json();
 
-    if (data.success) {
+    if (data.success === true) {
       return res.status(200).json({
         success: true,
         username: data.username,
+        country: data.country,
         user_id: data.user_id,
-        server_id: data.server_id,
-        country: data.country
+        server_id: data.server_id
       });
     }
 
     return res.status(200).json({
       success: false,
-      message: 'ID topilmadi'
+      message: data.message || 'ID topilmadi'
     });
 
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: 'API xatosi'
+      message: error.message
     });
   }
 }
