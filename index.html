@@ -547,7 +547,7 @@ function badFormat(gameId, key, v){
   const r = ID_RULES[gameId] && ID_RULES[gameId][key];
   if(!r) return null;
   if(!/^\d+$/.test(v)) return "faqat raqam bo'lishi kerak";
-  if(v.length < r[0] || v.length > r[1]) return r[0]+'-'+r[1]+' ta raqam bo'lishi kerak';
+  if(v.length < r[0] || v.length > r[1]) return r[0]+'-'+r[1]+" ta raqam bo'lishi kerak";
   return null;
 }
 function checkId(){
