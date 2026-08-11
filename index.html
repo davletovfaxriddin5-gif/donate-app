@@ -604,8 +604,35 @@ function renderSettings(){
 function copyId(id){ haptic(); try{ navigator.clipboard.writeText(id); }catch(e){} toast('ID nusxalandi'); }
 function setLang(l){ haptic(); currentLang=l; renderSettings(); }
 function sharePhone(){ haptic(); if(tg&&tg.requestContact){ tg.requestContact(); } else toast('Telegram ilovasida ishlaydi'); }
-function invite(){ haptic(); const link = tgUser&&tgUser.id ? `https://t.me/${CHANNEL_USERNAME}?start=ref${tgUser.id}` : `https://t.me/${CHANNEL_USERNAME}`;
-  if(tg&&tg.openTelegramLink){ tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent('Arzon donat — minatoh!')}`); } else toast('Telegramda ishlaydi'); }
+function invite(){
+  haptic();
+  const uid = tgUser && tgUser.id ? tgUser.id : '';
+  const link = uid ? `https://t.me/${BOT_USERNAME}?startapp=${uid}` : `https://t.me/${BOT_USERNAME}`;
+  window.scrollTo(0,0);
+  app.innerHTML = `
+  <div class="back-row"><button class="back-btn" onclick="go('settings')"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>Orqaga</button></div>
+  <div class="page-title">Do'stlarni taklif qilish</div>
+  <p style="color:var(--dim);font-size:13.5px;margin:-8px 2px 18px">Do'stlaringizni taklif qiling va har bir to'lovdan 1% bonus oling</p>
+  <div style="background:var(--card);border:1px solid var(--stroke);border-radius:var(--radius);padding:16px;margin-bottom:14px">
+    <div style="display:flex;align-items:center;gap:9px;margin-bottom:10px">
+      <span style="font-size:18px">👥</span>
+      <span style="font-weight:800;font-size:16px">Referal havolasi</span>
+    </div>
+    <div style="background:var(--bg-2);border:1px solid var(--stroke-2);border-radius:12px;padding:13px 15px;margin-bottom:12px;font-size:12.5px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${link}</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <button class="big-btn" style="margin:0;justify-content:center;background:var(--card-2)" onclick="copyRef('${link}')">Nusxalash</button>
+      <button class="big-btn" style="margin:0;justify-content:center;background:var(--blue);border-color:transparent;color:#fff" onclick="shareRef('${link}')">Ulashish</button>
+    </div>
+  </div>
+  <div class="empty" style="background:var(--card);border:1px solid var(--stroke);border-radius:var(--radius);padding:36px 20px">
+    <div class="em">👥</div>
+    <h3>Hali hech kim taklif qilmadingiz</h3>
+    <p>Do'stlaringizni taklif qiling va har bir to'lovdan 1% bonus oling</p>
+  </div>`;
+}
+function copyRef(link){ haptic(); try{ navigator.clipboard.writeText(link); }catch(e){} notify('success'); toast('Havola nusxalandi'); }
+function shareRef(link){ haptic(); openLink(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent("Arzon donat — minatoh!")}`); }
+   
 function toggleMotion(el){ haptic(); const on=document.body.classList.toggle('reduce-motion'); el.querySelector('.switch').classList.toggle('on', on); }
 
 function renderTopup(){
