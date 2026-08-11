@@ -679,75 +679,65 @@ function copyRef(link){ haptic(); try{ navigator.clipboard.writeText(link); }cat
 function shareRef(link){ haptic(); openLink(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent("Arzon donat — minatoh!")}`); }
    
 function toggleMotion(el){ haptic(); const on=document.body.classList.toggle('reduce-motion'); el.querySelector('.switch').classList.toggle('on', on); }
-
+let topMethod = null;
 function renderTopup(){
-
-  app.innerHTML = profileRow() + `
-
-  <div class="page-title">Hisobni to'ldirish</div>
-
+  if(!topMethod){
+    app.innerHTML = profileRow() + `
+    <div class="page-title">Hisobni to'ldirish</div>
+    <p style="color:var(--dim);font-size:13.5px;margin:-6px 2px 18px">To'lov usulini tanlang</p>
+    <div class="pay-grid">
+      <button class="pay" onclick="pickPay('uz')">
+        <span class="box" style="background:#f4f6fb;font-size:24px">💳</span><span class="nm">${CARD_BANK}</span>
+      </button>
+      <button class="pay" onclick="pickPay('ru')">
+        <span class="box" style="background:#eaf1ff;font-size:24px">🏦</span><span class="nm">${CARD2_BANK}</span>
+      </button>
+    </div>
+    <button class="guide-btn" style="margin-top:16px" onclick="openLink('${GUIDE_URL}')">
+      <span class="ic">📖</span><span class="t">Qo'llanma</span><span class="r">Kanal</span>
+    </button>`;
+    return;
+  }
+  const isUz = topMethod==='uz';
+  const num = isUz ? CARD_NUMBER : CARD2_NUMBER;
+  const hold = isUz ? CARD_HOLDER : CARD2_HOLDER;
+  const bank = isUz ? CARD_BANK : CARD2_BANK;
+  const cur = isUz ? "so'm" : "rubl";
+  app.innerHTML = `
+  <div class="back-row"><button class="back-btn" onclick="pickPay(null)"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>Orqaga</button></div>
+  <div class="page-title">${bank}</div>
   <p style="color:var(--dim);font-size:13.5px;margin:-6px 2px 18px">Quyidagi kartaga o'tkazma qiling</p>
-
   <div style="background:var(--card);border:1px solid var(--stroke);border-radius:var(--radius);padding:16px;margin-bottom:14px">
-
     <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--faint);text-transform:uppercase;margin-bottom:8px">Karta raqami</div>
-
-    <div style="font-weight:800;font-size:21px;letter-spacing:1px">${CARD_NUMBER}</div>
-
-    <div style="color:var(--dim);font-size:13px;margin-top:5px">${CARD_HOLDER} &middot; ${CARD_BANK}</div>
-
-    <button class="big-btn" style="margin:14px 0 0;justify-content:center;background:var(--card-2)" onclick="copyCard()">Nusxalash</button>
-
+    <div style="font-weight:800;font-size:21px;letter-spacing:1px">${num}</div>
+    <div style="color:var(--dim);font-size:13px;margin-top:5px">${hold}</div>
+    <button class="big-btn" style="margin:14px 0 0;justify-content:center;background:var(--card-2)" onclick="copyCard('${num}')">Nusxalash</button>
   </div>
-
   <div class="form-card">
-
-    <div class="lbl">QANCHA O'TKAZDINGIZ</div>
-
+    <div class="lbl">QANCHA O'TKAZDINGIZ (${cur})</div>
     <div class="inp-wrap"><input class="inp" id="topAmount" inputmode="numeric" placeholder="Masalan: 50000"></div>
-
     <button class="check-btn" style="width:100%;margin-top:14px;padding:13px" onclick="sendTopup()">To'ladim</button>
-
-  </div>
-
-  <button class="guide-btn" onclick="openLink('${GUIDE_URL}')">
-
-    <span class="ic">📖</span><span class="t">Qo'llanma</span><span class="r">Kanal</span>
-
-  </button>`;
-
+  </div>`;
 }
-
-function copyCard(){ haptic(); try{ navigator.clipboard.writeText(CARD_NUMBER.replace(/\s/g,'')); }catch(e){} notify('success'); toast('Karta raqami nusxalandi'); }
-
+function pickPay(m){ haptic(); topMethod=m; renderTopup(); }
+function copyCard(n){ haptic(); try{ navigator.clipboard.writeText(String(n).replace(/\s/g,'')); }catch(e){} notify('success'); toast('Karta raqami nusxalandi'); }
 function sendTopup(){
-
   const el=document.getElementById('topAmount');
-
   const amt=Number(((el&&el.value)||'').replace(/\D/g,''));
-
   if(!amt){ notify('error'); toast('Summani kiriting'); return; }
-
-  const order={ id:'TP'+Date.now().toString().slice(-8), game:"HISOB TO'LDIRISH", package:fmt(amt)+" so'm",
-
-    price:amt, details:{ summa:fmt(amt)+" so'm" }, region:null, status:'wait', createdAt:new Date().toISOString() };
-
+  const isUz = topMethod==='uz';
+  const bank = isUz ? CARD_BANK : CARD2_BANK;
+  const cur = isUz ? "so'm" : "rubl";
+  const order={ id:'TP'+Date.now().toString().slice(-8), game:"HISOB TO'LDIRISH", package:fmt(amt)+' '+cur,
+    price:amt, details:{ bank:bank, summa:fmt(amt)+' '+cur }, region:null, status:'wait', createdAt:new Date().toISOString() };
   fetch('/api/order', {
-
     method: 'POST',
-
     headers: { 'Content-Type': 'application/json' },
-
     body: JSON.stringify({ order: order, initData: (tg && tg.initData) || '' })
-
   }).then(function(r){ return r.json(); }).then(function(d){
-
     if(d && d.ok){ notify('success'); toast("✅ Yuborildi, tez orada tasdiqlanadi"); if(el) el.value=''; }
-
     else { notify('error'); toast("⚠️ Xato: " + ((d && d.error) || 'yuborilmadi')); }
-
   }).catch(function(){ notify('error'); toast("⚠️ Aloqa yo'q"); });
-
 }
 function payMethod(m){ haptic('medium'); toast(m+' — tez orada ulanadi 💳'); }
 
