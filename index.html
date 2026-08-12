@@ -709,50 +709,17 @@ function renderSettings(){
 }
 function copyId(id){ haptic(); try{ navigator.clipboard.writeText(id); }catch(e){} toast('ID nusxalandi'); }
 function setLang(l){ haptic(); currentLang=l; try{ localStorage.setItem('mt_lang',l); }catch(e){} renderSettings(); applyLang(); }
-function sharePhone() {
+function sharePhone(){
   haptic();
-
-  const tg = window.Telegram && window.Telegram.WebApp;
-
-  if (!tg) {
-    toast('Telegram WebApp topilmadi');
-    return;
-  }
-
-  tg.ready();
-  tg.expand();
-
-  // Eski Telegram versiyalari uchun
-  if (typeof tg.requestContact !== 'function') {
-    toast('Telegram versiyasini yangilang');
-    return;
-  }
-
-  // Kontakt so‘rash
-  tg.requestContact(function(success) {
-    if (success) {
-      toast('Telefon raqami muvaffaqiyatli ulashildi');
-
-      // Backend yoki botga signal yuborish
-      try {
-        tg.sendData(JSON.stringify({
-          type: 'contact_requested'
-        }));
-      } catch (e) {
-        console.log(e);
-      }
-
-      setTimeout(() => {
-        renderSettings();
-      }, 300);
-
-    } else {
-      toast('Telefon raqamini ulashish bekor qilindi');
-    }
-  });
+  var log = "tg:" + (tg ? "bor" : "yoq") + " rc:" + (tg && typeof tg.requestContact);
+  toast(log);
+  setTimeout(function(){
+    if(!tg || typeof tg.requestContact !== "function") return;
+    try{
+      tg.requestContact(function(ok){ toast(ok ? "OK bosildi" : "Bekor qilindi"); });
+    }catch(e){ toast("XATO: " + e.message); }
+  }, 2000);
 }
-
-
 function invite(){
   haptic();
   const uid = tgUser && tgUser.id ? tgUser.id : '';
