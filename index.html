@@ -712,31 +712,26 @@ function setLang(l){ haptic(); currentLang=l; try{ localStorage.setItem('mt_lang
 function sharePhone() {
   haptic();
 
-  if (!tg || !tg.requestContact) {
-    toast('Telegram ilovasida ishlaydi');
+  console.log('sharePhone bosildi');
+  console.log('tg:', tg);
+
+  if (!tg) {
+    alert('Telegram WebApp topilmadi');
     return;
   }
 
-  tg.requestContact(function(success) {
-    if (success) {
-      toast('Telefon raqami muvaffaqiyatli ulandi');
+  alert('WebApp version: ' + (tg.version || 'unknown'));
 
-      try {
-        tg.sendData(JSON.stringify({
-          type: 'contact_requested'
-        }));
-      } catch (e) {
-        console.log(e);
-      }
+  if (typeof tg.requestContact === 'function') {
+    alert('requestContact mavjud');
 
-      setTimeout(() => {
-        renderSettings();
-      }, 500);
+    tg.requestContact(function(success) {
+      alert('Natija: ' + success);
+    });
 
-    } else {
-      toast('Telefon raqamini ulashish bekor qilindi');
-    }
-  });
+  } else {
+    alert('requestContact mavjud emas');
+  }
 }
 function invite(){
   haptic();
