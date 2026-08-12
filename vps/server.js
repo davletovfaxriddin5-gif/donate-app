@@ -31,6 +31,7 @@ app.post("/webhook", (req,res)=>{
   if(SECRET && req.get("X-Telegram-Bot-Api-Secret-Token") !== SECRET) return;
   try{
     const msg = req.body && req.body.message;
+    console.log(JSON.stringify(req.body));
     if(!msg) return;
     const chatId = msg.chat && msg.chat.id;
     if (msg.web_app_data) {
