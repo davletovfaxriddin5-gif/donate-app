@@ -25,17 +25,15 @@ app.get("/phone", (req,res)=>{
   const rec = db[String(req.query.id||"")];
   res.json({ ok:true, phone: rec ? rec.phone : null });
 });
-app.post("/save-phone", (req, res) => {
+
+app.post("/save-phone", (req,res)=>{
+  const id = String((req.body && req.body.id) || "");
+  const phone = String((req.body && req.body.phone) || "").trim();
+  if(!id || !phone) return res.json({ ok:false, error:"missing" });
   const db = load();
-
-  db[String(req.body.id)] = {
-    phone: req.body.phone,
-    at: new Date().toISOString()
-  };
-
+  db[id] = { phone: phone, at: new Date().toISOString() };
   save(db);
-
-  res.json({ ok: true });
+  res.json({ ok:true });
 });
 
 app.post("/webhook", (req,res)=>{
@@ -43,35 +41,15 @@ app.post("/webhook", (req,res)=>{
   if(SECRET && req.get("X-Telegram-Bot-Api-Secret-Token") !== SECRET) return;
   try{
     const msg = req.body && req.body.message;
-    console.log(JSON.stringify(req.body));
     if(!msg) return;
     const chatId = msg.chat && msg.chat.id;
-    if (msg.web_app_data) {
-  try {
-    const data = JSON.parse(msg.web_app_data.data || "{}");
-
-    if (data.type === "contact_requested") {
-      sendContactButton(chatId);
-      return;
+    if(msg.contact && msg.contact.phone_number){
+      const db = load();
+      db[String(msg.contact.user_id || chatId)] = { phone: msg.contact.phone_number, at: new Date().toISOString() };
+      save(db);
+      send(chatId, "✅ Rahmat! Telefon raqamingiz saqlandi.");
     }
-  } catch (e) {
-    console.log(e);
-  }
-}
-  if(msg.contact && msg.contact.phone_number){
-  const db = load();
-  db[String(msg.contact.user_id || chatId)] = {
-    phone: msg.contact.phone_number,
-    at: new Date().toISOString()
-  };
-  save(db);
-
-  send(chatId, "✅ Rahmat! Telefon raqamingiz saqlandi.");
-  
-}
-
-}catch(e){ console.log(e); }
-
+  }catch(e){ console.log(e); }
 });
 
 function send(chatId, text){
@@ -80,26 +58,6 @@ function send(chatId, text){
     method:"POST",
     headers:{"Content-Type":"application/json"},
     body: JSON.stringify({ chat_id: chatId, text: text })
-  }).catch(function(){});
-}
-function sendContactButton(chatId){
-  if(!TOKEN) return;
-
-  fetch("https://api.telegram.org/bot"+TOKEN+"/sendMessage", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      chat_id: chatId,
-      text: "Telefon raqamingizni ulashish uchun pastdagi tugmani bosing.",
-      reply_markup: {
-        keyboard: [[{
-          text: "📱 Telefon raqamni ulashish",
-          request_contact: true
-        }]],
-        resize_keyboard: true,
-        one_time_keyboard: true
-      }
-    })
   }).catch(function(){});
 }
 
