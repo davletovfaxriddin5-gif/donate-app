@@ -50,5 +50,24 @@ function send(chatId, text){
     body: JSON.stringify({ chat_id: chatId, text: text })
   }).catch(function(){});
 }
+function sendContactButton(chatId){
+  if(!TOKEN) return;
 
+  fetch("https://api.telegram.org/bot"+TOKEN+"/sendMessage", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      chat_id: chatId,
+      text: "Telefon raqamingizni ulashing",
+      reply_markup: {
+        keyboard: [[{
+          text: "📱 Telefon raqamini ulashish",
+          request_contact: true
+        }]],
+        resize_keyboard: true,
+        one_time_keyboard: true
+      }
+    })
+  }).catch(console.log);
+}
 app.listen(3001,"0.0.0.0",()=>console.log("API 3001-portda ishlayapti"));
