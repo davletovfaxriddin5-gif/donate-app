@@ -716,7 +716,7 @@ function sharePhone() {
 
   if (!phone) return;
 
-  fetch("/save-phone", {
+  fetch("https://api.minatoh.uz/save-phone", {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
