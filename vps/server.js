@@ -33,7 +33,7 @@ app.post("/webhook", (req,res)=>{
     const msg = req.body && req.body.message;
     if(!msg) return;
     const chatId = msg.chat && msg.chat.id;
-   if(msg.contact && msg.contact.phone_number){
+  if(msg.contact && msg.contact.phone_number){
   const db = load();
   db[String(msg.contact.user_id || chatId)] = {
     phone: msg.contact.phone_number,
@@ -44,8 +44,9 @@ app.post("/webhook", (req,res)=>{
   send(chatId, "✅ Rahmat! Telefon raqamingiz saqlandi.");
   sendContactButton(chatId);
 }
-    
-  }catch(e){ console.log(e); }
+
+}catch(e){ console.log(e); }
+
 });
 
 function send(chatId, text){
