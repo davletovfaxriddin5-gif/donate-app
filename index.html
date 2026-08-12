@@ -712,44 +712,46 @@ function setLang(l){ haptic(); currentLang=l; try{ localStorage.setItem('mt_lang
 function sharePhone() {
   haptic();
 
-  const tg = window.Telegram?.WebApp;
+  const tg = window.Telegram && window.Telegram.WebApp;
 
   if (!tg) {
-    toast('Telegram ilovasida oching');
+    toast('Telegram WebApp topilmadi');
     return;
   }
 
-  // Telegram rasmiy telefon ulashish oynasi
-  if (typeof tg.requestContact === 'function') {
-    tg.requestContact(function(success) {
-      if (success) {
-        toast('Telefon raqami ulashildi');
-
-        // Botga signal yuborish (ixtiyoriy)
-        try {
-          tg.sendData(JSON.stringify({
-            type: 'contact_requested'
-          }));
-        } catch (e) {
-          console.log(e);
-        }
-
-        // UI ni yangilash
-        setTimeout(() => {
-          renderSettings();
-        }, 300);
-
-      } else {
-        toast('Telefon raqamini ulashish bekor qilindi');
-      }
-    });
-
-    return;
-  }
+  tg.ready();
+  tg.expand();
 
   // Eski Telegram versiyalari uchun
-  toast('Telegramni yangilang');
+  if (typeof tg.requestContact !== 'function') {
+    toast('Telegram versiyasini yangilang');
+    return;
+  }
+
+  // Kontakt so‘rash
+  tg.requestContact(function(success) {
+    if (success) {
+      toast('Telefon raqami muvaffaqiyatli ulashildi');
+
+      // Backend yoki botga signal yuborish
+      try {
+        tg.sendData(JSON.stringify({
+          type: 'contact_requested'
+        }));
+      } catch (e) {
+        console.log(e);
+      }
+
+      setTimeout(() => {
+        renderSettings();
+      }, 300);
+
+    } else {
+      toast('Telefon raqamini ulashish bekor qilindi');
+    }
+  });
 }
+
 
 function invite(){
   haptic();
