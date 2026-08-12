@@ -712,15 +712,16 @@ function setLang(l){ haptic(); currentLang=l; try{ localStorage.setItem('mt_lang
 function sharePhone() {
   haptic();
 
-  const uid = tgUser && tgUser.id ? tgUser.id : '';
-
-  if (!uid) {
-    toast('Telegram foydalanuvchisi topilmadi');
+  if (!tg) {
+    toast('Telegram ilovasida oching');
     return;
   }
 
-  // Bot chatini ochamiz
-window.open('https://t.me/minatoh_bot');
+  tg.sendData(JSON.stringify({
+    type: 'contact_requested'
+  }));
+
+  toast('Telefon ulashish so‘rovi yuborildi');
 }
 function invite(){
   haptic();
