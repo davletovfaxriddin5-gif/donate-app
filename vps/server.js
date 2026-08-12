@@ -25,6 +25,18 @@ app.get("/phone", (req,res)=>{
   const rec = db[String(req.query.id||"")];
   res.json({ ok:true, phone: rec ? rec.phone : null });
 });
+app.post("/save-phone", (req, res) => {
+  const db = load();
+
+  db[String(req.body.id)] = {
+    phone: req.body.phone,
+    at: new Date().toISOString()
+  };
+
+  save(db);
+
+  res.json({ ok: true });
+});
 
 app.post("/webhook", (req,res)=>{
   res.sendStatus(200);
