@@ -712,17 +712,29 @@ function setLang(l){ haptic(); currentLang=l; try{ localStorage.setItem('mt_lang
 function sharePhone() {
   haptic();
 
-  if (!tg) {
-    toast('Telegram ilovasida oching');
-    return;
-  }
+  const phone = prompt("Telefon raqamingizni kiriting (+998901234567):");
 
-  tg.sendData(JSON.stringify({
-    type: 'contact_requested'
-  }));
+  if (!phone) return;
 
-  toast('Telefon ulashish so‘rovi yuborildi');
+  fetch("https://api.minatoh.uz/save-phone", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      id: tgUser.id,
+      phone: phone
+    })
+  })
+  .then(r => r.json())
+  .then(() => {
+    toast("Telefon raqamingiz saqlandi");
+  })
+  .catch(() => {
+    toast("Xatolik yuz berdi");
+  });
 }
+
 function invite(){
   haptic();
   const uid = tgUser && tgUser.id ? tgUser.id : '';
