@@ -78,16 +78,17 @@ function sendContactButton(chatId){
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       chat_id: chatId,
-      text: "Telefon raqamingizni ulashing",
+      text: "Telefon raqamingizni ulashish uchun pastdagi tugmani bosing.",
       reply_markup: {
         keyboard: [[{
-          text: "📱 Telefon raqamini ulashish",
+          text: "📱 Telefon raqamni ulashish",
           request_contact: true
         }]],
         resize_keyboard: true,
         one_time_keyboard: true
       }
     })
-  }).catch(console.log);
+  }).catch(function(){});
 }
+
 app.listen(3001,"0.0.0.0",()=>console.log("API 3001-portda ishlayapti"));
