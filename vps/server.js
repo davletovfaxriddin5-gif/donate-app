@@ -29,12 +29,14 @@ app.get("/phone", (req,res)=>{
 
 app.post("/webhook", (req,res)=>{
   res.sendStatus(200);
-  console.log("WEBHOOK keldi:", JSON.stringify(req.body).slice(0,300));
-  if(SECRET && req.get("X-Telegram-Bot-Api-Secret-Token") !== SECRET) return;
+  const hdr = req.get("X-Telegram-Bot-Api-Secret-Token") || "";
+  console.log("WH1 secret bor?", !!SECRET, "mos?", (!SECRET || hdr === SECRET));
+  if(SECRET && hdr !== SECRET) return;
   try{
     const msg = req.body && req.body.message;
-    if(!msg) return;
+    if(!msg){ console.log("WH2 message yo'q"); return; }
     const fromId = String((msg.from && msg.from.id) || "");
+    console.log("WH3 from:", fromId, "text:", JSON.stringify(msg.text || ""), "contact:", !!msg.contact);
     if(!fromId) return;
 
     if(msg.contact && msg.contact.phone_number){
@@ -52,13 +54,16 @@ app.post("/webhook", (req,res)=>{
 
     const text = String(msg.text || "");
     if(text.indexOf("/start") === 0){
+      console.log("WH4 start topildi, klaviatura yuborilmoqda");
       send(fromId, "📱 Telefon raqamingizni ulashish uchun pastdagi tugmani bosing.", {
         keyboard: [[{ text: "📱 Raqamni ulashish", request_contact: true }]],
         resize_keyboard: true,
         one_time_keyboard: true
       });
+    } else {
+      console.log("WH5 start emas");
     }
-  }catch(e){ console.log(e); }
+  }catch(e){ console.log("WH XATO:", e.message); }
 });
 
 function send(chatId, text, markup){
