@@ -33,7 +33,7 @@ app.post("/webhook", (req,res)=>{
   if(SECRET && req.get("X-Telegram-Bot-Api-Secret-Token") !== SECRET) return;
   try{
     const msg = req.body && req.body.message;
-    if(msg && msg.text === "/start verify_phone"){
+    if(msg && msg.text && msg.text.startsWith("/start")){
   sendContactButton(msg.chat.id);
   return;
 }
