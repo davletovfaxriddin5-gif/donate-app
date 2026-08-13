@@ -54,12 +54,15 @@ app.post("/webhook", (req,res)=>{
 });
 
 function send(chatId, text){
-  if(!TOKEN) return;
+  if(!TOKEN){ console.log("SEND: token yo'q"); return; }
   fetch("https://api.telegram.org/bot"+TOKEN+"/sendMessage", {
     method:"POST",
     headers:{"Content-Type":"application/json"},
     body: JSON.stringify({ chat_id: chatId, text: text })
-  }).catch(function(){});
+  })
+  .then(function(r){ return r.text(); })
+  .then(function(t){ console.log("SEND javob:", t); })
+  .catch(function(e){ console.log("SEND xato:", e.message); });
 }
 
 app.listen(3001,"0.0.0.0",()=>console.log("API 3001-portda ishlayapti"));
