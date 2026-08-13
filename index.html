@@ -708,7 +708,7 @@ function renderSettings(){
   <p style="text-align:center;color:var(--faint);font-size:12px;margin-top:18px">minatoh.uz • © 2026</p>`;
 }
 function copyId(id){ haptic(); try{ navigator.clipboard.writeText(id); }catch(e){} toast('ID nusxalandi'); }
-function setLang(l){ haptic(); currentLang=l; try{ localStorage.setItem('mt_lang',l); }catch(e){} renderSettings(); applyLang(); }
+function setLang(l){ haptic(); currentLang=l; try{ localStorage.setItem('mt_lang',l); }catch(e){} renderSettings(); applyLang(); loadPhone(); }
 function setPhoneText(txt){
   const p = String(txt).charAt(0) === '+' ? String(txt) : '+' + String(txt);
   const btn = document.querySelector('button[onclick="sharePhone()"]');
