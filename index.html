@@ -727,16 +727,11 @@ function loadPhone(){
 }
 function sharePhone(){
   haptic();
-
   const url = "https://t.me/minatoh_bot?start=verify_phone";
 
-  try{
-    if(window.Telegram && Telegram.WebApp && Telegram.WebApp.openTelegramLink){
-      Telegram.WebApp.openTelegramLink(url);
-    }else{
-      window.location.href = url;
-    }
-  }catch(e){
+  if(tg && tg.openTelegramLink){
+    tg.openTelegramLink(url);
+  }else{
     window.location.href = url;
   }
 }
