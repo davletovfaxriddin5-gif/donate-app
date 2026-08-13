@@ -46,16 +46,25 @@ app.post("/webhook", (req,res)=>{
   }catch(e){ console.log(e); }
 });
 
-function send(chatId, text){
+function sendContactButton(chatId){
   if(!TOKEN || !chatId) return;
+
   fetch("https://api.telegram.org/bot"+TOKEN+"/sendMessage", {
     method:"POST",
     headers:{"Content-Type":"application/json"},
-    body: JSON.stringify({ chat_id: chatId, text: text })
-  })
-  .then(function(r){ return r.text(); })
-  .then(function(t){ console.log("SEND javob:", t); })
-  .catch(function(e){ console.log("SEND xato:", e.message); });
+    body: JSON.stringify({
+      chat_id: chatId,
+      text: "Telefon raqamingizni tasdiqlash uchun quyidagi tugmani bosing.",
+      reply_markup: {
+        keyboard: [[{
+          text: "📱 Telefon raqamni ulashish",
+          request_contact: true
+        }]],
+        resize_keyboard: true,
+        one_time_keyboard: true
+      }
+    })
+  }).catch(function(){});
 }
 
 app.listen(3001,"0.0.0.0",()=>console.log("API 3001-portda ishlayapti"));
