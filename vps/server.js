@@ -1,4 +1,5 @@
 const express = require("express");
+try{ require("dns").setDefaultResultOrder("ipv4first"); }catch(e){}
 const fs = require("fs");
 const app = express();
 app.use(express.json());
