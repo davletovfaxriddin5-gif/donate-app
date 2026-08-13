@@ -33,6 +33,7 @@ app.post("/save-phone", (req,res)=>{
   const db = load();
   db[id] = { phone: phone, at: new Date().toISOString() };
   save(db);
+  send(id, "✅ Rahmat! Telefon raqamingiz saqlandi.");
   res.json({ ok:true });
 });
 
