@@ -727,13 +727,7 @@ function loadPhone(){
 }
 function sharePhone(){
   haptic();
-  const url = "https://t.me/minatoh_bot?start=verify_phone";
-
-  if(tg && tg.openTelegramLink){
-    tg.openTelegramLink(url);
-  }else{
-    window.location.href = url;
-  }
+  window.open("https://t.me/minatoh_bot?start=verify_phone", "_blank");
 }
 
 function invite(){
