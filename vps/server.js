@@ -1,5 +1,5 @@
-const express = require("express");
 try{ require("dns").setDefaultResultOrder("ipv4first"); }catch(e){}
+const express = require("express");
 const fs = require("fs");
 const app = express();
 app.use(express.json());
@@ -24,18 +24,7 @@ app.get("/health", (req,res)=>res.json({success:true,server:"Contabo VPS"}));
 app.get("/phone", (req,res)=>{
   const db = load();
   const rec = db[String(req.query.id||"")];
-  res.json({ ok:true, phone: rec ? rec.phone : null });
-});
-
-app.post("/save-phone", (req,res)=>{
-  const id = String((req.body && req.body.id) || "");
-  const phone = String((req.body && req.body.phone) || "").trim();
-  if(!id || !phone) return res.json({ ok:false, error:"missing" });
-  const db = load();
-  db[id] = { phone: phone, at: new Date().toISOString() };
-  save(db);
-  send(id, "✅ Rahmat! Telefon raqamingiz saqlandi.");
-  res.json({ ok:true });
+  res.json({ ok:true, phone: rec ? rec.phone : null, at: rec ? rec.at : null });
 });
 
 app.post("/webhook", (req,res)=>{
@@ -43,19 +32,22 @@ app.post("/webhook", (req,res)=>{
   if(SECRET && req.get("X-Telegram-Bot-Api-Secret-Token") !== SECRET) return;
   try{
     const msg = req.body && req.body.message;
-    if(!msg) return;
-    const chatId = msg.chat && msg.chat.id;
-    if(msg.contact && msg.contact.phone_number){
-      const db = load();
-      db[String(msg.contact.user_id || chatId)] = { phone: msg.contact.phone_number, at: new Date().toISOString() };
-      save(db);
-      send(chatId, "✅ Rahmat! Telefon raqamingiz saqlandi.");
+    if(!msg || !msg.contact || !msg.contact.phone_number) return;
+    const fromId = String((msg.from && msg.from.id) || "");
+    const ownerId = String(msg.contact.user_id || "");
+    if(!fromId || ownerId !== fromId){
+      send(fromId, "⚠️ Faqat o'zingizning raqamingizni ulashishingiz mumkin.");
+      return;
     }
+    const db = load();
+    db[fromId] = { phone: msg.contact.phone_number, at: new Date().toISOString() };
+    save(db);
+    send(fromId, "✅ Rahmat! Telefon raqamingiz saqlandi.");
   }catch(e){ console.log(e); }
 });
 
 function send(chatId, text){
-  if(!TOKEN){ console.log("SEND: token yo'q"); return; }
+  if(!TOKEN || !chatId) return;
   fetch("https://api.telegram.org/bot"+TOKEN+"/sendMessage", {
     method:"POST",
     headers:{"Content-Type":"application/json"},
