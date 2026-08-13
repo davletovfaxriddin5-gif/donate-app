@@ -727,8 +727,17 @@ function loadPhone(){
 }
 function sharePhone(){
   haptic();
-  window.open("https://t.me/minatoh_bot?start=verify_phone", "_blank");
+
+  const bot = "minatoh_bot";
+  const url = `https://t.me/${bot}?start=verify_phone`;
+
+  if (window.Telegram && Telegram.WebApp) {
+    Telegram.WebApp.openTelegramLink(url);
+  } else {
+    window.open(url, "_blank");
+  }
 }
+
 
 function invite(){
   haptic();
