@@ -1,7 +1,6 @@
 try{ require("dns").setDefaultResultOrder("ipv4first"); }catch(e){}
 const express = require("express");
 const fs = require("fs");
-const https = require("https");
 const app = express();
 app.use(express.json());
 
@@ -33,57 +32,46 @@ app.post("/webhook", (req,res)=>{
   if(SECRET && req.get("X-Telegram-Bot-Api-Secret-Token") !== SECRET) return;
   try{
     const msg = req.body && req.body.message;
-    if(msg && msg.text && msg.text.startsWith("/start")){
-  sendContactButton(msg.chat.id);
-  return;
-}
-    if(!msg || !msg.contact || !msg.contact.phone_number) return;
+    if(!msg) return;
     const fromId = String((msg.from && msg.from.id) || "");
-    const ownerId = String(msg.contact.user_id || "");
-    if(!fromId || ownerId !== fromId){
-      send(fromId, "⚠️ Faqat o'zingizning raqamingizni ulashishingiz mumkin.");
+    if(!fromId) return;
+
+    if(msg.contact && msg.contact.phone_number){
+      const ownerId = String(msg.contact.user_id || "");
+      if(ownerId !== fromId){
+        send(fromId, "⚠️ Faqat o'zingizning raqamingizni ulashishingiz mumkin.", { remove_keyboard: true });
+        return;
+      }
+      const db = load();
+      db[fromId] = { phone: msg.contact.phone_number, at: new Date().toISOString() };
+      save(db);
+      send(fromId, "✅ Rahmat! Telefon raqamingiz saqlandi.", { remove_keyboard: true });
       return;
     }
-    const db = load();
-    db[fromId] = { phone: msg.contact.phone_number, at: new Date().toISOString() };
-    save(db);
-    send(fromId, "✅ Rahmat! Telefon raqamingiz saqlandi.");
+
+    const text = String(msg.text || "");
+    if(text.indexOf("/start") === 0){
+      send(fromId, "📱 Telefon raqamingizni ulashish uchun pastdagi tugmani bosing.", {
+        keyboard: [[{ text: "📱 Raqamni ulashish", request_contact: true }]],
+        resize_keyboard: true,
+        one_time_keyboard: true
+      });
+    }
   }catch(e){ console.log(e); }
 });
 
-function sendContactButton(chatId){
+function send(chatId, text, markup){
   if(!TOKEN || !chatId) return;
-
-  const data = JSON.stringify({
-    chat_id: chatId,
-    text: "Telefon raqamingizni tasdiqlash uchun quyidagi tugmani bosing.",
-    reply_markup: {
-      keyboard: [[{
-        text: "📱 Telefon raqamni ulashish",
-        request_contact: true
-      }]],
-      resize_keyboard: true,
-      one_time_keyboard: true
-    }
-  });
-
-  const req = https.request({
-    hostname: "api.telegram.org",
-    path: "/bot" + TOKEN + "/sendMessage",
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Content-Length": Buffer.byteLength(data)
-    }
-  }, (res) => {
-    let body = "";
-    res.on("data", chunk => body += chunk);
-    res.on("end", () => console.log("CONTACT javob:", body));
-  });
-
-  req.on("error", err => console.log("CONTACT xato:", err.message));
-  req.write(data);
-  req.end();
+  const body = { chat_id: chatId, text: text };
+  if(markup) body.reply_markup = markup;
+  fetch("https://api.telegram.org/bot"+TOKEN+"/sendMessage", {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify(body)
+  })
+  .then(function(r){ return r.text(); })
+  .then(function(t){ console.log("SEND javob:", t); })
+  .catch(function(e){ console.log("SEND xato:", e.message); });
 }
 
 app.listen(3001,"0.0.0.0",()=>console.log("API 3001-portda ishlayapti"));
