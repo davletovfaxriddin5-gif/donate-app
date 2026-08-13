@@ -446,7 +446,7 @@ function go(v){
   if(v==='home') renderHome();
   else if(v==='game') renderGame();
   else if(v==='history') renderHistory();
-  else if(v==='settings') renderSettings();
+  else if(v==='settings'){ renderSettings(); loadPhone(); }
   else if(v==='topup'){ topMethod=null; renderTopup(); }
 }
 function onBack(){ haptic(); if(view==='game') go('home'); else if(view==='topup') go('home'); else go('home'); }
@@ -709,30 +709,41 @@ function renderSettings(){
 }
 function copyId(id){ haptic(); try{ navigator.clipboard.writeText(id); }catch(e){} toast('ID nusxalandi'); }
 function setLang(l){ haptic(); currentLang=l; try{ localStorage.setItem('mt_lang',l); }catch(e){} renderSettings(); applyLang(); }
-function sharePhone() {
+function setPhoneText(txt){
+  const btn = document.querySelector('button[onclick="sharePhone()"]');
+  if(!btn) return;
+  const nodes = btn.childNodes;
+  for(let i=nodes.length-1; i>=0; i--){
+    if(nodes[i].nodeType === 3 && nodes[i].nodeValue.trim()){ nodes[i].nodeValue = ' ' + txt; return; }
+  }
+}
+function loadPhone(){
+  const uid = tgUser && tgUser.id ? tgUser.id : '';
+  if(!uid) return;
+  fetch("https://api.minatoh.uz/phone?id=" + uid)
+    .then(function(r){ return r.json(); })
+    .then(function(d){ if(d && d.phone) setPhoneText(d.phone); })
+    .catch(function(){});
+}
+function sharePhone(){
   haptic();
-
+  const uid = tgUser && tgUser.id ? tgUser.id : '';
+  if(!uid){ notify('error'); toast('Telegram orqali oching'); return; }
   const phone = prompt("Telefon raqamingizni kiriting (+998901234567):");
-
-  if (!phone) return;
-
+  if(!phone) return;
+  const clean = String(phone).replace(/[^\d+]/g,'');
+  if(!/^\+998\d{9}$/.test(clean)){ notify('error'); toast("⚠️ Format: +998901234567"); return; }
   fetch("https://api.minatoh.uz/save-phone", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      id: tgUser.id,
-      phone: phone
-    })
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ id: uid, phone: clean })
   })
-  .then(r => r.json())
-  .then(() => {
-    toast("Telefon raqamingiz saqlandi");
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    if(d && d.ok){ notify('success'); toast("✅ Telefon raqamingiz saqlandi"); setPhoneText(clean); }
+    else { notify('error'); toast("⚠️ Saqlanmadi"); }
   })
-  .catch(() => {
-    toast("Xatolik yuz berdi");
-  });
+  .catch(function(){ notify('error'); toast("⚠️ Aloqa yo'q"); });
 }
 
 function invite(){
