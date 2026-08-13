@@ -729,21 +729,33 @@ function sharePhone(){
   haptic();
   const uid = tgUser && tgUser.id ? tgUser.id : '';
   if(!uid){ notify('error'); toast('Telegram orqali oching'); return; }
-  const phone = prompt("Telefon raqamingizni kiriting (+998901234567):");
-  if(!phone) return;
-  const clean = String(phone).replace(/[^\d+]/g,'');
-  if(!/^\+998\d{9}$/.test(clean)){ notify('error'); toast("⚠️ Format: +998901234567"); return; }
-  fetch("https://api.minatoh.uz/save-phone", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ id: uid, phone: clean })
-  })
-  .then(function(r){ return r.json(); })
-  .then(function(d){
-    if(d && d.ok){ notify('success'); toast("✅ Telefon raqamingiz saqlandi"); setPhoneText(clean); }
-    else { notify('error'); toast("⚠️ Saqlanmadi"); }
-  })
-  .catch(function(){ notify('error'); toast("⚠️ Aloqa yo'q"); });
+  if(!tg || typeof tg.requestContact !== 'function'){ notify('error'); toast('Telegramni yangilang'); return; }
+  fetch("https://api.minatoh.uz/phone?id=" + uid)
+    .then(function(r){ return r.json(); })
+    .catch(function(){ return {}; })
+    .then(function(before){
+      const oldAt = (before && before.at) || '';
+      tg.requestContact(function(ok){
+        if(!ok){ notify('error'); toast('Bekor qilindi'); return; }
+        toast('⏳ Saqlanmoqda...');
+        let n = 0;
+        const timer = setInterval(function(){
+          n++;
+          fetch("https://api.minatoh.uz/phone?id=" + uid)
+            .then(function(r){ return r.json(); })
+            .then(function(d){
+              if(d && d.phone && d.at && d.at !== oldAt){
+                clearInterval(timer);
+                notify('success'); toast("✅ Telefon raqamingiz saqlandi");
+                setPhoneText(d.phone);
+              } else if(n >= 8){
+                clearInterval(timer);
+                notify('error'); toast("⚠️ Saqlanmadi");
+              }
+            }).catch(function(){});
+        }, 1000);
+      });
+    });
 }
 
 function invite(){
