@@ -730,12 +730,14 @@ function setPhoneText(txt){
     chip.textContent = '📱 ' + p;
   }
 }
+let phoneCache = null;
 function loadPhone(){
   const uid = tgUser && tgUser.id ? tgUser.id : '';
   if(!uid) return;
+  if(phoneCache) setPhoneText(phoneCache);
   fetch("https://api.minatoh.uz/phone?id=" + uid)
     .then(function(r){ return r.json(); })
-    .then(function(d){ if(d && d.phone) setPhoneText(d.phone); })
+    .then(function(d){ if(d && d.phone){ phoneCache = d.phone; setPhoneText(d.phone); } })
     .catch(function(){});
 }
 function sharePhone(){
@@ -843,7 +845,9 @@ function toast(msg){ const el=document.getElementById('toast'); el.textContent=t
   clearTimeout(tt); tt=setTimeout(()=>el.classList.remove('show'),2600); }
 
 go('home');
-try{ new MutationObserver(()=>applyLang()).observe(document.getElementById('app'), {childList:true, subtree:true}); }catch(e){}
+let langTimer=null;
+function scheduleLang(){ clearTimeout(langTimer); langTimer=setTimeout(applyLang, 60); }
+try{ new MutationObserver(()=>scheduleLang()).observe(document.getElementById('app'), {childList:true, subtree:true}); }catch(e){}
 applyLang();
 </script>
 </body>
