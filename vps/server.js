@@ -29,6 +29,7 @@ app.get("/phone", (req,res)=>{
 
 app.post("/webhook", (req,res)=>{
   res.sendStatus(200);
+  console.log("WEBHOOK keldi:", JSON.stringify(req.body).slice(0,300));
   if(SECRET && req.get("X-Telegram-Bot-Api-Secret-Token") !== SECRET) return;
   try{
     const msg = req.body && req.body.message;
