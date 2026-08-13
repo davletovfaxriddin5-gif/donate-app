@@ -758,14 +758,17 @@ function renderSettings(){
 }
 function copyId(id){ haptic(); try{ navigator.clipboard.writeText(id); }catch(e){} toast('ID nusxalandi'); }
 function setLang(l){ haptic(); currentLang=l; try{ localStorage.setItem('mt_lang',l); }catch(e){} renderSettings(); applyLang(); loadPhone(); }
+let phoneCache = null, phoneLoaded = false;
+function hidePhoneSection(hide){
+  const btn = document.querySelector('button[onclick="sharePhone()"]');
+  if(!btn) return;
+  btn.style.display = hide ? 'none' : '';
+  const lbl = btn.previousElementSibling;
+  if(lbl && lbl.classList && lbl.classList.contains('sec-lbl')) lbl.style.display = hide ? 'none' : '';
+}
 function setPhoneText(txt){
   const p = String(txt).charAt(0) === '+' ? String(txt) : '+' + String(txt);
-  const btn = document.querySelector('button[onclick="sharePhone()"]');
-  if(btn){
-    btn.style.display = 'none';
-    const lbl = btn.previousElementSibling;
-    if(lbl && lbl.classList && lbl.classList.contains('sec-lbl')) lbl.style.display = 'none';
-  }
+  hidePhoneSection(true);
   const idChip = document.querySelector('button[onclick^="copyId"]');
   if(idChip){
     let chip = document.getElementById('phoneChip');
@@ -779,15 +782,19 @@ function setPhoneText(txt){
     chip.textContent = '📱 ' + p;
   }
 }
-let phoneCache = null;
 function loadPhone(){
   const uid = tgUser && tgUser.id ? tgUser.id : '';
   if(!uid) return;
   if(phoneCache) setPhoneText(phoneCache);
+  else if(!phoneLoaded) hidePhoneSection(true);
   fetch("https://api.minatoh.uz/phone?id=" + uid)
     .then(function(r){ return r.json(); })
-    .then(function(d){ if(d && d.phone){ phoneCache = d.phone; setPhoneText(d.phone); } })
-    .catch(function(){});
+    .then(function(d){
+      phoneLoaded = true;
+      if(d && d.phone){ phoneCache = d.phone; setPhoneText(d.phone); }
+      else hidePhoneSection(false);
+    })
+    .catch(function(){ phoneLoaded = true; hidePhoneSection(false); });
 }
 function sharePhone(){
   haptic();
@@ -898,6 +905,7 @@ let langTimer=null;
 function scheduleLang(){ clearTimeout(langTimer); langTimer=setTimeout(applyLang, 60); }
 try{ new MutationObserver(()=>scheduleLang()).observe(document.getElementById('app'), {childList:true, subtree:true}); }catch(e){}
 applyLang();
+loadPhone();
 </script>
 </body>
 </html>
