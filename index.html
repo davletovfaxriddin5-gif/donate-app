@@ -710,11 +710,24 @@ function renderSettings(){
 function copyId(id){ haptic(); try{ navigator.clipboard.writeText(id); }catch(e){} toast('ID nusxalandi'); }
 function setLang(l){ haptic(); currentLang=l; try{ localStorage.setItem('mt_lang',l); }catch(e){} renderSettings(); applyLang(); }
 function setPhoneText(txt){
+  const p = String(txt).charAt(0) === '+' ? String(txt) : '+' + String(txt);
   const btn = document.querySelector('button[onclick="sharePhone()"]');
-  if(!btn) return;
-  const nodes = btn.childNodes;
-  for(let i=nodes.length-1; i>=0; i--){
-    if(nodes[i].nodeType === 3 && nodes[i].nodeValue.trim()){ nodes[i].nodeValue = ' ' + txt; return; }
+  if(btn){
+    btn.style.display = 'none';
+    const lbl = btn.previousElementSibling;
+    if(lbl && lbl.classList && lbl.classList.contains('sec-lbl')) lbl.style.display = 'none';
+  }
+  const idChip = document.querySelector('button[onclick^="copyId"]');
+  if(idChip){
+    let chip = document.getElementById('phoneChip');
+    if(!chip){
+      chip = document.createElement('div');
+      chip.id = 'phoneChip';
+      chip.className = 'id-chip';
+      chip.style.marginTop = '8px';
+      idChip.parentNode.insertBefore(chip, idChip.nextSibling);
+    }
+    chip.textContent = '📱 ' + p;
   }
 }
 function loadPhone(){
