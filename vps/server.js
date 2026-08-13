@@ -1,6 +1,7 @@
 try{ require("dns").setDefaultResultOrder("ipv4first"); }catch(e){}
 const express = require("express");
 const fs = require("fs");
+const https = require("https");
 const app = express();
 app.use(express.json());
 
@@ -53,22 +54,36 @@ app.post("/webhook", (req,res)=>{
 function sendContactButton(chatId){
   if(!TOKEN || !chatId) return;
 
-  fetch("https://api.telegram.org/bot"+TOKEN+"/sendMessage", {
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body: JSON.stringify({
-      chat_id: chatId,
-      text: "Telefon raqamingizni tasdiqlash uchun quyidagi tugmani bosing.",
-      reply_markup: {
-        keyboard: [[{
-          text: "📱 Telefon raqamni ulashish",
-          request_contact: true
-        }]],
-        resize_keyboard: true,
-        one_time_keyboard: true
-      }
-    })
-  }).catch(function(){});
+  const data = JSON.stringify({
+    chat_id: chatId,
+    text: "Telefon raqamingizni tasdiqlash uchun quyidagi tugmani bosing.",
+    reply_markup: {
+      keyboard: [[{
+        text: "📱 Telefon raqamni ulashish",
+        request_contact: true
+      }]],
+      resize_keyboard: true,
+      one_time_keyboard: true
+    }
+  });
+
+  const req = https.request({
+    hostname: "api.telegram.org",
+    path: "/bot" + TOKEN + "/sendMessage",
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Content-Length": Buffer.byteLength(data)
+    }
+  }, (res) => {
+    let body = "";
+    res.on("data", chunk => body += chunk);
+    res.on("end", () => console.log("CONTACT javob:", body));
+  });
+
+  req.on("error", err => console.log("CONTACT xato:", err.message));
+  req.write(data);
+  req.end();
 }
 
 app.listen(3001,"0.0.0.0",()=>console.log("API 3001-portda ishlayapti"));
