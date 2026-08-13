@@ -725,16 +725,15 @@ function loadPhone(){
     .then(function(d){ if(d && d.phone) setPhoneText(d.phone); })
     .catch(function(){});
 }
-function sharePhone(){
+function sharePhone() {
   haptic();
 
-  const bot = "minatoh_bot";
-  const url = `https://t.me/${bot}?start=verify_phone`;
+  const url = "https://t.me/minatoh_bot?start=verify_phone";
 
   if (window.Telegram && Telegram.WebApp) {
     Telegram.WebApp.openTelegramLink(url);
   } else {
-    window.open(url, "_blank");
+    window.location.href = url;
   }
 }
 
