@@ -725,18 +725,13 @@ function loadPhone(){
     .then(function(d){ if(d && d.phone) setPhoneText(d.phone); })
     .catch(function(){});
 }
-function sharePhone() {
+function sharePhone(){
   haptic();
-
-  const url = "https://t.me/minatoh_bot?start=verify_phone";
-
-  if (window.Telegram && Telegram.WebApp) {
-    Telegram.WebApp.openTelegramLink(url);
-  } else {
-    window.location.href = url;
-  }
+  const uid = tgUser && tgUser.id ? tgUser.id : '';
+  if(!uid){ notify('error'); toast('Telegram orqali oching'); return; }
+  toast("📱 Botda tugmani bosing");
+  openLink("https://t.me/" + BOT_USERNAME + "?start=phone");
 }
-
 
 function invite(){
   haptic();
