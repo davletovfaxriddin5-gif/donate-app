@@ -727,33 +727,11 @@ function loadPhone(){
 }
 function sharePhone(){
   haptic();
-  const uid = tgUser && tgUser.id ? tgUser.id : '';
-  if(!uid){ notify('error'); toast('Telegram orqali oching'); return; }
-  if(!tg || typeof tg.requestContact !== 'function'){ notify('error'); toast('Telegramni yangilang'); return; }
-  const t0 = Date.now() - 5000;
-  let answered = false;
-  tg.requestContact(function(ok){
-    answered = true;
-    if(!ok){ notify('error'); toast('Bekor qilindi'); return; }
-    toast('⏳ Saqlanmoqda...');
-    let n = 0;
-    const timer = setInterval(function(){
-      n++;
-      fetch("https://api.minatoh.uz/phone?id=" + uid)
-        .then(function(r){ return r.json(); })
-        .then(function(d){
-          if(d && d.phone && d.at && new Date(d.at).getTime() >= t0){
-            clearInterval(timer);
-            notify('success'); toast("✅ Telefon raqamingiz saqlandi");
-            setPhoneText(d.phone);
-          } else if(n >= 10){
-            clearInterval(timer);
-            notify('error'); toast("⚠️ Saqlanmadi");
-          }
-        }).catch(function(){});
-    }, 1000);
-  });
-  setTimeout(function(){ if(!answered) toast("⚠️ Telegram javob bermadi"); }, 8000);
+  if(tg && tg.openTelegramLink){
+    tg.openTelegramLink("https://t.me/minatoh_bot?start=verify_phone");
+  }else{
+    window.location.href = "https://t.me/minatoh_bot?start=verify_phone";
+  }
 }
 
 function invite(){
