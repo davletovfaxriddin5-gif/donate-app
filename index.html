@@ -434,11 +434,9 @@ const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : 
 let tgUser = null;
 if(tg){
   tg.ready(); tg.expand();
-  setTimeout(function(){
-    try{ tg.BackButton.show(); toast('v'+tg.version+' | BB='+tg.BackButton.isVisible); }
-    catch(e){ toast('xato: '+e.message); }
-  }, 800);
-  try{ tg.BackButton.show(); }catch(e){}
+  [0,100,400,900,1500].forEach(function(ms){ setTimeout(function(){ try{ if(!tg.isExpanded) tg.expand(); }catch(e){} }, ms); });
+  try{ tg.onEvent('viewportChanged', function(){ if(!tg.isExpanded) tg.expand(); }); }catch(e){}
+  setTimeout(function(){ toast('expanded=' + tg.isExpanded); }, 2000);
   try{ tg.setHeaderColor && tg.setHeaderColor('#0B1120'); tg.setBackgroundColor && tg.setBackgroundColor('#0B1120'); }catch(e){}
   tgUser = tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user : null;
   tg.onEvent('backButtonClicked', onBack);
