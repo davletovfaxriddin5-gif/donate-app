@@ -304,6 +304,41 @@ body{ font-size:13px; font-weight:400; letter-spacing:-.1px }
 .lang-toggle button, .pay .nm{ font-weight:500 }
 .guide-btn .t{ font-weight:600 }
 .toast{ font-weight:500 }
+/* === Yorug' rejim === */
+body.light{
+  --bg:#EEF1F8;
+  --bg-2:#F6F8FC;
+  --card:#FFFFFF;
+  --card-2:#EDF1F9;
+  --stroke:rgba(16,24,40,.09);
+  --stroke-2:rgba(16,24,40,.16);
+  --text:#111A2E;
+  --dim:#5A6478;
+  --faint:#8A93A8;
+  --blue-soft:rgba(63,85,246,.10);
+  --green-soft:rgba(47,181,116,.14);
+}
+body.light .nav-inner,
+body.light .rent{ background:rgba(255,255,255,.92) }
+body.light .rent{ color:#B8791A }
+body.light .toast{ color:var(--text) }
+body.light .pay{ border:1px solid var(--stroke) }
+body.light .svc:active{ background:rgba(16,24,40,.04) }
+body.light .switch{ background:#C7CEDC }
+body.light .game .star.off{ background:#B9C0D0 }
+body.light .refresh-btn,
+body.light .guide-btn .t,
+body.light .guide-btn .r,
+body.light .set-profile .un,
+body.light .info-i{ color:#3B4DF0 }
+body.light .pkg .info .p,
+body.light .stat .v.gold{ color:#B8791A }
+body.light .game .tile,
+body.light .pkg,
+body.light .order,
+body.light .svc-list,
+body.light .form-card,
+body.light .set-profile{ box-shadow:0 2px 10px rgba(16,24,40,.05) }
 </style>
 </head>
 <body>
@@ -368,6 +403,7 @@ let cashback = 0;
 let currentLang = 'uz';
 try{ const sv=localStorage.getItem('mt_lang'); if(sv) currentLang=sv; }catch(e){}
 const RU = {
+  "Tungi rejim":"Ночной режим","Yorug' rejimga o'tish":"Переключиться на светлый режим",
   "Bosh sahifa":"Главная","Tarix":"История","Sozlamalar":"Настройки","Orqaga":"Назад",
   "Balans":"Баланс","so'm":"сум","Keshbek":"Кэшбэк",
   "Hisobni to'ldirish":"Пополнить счёт","Qo'llab-quvvatlash":"Поддержка",
@@ -753,6 +789,11 @@ function renderSettings(){
       <span class="txt"><div class="t">Animatsiyalarni kamaytirish</div><div class="s">Sekin qurilmalarda tezroq ishlashi uchun</div></span>
       <span class="switch ${reduced?'on':''}"></span>
     </button>
+    <button class="svc" onclick="toggleTheme(this)">
+      <span class="ic" style="background:#C9902A"><svg viewBox="0 0 24 24"><path d="M21 12.8A8.5 8.5 0 1 1 11.2 3a6.6 6.6 0 0 0 9.8 9.8z"/></svg></span>
+      <span class="txt"><div class="t">Tungi rejim</div><div class="s">Yorug' rejimga o'tish</div></span>
+      <span class="switch ${document.body.classList.contains('light')?'on':''}"></span>
+    </button>
   </div>
   <p style="text-align:center;color:var(--faint);font-size:12px;margin-top:18px">minatoh.uz • © 2026</p>`;
 }
@@ -834,6 +875,19 @@ function copyRef(link){ haptic(); try{ navigator.clipboard.writeText(link); }cat
 function shareRef(link){ haptic(); openLink(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent("Arzon donat — minatoh!")}`); }
    
 function toggleMotion(el){ haptic(); const on=document.body.classList.toggle('reduce-motion'); el.querySelector('.switch').classList.toggle('on', on); }
+  function applyTheme(){
+  const light = document.body.classList.contains('light');
+  const c = light ? '#EEF1F8' : '#0B1120';
+  try{ tg && tg.setHeaderColor && tg.setHeaderColor(c); }catch(e){}
+  try{ tg && tg.setBackgroundColor && tg.setBackgroundColor(c); }catch(e){}
+}
+function toggleTheme(el){
+  haptic();
+  const on = document.body.classList.toggle('light');
+  try{ localStorage.setItem('mt_theme', on ? 'light' : 'dark'); }catch(e){}
+  const sw = el.querySelector('.switch'); if(sw) sw.classList.toggle('on', on);
+  applyTheme();
+}
 let topMethod = null;
 function renderTopup(){
   if(!topMethod){
@@ -901,6 +955,8 @@ function toast(msg){ const el=document.getElementById('toast'); el.textContent=t
   clearTimeout(tt); tt=setTimeout(()=>el.classList.remove('show'),2600); }
 
 go('home');
+try{ if(localStorage.getItem('mt_theme')==='light') document.body.classList.add('light'); }catch(e){}
+applyTheme();
 let langTimer=null;
 function scheduleLang(){ applyLang(); }
 try{ new MutationObserver(()=>scheduleLang()).observe(document.getElementById('app'), {childList:true, subtree:true}); }catch(e){}
