@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+<title>minatoh</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+/* =========================================================
+   minatoh — dizayn tokenlari (navy + ko'k) — ixcham o'lcham
+   ========================================================= */
+:root{
+  --bg:#0B1120;
+  --bg-2:#0D1626;
+  --card:#141D31;
+  --card-2:#18223A;
+  --stroke:rgba(255,255,255,.06);
+  --stroke-2:rgba(255,255,255,.12);
+  --text:#EEF2FB;
+  --dim:#8B94AC;
+  --faint:#5C6580;
+  --blue:#3B4DF0;
+  --blue-grad:linear-gradient(135deg,#3F55F6 0%,#5A43F2 100%);
+  --blue-soft:rgba(63,85,246,.16);
+  --gold:#F0A93C;
+  --green:#2FB574;
+  --green-soft:rgba(47,181,116,.15);
+  --nav-h:66px;
+  --radius:16px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;background:var(--bg)}
+body{
+  color:var(--text);
+  font-family:'Manrope',system-ui,-apple-system,sans-serif;
+  font-size:13.5px;line-height:1.45;-webkit-font-smoothing:antialiased;
+  overflow-x:hidden;min-height:100vh;min-height:100dvh;
+}
+.reduce-motion *{animation:none!important;transition:none!important}
+.wrap{max-width:460px;margin:0 auto;position:relative;min-height:100dvh;
+  padding:calc(env(safe-area-inset-top) + 10px) 14px calc(var(--nav-h) + env(safe-area-inset-bottom) + 16px);}
+button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:none}
+input{font-family:inherit}
+::-webkit-scrollbar{display:none}
+
+.profile{display:flex;align-items:center;justify-content:space-between;margin-bottom:15px}
+.profile .who{display:flex;align-items:center;gap:10px;min-width:0}
+.avatar{width:42px;height:42px;border-radius:50%;flex-shrink:0;background:var(--blue-grad);
+  display:grid;place-items:center;font-weight:800;font-size:16px;color:#fff;overflow:hidden;background-size:cover;background-position:center}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.who .nm{font-weight:800;font-size:15px;font-style:italic;letter-spacing:-.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.who .un{color:var(--dim);font-size:12px;margin-top:1px}
+.coin{display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--stroke);
+  padding:6px 12px;border-radius:999px;font-weight:700;font-size:13.5px}
+.coin .dot{width:14px;height:14px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#FFE07A,#F0B429)}
+
+.balance{background:var(--blue-grad);border-radius:20px;padding:17px 18px 15px;margin-bottom:20px;
+  box-shadow:0 12px 32px -12px rgba(63,85,246,.55);position:relative;overflow:hidden}
+.balance::after{content:"";position:absolute;right:-40px;top:-40px;width:140px;height:140px;border-radius:50%;
+  background:rgba(255,255,255,.08)}
+.balance .lbl{font-size:12.5px;color:rgba(255,255,255,.8);font-weight:600}
+.balance .amt{font-weight:800;font-size:33px;letter-spacing:-1px;line-height:1;margin:3px 0 15px;color:#fff}
+.balance .amt small{font-size:15px;font-weight:600;color:rgba(255,255,255,.72);margin-left:5px;letter-spacing:0}
+.bal-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;position:relative;z-index:1}
+.bal-btn{background:rgba(255,255,255,.14);border-radius:13px;padding:12px 6px;display:flex;flex-direction:column;
+  align-items:center;gap:6px;font-size:11px;font-weight:600;color:#fff;line-height:1.25;text-align:center;transition:.15s}
+.bal-btn:active{transform:scale(.96);background:rgba(255,255,255,.22)}
+.bal-btn svg{width:20px;height:20px;stroke:#fff;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+
+.sec-lbl{font-size:11px;font-weight:700;letter-spacing:1.2px;color:var(--faint);text-transform:uppercase;margin:18px 2px 10px}
+
+.games{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.game{position:relative}
+.game .tile{position:relative;width:100%;aspect-ratio:1;border-radius:15px;overflow:hidden;
+  background:var(--card);display:grid;place-items:center;transition:transform .12s}
+.game:active .tile{transform:scale(.95)}
+.game .tile img{width:100%;height:100%;object-fit:cover}
+.game .glyph{font-size:26px;filter:drop-shadow(0 3px 8px rgba(0,0,0,.5))}
+.game .star{position:absolute;top:0;left:0;width:25px;height:25px;border-radius:15px 0 12px 0;
+  display:grid;place-items:center;font-size:11px;z-index:2}
+.game .star.on{background:var(--gold)}
+.game .star.off{background:#4A5266}
+.game .badge{position:absolute;top:6px;right:6px;background:var(--blue);color:#fff;font-size:9px;font-weight:700;
+  padding:2px 6px;border-radius:7px;z-index:2;letter-spacing:.2px}
+.game .maint{position:absolute;inset:0;background:rgba(8,12,22,.55);display:grid;place-items:center;z-index:1}
+.game .maint span{background:var(--gold);color:#1a1200;font-size:9.5px;font-weight:800;padding:4px 9px;border-radius:8px}
+.game .nm{text-align:center;font-size:10.5px;font-weight:600;color:var(--dim);margin-top:7px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.2px;text-transform:uppercase}
+
+.back-row{display:flex;align-items:center;margin-bottom:14px}
+.back-btn{display:flex;align-items:center;gap:5px;background:var(--card);border:1px solid var(--stroke);
+  padding:9px 13px 9px 10px;border-radius:12px;font-weight:700;font-size:13.5px}
+.back-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+
+.gd-head{display:flex;align-items:center;gap:13px;background:var(--card);border:1px solid var(--stroke);
+  border-radius:var(--radius);padding:14px;margin-bottom:16px}
+.gd-head .ic{width:60px;height:60px;border-radius:15px;overflow:hidden;flex-shrink:0;display:grid;place-items:center;
+  background:var(--card-2);font-size:28px}
+.gd-head .ic img{width:100%;height:100%;object-fit:cover}
+.gd-head .nm{font-weight:800;font-size:19px;letter-spacing:-.4px;line-height:1.1;text-transform:uppercase}
+.gd-head .cur{font-size:17px;margin-top:3px}
+.saved-ids{display:flex;gap:9px;overflow-x:auto;padding:2px 0 4px;margin-bottom:16px}
+.saved-ids .chip{background:var(--card);border:1px solid var(--stroke);border-radius:12px;padding:10px 14px;
+  white-space:nowrap;font-size:12.5px;color:var(--dim);flex-shrink:0}
+.form-card{background:var(--card);border:1px solid var(--stroke);border-radius:var(--radius);padding:15px;margin-bottom:18px}
+.form-card .lbl{font-size:11px;font-weight:700;letter-spacing:1px;color:var(--faint);text-transform:uppercase;margin-bottom:8px}
+.inp-wrap{position:relative;margin-bottom:14px}
+.inp-wrap:last-child{margin-bottom:0}
+.inp{width:100%;background:var(--bg-2);border:1px solid var(--stroke-2);border-radius:12px;
+  padding:13px 46px 13px 15px;color:var(--text);font-size:13.5px}
+.inp::placeholder{color:var(--faint)}
+.inp:focus{outline:none;border-color:var(--blue)}
+.info-i{position:absolute;right:12px;top:50%;transform:translateY(-50%);width:22px;height:22px;border-radius:50%;
+  background:var(--blue-soft);color:#7E93FF;display:grid;place-items:center;font-size:11.5px;font-weight:700;font-style:italic}
+.row-inp{display:flex;gap:10px;align-items:stretch}
+.row-inp .inp-wrap{flex:1;margin-bottom:0}
+.check-btn{background:var(--blue-grad);border-radius:12px;padding:0 18px;font-weight:700;font-size:13.5px;color:#fff;
+  white-space:nowrap;box-shadow:0 8px 20px -8px rgba(63,85,246,.6)}
+.check-btn:active{transform:scale(.98)}
+.region-tabs{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:16px}
+.region-tabs .rt{background:var(--card);border:1px solid var(--stroke);border-radius:12px;padding:10px 14px;
+  font-weight:700;font-size:13px;display:flex;align-items:center;gap:6px;color:var(--dim);transition:.15s}
+.region-tabs .rt.on{background:var(--blue);color:#fff;border-color:transparent}
+.pkg-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding-bottom:8px}
+.pkg{position:relative;background:var(--card);border:1.5px solid rgba(240,169,60,.45);border-radius:14px;
+  padding:13px 11px;display:flex;align-items:center;gap:10px;transition:.14s;text-align:left;overflow:hidden}
+.pkg:active{transform:scale(.98)}
+.pkg.sel{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold),0 10px 26px -12px rgba(240,169,60,.5)}
+.pkg .pic{position:relative;flex-shrink:0}
+.pkg .pic .em{font-size:24px}
+.pkg .pic .x2{position:absolute;top:-7px;left:-6px;background:var(--gold);color:#1a1200;font-size:9px;
+  font-weight:800;padding:1px 5px;border-radius:6px;font-style:italic}
+.pkg .info .a{font-weight:800;font-size:15.5px;letter-spacing:-.3px}
+.pkg .info .p{color:var(--gold);font-weight:700;font-size:12.5px;margin-top:3px}
+.pkg .hit{position:absolute;top:9px;right:9px;background:var(--gold);color:#1a1200;font-size:9px;font-weight:800;
+  padding:2px 7px;border-radius:7px;letter-spacing:.3px}
+.pkg .info .a.small{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:105px}
+
+.buy-bar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom) + 14px);
+  width:calc(100% - 28px);max-width:432px;z-index:60}
+.buy-btn{width:100%;background:var(--blue-grad);border-radius:15px;padding:15px;font-weight:800;font-size:15px;
+  color:#fff;box-shadow:0 14px 34px -10px rgba(63,85,246,.7)}
+.buy-btn:active{transform:scale(.99)}
+.buy-btn:disabled{opacity:.5;box-shadow:none}
+
+.page-title{font-weight:800;font-size:23px;letter-spacing:-.6px;margin:4px 2px 14px}
+
+.seg{display:flex;background:var(--card);border:1px solid var(--stroke);border-radius:15px;padding:5px;margin-bottom:14px}
+.seg button{flex:1;padding:11px;border-radius:11px;font-weight:700;font-size:14px;color:var(--dim);transition:.15s}
+.seg button.on{background:var(--blue);color:#fff}
+.chips{display:flex;gap:9px;overflow-x:auto;padding-bottom:4px;margin-bottom:14px}
+.chips .c{background:var(--card);border:1px solid var(--stroke);border-radius:999px;padding:9px 16px;
+  font-weight:700;font-size:13.5px;color:var(--dim);white-space:nowrap;transition:.15s}
+.chips .c.on{background:var(--blue);color:#fff;border-color:transparent}
+.refresh-btn{width:100%;background:var(--blue-soft);border:1px solid rgba(63,85,246,.3);border-radius:14px;
+  padding:13px;font-weight:700;font-size:14px;color:#9CA9FF;display:flex;align-items:center;justify-content:center;gap:9px;margin-bottom:16px}
+.refresh-btn:active{transform:scale(.99)}
+.refresh-btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+.order{background:var(--card);border:1px solid var(--stroke);border-radius:var(--radius);padding:15px;margin-bottom:12px}
+.order .top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.order .g{display:flex;align-items:center;gap:10px}
+.order .g .ic{width:46px;height:46px;border-radius:12px;background:var(--card-2);display:grid;place-items:center;
+  font-size:20px;flex-shrink:0;overflow:hidden}
+.order .g .ic img{width:100%;height:100%;object-fit:cover}
+.order .g .nm{font-weight:800;font-size:15px}
+.order .g .sub{color:var(--dim);font-size:12.5px;margin-top:2px}
+.order .price{font-weight:800;font-size:16.5px;white-space:nowrap}
+.order .price small{color:var(--dim);font-weight:600;font-size:12px;margin-left:3px}
+.order .sep{height:1px;background:var(--stroke);margin:12px 0}
+.order .kv{display:flex;justify-content:space-between;align-items:center;font-size:13px;margin-bottom:7px}
+.order .kv:last-of-type{margin-bottom:0}
+.order .kv .k{color:var(--dim)}
+.order .kv .v{font-weight:600}
+.badge-st{font-size:11px;font-weight:700;padding:4px 12px;border-radius:999px}
+.badge-st.done{color:#4FE0A0;background:var(--green-soft)}
+.badge-st.wait{color:var(--gold);background:rgba(240,169,60,.14)}
+.order .date{color:var(--faint);font-size:12px;margin-top:10px}
+
+.empty{text-align:center;padding:50px 24px;color:var(--dim)}
+.empty .em{font-size:40px;margin-bottom:14px}
+.empty h3{font-weight:800;font-size:16px;color:var(--text);margin:0 0 6px}
+.empty p{font-size:12.5px;margin:0}
+
+.set-profile{background:var(--card);border:1px solid var(--stroke);border-radius:var(--radius);padding:15px;margin-bottom:18px}
+.set-profile .top{display:flex;align-items:center;gap:12px}
+.set-profile .nm{font-weight:800;font-size:16.5px;font-style:italic}
+.set-profile .un{color:#7E93FF;font-size:12.5px;margin-top:1px}
+.id-chip{display:inline-flex;align-items:center;gap:7px;background:var(--bg-2);border:1px solid var(--stroke);
+  border-radius:10px;padding:5px 11px;margin-top:8px;font-size:12.5px;color:var(--dim);font-weight:600}
+.id-chip svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8}
+.stat-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.stat{background:var(--bg-2);border:1px solid var(--stroke);border-radius:14px;padding:12px 14px}
+.stat .k{font-size:10.5px;font-weight:700;letter-spacing:1px;color:var(--faint);text-transform:uppercase}
+.stat .v{font-weight:800;font-size:18px;margin-top:4px}
+.stat .v.gold{color:var(--gold)}
+.stat .v small{font-size:12px;font-weight:600;color:var(--dim);margin-left:4px}
+.big-btn{width:100%;background:var(--blue-soft);border:1px solid rgba(63,85,246,.35);border-radius:14px;
+  padding:14px 16px;display:flex;align-items:center;gap:12px;font-weight:700;font-size:14px;margin-bottom:8px;transition:.15s}
+.big-btn:active{transform:scale(.99)}
+.big-btn .ic{width:38px;height:38px;border-radius:11px;background:var(--blue);display:grid;place-items:center;flex-shrink:0}
+.big-btn .ic svg{width:20px;height:20px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.lang-toggle{display:flex;background:var(--card);border:1px solid var(--stroke);border-radius:15px;padding:5px;margin-bottom:8px}
+.lang-toggle button{flex:1;padding:12px;border-radius:11px;font-weight:700;font-size:14px;color:var(--dim);transition:.15s}
+.lang-toggle button.on{background:var(--blue);color:#fff}
+.svc-list{background:var(--card);border:1px solid var(--stroke);border-radius:var(--radius);overflow:hidden}
+.svc{display:flex;align-items:center;gap:12px;padding:14px 16px;transition:.12s;width:100%;text-align:left}
+.svc:active{background:rgba(255,255,255,.03)}
+.svc + .svc{border-top:1px solid var(--stroke)}
+.svc .ic{width:40px;height:40px;border-radius:11px;display:grid;place-items:center;flex-shrink:0}
+.svc .ic svg{width:20px;height:20px;stroke:#fff;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.svc .t{font-weight:700;font-size:14px}
+.svc .s{color:var(--dim);font-size:12px;margin-top:2px;line-height:1.4}
+.svc .arw{color:var(--faint);font-size:20px;margin-left:auto;flex-shrink:0}
+.svc .txt{min-width:0}
+.switch{width:44px;height:26px;border-radius:999px;background:var(--stroke-2);margin-left:auto;flex-shrink:0;position:relative;transition:.2s}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.2s}
+.switch.on{background:var(--blue)}
+.switch.on::after{left:21px}
+
+.guide-btn{width:100%;background:var(--blue-soft);border:1px solid rgba(63,85,246,.35);border-radius:14px;
+  padding:14px 16px;display:flex;align-items:center;gap:12px;margin-bottom:18px;transition:.15s}
+.guide-btn:active{transform:scale(.99)}
+.guide-btn .ic{width:38px;height:38px;border-radius:11px;background:var(--blue);display:grid;place-items:center;font-size:18px;flex-shrink:0}
+.guide-btn .t{font-weight:700;font-size:15px;color:#9CA9FF}
+.guide-btn .r{margin-left:auto;color:#7E93FF;font-size:13px;font-weight:600}
+.pay-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pay{background:#fff;border-radius:14px;padding:14px 8px 11px;display:flex;flex-direction:column;align-items:center;gap:9px;transition:.14s}
+.pay:active{transform:scale(.96)}
+.pay .box{width:50px;height:50px;border-radius:12px;display:grid;place-items:center;overflow:hidden}
+.pay .nm{font-size:12.5px;font-weight:700;color:#1a2236;text-align:center}
+
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:460px;z-index:70;
+  height:calc(var(--nav-h) + env(safe-area-inset-bottom));padding:0 12px env(safe-area-inset-bottom);
+  display:flex;align-items:center;gap:8px}
+.nav-inner{flex:1;display:flex;background:rgba(15,22,38,.9);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border:1px solid var(--stroke);border-radius:18px;padding:7px 4px;height:54px}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  color:var(--faint);font-size:10.5px;font-weight:600;border-radius:14px;transition:.15s}
+.nav-item svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.nav-item.on{background:var(--blue);color:#fff}
+.rent{width:58px;height:54px;border-radius:18px;border:1px solid var(--stroke);background:rgba(15,22,38,.9);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:3px;flex-shrink:0;color:var(--gold);font-size:10px;font-weight:700}
+.rent:active{transform:scale(.95)}
+.rent .g{display:flex;align-items:center;gap:4px}
+.rent .g svg{width:18px;height:18px}
+
+.toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 12px);transform:translateX(-50%) translateY(-20px);
+  background:var(--card-2);border:1px solid var(--stroke-2);color:#fff;padding:12px 18px;border-radius:13px;
+  font-size:13px;font-weight:600;z-index:99;opacity:0;transition:.25s;box-shadow:0 12px 30px rgba(0,0,0,.5);
+  pointer-events:none;max-width:88%;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+ /* === Tipografiya sayqali === */
+body{ font-size:13px; font-weight:400; letter-spacing:-.1px }
+.coin{ font-size:12.5px; font-weight:500 }
+.who .nm{ font-size:14.5px; font-weight:600 }
+.who .un{ font-weight:400 }
+.balance .lbl{ font-weight:400 }
+.balance .amt{ font-size:29px; font-weight:600; letter-spacing:-1.2px }
+.balance .amt small{ font-weight:400 }
+.bal-btn{ font-size:10.5px; font-weight:500 }
+.sec-lbl{ font-size:10.5px; font-weight:500; letter-spacing:.9px }
+.game .nm{ font-size:10px; font-weight:400; letter-spacing:.1px }
+.game .badge{ font-weight:500 }
+.game .star.on, .game .maint span{ font-weight:600 }
+.page-title{ font-size:21px; font-weight:600; letter-spacing:-.5px }
+.gd-head .nm{ font-size:17px; font-weight:600 }
+.inp{ font-size:13px; font-weight:400 }
+.form-card .lbl{ font-weight:500 }
+.check-btn{ font-size:13px; font-weight:500 }
+.region-tabs .rt{ font-size:12.5px; font-weight:500 }
+
+.pkg{ padding:12px 10px; gap:8px }
+.pkg .pic .pim{ width:36px; height:36px; object-fit:contain; display:block }
+.pkg .info{ display:flex; flex-direction:column; min-width:0 }
+.pkg .info .a{ font-size:14px; font-weight:600; letter-spacing:-.2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+.pkg .info .a.small{ font-size:11.5px; max-width:100% }
+.pkg .info .p{ font-size:11.5px; font-weight:500; white-space:nowrap; margin-top:2px }
+.pkg .hit, .pkg .pic .x2{ font-weight:600 }
+
+.buy-btn{ font-size:14.5px; font-weight:600 }
+.back-btn{ font-weight:500 }
+.nav-item{ font-size:10px; font-weight:400 }
+.seg button{ font-size:13px; font-weight:500 }
+.chips .c{ font-size:12.5px; font-weight:500 }
+.refresh-btn{ font-weight:500 }
+.order .g .nm{ font-size:14px; font-weight:600 }
+.order .g .sub{ font-size:11.5px; font-weight:400 }
+.order .price{ font-size:15px; font-weight:600 }
+.order .kv .v{ font-weight:500 }
+.badge-st{ font-weight:500 }
+.set-profile .nm{ font-size:15.5px; font-weight:600 }
+.id-chip{ font-weight:400 }
+.stat .k{ font-weight:500 }
+.stat .v{ font-size:16.5px; font-weight:600 }
+.big-btn{ font-size:13.5px; font-weight:500 }
+.svc .t{ font-size:13.5px; font-weight:500 }
+.svc .s{ font-size:11.5px; font-weight:400 }
+.lang-toggle button, .pay .nm{ font-weight:500 }
+.guide-btn .t{ font-weight:600 }
+.toast{ font-weight:500 }
+    /* === Yumshoq burchaklar === */
+:root{ --radius:20px }
+.game .tile{ border-radius:22px }
+.game .star{ border-radius:22px 0 14px 0 }
+.game .badge{ border-radius:9px }
+.balance{ border-radius:24px }
+.bal-btn{ border-radius:16px }
+.pkg{ border-radius:18px }
+.pkg .hit{ border-radius:9px }
+.pkg .pic .x2{ border-radius:8px }
+.nav-inner{ border-radius:22px }
+.nav-item{ border-radius:18px }
+.rent{ border-radius:22px }
+.seg{ border-radius:18px }
+.seg button{ border-radius:14px }
+.inp{ border-radius:14px }
+.check-btn, .back-btn, .region-tabs .rt, .saved-ids .chip{ border-radius:14px }
+.buy-btn{ border-radius:18px }
+.big-btn, .guide-btn, .refresh-btn, .lang-toggle, .stat, .pay{ border-radius:17px }
+.lang-toggle button{ border-radius:13px }
+.big-btn .ic, .guide-btn .ic, .svc .ic{ border-radius:13px }
+.gd-head .ic{ border-radius:18px }
+.order .g .ic, .pay .box{ border-radius:14px }
+.id-chip{ border-radius:12px }
+.toast{ border-radius:16px }
+  /* === Pastki panel === */
+:root{ --nav-h:74px }
+.nav-inner{ height:62px; padding:7px 6px }
+.nav-item{ border-radius:999px; gap:4px }
+.nav-item svg{ width:19px; height:19px }
+.rent{ height:62px; border-radius:24px }
+  /* === Ixcham elementlar === */
+.seg{ padding:4px }
+.seg button{ padding:9px; font-size:12.5px }
+.chips .c{ padding:7px 15px; font-size:12px }
+.refresh-btn{ padding:11px; font-size:13px }
+.lang-toggle{ padding:4px }
+.lang-toggle button{ padding:10px; font-size:13px }
+.svc{ padding:12px 14px }
+.svc .ic{ width:36px; height:36px }
+.svc .ic svg{ width:18px; height:18px }
+.big-btn, .guide-btn{ padding:12px 14px }
+.big-btn .ic, .guide-btn .ic{ width:34px; height:34px }
+.stat{ padding:10px 12px }
+.seg button.on, .lang-toggle button.on, .chips .c.on{ background:#3D45C9 }
+  /* === Aniqroq chiziqlar === */
+:root{
+  --stroke:rgba(255,255,255,.13);
+  --stroke-2:rgba(255,255,255,.20);
+}
+.seg button.on, .lang-toggle button.on, .chips .c.on{
+  background:#3B4DF0;
+  border:1px solid rgba(255,255,255,.30);
+  box-shadow:0 4px 14px -4px rgba(59,77,240,.7);
+}
+.bal-btn{ border:1px solid rgba(255,255,255,.24) }
+.nav-item.on{ border:1px solid rgba(255,255,255,.24) }
+.big-btn, .guide-btn, .refresh-btn{ border-color:rgba(99,120,255,.5) }
+.pkg{ border-color:rgba(240,169,60,.55) }
+.stat, .id-chip{ border-color:rgba(255,255,255,.14) }
+.svc + .svc{ border-top-color:rgba(255,255,255,.10) }
+.order .sep{ background:rgba(255,255,255,.10) }
+body.light .stat, body.light .id-chip{ border-color:rgba(16,24,40,.14) }
+body.light .svc + .svc{ border-top-color:rgba(16,24,40,.10) }
+body.light .order .sep{ background:rgba(16,24,40,.10) }
+/* === Yorug' rejim === */
+body.light{
+  --bg:#EEF1F8;
+  --bg-2:#F6F8FC;
+  --card:#FFFFFF;
+  --card-2:#EDF1F9;
+  --stroke:rgba(16,24,40,.09);
+  --stroke-2:rgba(16,24,40,.16);
+  --text:#111A2E;
+  --dim:#5A6478;
+  --faint:#8A93A8;
+  --blue-soft:rgba(63,85,246,.10);
+  --green-soft:rgba(47,181,116,.14);
+}
+body.light .nav-inner,
+body.light .rent{ background:rgba(255,255,255,.92) }
+body.light .rent{ color:#B8791A }
+body.light .toast{ color:var(--text) }
+body.light .pay{ border:1px solid var(--stroke) }
+body.light .svc:active{ background:rgba(16,24,40,.04) }
+body.light .switch{ background:#C7CEDC }
+body.light .game .star.off{ background:#B9C0D0 }
+body.light .refresh-btn,
+body.light .guide-btn .t,
+body.light .guide-btn .r,
+body.light .set-profile .un,
+body.light .info-i{ color:#3B4DF0 }
+body.light .pkg .info .p,
+body.light .stat .v.gold{ color:#B8791A }
+body.light .game .tile,
+body.light .pkg,
+body.light .order,
+body.light .svc-list,
+body.light .form-card,
+body.light .set-profile{ box-shadow:0 2px 10px rgba(16,24,40,.05) }
+/* === Pastki panel: suyuq kapsula === */
+.nav-inner{ position:relative }
+.nav-goo{ position:absolute; left:0; right:0; top:7px; bottom:7px; z-index:0; opacity:0;
+  pointer-events:none; filter:url(#navgoo); -webkit-filter:url(#navgoo) }
+.nav-goo i{ position:absolute; left:0; top:0; bottom:0; width:0; display:block;
+  border-radius:999px; background:var(--blue) }
+.nav-tail{ opacity:.96 }
+.nav-pill{ position:absolute; left:0; top:7px; bottom:7px; width:0; border-radius:999px;
+  z-index:1; opacity:0; pointer-events:none;
+  border:1px solid rgba(255,255,255,.42);
+  background:linear-gradient(100deg, rgba(255,255,255,.34) 0%, rgba(255,255,255,.08) 36%, rgba(255,255,255,0) 62%);
+  background-size:220% 100%; background-position:50% 0;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.58),
+             inset 0 -7px 14px -9px rgba(255,255,255,.40),
+             0 8px 22px -10px rgba(59,77,240,.95);
+  transform-origin:center center; will-change:transform }
+.nav-inner .nav-item{ position:relative; z-index:2; transition:color .2s ease, transform .16s ease }
+.nav-inner .nav-item.on{ background:transparent; border:0; color:#fff }
+.nav-item svg{ transition:transform .22s cubic-bezier(.34,1.4,.5,1) }
+.nav-inner .nav-item.on svg{ transform:scale(1.08) }
+.nav-inner .nav-item:active{ transform:scale(.94) }
+.reduce-motion .nav-goo{ filter:none; -webkit-filter:none }
+</style>
+</head>
+<body>
+<div class="wrap"><div id="app"></div></div>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <span class="nav-goo"><i class="nav-blob"></i><i class="nav-tail"></i></span>
+    <span class="nav-pill"></span>
+    <button class="nav-item on" data-tab="home">
+      <svg viewBox="0 0 24 24"><path d="M4 8h16M4 8l1.5 11a2 2 0 0 0 2 1.7h9a2 2 0 0 0 2-1.7L20 8M8 8V6a4 4 0 0 1 8 0v2"/></svg>
+      Bosh sahifa
+    </button>
+    <button class="nav-item" data-tab="history">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+      Tarix
+    </button>
+    <button class="nav-item" data-tab="settings">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="9" r="3.2"/><path d="M5.5 20a6.5 6.5 0 0 1 13 0"/></svg>
+      Sozlamalar
+    </button>
+  </div>
+ 
+</nav>
+<svg width="0" height="0" aria-hidden="true" style="position:absolute;pointer-events:none">
+  <defs>
+    <filter id="navgoo" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="blur"/>
+      <feColorMatrix in="blur" type="matrix"
+        values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 24 -11"/>
+    </filter>
+  </defs>
+</svg>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+let tgUser = null;
+if(tg){
+  tg.ready(); tg.expand();
+  [0,60,200,500,900,1500,2500].forEach(function(ms){ setTimeout(function(){ try{ tg.expand(); }catch(e){} }, ms); });
+  setTimeout(function(){ toast('exp=' + tg.isExpanded + ' vh=' + Math.round(tg.viewportHeight) + ' sh=' + window.screen.height); }, 2600);
+  try{ tg.setHeaderColor && tg.setHeaderColor('#0B1120'); tg.setBackgroundColor && tg.setBackgroundColor('#0B1120'); }catch(e){}
+  tgUser = tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user : null;
+  tg.onEvent('backButtonClicked', onBack);
+}
+function haptic(t){ try{ tg && tg.HapticFeedback && tg.HapticFeedback.impactOccurred(t||'light'); }catch(e){} }
+function notify(t){ try{ tg && tg.HapticFeedback && tg.HapticFeedback.notificationOccurred(t||'success'); }catch(e){} }
+function openLink(url){
+  haptic();
+  if(url.indexOf('t.me')>-1){
+    try{ window.location.href = url; return; }catch(e){}
+  }
+  if(tg && tg.openLink){
+    try{ tg.openLink(url); return; }catch(e){}
+  }
+  window.location.href = url;
+}
+
+const ADMIN_USERNAME = 'dv1mm_garant';
+const CHANNEL_USERNAME = 'savdo_mlbb1';
+const GUIDE_URL = 'https://t.me/savdo_mlbb1';
+const BOT_USERNAME = 'minatoh_bot';
+const APP_SHORT_NAME = 'app';
+const CARD_NUMBER = '9860 1606 3393 9915';
+const CARD_HOLDER = 'Faxriddin Davlatov';
+const CARD_BANK = 'Humo';
+const CARD2_NUMBER = '2202 2084 9695 4109';
+const CARD2_HOLDER = 'Фахриддин Давлатов';
+const CARD2_BANK = 'Sberbank';
+
+let balance = 0;
+let cashback = 0;
+let currentLang = 'uz';
+try{ const sv=localStorage.getItem('mt_lang'); if(sv) currentLang=sv; }catch(e){}
+const RU = {
+  "Tungi rejim":"Ночной режим","Yorug' rejimga o'tish":"Переключиться на светлый режим",
+  "Bosh sahifa":"Главная","Tarix":"История","Sozlamalar":"Настройки","Orqaga":"Назад",
+  "Balans":"Баланс","so'm":"сум","Keshbek":"Кэшбэк",
+  "Hisobni to'ldirish":"Пополнить счёт","Qo'llab-quvvatlash":"Поддержка",
+  "Saqlangan ID'lar":"Сохранённые ID","Tekshirish":"Проверить",
+  "Mahsulotni tanlang":"Выберите товар","Sotib olish":"Купить",
+  "O'YINCHI ID":"ID ИГРОКА","SERVER ID":"ID СЕРВЕРА","KIMGA (@username)":"КОМУ (@username)",
+  "Player ID kiriting":"Введите Player ID","O'yinchi ID kiriting":"Введите ID игрока",
+  "Server ID kiriting":"Введите Server ID",
+  "Buyurtmalar":"Заказы","Moliya":"Финансы","Barchasi":"Все","Bajarildi":"Выполнено",
+  "Kutilmoqda":"В ожидании","Bekor qilingan":"Отменено","Statusni yangilash":"Обновить статус",
+  "Hozircha bo'sh":"Пока пусто","Buyurtma bergach bu yerda ko'rinadi.":"После заказа он появится здесь.",
+  "O'yinchi ID":"ID игрока","Holat":"Статус",
+  "Telefon raqami":"Номер телефона","Telefon raqamini ulashish":"Поделиться номером телефона",
+  "Til":"Язык","Xizmatlar":"Услуги",
+  "Do'stlarni taklif qilish":"Пригласить друзей",
+  "Do'stlaringizni taklif qilib bonus tangalar yutib oling":"Приглашайте друзей и получайте бонусные монеты",
+  "Savollar bo'yicha 24/7 yordam chati orqali bog'laning":"Свяжитесь с поддержкой 24/7 по любым вопросам",
+  "Animatsiyalarni kamaytirish":"Уменьшить анимации",
+  "Sekin qurilmalarda tezroq ishlashi uchun":"Для быстрой работы на медленных устройствах",
+  "To'lov usulini tanlang":"Выберите способ оплаты","Qo'llanma":"Инструкция",
+  "TEXNIK ISH":"ТЕХРАБОТЫ",
+  "Referal havolasi":"Реферальная ссылка","Nusxalash":"Копировать","Ulashish":"Поделиться",
+  "Hali hech kim taklif qilmadingiz":"Вы ещё никого не пригласили",
+  "Do'stlaringizni taklif qiling va har bir to'lovdan 1% bonus oling":"Приглашайте друзей и получайте 1% с каждого платежа",
+  "Avval ID kiriting":"Сначала введите ID","ID nusxalandi":"ID скопирован",
+  "Havola nusxalandi":"Ссылка скопирована","Paketni tanlang":"Выберите пакет",
+  "Telegram ilovasida ishlaydi":"Работает в приложении Telegram",
+  "Moliya bo'limi tez orada":"Раздел «Финансы» скоро",
+  "✅ Buyurtma qabul qilindi":"✅ Заказ принят","✅ ID tekshirildi":"✅ ID проверен",
+  "🔄 Statuslar yangilandi":"🔄 Статусы обновлены",
+ "Haftalik propusk":"Недельный пропуск","Sumerechniy":"Сумеречный",
+  "Quyidagi kartaga o'tkazma qiling":"Переведите на карту ниже",
+  "Karta raqami":"Номер карты","Kanal":"Канал",
+  "QANCHA O'TKAZDINGIZ (so'm)":"СКОЛЬКО ВЫ ПЕРЕВЕЛИ (сум)",
+  "QANCHA O'TKAZDINGIZ (rubl)":"СКОЛЬКО ВЫ ПЕРЕВЕЛИ (руб)",
+  "To'ladim":"Я оплатил","Masalan: 50000":"Например: 50000",
+  "Karta raqami nusxalandi":"Номер карты скопирован",
+  "Summani kiriting":"Введите сумму",
+  "✅ Yuborildi, tez orada tasdiqlanadi":"✅ Отправлено, скоро подтвердим",
+  "HISOB TO'LDIRISH":"ПОПОЛНЕНИЕ СЧЁТА",
+  "✅ Format to'g'ri":"✅ Формат верный",
+  "faqat raqam bo'lishi kerak":"должны быть только цифры"
+};
+const UZ = {}; for(const k in RU) UZ[RU[k]] = k;
+function tr(s){ const m = currentLang==='ru' ? RU : UZ; const k = (s||'').trim(); return m[k] ? m[k] : s; }
+function applyLang(){
+  const map = currentLang==='ru' ? RU : UZ;
+  const w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+  const arr=[]; while(w.nextNode()) arr.push(w.currentNode);
+  arr.forEach(n=>{ const k=n.nodeValue.trim(); if(k && map[k]) n.nodeValue = n.nodeValue.replace(k, map[k]); });
+  document.querySelectorAll('[placeholder]').forEach(el=>{ const k=(el.placeholder||'').trim(); if(k && map[k]) el.placeholder = map[k]; });
+}
+
+const GAMES = [
+  { id:'pubg', name:'PUBG MOBILE', glyph:'🎯', star:'on', badge:'Global', img:'/IMG_4367.jpeg',
+    cur:'UC', region:false,
+    idFields:[{key:'playerId',label:"O'YINCHI ID",ph:'Player ID kiriting'}],
+    packages:[
+{a:'60', c:'UC', p:12000, im:'/IMG_4457.png'},
+{a:'325', c:'UC', p:58000, hit:true, im:'/IMG_4458.png'},
+{a:'660', c:'UC', p:112000, hit:true, im:'/IMG_4453.png'},
+{a:'1800', c:'UC', p:290000, im:'/IMG_4454.png'},
+{a:'3850', c:'UC', p:580000, im:'/IMG_4444.png'},
+{a:'8100', c:'UC', p:1150000, im:'/IMG_4445.png'},
+    ]},
+  { id:'freefire', name:'FREE FIRE', glyph:'🔥', star:'on', badge:'SNG', img:'/IMG_4368.jpeg',
+    cur:'💎', region:false,
+    idFields:[{key:'playerId',label:"O'YINCHI ID",ph:'Player ID kiriting'}],
+    packages:[
+      {a:'100', c:'💎', p:18000,im:'/IMG_4431.png'},
+      {a:'310', c:'💎', p:52000, hit:true,im:'/IMG_4432.png'},
+      {a:'520', c:'💎', p:85000,im:'/IMG_4433.png'},
+      {a:'1060',c:'💎', p:165000, im:'/IMG_4434.png'},
+    ]},
+  { id:'mlbb', name:'MOBILE LEGENDS', glyph:'⚔️', star:'on', badge:'Global', img:'/IMG_4365.jpeg',
+    cur:'💎', region:true,
+    idFields:[{key:'playerId',label:"O'YINCHI ID",ph:"O'yinchi ID kiriting"},{key:'serverId',label:'SERVER ID',ph:'Server ID kiriting'}],
+    packages:[
+      {a:'55', c:'💎', p:10000, hit:true, x2:true, im:'/IMG_4449.png'},
+      {a:'165', c:'💎', p:30500, hit:true, x2:true, im:'/IMG_4455.png'},
+      {a:'275', c:'💎', p:48500, hit:true, x2:true, im:'/IMG_4459.png'},
+      {a:'565', c:'💎', p:99600, hit:true, x2:true, im:'/IMG_4460.png'},
+      {a:'Haftalik propusk', c:'', p:16000, txt:true, im:'/IMG_4446.png'},
+      {a:'Sumerechniy', c:'', p:31600, txt:true, im:'/IMG_4429.png'},
+    ]},
+  { id:'tgstars', name:'TG STARS', glyph:'⭐', star:'on', badge:'AVTO', img:'/IMG_4370.jpeg',
+    cur:'⭐', region:false,
+    idFields:[{key:'username',label:'KIMGA (@username)',ph:'@username'}],
+    packages:[
+      {a:'50', c:'⭐', p:10500},
+      {a:'100', c:'⭐', p:21000, hit:true},
+      {a:'250', c:'⭐', p:52000},
+      {a:'500', c:'⭐', p:99000},
+    ]},
+  { id:'tgpremium', name:'TG PREMIUM', glyph:'👑', star:'on', badge:'AVTO', img:'/IMG_4369.jpeg',
+    cur:'', region:false,
+    idFields:[{key:'username',label:'KIMGA (@username)',ph:'@username'}],
+    packages:[
+      {a:'3 oy', c:'', p:145000, txt:true, im:'/IMG_4437.png'},
+      {a:'6 oy', c:'', p:260000, txt:true,im:'/IMG_4438.png'},
+      {a:'12 oy', c:'', p:430000, txt:true, im:'/IMG_4439.png'},
+    ]},
+];
+
+const REGIONS = [
+  {code:'uzb', label:'UZB / 🌐 Global', flag:'🇺🇿'},
+  {code:'ru', label:'RU', flag:'🇷🇺'},
+  {code:'tr', label:'TR', flag:'🇹🇷'},
+  {code:'id', label:'ID', flag:'🇮🇩'},
+  {code:'sg', label:'SG', flag:'🇸🇬'},
+  {code:'my', label:'MY', flag:'🇲🇾'},
+];
+
+let view = 'home', curGame = null, selPkg = null, curRegion = 'uzb';
+let histTab = 'orders', histFilter = 'all';
+const app = document.getElementById('app');
+const fmt = n => n.toLocaleString('ru-RU').replace(/,/g,' ');
+
+function go(v){
+  view = v; window.scrollTo(0,0);
+  const sub = (v==='game' || v==='topup');
+  if(tg&&tg.BackButton){ sub ? tg.BackButton.show() : tg.BackButton.hide(); }
+  document.querySelector('.nav').style.display = (v==='game') ? 'none' : 'flex';
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('on', n.dataset.tab===v));
+  if(v==='home') renderHome();
+  else if(v==='game') renderGame();
+  else if(v==='history') renderHistory();
+  else if(v==='settings'){ renderSettings(); loadPhone(); }
+  else if(v==='topup'){ topMethod=null; renderTopup(); }
+  syncNavPill(true);
+}
+function onBack(){ haptic(); if(view==='game') go('home'); else if(view==='topup') go('home'); else go('home'); }
+let navDragged = false;
+document.querySelectorAll('.nav-item').forEach(n=> n.addEventListener('click', ()=>{ if(navDragged) return; haptic(); go(n.dataset.tab); }));
+
+/* --- Pastki panel: suyuq kapsula (blob + quyruq + prujina) --- */
+const NAV = (function(){
+  const inner=document.querySelector('.nav-inner');
+  if(!inner) return { sync:function(){} };
+  const goo=inner.querySelector('.nav-goo');
+  const blob=inner.querySelector('.nav-blob');
+  const tail=inner.querySelector('.nav-tail');
+  const rim=inner.querySelector('.nav-pill');
+  const items=[].slice.call(inner.querySelectorAll('.nav-item'));
+  if(!goo||!blob||!tail||!rim||!items.length) return { sync:function(){} };
+
+  let w=0, minX=0, maxX=0, ir=null;
+  let x=0, tx=0, v=0, targetX=0;
+  let dragging=false, raf=0, startItem=null, target=null, ready=false;
+
+  function slow(){ return document.body.classList.contains('reduce-motion'); }
+  function measure(){
+    if(getComputedStyle(inner.parentNode).display==='none') return false;
+    ir=inner.getBoundingClientRect(); if(!ir.width) return false;
+    const r0=items[0].getBoundingClientRect(), rl=items[items.length-1].getBoundingClientRect();
+    if(!r0.width) return false;
+    w=r0.width; minX=r0.left-ir.left; maxX=rl.left-ir.left;
+    blob.style.width=w+'px'; tail.style.width=w+'px'; rim.style.width=w+'px';
+    return true;
+  }
+  function xOf(el){ return el.getBoundingClientRect().left-ir.left; }
+  function clamp(px){ return Math.max(minX, Math.min(maxX, px)); }
+  function paint(){
+    const d=x-tx, st=Math.min(Math.abs(d)/Math.max(w,1), 1);
+    blob.style.transform='translateX('+x.toFixed(1)+'px)';
+    tail.style.transform='translateX('+tx.toFixed(1)+'px) scale('+(0.78+st*0.14).toFixed(3)+')';
+    rim.style.transform='translateX('+x.toFixed(1)+'px) scaleX('+(1+st*0.26).toFixed(3)+') scaleY('+(1-st*0.14).toFixed(3)+')';
+    rim.style.backgroundPosition=(50-d*1.8).toFixed(1)+'% 0%';
+    goo.style.opacity='1'; rim.style.opacity='1';
+  }
+  function loop(){
+    raf=0;
+    if(!dragging){
+      v+=(targetX-x)*0.17; v*=0.76; x+=v;
+      if(Math.abs(v)<0.12 && Math.abs(targetX-x)<0.4){ x=targetX; v=0; }
+    }
+    tx+=(x-tx)*0.30;
+    paint();
+    if(!dragging && v===0 && Math.abs(x-tx)<0.4){ tx=x; paint(); return; }
+    raf=requestAnimationFrame(loop);
+  }
+  function kick(){ if(!raf) raf=requestAnimationFrame(loop); }
+  function nearest(cx){
+    let b=items[0], bd=1e9;
+    items.forEach(function(n){ const r=n.getBoundingClientRect(); const dd=Math.abs(r.left+r.width/2-cx); if(dd<bd){ bd=dd; b=n; } });
+    return b;
+  }
+  function mark(el){ if(el===target) return; target=el; haptic(); items.forEach(function(n){ n.classList.toggle('on', n===el); }); }
+
+  function sync(animate){
+    if(!measure()) return;
+    const on=document.querySelector('.nav-item.on'); if(!on) return;
+    target=on; targetX=xOf(on);
+    if(animate===false || !ready || slow()){ x=targetX; tx=targetX; v=0; ready=true; paint(); return; }
+    ready=true; kick();
+  }
+
+  inner.addEventListener('touchstart', function(e){
+    if(!measure()) return;
+    const t=e.touches[0];
+    dragging=true; v=0;
+    startItem=nearest(t.clientX); target=null; mark(startItem);
+    x=clamp(t.clientX-ir.left-w/2);
+    kick();
+  }, {passive:true});
+
+  inner.addEventListener('touchmove', function(e){
+    if(!dragging) return;
+    const t=e.touches[0];
+    x=clamp(t.clientX-ir.left-w/2);
+    mark(nearest(x+ir.left+w/2));
+    kick();
+    if(e.cancelable) e.preventDefault();
+  }, {passive:false});
+
+  function end(){
+    if(!dragging) return; dragging=false;
+    if(target) targetX=xOf(target);
+    v=0; kick();
+    if(target && target!==startItem){
+      navDragged=true; go(target.dataset.tab);
+      setTimeout(function(){ navDragged=false; }, 480);
+    }
+  }
+  inner.addEventListener('touchend', end);
+  inner.addEventListener('touchcancel', end);
+  window.addEventListener('resize', function(){ sync(false); });
+  return { sync:sync };
+})();
+function syncNavPill(animate){ NAV.sync(animate); }
+function rent(){ haptic(); toast("Ijaraga bo'limi tez orada 🔜"); }
+
+function profileRow(){
+  const name = tgUser ? (tgUser.first_name||'Foydalanuvchi') : 'Foydalanuvchi';
+  const un = tgUser && tgUser.username ? '@'+tgUser.username : '@user';
+  const initial = name.charAt(0).toUpperCase();
+  const photo = tgUser && tgUser.photo_url ? `<img src="${tgUser.photo_url}" alt="">` : initial;
+  return `<div class="profile">
+    <div class="who">
+      <div class="avatar">${photo}</div>
+      <div><div class="nm">${name}</div><div class="un">${un}</div></div>
+    </div>
+    <div class="coin"><span class="dot"></span>${cashback}</div>
+  </div>`;
+}
+
+function renderHome(){
+  app.innerHTML = profileRow() + `
+  <div class="balance">
+    <div class="lbl">Balans</div>
+    <div class="amt">${fmt(balance)}<small>so'm</small></div>
+    <div class="bal-actions">
+      <button class="bal-btn" onclick="go('topup')">
+        <svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="2.5"/><path d="M3 10h18M16 15h2"/></svg>
+        Hisobni to'ldirish
+      </button>
+      <button class="bal-btn" onclick="openLink('https://t.me/${ADMIN_USERNAME}')">
+        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H8l-4 4V5a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2z"/></svg>
+        Qo'llab-quvvatlash
+      </button>
+    </div>
+  </div>
+  <div class="games">
+    ${GAMES.map(g=>`
+      <button class="game" onclick="openGame('${g.id}')">
+        <div class="tile">
+          ${g.img ? `<img src="${g.img}" alt="">` : `<span class="glyph">${g.glyph}</span>`}
+          <span class="star ${g.star}">★</span>
+          <span class="badge">${g.badge}</span>
+          ${g.maint ? `<span class="maint"><span>TEXNIK ISH</span></span>` : ''}
+        </div>
+        <div class="nm">${g.name}</div>
+      </button>`).join('')}
+  </div>`;
+}
+
+function openGame(id){ haptic(); curGame = GAMES.find(g=>g.id===id); selPkg = null; curRegion='uzb'; go('game'); }
+function savedIds(gameId){ try{ return JSON.parse(localStorage.getItem('mt_ids_'+gameId)||'[]'); }catch(e){ return []; } }
+function saveId(gameId, val){ try{ let a=savedIds(gameId); a=a.filter(x=>x!==val); a.unshift(val); localStorage.setItem('mt_ids_'+gameId, JSON.stringify(a.slice(0,6))); }catch(e){} }
+
+function renderGame(){
+  const g = curGame;
+  const ids = savedIds(g.id);
+  app.innerHTML = `
+  <div class="back-row"><button class="back-btn" onclick="go('home')"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>Orqaga</button></div>
+  <div class="gd-head">
+    <div class="ic">${g.img?`<img src="${g.img}">`:g.glyph}</div>
+    <div><div class="nm">${g.name}</div><div class="cur">${g.cur||''}</div></div>
+  </div>
+  ${ids.length ? `<div class="sec-lbl" style="margin-top:0">Saqlangan ID'lar</div>
+  <div class="saved-ids">${ids.map(v=>`<button class="chip" onclick="fillId('${v}')">${v}</button>`).join('')}</div>` : ''}
+  <div class="form-card">
+    ${g.idFields.map((f,i)=>{
+      const isLast = i===g.idFields.length-1;
+      const inp = `<div class="inp-wrap"><input class="inp" id="fld_${f.key}" placeholder="${f.ph}" autocomplete="off"><span class="info-i">i</span></div>`;
+      return `<div class="lbl">${f.label}</div>` + (isLast && g.idFields.length>1
+        ? `<div class="row-inp">${inp}<button class="check-btn" onclick="checkId()">Tekshirish</button></div>`
+        : inp);
+    }).join('')}
+    ${g.idFields.length===1 ? `<button class="check-btn" style="width:100%;margin-top:14px;padding:13px" onclick="checkId()">Tekshirish</button>`:''}
+  </div>
+  <div class="sec-lbl" style="margin-top:0">Mahsulotni tanlang</div>
+  ${g.region ? `<div class="region-tabs">${REGIONS.map(r=>`<button class="rt ${r.code==='uzb'?'on':''}" data-r="${r.code}" onclick="pickRegion('${r.code}')">${r.flag} ${r.label}</button>`).join('')}</div>` : ''}
+  <div class="pkg-grid">
+    ${g.packages.map((p,i)=>`
+      <button class="pkg ${p.txt?'txt-only':''}" data-i="${i}" onclick="pickPkg(${i})">
+        ${p.hit?`<span class="hit">HIT</span>`:''}
+        <span class="pic"><span class="em">${p.im?'<img class="pim" src="'+p.im+'">':p.txt?'🎁':(p.c==='💎'?'💎':p.c==='⭐'?'⭐':'🪙')}</span>${p.x2?`<span class="x2">x2</span>`:''}</span>
+        <span class="info"><span class="a ${p.txt?'small':''}">${p.a}${p.c&&p.c.length<=2?' '+p.c:''}</span><span class="p">${fmt(p.p)} so'm</span></span>
+      </button>`).join('')}
+  </div>
+  <div class="buy-bar"><button class="buy-btn" id="buyBtn" disabled onclick="buy()">Sotib olish</button></div>`;
+}
+async function checkId() {
+  const playerId = (document.getElementById('fld_playerId')?.value || '').trim();
+  const serverId = (document.getElementById('fld_serverId')?.value || '').trim();
+
+  if (!playerId || !serverId) {
+    notify('error');
+    toast('ID va Server kiriting');
+    return;
+  }
+
+  try {
+    const response = await fetch(`/api/check-ml?id=${playerId}&server=${serverId}`);
+    const data = await response.json();
+
+    if (data.success) {
+      notify('success');
+      toast(`Topildi: ${data.username} (${data.country})`);
+    } else {
+      notify('error');
+      toast('ID yoki Server noto‘g‘ri');
+    }
+  } catch (e) {
+    notify('error');
+    toast('Tekshirishda xatolik');
+  }
+}
+function pickPkg(i){ haptic(); selPkg=i; document.querySelectorAll('.pkg').forEach(el=>el.classList.toggle('sel', +el.dataset.i===i));
+  const b=document.getElementById('buyBtn'); if(b) b.disabled=false; }
+const ID_RULES = {
+  pubg:     { playerId:[10,12] },
+  freefire: { playerId:[8,12] },
+  mlbb:     { playerId:[6,11], serverId:[3,6] }
+};
+function badFormat(gameId, key, v){
+  const r = ID_RULES[gameId] && ID_RULES[gameId][key];
+  if(!r) return null;
+  if(!/^\d+$/.test(v)) return "faqat raqam bo'lishi kerak";
+  if(v.length < r[0] || v.length > r[1]) return r[0]+'-'+r[1]+" ta raqam bo'lishi kerak";
+  return null;
+}
+function checkId(){
+  const g=curGame;
+  for(const f of g.idFields){
+    const el=document.getElementById('fld_'+f.key);
+    const v=(el&&el.value||'').trim();
+    if(!v){ notify('error'); toast(f.label+' kiriting'); return false; }
+    const bad=badFormat(g.id, f.key, v);
+    if(bad){ notify('error'); toast(f.label+': '+bad); return false; }
+  }
+  notify('success'); toast("✅ Format to'g'ri");
+  return true;
+}
+function buy(){
+  const g=curGame;
+  if(selPkg===null){ notify('error'); toast('Paketni tanlang'); return; }
+  if(!checkId()) return;
+  const p=g.packages[selPkg];
+  const details={};
+  for(const f of g.idFields){ const v=(document.getElementById('fld_'+f.key)?.value||'').trim();
+    if(!v){ notify('error'); toast(f.label+' kiriting'); return; } details[f.key]=v; }
+  saveId(g.id, Object.values(details).join(' '));
+  const order={ id:'MT'+Date.now().toString().slice(-8), game:g.name, gameId:g.id, glyph:g.glyph, img:g.img||'',
+    package:(p.a+(p.c&&p.c.length<=2?' '+p.c:'')), price:p.p, details, region:g.region?curRegion:null,
+    tgUser: tgUser?{id:tgUser.id,username:tgUser.username,name:tgUser.first_name}:null,
+    status:'wait', createdAt:new Date().toISOString() };
+  saveOrder(order); notify('success');
+fetch('/api/order', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ order: order, initData: (tg && tg.initData) || '' })
+  }).then(function(r){ return r.json(); }).then(function(d){
+    if(d && d.ok){ toast('✅ Buyurtma qabul qilindi'); setTimeout(function(){ go('history'); }, 700); }
+    else { notify('error'); toast("⚠️ Xato: " + ((d && d.error) || 'yuborilmadi')); }
+  }).catch(function(){ notify('error'); toast("⚠️ Aloqa yo'q"); });  
+}
+
+function saveOrder(o){ try{ const a=getOrders(); a.unshift(o); localStorage.setItem('mt_orders', JSON.stringify(a.slice(0,60))); }catch(e){} }
+function getOrders(){ try{ return JSON.parse(localStorage.getItem('mt_orders')||'[]'); }catch(e){ return []; } }
+function renderHistory(){
+  let orders=getOrders();
+  if(histFilter==='done') orders=orders.filter(o=>o.status==='done');
+  if(histFilter==='wait') orders=orders.filter(o=>o.status==='wait');
+  if(histFilter==='cancel') orders=orders.filter(o=>o.status==='cancel');
+  app.innerHTML = profileRow() + `
+  <div class="page-title">Tarix</div>
+  <div class="seg">
+    <button class="${histTab==='orders'?'on':''}" onclick="setHistTab('orders')">Buyurtmalar</button>
+    <button class="${histTab==='finance'?'on':''}" onclick="setHistTab('finance')">Moliya</button>
+  </div>
+  <div class="chips">
+    <button class="c ${histFilter==='all'?'on':''}" onclick="setFilter('all')">Barchasi</button>
+    <button class="c ${histFilter==='done'?'on':''}" onclick="setFilter('done')">Bajarildi</button>
+    <button class="c ${histFilter==='wait'?'on':''}" onclick="setFilter('wait')">Kutilmoqda</button>
+    <button class="c ${histFilter==='cancel'?'on':''}" onclick="setFilter('cancel')">Bekor qilingan</button>
+  </div>
+  <button class="refresh-btn" onclick="refreshStatus()"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.6-6.4M21 4v5h-5"/></svg>Statusni yangilash</button>
+  <div id="histList"></div>`;
+  const list=document.getElementById('histList');
+  if(!orders.length){
+    list.innerHTML=`<div class="empty"><div class="em">🧾</div><h3>Hozircha bo'sh</h3><p>Buyurtma bergach bu yerda ko'rinadi.</p></div>`;
+    return;
+  }
+  list.innerHTML = orders.map(o=>{
+    const st = o.status==='done'?['done','Bajarildi'] : o.status==='cancel'?['wait','Bekor qilingan'] : ['wait','Kutilmoqda'];
+    const idVal = o.details ? Object.values(o.details)[0] : '';
+    const date = new Date(o.createdAt).toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+    return `<div class="order">
+      <div class="top">
+        <div class="g"><div class="ic">${o.img?`<img src="${o.img}">`:o.glyph}</div>
+        <div><div class="nm">${o.game}</div><div class="sub">${o.package}</div></div></div>
+        <div class="price">-${fmt(o.price)}<small>so'm</small></div>
+      </div>
+      <div class="sep"></div>
+      <div class="kv"><span class="k">O'yinchi ID</span><span class="v">${idVal}</span></div>
+      <div class="kv"><span class="k">Holat</span><span class="badge-st ${st[0]}">${st[1]}</span></div>
+      <div class="date">${date}</div>
+    </div>`;
+  }).join('');
+}
+function setHistTab(t){ haptic(); if(t==='finance'){ toast("Moliya bo'limi tez orada"); return; } histTab=t; renderHistory(); }
+function setFilter(f){ haptic(); histFilter=f; renderHistory(); }
+function refreshStatus(){ haptic('medium'); notify('success'); toast('🔄 Statuslar yangilandi'); }
+
+function renderSettings(){
+  const name = tgUser?(tgUser.first_name||'Foydalanuvchi'):'Foydalanuvchi';
+  const un = tgUser&&tgUser.username?'@'+tgUser.username:'@user';
+  const uid = tgUser&&tgUser.id?tgUser.id:'—';
+  const initial=name.charAt(0).toUpperCase();
+  const photo = tgUser&&tgUser.photo_url?`<img src="${tgUser.photo_url}">`:initial;
+  const reduced = document.body.classList.contains('reduce-motion');
+  app.innerHTML = `
+  <div class="set-profile">
+    <div class="top">
+      <div class="avatar" style="width:52px;height:52px;font-size:19px">${photo}</div>
+      <div><div class="nm">${name}</div><div class="un">${un}</div>
+      <button class="id-chip" onclick="copyId('${uid}')">ID: ${uid} <svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg></button>
+      </div>
+    </div>
+    <div class="stat-row">
+      <div class="stat"><div class="k">Balans</div><div class="v">${fmt(balance)}<small>so'm</small></div></div>
+      <div class="stat"><div class="k">Keshbek</div><div class="v gold">${cashback}</div></div>
+    </div>
+  </div>
+  <div class="sec-lbl" style="margin-top:0">Telefon raqami</div>
+  <button class="big-btn" onclick="sharePhone()">
+    <span class="ic"><svg viewBox="0 0 24 24"><path d="M5 4h3l2 5-2.5 1.5a11 11 0 0 0 5 5L16 13l5 2v3a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg></span>
+    Telefon raqamini ulashish
+  </button>
+  <div class="sec-lbl">Til</div>
+  <div class="lang-toggle">
+    <button class="${currentLang==='uz'?'on':''}" onclick="setLang('uz')">O'zbekcha</button>
+    <button class="${currentLang==='ru'?'on':''}" onclick="setLang('ru')">Русский</button>
+  </div>
+  <div class="sec-lbl">Xizmatlar</div>
+  <div class="svc-list">
+    <button class="svc" onclick="invite()">
+      <span class="ic" style="background:#6C4BF0"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0M17 8h4M19 6v4"/></svg></span>
+      <span class="txt"><div class="t">Do'stlarni taklif qilish</div><div class="s">Do'stlaringizni taklif qilib bonus tangalar yutib oling</div></span>
+      <span class="arw">›</span>
+    </button>
+    <button class="svc" onclick="openLink('https://t.me/${ADMIN_USERNAME}')">
+      <span class="ic" style="background:#2E7BC0"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H8l-4 4V5a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2z"/></svg></span>
+      <span class="txt"><div class="t">Qo'llab-quvvatlash</div><div class="s">Savollar bo'yicha 24/7 yordam chati orqali bog'laning</div></span>
+      <span class="arw">›</span>
+    </button>
+    <button class="svc" onclick="toggleMotion(this)">
+      <span class="ic" style="background:#3A4358"><svg viewBox="0 0 24 24"><path d="M12 3v2M12 19v2M5 12H3M21 12h-2M6 6l1.5 1.5M16.5 16.5L18 18"/></svg></span>
+      <span class="txt"><div class="t">Animatsiyalarni kamaytirish</div><div class="s">Sekin qurilmalarda tezroq ishlashi uchun</div></span>
+      <span class="switch ${reduced?'on':''}"></span>
+    </button>
+    <button class="svc" onclick="toggleTheme(this)">
+      <span class="ic" style="background:#C9902A"><svg viewBox="0 0 24 24"><path d="M21 12.8A8.5 8.5 0 1 1 11.2 3a6.6 6.6 0 0 0 9.8 9.8z"/></svg></span>
+      <span class="txt"><div class="t">Tungi rejim</div><div class="s">Yorug' rejimga o'tish</div></span>
+      <span class="switch ${document.body.classList.contains('light')?'on':''}"></span>
+    </button>
+  </div>
+  <p style="text-align:center;color:var(--faint);font-size:12px;margin-top:18px">minatoh.uz • © 2026</p>`;
+}
+function copyId(id){ haptic(); try{ navigator.clipboard.writeText(id); }catch(e){} toast('ID nusxalandi'); }
+function setLang(l){ haptic(); currentLang=l; try{ localStorage.setItem('mt_lang',l); }catch(e){} renderSettings(); applyLang(); loadPhone(); }
+let phoneCache = null, phoneLoaded = false;
+function hidePhoneSection(hide){
+  const btn = document.querySelector('button[onclick="sharePhone()"]');
+  if(!btn) return;
+  btn.style.display = hide ? 'none' : '';
+  const lbl = btn.previousElementSibling;
+  if(lbl && lbl.classList && lbl.classList.contains('sec-lbl')) lbl.style.display = hide ? 'none' : '';
+}
+function setPhoneText(txt){
+  const p = String(txt).charAt(0) === '+' ? String(txt) : '+' + String(txt);
+  hidePhoneSection(true);
+  const idChip = document.querySelector('button[onclick^="copyId"]');
+  if(idChip){
+    let chip = document.getElementById('phoneChip');
+    if(!chip){
+      chip = document.createElement('div');
+      chip.id = 'phoneChip';
+      chip.className = 'id-chip';
+      chip.style.marginTop = '8px';
+      idChip.parentNode.insertBefore(chip, idChip.nextSibling);
+    }
+    chip.textContent = '📱 ' + p;
+  }
+}
+function loadPhone(){
+  const uid = tgUser && tgUser.id ? tgUser.id : '';
+  if(!uid) return;
+  if(phoneCache) setPhoneText(phoneCache);
+  else if(!phoneLoaded) hidePhoneSection(true);
+  fetch("https://api.minatoh.uz/phone?id=" + uid)
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      phoneLoaded = true;
+      if(d && d.phone){ phoneCache = d.phone; setPhoneText(d.phone); }
+      else hidePhoneSection(false);
+    })
+    .catch(function(){ phoneLoaded = true; hidePhoneSection(false); });
+}
+function sharePhone(){
+  haptic();
+  const uid = tgUser && tgUser.id ? tgUser.id : '';
+  if(!uid){ notify('error'); toast('Telegram orqali oching'); return; }
+  toast("📱 Botda tugmani bosing");
+  openLink("https://t.me/" + BOT_USERNAME + "?start=phone");
+}
+
+function invite(){
+  haptic();
+  const uid = tgUser && tgUser.id ? tgUser.id : '';
+  const link = uid ? `https://t.me/${BOT_USERNAME}?startapp=${uid}` : `https://t.me/${BOT_USERNAME}`;
+  window.scrollTo(0,0);
+  app.innerHTML = `
+  <div class="back-row"><button class="back-btn" onclick="go('settings')"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>Orqaga</button></div>
+  <div class="page-title">Do'stlarni taklif qilish</div>
+  <p style="color:var(--dim);font-size:13.5px;margin:-8px 2px 18px">Do'stlaringizni taklif qiling va har bir to'lovdan 1% bonus oling</p>
+  <div style="background:var(--card);border:1px solid var(--stroke);border-radius:var(--radius);padding:16px;margin-bottom:14px">
+    <div style="display:flex;align-items:center;gap:9px;margin-bottom:10px">
+      <span style="font-size:18px">👥</span>
+      <span style="font-weight:800;font-size:16px">Referal havolasi</span>
+    </div>
+    <div style="background:var(--bg-2);border:1px solid var(--stroke-2);border-radius:12px;padding:13px 15px;margin-bottom:12px;font-size:12.5px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${link}</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <button class="big-btn" style="margin:0;justify-content:center;background:var(--card-2)" onclick="copyRef('${link}')">Nusxalash</button>
+      <button class="big-btn" style="margin:0;justify-content:center;background:var(--blue);border-color:transparent;color:#fff" onclick="shareRef('${link}')">Ulashish</button>
+    </div>
+  </div>
+  <div class="empty" style="background:var(--card);border:1px solid var(--stroke);border-radius:var(--radius);padding:36px 20px">
+    <div class="em">👥</div>
+    <h3>Hali hech kim taklif qilmadingiz</h3>
+    <p>Do'stlaringizni taklif qiling va har bir to'lovdan 1% bonus oling</p>
+  </div>`;
+}
+function copyRef(link){ haptic(); try{ navigator.clipboard.writeText(link); }catch(e){} notify('success'); toast('Havola nusxalandi'); }
+function shareRef(link){ haptic(); openLink(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent("Arzon donat — minatoh!")}`); }
+   
+function toggleMotion(el){ haptic(); const on=document.body.classList.toggle('reduce-motion'); el.querySelector('.switch').classList.toggle('on', on); }
+  function applyTheme(){
+  const light = document.body.classList.contains('light');
+  const c = light ? '#EEF1F8' : '#0B1120';
+  try{ tg && tg.setHeaderColor && tg.setHeaderColor(c); }catch(e){}
+  try{ tg && tg.setBackgroundColor && tg.setBackgroundColor(c); }catch(e){}
+}
+function toggleTheme(el){
+  haptic();
+  const on = document.body.classList.toggle('light');
+  try{ localStorage.setItem('mt_theme', on ? 'light' : 'dark'); }catch(e){}
+  const sw = el.querySelector('.switch'); if(sw) sw.classList.toggle('on', on);
+  applyTheme();
+}
+let topMethod = null;
+function renderTopup(){
+  if(!topMethod){
+    app.innerHTML = profileRow() + `
+    <div class="page-title">Hisobni to'ldirish</div>
+    <p style="color:var(--dim);font-size:13.5px;margin:-6px 2px 18px">To'lov usulini tanlang</p>
+    <div class="pay-grid">
+      <button class="pay" onclick="pickPay('uz')">
+        <span class="box" style="background:#f4f6fb;font-size:24px">💳</span><span class="nm">${CARD_BANK}</span>
+      </button>
+      <button class="pay" onclick="pickPay('ru')">
+        <span class="box" style="background:#eaf1ff;font-size:24px">🏦</span><span class="nm">${CARD2_BANK}</span>
+      </button>
+    </div>
+    <button class="guide-btn" style="margin-top:16px" onclick="openLink('${GUIDE_URL}')">
+      <span class="ic">📖</span><span class="t">Qo'llanma</span><span class="r">Kanal</span>
+    </button>`;
+    return;
+  }
+  const isUz = topMethod==='uz';
+  const num = isUz ? CARD_NUMBER : CARD2_NUMBER;
+  const hold = isUz ? CARD_HOLDER : CARD2_HOLDER;
+  const bank = isUz ? CARD_BANK : CARD2_BANK;
+  const cur = isUz ? "so'm" : "rubl";
+  app.innerHTML = `
+  <div class="back-row"><button class="back-btn" onclick="pickPay(null)"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>Orqaga</button></div>
+  <div class="page-title">${bank}</div>
+  <p style="color:var(--dim);font-size:13.5px;margin:-6px 2px 18px">Quyidagi kartaga o'tkazma qiling</p>
+  <div style="background:var(--card);border:1px solid var(--stroke);border-radius:var(--radius);padding:16px;margin-bottom:14px">
+    <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--faint);text-transform:uppercase;margin-bottom:8px">Karta raqami</div>
+    <div style="font-weight:800;font-size:21px;letter-spacing:1px">${num}</div>
+    <div style="color:var(--dim);font-size:13px;margin-top:5px">${hold}</div>
+    <button class="big-btn" style="margin:14px 0 0;justify-content:center;background:var(--card-2)" onclick="copyCard('${num}')">Nusxalash</button>
+  </div>
+  <div class="form-card">
+    <div class="lbl">QANCHA O'TKAZDINGIZ (${cur})</div>
+    <div class="inp-wrap"><input class="inp" id="topAmount" inputmode="numeric" placeholder="Masalan: 50000"></div>
+    <button class="check-btn" style="width:100%;margin-top:14px;padding:13px" onclick="sendTopup()">To'ladim</button>
+  </div>`;
+}
+function pickPay(m){ haptic(); topMethod=m; renderTopup(); }
+function copyCard(n){ haptic(); try{ navigator.clipboard.writeText(String(n).replace(/\s/g,'')); }catch(e){} notify('success'); toast('Karta raqami nusxalandi'); }
+function sendTopup(){
+  const el=document.getElementById('topAmount');
+  const amt=Number(((el&&el.value)||'').replace(/\D/g,''));
+  if(!amt){ notify('error'); toast('Summani kiriting'); return; }
+  const isUz = topMethod==='uz';
+  const bank = isUz ? CARD_BANK : CARD2_BANK;
+  const cur = isUz ? "so'm" : "rubl";
+  const order={ id:'TP'+Date.now().toString().slice(-8), game:"HISOB TO'LDIRISH", package:fmt(amt)+' '+cur,
+    price:amt, details:{ bank:bank, summa:fmt(amt)+' '+cur }, region:null, status:'wait', createdAt:new Date().toISOString() };
+  fetch('/api/order', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ order: order, initData: (tg && tg.initData) || '' })
+  }).then(function(r){ return r.json(); }).then(function(d){
+    if(d && d.ok){ notify('success'); toast("✅ Yuborildi, tez orada tasdiqlanadi"); if(el) el.value=''; }
+    else { notify('error'); toast("⚠️ Xato: " + ((d && d.error) || 'yuborilmadi')); }
+  }).catch(function(){ notify('error'); toast("⚠️ Aloqa yo'q"); });
+}
+function payMethod(m){ haptic('medium'); toast(m+' — tez orada ulanadi 💳'); }
+
+let tt;
+function toast(msg){ const el=document.getElementById('toast'); el.textContent=tr(msg); el.classList.add('show');
+  clearTimeout(tt); tt=setTimeout(()=>el.classList.remove('show'),2600); }
+
+go('home');
+syncNavPill(false);
+try{ if(localStorage.getItem('mt_theme')==='light') document.body.classList.add('light'); }catch(e){}
+applyTheme();
+let langTimer=null;
+function scheduleLang(){ applyLang(); }
+try{ new MutationObserver(()=>scheduleLang()).observe(document.getElementById('app'), {childList:true, subtree:true}); }catch(e){}
+applyLang();
+loadPhone();
+</script>
+</body>
+</html>
