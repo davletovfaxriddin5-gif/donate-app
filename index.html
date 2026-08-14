@@ -902,7 +902,7 @@ function toast(msg){ const el=document.getElementById('toast'); el.textContent=t
 
 go('home');
 let langTimer=null;
-function scheduleLang(){ clearTimeout(langTimer); langTimer=setTimeout(applyLang, 60); }
+function scheduleLang(){ applyLang(); }
 try{ new MutationObserver(()=>scheduleLang()).observe(document.getElementById('app'), {childList:true, subtree:true}); }catch(e){}
 applyLang();
 loadPhone();
