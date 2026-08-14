@@ -445,9 +445,83 @@ body.light .set-profile{ box-shadow:0 2px 10px rgba(16,24,40,.05) }
 .fx-host button{ position:relative; z-index:2 }
 .fx-host button.on{ background:transparent; border:0; box-shadow:none; color:#fff }
 .reduce-motion .fx-goo{ filter:none; -webkit-filter:none }
+/* === Ochilish ekrani === */
+#splash{ position:fixed; inset:0; z-index:200; background:var(--bg);
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:20px;
+  transition:opacity .5s ease, visibility .5s, transform .5s ease }
+#splash.gone{ opacity:0; visibility:hidden; pointer-events:none; transform:scale(1.06) }
+
+.sp-stage{ position:relative; width:150px; height:150px; display:grid; place-items:center;
+  animation:spIn .78s cubic-bezier(.22,1.35,.36,1) both }
+.sp-stage::before{ content:""; position:absolute; inset:-90px; border-radius:50%;
+  background:radial-gradient(circle, rgba(63,85,246,.22), rgba(63,85,246,0) 70%);
+  animation:spGlow 3.4s ease-in-out infinite }
+@keyframes spIn{
+  0%  { transform:scale(.55) rotate(-22deg); opacity:0 }
+  55% { opacity:1 }
+  100%{ transform:scale(1) rotate(0deg); opacity:1 }
+}
+@keyframes spGlow{
+  0%,100%{ transform:scale(.9);  opacity:.65 }
+  50%    { transform:scale(1.08); opacity:1 }
+}
+
+.sp-ring{ position:absolute; width:118px; height:118px; border-radius:50%;
+  border:2px solid rgba(150,168,255,.9); opacity:0;
+  animation:spRing 1.6s ease-out .3s both }
+@keyframes spRing{
+  0%  { transform:scale(.35); opacity:0 }
+  16% { opacity:.95 }
+  100%{ transform:scale(2.4); opacity:0 }
+}
+
+.sp-mark{ position:relative; width:128px; height:128px; display:block;
+  filter:drop-shadow(0 12px 30px rgba(59,77,240,.55));
+  animation:spFloat 3s ease-in-out .5s infinite }
+@keyframes spFloat{
+  0%,100%{ transform:translateY(0)     rotate(0deg) }
+  25%    { transform:translateY(-9px)  rotate(-4deg) }
+  75%    { transform:translateY(9px)   rotate(4deg) }
+}
+
+.sp-name{ font-size:14px; font-weight:600; text-transform:uppercase; color:var(--dim);
+  text-indent:6px; opacity:0; animation:spName .85s ease-out .36s both }
+@keyframes spName{
+  0%  { opacity:0; letter-spacing:.5px; transform:translateY(7px) }
+  100%{ opacity:1; letter-spacing:6px;  transform:translateY(0) }
+}
+
+.sp-bar{ width:148px; height:4px; border-radius:999px; background:rgba(255,255,255,.10);
+  overflow:hidden; opacity:0; animation:spFade .6s ease-out .52s both }
+.sp-bar i{ display:block; height:100%; width:0; border-radius:999px; background:var(--blue-grad);
+  animation:spFill 1.7s cubic-bezier(.25,.8,.3,1) .52s both }
+@keyframes spFill{ 0%{ width:0 } 100%{ width:92% } }
+@keyframes spFade{ to{ opacity:1 } }
+#splash.gone .sp-bar i{ animation:none; width:100%; transition:width .3s ease }
+
+body.light .sp-bar{ background:rgba(16,24,40,.12) }
+body.light .sp-stage::before{ background:radial-gradient(circle, rgba(63,85,246,.14), rgba(63,85,246,0) 70%) }
+body.light .sp-ring{ border-color:rgba(59,77,240,.55) }
 </style>
 </head>
 <body>
+<div id="splash">
+  <div class="sp-stage">
+    <span class="sp-ring"></span>
+    <svg class="sp-mark" viewBox="0 0 512 512" aria-hidden="true">
+      <defs>
+        <linearGradient id="spGrad" x1="0" y1="0" x2="0.35" y2="1">
+          <stop offset="0" stop-color="#A8B6FF"/>
+          <stop offset="0.55" stop-color="#5A6BF5"/>
+          <stop offset="1" stop-color="#2E3ED8"/>
+        </linearGradient>
+      </defs>
+      <path fill="url(#spGrad)" d="M218 218 C174 200 166 130 232 74 C214 124 222 170 246 214 Z M266 214 C290 170 298 124 280 74 C346 130 338 200 294 218 Z M246 298 C222 342 214 388 232 438 C166 382 174 312 218 294 Z M294 294 C338 312 346 382 280 438 C298 388 290 342 266 298 Z M256 52 L272 90 L272 422 L256 460 L240 422 L240 90 Z M220 190 L292 190 L292 206 L220 206 Z M220 306 L292 306 L292 322 L220 322 Z M256 212 C280.3 212 300 231.7 300 256 C300 280.3 280.3 300 256 300 C231.7 300 212 280.3 212 256 C212 231.7 231.7 212 256 212 Z"/>
+    </svg>
+  </div>
+  <div class="sp-name">minatoh</div>
+  <div class="sp-bar"><i></i></div>
+</div>
 <div class="wrap"><div id="app"></div></div>
 
 <nav class="nav">
@@ -1300,6 +1374,14 @@ function scheduleLang(){ applyLang(); initFx(); }
 try{ new MutationObserver(()=>scheduleLang()).observe(document.getElementById('app'), {childList:true, subtree:true}); }catch(e){}
 applyLang();
 loadPhone();
+
+const splashT0 = Date.now();
+function hideSplash(){
+  const s=document.getElementById('splash'); if(!s || s.classList.contains('gone')) return;
+  setTimeout(function(){ s.classList.add('gone'); }, Math.max(0, 1750 - (Date.now()-splashT0)));
+}
+window.addEventListener('load', hideSplash);
+setTimeout(hideSplash, 3400);
 </script>
 </body>
 </html>
