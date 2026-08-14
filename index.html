@@ -434,6 +434,7 @@ const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : 
 let tgUser = null;
 if(tg){
   tg.ready(); tg.expand();
+  try{ tg.BackButton.show(); }catch(e){}
   try{ tg.setHeaderColor && tg.setHeaderColor('#0B1120'); tg.setBackgroundColor && tg.setBackgroundColor('#0B1120'); }catch(e){}
   tgUser = tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user : null;
   tg.onEvent('backButtonClicked', onBack);
