@@ -672,6 +672,7 @@ const NAV = (function(){
   let w=0, minX=0, maxX=0, ir=null;
   let x=0, tx=0, v=0, targetX=0;
   let dragging=false, raf=0, startItem=null, target=null, ready=false;
+  let pressed=false, moving=false, sx0=0, offs=0;
 
   function slow(){ return document.body.classList.contains('reduce-motion'); }
   function measure(){
@@ -723,26 +724,33 @@ const NAV = (function(){
   inner.addEventListener('touchstart', function(e){
     if(!measure()) return;
     const t=e.touches[0];
-    dragging=true; v=0;
+    pressed=true; moving=false; dragging=false; sx0=t.clientX;
     startItem=nearest(t.clientX); target=null; mark(startItem);
-    x=clamp(t.clientX-ir.left-w/2);
-    kick();
+    targetX=xOf(startItem); v=0; kick();
   }, {passive:true});
 
   inner.addEventListener('touchmove', function(e){
-    if(!dragging) return;
+    if(!pressed) return;
     const t=e.touches[0];
-    x=clamp(t.clientX-ir.left-w/2);
+    if(!moving){
+      if(Math.abs(t.clientX-sx0) < 8) return;
+      moving=true; dragging=true;
+      offs = x - (t.clientX-ir.left-w/2);
+    }
+    x=clamp(t.clientX-ir.left-w/2+offs);
     mark(nearest(x+ir.left+w/2));
     kick();
     if(e.cancelable) e.preventDefault();
   }, {passive:false});
 
   function end(){
-    if(!dragging) return; dragging=false;
+    if(!pressed) return;
+    pressed=false;
+    const wasDrag=moving;
+    moving=false; dragging=false;
     if(target) targetX=xOf(target);
     v=0; kick();
-    if(target && target!==startItem){
+    if(wasDrag && target && target!==startItem){
       navDragged=true; go(target.dataset.tab);
       setTimeout(function(){ navDragged=false; }, 480);
     }
@@ -770,6 +778,7 @@ function liquidFx(host){
   let w=0, minX=0, maxX=0, ir=null;
   let x=0, tx=0, v=0, targetX=0;
   let dragging=false, raf=0, origin=null, target=null, ready=false;
+  let pressed=false, moving=false, sx0=0, offs=0;
 
   function slow(){ return document.body.classList.contains('reduce-motion'); }
   function measure(){
@@ -821,30 +830,34 @@ function liquidFx(host){
     if(!measure()) return;
     const t=e.touches[0];
     origin=host.querySelector('button.on');
-    dragging=true; v=0; target=null;
-    mark(nearest(t.clientX));
-    x=clamp(t.clientX-ir.left-w/2);
-    kick();
+    pressed=true; moving=false; dragging=false; sx0=t.clientX;
+    target=null; mark(nearest(t.clientX));
+    targetX=xOf(target); v=0; kick();
   }, {passive:true});
 
   host.addEventListener('touchmove', function(e){
-    if(!dragging) return;
+    if(!pressed) return;
     const t=e.touches[0];
-    x=clamp(t.clientX-ir.left-w/2);
+    if(!moving){
+      if(Math.abs(t.clientX-sx0) < 8) return;
+      moving=true; dragging=true;
+      offs = x - (t.clientX-ir.left-w/2);
+    }
+    x=clamp(t.clientX-ir.left-w/2+offs);
     mark(nearest(x+ir.left+w/2));
     kick();
     if(e.cancelable) e.preventDefault();
   }, {passive:false});
 
   function end(e){
-    if(!dragging) return; dragging=false;
-    if(raf){ cancelAnimationFrame(raf); raf=0; }
+    if(!pressed) return;
+    pressed=false; moving=false; dragging=false;
     if(target) targetX=xOf(target);
     v=0; kick();
     if(e && e.cancelable) e.preventDefault();
     if(target && target!==origin){
       const t=target;
-      setTimeout(function(){ t.click(); setTimeout(function(){ sync(true); }, 40); }, 300);
+      setTimeout(function(){ t.click(); setTimeout(function(){ sync(true); }, 40); }, 320);
     }
   }
   host.addEventListener('touchend', end);
