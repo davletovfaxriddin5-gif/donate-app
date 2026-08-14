@@ -426,6 +426,25 @@ body.light .set-profile{ box-shadow:0 2px 10px rgba(16,24,40,.05) }
 .nav-inner .nav-item.on svg{ transform:scale(1.08) }
 .nav-inner .nav-item:active{ transform:scale(.94) }
 .reduce-motion .nav-goo{ filter:none; -webkit-filter:none }
+/* === Tanlov tugmalari: suyuq kapsula === */
+.fx-host{ position:relative }
+.fx-goo{ position:absolute; left:0; right:0; top:4px; bottom:4px; z-index:0; opacity:0;
+  pointer-events:none; filter:url(#navgoo); -webkit-filter:url(#navgoo) }
+.fx-goo i{ position:absolute; left:0; top:0; bottom:0; width:0; display:block;
+  border-radius:999px; background:var(--blue) }
+.fx-goo .fx-tail{ opacity:.96 }
+.fx-rim{ position:absolute; left:0; top:4px; bottom:4px; width:0; border-radius:999px;
+  z-index:1; opacity:0; pointer-events:none;
+  border:1px solid rgba(255,255,255,.42);
+  background:linear-gradient(100deg, rgba(255,255,255,.34) 0%, rgba(255,255,255,.08) 36%, rgba(255,255,255,0) 62%);
+  background-size:220% 100%; background-position:50% 0;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.58),
+             inset 0 -7px 14px -9px rgba(255,255,255,.40),
+             0 8px 22px -10px rgba(59,77,240,.95);
+  transform-origin:center center; will-change:transform }
+.fx-host button{ position:relative; z-index:2 }
+.fx-host button.on{ background:transparent; border:0; box-shadow:none; color:#fff }
+.reduce-motion .fx-goo{ filter:none; -webkit-filter:none }
 </style>
 </head>
 <body>
@@ -734,6 +753,112 @@ const NAV = (function(){
   return { sync:sync };
 })();
 function syncNavPill(animate){ NAV.sync(animate); }
+
+/* --- Tanlov tugmalari uchun suyuq kapsula (til, bo'limlar) --- */
+function liquidFx(host){
+  if(!host || host._fx) return;
+  const btns=[].slice.call(host.querySelectorAll('button'));
+  if(btns.length<2) return;
+  host.classList.add('fx-host');
+  const goo=document.createElement('span'); goo.className='fx-goo';
+  goo.innerHTML='<i class="fx-blob"></i><i class="fx-tail"></i>';
+  const rim=document.createElement('span'); rim.className='fx-rim';
+  host.insertBefore(rim, host.firstChild);
+  host.insertBefore(goo, host.firstChild);
+  const blob=goo.firstElementChild, tail=goo.lastElementChild;
+
+  let w=0, minX=0, maxX=0, ir=null;
+  let x=0, tx=0, v=0, targetX=0;
+  let dragging=false, raf=0, origin=null, target=null, ready=false;
+
+  function slow(){ return document.body.classList.contains('reduce-motion'); }
+  function measure(){
+    if(!host.offsetWidth) return false;
+    ir=host.getBoundingClientRect();
+    const r0=btns[0].getBoundingClientRect(), rl=btns[btns.length-1].getBoundingClientRect();
+    if(!r0.width) return false;
+    w=r0.width; minX=r0.left-ir.left; maxX=rl.left-ir.left;
+    blob.style.width=w+'px'; tail.style.width=w+'px'; rim.style.width=w+'px';
+    return true;
+  }
+  function xOf(el){ return el.getBoundingClientRect().left-ir.left; }
+  function clamp(px){ return Math.max(minX, Math.min(maxX, px)); }
+  function paint(){
+    const d=x-tx, st=Math.min(Math.abs(d)/Math.max(w,1), 1);
+    blob.style.transform='translateX('+x.toFixed(1)+'px)';
+    tail.style.transform='translateX('+tx.toFixed(1)+'px) scale('+(0.80+st*0.13).toFixed(3)+')';
+    rim.style.transform='translateX('+x.toFixed(1)+'px) scaleX('+(1+st*0.24).toFixed(3)+') scaleY('+(1-st*0.13).toFixed(3)+')';
+    rim.style.backgroundPosition=(50-d*1.8).toFixed(1)+'% 0%';
+    goo.style.opacity='1'; rim.style.opacity='1';
+  }
+  function loop(){
+    raf=0;
+    if(!dragging){
+      v+=(targetX-x)*0.17; v*=0.76; x+=v;
+      if(Math.abs(v)<0.12 && Math.abs(targetX-x)<0.4){ x=targetX; v=0; }
+    }
+    tx+=(x-tx)*0.30;
+    paint();
+    if(!dragging && v===0 && Math.abs(x-tx)<0.4){ tx=x; paint(); return; }
+    raf=requestAnimationFrame(loop);
+  }
+  function kick(){ if(!raf) raf=requestAnimationFrame(loop); }
+  function nearest(cx){
+    let b=btns[0], bd=1e9;
+    btns.forEach(function(n){ const r=n.getBoundingClientRect(); const dd=Math.abs(r.left+r.width/2-cx); if(dd<bd){ bd=dd; b=n; } });
+    return b;
+  }
+  function mark(el){ if(el===target) return; target=el; haptic(); btns.forEach(function(n){ n.classList.toggle('on', n===el); }); }
+  function sync(animate){
+    if(!measure()) return;
+    const on=host.querySelector('button.on'); if(!on) return;
+    target=on; targetX=xOf(on);
+    if(animate===false || !ready || slow()){ x=targetX; tx=targetX; v=0; ready=true; paint(); return; }
+    ready=true; kick();
+  }
+
+  host.addEventListener('touchstart', function(e){
+    if(!measure()) return;
+    const t=e.touches[0];
+    origin=host.querySelector('button.on');
+    dragging=true; v=0; target=null;
+    mark(nearest(t.clientX));
+    x=clamp(t.clientX-ir.left-w/2);
+    kick();
+  }, {passive:true});
+
+  host.addEventListener('touchmove', function(e){
+    if(!dragging) return;
+    const t=e.touches[0];
+    x=clamp(t.clientX-ir.left-w/2);
+    mark(nearest(x+ir.left+w/2));
+    kick();
+    if(e.cancelable) e.preventDefault();
+  }, {passive:false});
+
+  function end(e){
+    if(!dragging) return; dragging=false;
+    if(raf){ cancelAnimationFrame(raf); raf=0; }
+    if(target) targetX=xOf(target);
+    v=0; kick();
+    if(e && e.cancelable) e.preventDefault();
+    if(target && target!==origin){
+      const t=target;
+      setTimeout(function(){ t.click(); setTimeout(function(){ sync(true); }, 40); }, 300);
+    }
+  }
+  host.addEventListener('touchend', end);
+  host.addEventListener('touchcancel', end);
+
+  host._fx={ sync:sync };
+  sync(false);
+}
+function initFx(){
+  ['.lang-toggle', '.seg'].forEach(function(sel){
+    const h=document.querySelector(sel); if(h) liquidFx(h);
+  });
+}
+
 function rent(){ haptic(); toast("Ijaraga bo'limi tez orada 🔜"); }
 
 function profileRow(){
@@ -1154,10 +1279,11 @@ function toast(msg){ const el=document.getElementById('toast'); el.textContent=t
 
 go('home');
 syncNavPill(false);
+initFx();
 try{ if(localStorage.getItem('mt_theme')==='light') document.body.classList.add('light'); }catch(e){}
 applyTheme();
 let langTimer=null;
-function scheduleLang(){ applyLang(); }
+function scheduleLang(){ applyLang(); initFx(); }
 try{ new MutationObserver(()=>scheduleLang()).observe(document.getElementById('app'), {childList:true, subtree:true}); }catch(e){}
 applyLang();
 loadPhone();
