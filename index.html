@@ -276,7 +276,7 @@ body{ font-size:13px; font-weight:400; letter-spacing:-.1px }
 .region-tabs .rt{ font-size:12.5px; font-weight:500 }
 
 .pkg{ padding:12px 10px; gap:8px }
-.pkg .pic .em{ font-size:20px }
+.pkg .pic .pim{ width:36px; height:36px; object-fit:contain; display:block }
 .pkg .info{ display:flex; flex-direction:column; min-width:0 }
 .pkg .info .a{ font-size:14px; font-weight:600; letter-spacing:-.2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
 .pkg .info .a.small{ font-size:11.5px; max-width:100% }
@@ -577,7 +577,7 @@ function renderGame(){
     ${g.packages.map((p,i)=>`
       <button class="pkg ${p.txt?'txt-only':''}" data-i="${i}" onclick="pickPkg(${i})">
         ${p.hit?`<span class="hit">HIT</span>`:''}
-        <span class="pic"><span class="em">${p.txt?'🎁':(p.c==='💎'?'💎':p.c==='⭐'?'⭐':'🪙')}</span>${p.x2?`<span class="x2">x2</span>`:''}</span>
+        <span class="pic"><span class="em">${p.im?'<img class="pim" src="'+p.im+'">':p.txt?'🎁':(p.c==='💎'?'💎':p.c==='⭐'?'⭐':'🪙')}</span>${p.x2?`<span class="x2">x2</span>`:''}</span>
         <span class="info"><span class="a ${p.txt?'small':''}">${p.a}${p.c&&p.c.length<=2?' '+p.c:''}</span><span class="p">${fmt(p.p)} so'm</span></span>
       </button>`).join('')}
   </div>
