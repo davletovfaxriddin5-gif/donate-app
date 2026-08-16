@@ -736,6 +736,7 @@ function go(v){
   else if(v==='history') renderHistory();
   else if(v==='settings'){ renderSettings(); loadPhone(); }
   else if(v==='topup'){ topMethod=null; renderTopup(); }
+  if(v==='home'||v==='settings') loadBalance();
   syncNavPill(true);
 }
 function onBack(){ haptic(); if(view==='game') go('home'); else if(view==='topup') go('home'); else go('home'); }
@@ -1142,13 +1143,22 @@ function buy(){
     tgUser: tgUser?{id:tgUser.id,username:tgUser.username,name:tgUser.first_name}:null,
     status:'wait', createdAt:new Date().toISOString() };
   saveOrder(order); notify('success');
-fetch('/api/order', {
+fetch(VBASE + '/order', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ order: order, initData: (tg && tg.initData) || '' })
   }).then(function(r){ return r.json(); }).then(function(d){
-    if(d && d.ok){ toast('✅ Buyurtma qabul qilindi'); setTimeout(function(){ go('history'); }, 700); }
-    else { notify('error'); toast("⚠️ Xato: " + ((d && d.error) || 'yuborilmadi')); }
+    if(d && d.ok){
+      if(typeof d.balance === 'number') balance = d.balance;
+      toast('✅ Buyurtma qabul qilindi');
+      setTimeout(function(){ go('history'); }, 700);
+    } else if(d && d.error === 'balance'){
+      if(typeof d.balance === 'number') balance = d.balance;
+      notify('error');
+      toast('❌ Balans yetarli emas — ' + fmt(d.balance||0) + " so'm bor");
+    } else {
+      notify('error'); toast("⚠️ Xato: " + ((d && d.error) || 'yuborilmadi'));
+    }
   }).catch(function(){ notify('error'); toast("⚠️ Aloqa yo'q"); });  
 }
 
@@ -1280,6 +1290,17 @@ function setPhoneText(txt){
     chip.textContent = '📱 ' + p;
   }
 }
+function loadBalance(){
+  const uid = tgUser && tgUser.id ? tgUser.id : '';
+  if(!uid) return;
+  fetch(VBASE + '/balance?id=' + uid).then(function(r){ return r.json(); }).then(function(d){
+    if(d && d.ok && typeof d.balance === 'number' && d.balance !== balance){
+      balance = d.balance;
+      if(view === 'home') renderHome();
+      else if(view === 'settings'){ renderSettings(); loadPhone(); }
+    }
+  }).catch(function(){});
+}
 function loadPhone(){
   const uid = tgUser && tgUser.id ? tgUser.id : '';
   if(!uid) return;
@@ -1380,9 +1401,10 @@ function renderTopup(){
     <button class="big-btn" style="margin:14px 0 0;justify-content:center;background:var(--card-2)" onclick="copyCard('${num}')">Nusxalash</button>
   </div>
   <div class="form-card">
-    <div class="lbl">QANCHA O'TKAZDINGIZ (${cur})</div>
+    <div class="lbl">QANCHA TO'LDIRMOQCHISIZ (${cur})</div>
     <div class="inp-wrap"><input class="inp" id="topAmount" inputmode="numeric" placeholder="Masalan: 50000"></div>
-    <button class="check-btn" style="width:100%;margin-top:14px;padding:13px" onclick="sendTopup()">To'ladim</button>
+    <button class="check-btn" id="topBtn" style="width:100%;margin-top:14px;padding:13px" onclick="sendTopup()">Davom etish</button>
+    <div id="payBox" class="id-res"></div>
   </div>`;
 }
 function pickPay(m){ haptic(); topMethod=m; renderTopup(); }
@@ -1390,20 +1412,39 @@ function copyCard(n){ haptic(); try{ navigator.clipboard.writeText(String(n).rep
 function sendTopup(){
   const el=document.getElementById('topAmount');
   const amt=Number(((el&&el.value)||'').replace(/\D/g,''));
-  if(!amt){ notify('error'); toast('Summani kiriting'); return; }
-  const isUz = topMethod==='uz';
-  const bank = isUz ? CARD_BANK : CARD2_BANK;
-  const cur = isUz ? "so'm" : "rubl";
-  const order={ id:'TP'+Date.now().toString().slice(-8), game:"HISOB TO'LDIRISH", package:fmt(amt)+' '+cur,
-    price:amt, details:{ bank:bank, summa:fmt(amt)+' '+cur }, region:null, status:'wait', createdAt:new Date().toISOString() };
-  fetch('/api/order', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ order: order, initData: (tg && tg.initData) || '' })
+  if(!amt || amt<1000){ notify('error'); toast("Kamida 1000 kiriting"); return; }
+  const cur = topMethod==='uz' ? "so'm" : "rubl";
+  const bank = topMethod==='uz' ? CARD_BANK : CARD2_BANK;
+  const btn = document.getElementById('topBtn');
+  const box = document.getElementById('payBox');
+  if(btn){ btn.disabled = true; btn.textContent = '…'; }
+  if(box){ box.className='id-res wait'; box.textContent='⏳ Tayyorlanmoqda…'; }
+
+  fetch(VBASE + '/topup', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ amount: amt, method: bank, initData: (tg && tg.initData) || '' })
   }).then(function(r){ return r.json(); }).then(function(d){
-    if(d && d.ok){ notify('success'); toast("✅ Yuborildi, tez orada tasdiqlanadi"); if(el) el.value=''; }
-    else { notify('error'); toast("⚠️ Xato: " + ((d && d.error) || 'yuborilmadi')); }
-  }).catch(function(){ notify('error'); toast("⚠️ Aloqa yo'q"); });
+    if(btn){ btn.disabled = false; btn.textContent = 'Davom etish'; }
+    if(d && d.ok){
+      notify('success');
+      if(box){
+        box.className = 'id-res ok';
+        box.innerHTML = "Kartaga <b>aynan " + fmt(d.pay) + " " + cur + "</b> o'tkazing.<br>" +
+          "<span style=\"color:var(--dim);font-weight:500\">Summa aynan mos kelishi kerak — to'lovingizni shu orqali topamiz. " +
+          "Tasdiqlangach balans o'zi to'ladi.</span>";
+      }
+      if(el) el.value='';
+    } else {
+      notify('error');
+      const m = { amount:"Summa noto'g'ri", pending:"Sizda 3 ta kutilayotgan so'rov bor",
+                  auth:"Telegram orqali oching", busy:"Hozir band, keyinroq urinib ko'ring" };
+      if(box){ box.className='id-res bad'; box.textContent = "❌ " + (m[d && d.error] || "Yuborilmadi"); }
+    }
+  }).catch(function(){
+    if(btn){ btn.disabled = false; btn.textContent = 'Davom etish'; }
+    notify('error');
+    if(box){ box.className='id-res bad'; box.textContent = "⚠️ Aloqa yo'q"; }
+  });
 }
 function payMethod(m){ haptic('medium'); toast(m+' — tez orada ulanadi 💳'); }
 
@@ -1421,6 +1462,7 @@ function scheduleLang(){ applyLang(); initFx(); }
 try{ new MutationObserver(()=>scheduleLang()).observe(document.getElementById('app'), {childList:true, subtree:true}); }catch(e){}
 applyLang();
 loadPhone();
+loadBalance();
 
 const splashT0 = Date.now();
 function hideSplash(){
