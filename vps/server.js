@@ -131,6 +131,29 @@ const CATALOG = {
   }}
 };
 
+/* MLBB RU serveri \u2014 boshqa paketlar, boshqa narxlar */
+const MLBB_RU = {
+  "35_diamonds":11000, "55_diamonds":15000, "165_diamonds":42000,
+  "275_diamonds":75000, "565_diamonds":145000, "1155_diamonds":282000,
+  "1765_diamonds":420000, "2975_diamonds":699000, "6000_diamonds":1392000,
+  "super_value_pass":22000, "weekly_pass":28400
+};
+
+function isRu(region){
+  const r = String(region||"").toLowerCase();
+  return r.indexOf("russ") > -1 || r === "ru";
+}
+
+/* O'yin + paket + akkaunt regioni -> qaysi kategoriya va qaysi narx */
+function resolveOffer(game, oid, region){
+  const cfg = CATALOG[game];
+  if(!cfg) return null;
+  let cat = cfg.cat, items = cfg.items;
+  if(game === "mlbb" && isRu(region)){ cat = "mobile_legends_ru"; items = MLBB_RU; }
+  if(items[oid] == null) return null;
+  return { cat: cat, price: items[oid], srv: !!cfg.srv };
+}
+
 /* MLBB Global: bu paketlar MY/SG/PH/ID/RU akkauntlarida ishlamaydi */
 const MLBB_LIMITED = ["78_8_diamonds","156_16_diamonds","234_23_diamonds","625_81_diamonds",
   "1860_335_diamonds","3099_589_diamonds","4649_883_diamonds","7740_1548_diamonds","weekly_pass"];
@@ -283,22 +306,24 @@ app.post("/order", async (req,res)=>{
     const o    = b.order || {};
     const game = gameKey(o);
     const oid  = String(o.oid||"");
-    const cfg  = CATALOG[game];
+    const acc  = String(o.accRegion||"");
+    const off  = resolveOffer(game, oid, acc);
 
     /* narxni server belgilaydi; katalogda yo'q o'yinlar (TG Stars/Premium) qo'lda qoladi */
-    const auto = !!(cfg && cfg.items[oid] != null);
-    const price = auto ? cfg.items[oid] : Math.round(Number(o.price) || 0);
+    const auto = !!off;
+    const price = auto ? off.price : Math.round(Number(o.price) || 0);
     if(!(price > 0)) return res.json({ ok:false, error:"price" });
 
     const fields = fzrFields(game, o);
     if(auto){
       if(!fields.player_id) return res.json({ ok:false, error:"fields" });
-      if(cfg.srv && !fields.server_id){
+      if(off.srv && !fields.server_id){
         console.log("ORDER: server_id topilmadi, kelgan obyekt:", JSON.stringify(o));
         return res.json({ ok:false, error:"fields" });
       }
-      if(game === "mlbb"){
-        const reg = String(o.accRegion||"").toLowerCase();
+      /* Cheklovlar faqat Global kategoriyaga tegishli; RU kategoriyasida hammasi ishlaydi */
+      if(game === "mlbb" && off.cat === "mobile_legends_global"){
+        const reg = acc.toLowerCase();
         if(MLBB_BLOCKED_REG.indexOf(reg) >= 0) return res.json({ ok:false, error:"region" });
         if(MLBB_LIMITED.indexOf(oid) >= 0 && MLBB_LIMITED_REG.indexOf(reg) >= 0)
           return res.json({ ok:false, error:"region" });
@@ -317,7 +342,7 @@ app.post("/order", async (req,res)=>{
       package: String(o.package||""), price: price,
       details: o.details || {}, region: o.region || null,
       nick: String(o.nick||""), accRegion: String(o.accRegion||""),
-      oid: oid, cat: auto ? cfg.cat : "", auto: auto,
+      oid: oid, cat: auto ? off.cat : "", auto: auto,
       fzr: "", status: "wait", at: new Date().toISOString()
     };
     u.orders.unshift(rec); u.orders = u.orders.slice(0,100);
