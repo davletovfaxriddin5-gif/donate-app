@@ -1178,7 +1178,6 @@ fetch(VBASE + '/order', {
 }
 
 function saveOrder(o){ try{ const a=getOrders(); a.unshift(o); localStorage.setItem('mt_orders', JSON.stringify(a.slice(0,60))); }catch(e){} }
-var srvOrders = null, histTimer = null, histAt = 0;
 var srvOrders = null, srvTopups = null, histTimer = null, histAt = 0;
 function getTopups(){ return srvTopups || []; }
 function getOrders(){ if(srvOrders) return srvOrders; try{ return JSON.parse(localStorage.getItem('mt_orders')||'[]'); }catch(e){ return []; } }
@@ -1188,7 +1187,6 @@ function loadOrders(cb){
   fetch(VBASE+"/orders?id="+uid+"&t="+Date.now())
    .then(function(r){ return r.json(); })
    .then(function(d){
-     if(d && d.ok && Array.isArray(d.orders)){
      if(d && Array.isArray(d.topups)) srvTopups = d.topups;
      if(d && d.ok && Array.isArray(d.orders)){
        const loc = getOrders(), map = {};
