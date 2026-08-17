@@ -547,6 +547,12 @@ app.post("/webhook", (req,res)=>{
       return;
     }
     if(text.indexOf("/start") === 0){
+      const dbs = load();
+      const us = dbs[fromId];
+      if(us && us.phone){
+        send(fromId, "✅ Telefon raqamingiz allaqachon saqlangan: "+us.phone+"\n\nIlovaga qaytish uchun pastdagi Open tugmasini bosing.", { remove_keyboard: true });
+        return;
+      }
       send(fromId, "📱 Telefon raqamingizni ulashish uchun pastdagi tugmani bosing.", {
         keyboard: [[{ text: "📱 Raqamni ulashish", request_contact: true }]],
         resize_keyboard: true,
