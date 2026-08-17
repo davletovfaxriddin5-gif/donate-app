@@ -1268,7 +1268,7 @@ function renderSettings(){
     </button>
     <button class="svc" onclick="toggleTheme(this)">
       <span class="ic" style="background:#C9902A"><svg viewBox="0 0 24 24"><path d="M21 12.8A8.5 8.5 0 1 1 11.2 3a6.6 6.6 0 0 0 9.8 9.8z"/></svg></span>
-      <span class="txt"><div class="t">Tungi rejim</div><div class="s"><span class="thm-dk">Yorug' rejimga o'tish</span><span class="thm-lt">Tungi rejimga o'tish</span></div></span>
+      <span class="txt"><div class="t">Tungi rejim</div><div class="s">${document.body.classList.contains('light')?"Tungi rejimga o'tish":"Yorug' rejimga o'tish"}</div></span>
       <span class="switch ${document.body.classList.contains('light')?'on':''}"></span>
     </button>
   </div>
@@ -1381,6 +1381,7 @@ function toggleTheme(el){
   const on = document.body.classList.toggle('light');
   try{ localStorage.setItem('mt_theme', on ? 'light' : 'dark'); }catch(e){}
   const sw = el.querySelector('.switch'); if(sw) sw.classList.toggle('on', on);
+  const lb = el.querySelector('.s'); if(lb) lb.textContent = on ? "Tungi rejimga o'tish" : "Yorug' rejimga o'tish";
   applyTheme();
 }
 let topMethod = null;
