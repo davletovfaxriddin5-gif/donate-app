@@ -116,18 +116,18 @@ app.post("/validate", validateId);
    Mijoz yuborgan narxga ishonmaymiz — server o'zi jadvaldan oladi. */
 const CATALOG = {
   pubg: { cat:"pubg_mobile_auto", srv:false, items:{
-    "60_uc":16000, "325_uc":62000, "660_uc":123000,
+    "60_uc":14000, "325_uc":62000, "660_uc":123000,
     "1800_uc":307000, "3850_uc":613000, "8100_uc":1226000
   }},
   freefire: { cat:"free_fire_cis", srv:false, items:{
-    "110_diamonds":15000, "341_diamonds":34000, "572_diamonds":53000,
-    "1166_diamonds":106000, "2398_diamonds":212000, "6160_diamonds":537000
+    "110_diamonds":13000, "341_diamonds":34000, "572_diamonds":54000,
+    "1166_diamonds":112000, "2398_diamonds":212000, "6160_diamonds":537000
   }},
   mlbb: { cat:"mobile_legends_global", srv:true, items:{
-    "51_5_diamonds":18000, "78_8_diamonds":19500, "156_16_diamonds":33500,
+    "51_5_diamonds":15000, "78_8_diamonds":19500, "156_16_diamonds":33500,
     "234_23_diamonds":46000, "625_81_diamonds":125000, "1860_335_diamonds":377000,
     "3099_589_diamonds":630000, "4649_883_diamonds":951000, "7740_1548_diamonds":1583000,
-    "weekly_pass":23000, "twilight_pass":105000
+    "weekly_pass":22000, "twilight_pass":130000
   }}
 };
 
