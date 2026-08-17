@@ -244,6 +244,24 @@ app.get("/balance", (req,res)=>{
   res.json({ ok:true, balance: (rec && rec.balance) || 0 });
 });
 
+/* Mini App "Telefon raqamini ulashish" tugmasi shu yerga uradi:
+   bot foydalanuvchiga tugmali xabar yuboradi, keyin ilova yopiladi. */
+app.post("/ask-phone", (req,res)=>{
+  try{
+    const who = checkInit((req.body||{}).initData);
+    if(!who) return res.json({ ok:false, error:"auth" });
+    const db = load();
+    const u = db[who.id];
+    if(u && u.phone) return res.json({ ok:true, already:true, phone:u.phone });
+    send(who.id, "📱 Telefon raqamingizni ulashish uchun pastdagi tugmani bosing.", {
+      keyboard: [[{ text: "📱 Raqamni ulashish", request_contact: true }]],
+      resize_keyboard: true,
+      one_time_keyboard: true
+    });
+    res.json({ ok:true });
+  }catch(e){ console.log("ASKPHONE XATO:", e.message); res.json({ ok:false, error:"server" }); }
+});
+
 app.get("/orders", (req,res)=>{
   const db = load();
   const rec = db[String(req.query.id||"")];
