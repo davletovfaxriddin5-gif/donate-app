@@ -622,6 +622,7 @@ const RU = {
   "Kutilmoqda":"В ожидании","Bekor qilingan":"Отменено","Pul qaytarildi":"Возврат средств","Yuborilmoqda":"Отправляется","Tungi rejimga o'tish":"Переключиться на тёмный режим","Statusni yangilash":"Обновить статус",
   "To'lovni amalga oshiring":"Произведите оплату","AYNAN SHU SUMMANI O'TKAZING":"ПЕРЕВЕДИТЕ РОВНО ЭТУ СУММУ","Summani nusxalash":"Скопировать сумму","Karta raqamini nusxalash":"Скопировать номер карты","To'ladim":"Я оплатил","Bekor qilish":"Отменить",
   "Qancha to'ldirmoqchisiz?":"На какую сумму пополнить?","Vaqt tugadi":"Время истекло","Nusxalandi":"Скопировано","Bekor qilindi":"Отменено","Qabul qilindi — admin tekshiradi":"Принято — админ проверит",
+  "Davom etish":"Продолжить","⏳ Tayyorlanmoqda…":"⏳ Подготовка…",
   "Summa aynan mos kelishi shart — to'lovingizni shu raqam orqali topamiz.":"Сумма должна совпадать точно — по ней мы найдём ваш платёж.","Ko'p yoki kam yuborsangiz, pulni faqat admin orqali qaytarib olasiz.":"Если отправите больше или меньше, вернуть деньги можно только через админа.","To'lagandan keyin pastdagi tugmani bosing, tasdiqlangach balans o'zi to'ladi.":"После оплаты нажмите кнопку ниже — после подтверждения баланс пополнится автоматически.",
   "Hozircha bo'sh":"Пока пусто","Buyurtma bergach bu yerda ko'rinadi.":"После заказа он появится здесь.",
   "O'yinchi ID":"ID игрока","Holat":"Статус",
@@ -1522,12 +1523,12 @@ function sendTopup(){
   const btn = document.getElementById('topBtn');
   const box = document.getElementById('payBox');
   if(btn){ btn.disabled = true; btn.textContent = '…'; }
-  if(box){ box.className='id-res wait'; box.textContent='⏳ Tayyorlanmoqda…'; }
+  if(box){ box.className='id-res wait'; box.textContent=tr('⏳ Tayyorlanmoqda…'); }
   fetch(VBASE + '/topup', {
     method:'POST', headers:{'Content-Type':'application/json'},
     body: JSON.stringify({ amount: amt, method: bank, initData: (tg && tg.initData) || '' })
   }).then(function(r){ return r.json(); }).then(function(d){
-    if(btn){ btn.disabled = false; btn.textContent = 'Davom etish'; }
+    if(btn){ btn.disabled = false; btn.textContent = tr('Davom etish'); }
     if(d && d.ok){
       notify('success');
       topPend = { id: d.id, pay: d.pay, m: topMethod, until: Date.now() + 600000 };
