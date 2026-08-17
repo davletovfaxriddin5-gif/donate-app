@@ -1540,7 +1540,7 @@ function sendTopup(){
       if(box){ box.className='id-res bad'; box.textContent = "❌ " + (m[d && d.error] || "Yuborilmadi"); }
     }
   }).catch(function(){
-    if(btn){ btn.disabled = false; btn.textContent = 'Davom etish'; }
+        if(btn){ btn.disabled = false; btn.textContent = tr('Davom etish'); }
     notify('error');
     if(box){ box.className='id-res bad'; box.textContent = "⚠️ Aloqa yo'q"; }
   });
