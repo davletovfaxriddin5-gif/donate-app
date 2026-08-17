@@ -137,11 +137,27 @@ const MLBB_LIMITED = ["78_8_diamonds","156_16_diamonds","234_23_diamonds","625_8
 const MLBB_LIMITED_REG = ["russia","indonesia","malaysia","singapore","philippines"];
 const MLBB_BLOCKED_REG = ["indonesia","brazil"];
 
+/* Ilova o'yin KALITINI o.gameId da yuboradi ("mlbb"), o.game esa ko'rsatish uchun ("mobile legends").
+   O'yinchi ID va server esa o.details ichida (playerId / serverId). */
+const GAME_ALIAS = {
+  pubg:"pubg", pubgmobile:"pubg", pubgm:"pubg",
+  freefire:"freefire", ff:"freefire", garenafreefire:"freefire",
+  mlbb:"mlbb", mobilelegends:"mlbb", mobilelegend:"mlbb", ml:"mlbb"
+};
+function gameKey(o){
+  const cand = [o.gameId, o.game, o.key, o.g];
+  for(let i = 0; i < cand.length; i++){
+    const s = String(cand[i]||"").toLowerCase().replace(/[^a-z]/g,"");
+    if(GAME_ALIAS[s]) return GAME_ALIAS[s];
+  }
+  return "";
+}
+
 function fzrFields(game, o){
   const d = o.details || {};
-  const pid = String(o.gameId || o.playerId || d.playerId || d.player_id || d.id || "").trim();
-  const srv = String(o.serverId || o.zoneId || d.serverId || d.server_id ||
-                     d.zoneId || d.zone_id || d.server || "").trim();
+  const pid = String(d.playerId || d.player_id || d.uid || d.id || o.playerId || "").trim();
+  const srv = String(d.serverId || d.server_id || d.zoneId || d.zone_id ||
+                     d.server || d.zone || o.serverId || o.zoneId || "").trim();
   const f = {};
   if(pid) f.player_id = pid;
   if(game === "mlbb" && srv) f.server_id = srv;
@@ -241,7 +257,7 @@ app.post("/order", async (req,res)=>{
     if(!who) return res.json({ ok:false, error:"auth" });
     const uid  = who.id;
     const o    = b.order || {};
-    const game = String(o.game||"").toLowerCase();
+    const game = gameKey(o);
     const oid  = String(o.oid||"");
     const cfg  = CATALOG[game];
 
@@ -250,7 +266,7 @@ app.post("/order", async (req,res)=>{
     const price = auto ? cfg.items[oid] : Math.round(Number(o.price) || 0);
     if(!(price > 0)) return res.json({ ok:false, error:"price" });
 
-    const fields = auto ? fzrFields(game, o) : {};
+    const fields = fzrFields(game, o);
     if(auto){
       if(!fields.player_id) return res.json({ ok:false, error:"fields" });
       if(cfg.srv && !fields.server_id){
@@ -272,7 +288,8 @@ app.post("/order", async (req,res)=>{
     u.balance -= price;
     const rec = {
       id: String(o.id || ("MT"+Date.now().toString().slice(-8))),
-      game: game, gameId: String(o.gameId||""),
+      game: String(o.game||""), gkey: game, gameId: String(o.gameId||""),
+      pid: fields.player_id || "", srv: fields.server_id || "",
       package: String(o.package||""), price: price,
       details: o.details || {}, region: o.region || null,
       nick: String(o.nick||""), accRegion: String(o.accRegion||""),
@@ -338,7 +355,7 @@ async function checkOne(uid, ordId){
   if(s === "completed"){
     r.status = "done"; r.doneAt = new Date().toISOString();
     save(db);
-    send(uid, "✅ "+r.package+" hisobingizga tushdi!\nID: "+r.gameId);
+    send(uid, "✅ "+r.package+" hisobingizga tushdi!\nID: "+(r.pid || r.gameId || ""));
     return;
   }
   if(s === "failed" || s === "cancelled" || s === "canceled" || s === "refunded"){
