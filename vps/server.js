@@ -1,3 +1,18 @@
+/* ---------- .env dan o'qish (VPS qayta yuklansa ham kalitlar yo'qolmasin) ---------- */
+try{
+  const _t = require("fs").readFileSync("/root/donate-app/.env","utf8");
+  _t.split("\n").forEach(function(line){
+    const s = line.trim();
+    if(!s || s[0] === "#") return;
+    const i = s.indexOf("=");
+    if(i < 1) return;
+    const k = s.slice(0,i).trim();
+    let v = s.slice(i+1).trim();
+    if(v.length > 1 && ((v[0] === '"' && v.slice(-1) === '"') || (v[0] === "'" && v.slice(-1) === "'"))) v = v.slice(1,-1);
+    if(!process.env[k]) process.env[k] = v;
+  });
+}catch(e){}
+
 try{ require("dns").setDefaultResultOrder("ipv4first"); }catch(e){}
 const express = require("express");
 const fs = require("fs");
@@ -96,6 +111,77 @@ async function validateId(req,res){
 app.get("/validate", validateId);
 app.post("/validate", validateId);
 
+/* ---------- FazerCards: avtomatik yetkazish ---------- */
+/* DIQQAT: narxlar shu yerda turadi. index.html dagi narxlar bilan BIR XIL bo'lishi shart.
+   Mijoz yuborgan narxga ishonmaymiz — server o'zi jadvaldan oladi. */
+const CATALOG = {
+  pubg: { cat:"pubg_mobile_auto", srv:false, items:{
+    "60_uc":16000, "325_uc":62000, "660_uc":123000,
+    "1800_uc":307000, "3850_uc":613000, "8100_uc":1226000
+  }},
+  freefire: { cat:"free_fire_cis", srv:false, items:{
+    "110_diamonds":15000, "341_diamonds":34000, "572_diamonds":53000,
+    "1166_diamonds":106000, "2398_diamonds":212000, "6160_diamonds":537000
+  }},
+  mlbb: { cat:"mobile_legends_global", srv:true, items:{
+    "51_5_diamonds":18000, "78_8_diamonds":19500, "156_16_diamonds":33500,
+    "234_23_diamonds":46000, "625_81_diamonds":125000, "1860_335_diamonds":377000,
+    "3099_589_diamonds":630000, "4649_883_diamonds":951000, "7740_1548_diamonds":1583000,
+    "weekly_pass":23000, "twilight_pass":105000
+  }}
+};
+
+/* MLBB Global: bu paketlar MY/SG/PH/ID/RU akkauntlarida ishlamaydi */
+const MLBB_LIMITED = ["78_8_diamonds","156_16_diamonds","234_23_diamonds","625_81_diamonds",
+  "1860_335_diamonds","3099_589_diamonds","4649_883_diamonds","7740_1548_diamonds","weekly_pass"];
+const MLBB_LIMITED_REG = ["russia","indonesia","malaysia","singapore","philippines"];
+const MLBB_BLOCKED_REG = ["indonesia","brazil"];
+
+function fzrFields(game, o){
+  const d = o.details || {};
+  const pid = String(o.gameId || o.playerId || d.playerId || d.player_id || d.id || "").trim();
+  const srv = String(o.serverId || o.zoneId || d.serverId || d.server_id ||
+                     d.zoneId || d.zone_id || d.server || "").trim();
+  const f = {};
+  if(pid) f.player_id = pid;
+  if(game === "mlbb" && srv) f.server_id = srv;
+  return f;
+}
+
+async function fzrCreate(cat, oid, fields){
+  const ac = new AbortController();
+  const tm = setTimeout(()=>ac.abort(), 25000);
+  try{
+    const r = await fetch(FZR_BASE+"/api/v2/topups/order", {
+      method:"POST",
+      headers:{ "Content-Type":"application/json", "X-API-Key": FZR_KEY },
+      body: JSON.stringify({ category_id: cat, offer_id: oid, fields: fields }),
+      signal: ac.signal
+    });
+    const j = await r.json().catch(()=>({}));
+    if(r.ok && j.ok && j.order && j.order.id) return { ok:true, id:String(j.order.id) };
+    console.log("FZR order rad:", r.status, JSON.stringify(j));
+    return { ok:false, why: String(j.error || ("HTTP "+r.status)) };
+  }catch(e){
+    console.log("FZR order xato:", e.message);
+    return { ok:false, why:"network" };
+  } finally { clearTimeout(tm); }
+}
+
+async function fzrStatus(id){
+  const ac = new AbortController();
+  const tm = setTimeout(()=>ac.abort(), 15000);
+  try{
+    const r = await fetch(FZR_BASE+"/api/v2/orders/"+encodeURIComponent(id), {
+      headers:{ "X-API-Key": FZR_KEY }, signal: ac.signal
+    });
+    const j = await r.json().catch(()=>({}));
+    if(!r.ok || !j.ok || !j.order) return null;
+    return j.order;
+  }catch(e){ return null; }
+  finally { clearTimeout(tm); }
+}
+
 /* ---------- Balans, buyurtma va to'ldirish ---------- */
 const crypto = require("crypto");
 const ADMIN_ID = String(process.env.ADMIN_ID || "");
@@ -148,15 +234,36 @@ app.get("/orders", (req,res)=>{
   res.json({ ok:true, orders:(rec && rec.orders) || [], topups:(rec && rec.topups) || [] });
 });
 
-app.post("/order", (req,res)=>{
+app.post("/order", async (req,res)=>{
   try{
     const b = req.body || {};
     const who = checkInit(b.initData);
     if(!who) return res.json({ ok:false, error:"auth" });
-    const uid = who.id;
-    const o = b.order || {};
-    const price = Math.round(Number(o.price) || 0);
+    const uid  = who.id;
+    const o    = b.order || {};
+    const game = String(o.game||"").toLowerCase();
+    const oid  = String(o.oid||"");
+    const cfg  = CATALOG[game];
+
+    /* narxni server belgilaydi; katalogda yo'q o'yinlar (TG Stars/Premium) qo'lda qoladi */
+    const auto = !!(cfg && cfg.items[oid] != null);
+    const price = auto ? cfg.items[oid] : Math.round(Number(o.price) || 0);
     if(!(price > 0)) return res.json({ ok:false, error:"price" });
+
+    const fields = auto ? fzrFields(game, o) : {};
+    if(auto){
+      if(!fields.player_id) return res.json({ ok:false, error:"fields" });
+      if(cfg.srv && !fields.server_id){
+        console.log("ORDER: server_id topilmadi, kelgan obyekt:", JSON.stringify(o));
+        return res.json({ ok:false, error:"fields" });
+      }
+      if(game === "mlbb"){
+        const reg = String(o.accRegion||"").toLowerCase();
+        if(MLBB_BLOCKED_REG.indexOf(reg) >= 0) return res.json({ ok:false, error:"region" });
+        if(MLBB_LIMITED.indexOf(oid) >= 0 && MLBB_LIMITED_REG.indexOf(reg) >= 0)
+          return res.json({ ok:false, error:"region" });
+      }
+    }
 
     const db = load();
     const u = urec(db, uid);
@@ -165,25 +272,118 @@ app.post("/order", (req,res)=>{
     u.balance -= price;
     const rec = {
       id: String(o.id || ("MT"+Date.now().toString().slice(-8))),
-      game: String(o.game||""), gameId: String(o.gameId||""),
+      game: game, gameId: String(o.gameId||""),
       package: String(o.package||""), price: price,
       details: o.details || {}, region: o.region || null,
       nick: String(o.nick||""), accRegion: String(o.accRegion||""),
-      status: "wait", at: new Date().toISOString()
+      oid: oid, cat: auto ? cfg.cat : "", auto: auto,
+      fzr: "", status: "wait", at: new Date().toISOString()
     };
     u.orders.unshift(rec); u.orders = u.orders.slice(0,100);
     save(db);
 
     const det = Object.keys(rec.details).map(function(k){ return k+": "+rec.details[k]; }).join("\n");
     if(ADMIN_ID) tgCall("sendMessage", { chat_id: ADMIN_ID,
-      text: "🧾 BUYURTMA "+rec.id+"\n"+rec.game+" — "+rec.package+"\n"+
+      text: (auto ? "🤖 AVTO BUYURTMA " : "🧾 QO'LDA BUYURTMA ")+rec.id+"\n"+rec.game+" — "+rec.package+"\n"+
             (rec.nick ? ("👤 "+rec.nick+(rec.accRegion?" ("+rec.accRegion+")":"")+"\n") : "")+
             det+"\n💰 "+rec.price+" so'm\n👥 id: "+uid+"\nQoldiq: "+u.balance });
 
-    send(uid, "✅ Buyurtma qabul qilindi: "+rec.package+"\nQoldiq balans: "+u.balance+" so'm");
-    res.json({ ok:true, balance:u.balance, order:rec });
+    if(!auto){
+      send(uid, "✅ Buyurtma qabul qilindi: "+rec.package+"\nTez orada bajariladi.\nQoldiq balans: "+u.balance+" so'm");
+      return res.json({ ok:true, balance:u.balance, order:rec });
+    }
+
+    /* FazerCards ga yuboramiz */
+    const r = await fzrCreate(rec.cat, rec.oid, fields);
+
+    const db2 = load();
+    const u2 = urec(db2, uid);
+    const rec2 = u2.orders.find(function(x){ return x.id === rec.id; }) || rec;
+
+    if(r.ok){
+      rec2.fzr = r.id; rec2.status = "sent";
+      save(db2);
+      send(uid, "⏳ Buyurtma yuborildi: "+rec.package+"\nOdatda 1-2 daqiqada tushadi.\nQoldiq balans: "+u2.balance+" so'm");
+      return res.json({ ok:true, balance:u2.balance, order:rec2 });
+    }
+
+    /* rad etildi — pulni darrov qaytaramiz */
+    u2.balance += rec2.price;
+    rec2.status = "refund"; rec2.fail = r.why;
+    save(db2);
+    send(uid, "❌ Buyurtmani bajarib bo'lmadi. "+rec2.price+" so'm balansga qaytarildi.\nJoriy balans: "+u2.balance+" so'm");
+    if(ADMIN_ID) tgCall("sendMessage", { chat_id: ADMIN_ID,
+      text: "⚠️ FZR rad etdi: "+r.why+"\n"+rec.package+" — id "+uid+"\nQaytarildi: "+rec2.price+" so'm" });
+    res.json({ ok:false, error:"supplier", balance:u2.balance });
+
   }catch(e){ console.log("ORDER XATO:", e.message); res.json({ ok:false, error:"server" }); }
 });
+
+/* ---------- Tugallanmagan buyurtmalarni kuzatish ---------- */
+async function checkOne(uid, ordId){
+  const d0 = load();
+  const u0 = d0[uid]; if(!u0 || !Array.isArray(u0.orders)) return;
+  const r0 = u0.orders.find(function(x){ return x.id === ordId; });
+  if(!r0 || !r0.fzr || r0.status !== "sent") return;
+
+  const st = await fzrStatus(r0.fzr);
+  if(!st) return;
+  const s = String(st.status||"").toLowerCase();
+
+  const db = load();
+  const u = urec(db, uid);
+  const r = u.orders.find(function(x){ return x.id === ordId; });
+  if(!r || r.status !== "sent") return;
+
+  if(s === "completed"){
+    r.status = "done"; r.doneAt = new Date().toISOString();
+    save(db);
+    send(uid, "✅ "+r.package+" hisobingizga tushdi!\nID: "+r.gameId);
+    return;
+  }
+  if(s === "failed" || s === "cancelled" || s === "canceled" || s === "refunded"){
+    u.balance += r.price;
+    r.status = "refund"; r.fail = String(st.fail_reason||"");
+    save(db);
+    send(uid, "❌ Buyurtma bajarilmadi. "+r.price+" so'm balansga qaytarildi.\nJoriy balans: "+u.balance+" so'm");
+    if(ADMIN_ID) tgCall("sendMessage", { chat_id: ADMIN_ID,
+      text: "⚠️ FZR fail "+r.fzr+"\n"+(st.fail_reason||"-")+"\n"+r.package+" — id "+uid+"\nQaytarildi: "+r.price+" so'm" });
+    return;
+  }
+  if(Date.now() - new Date(r.at).getTime() > 30*60000){
+    r.status = "stuck";
+    save(db);
+    if(ADMIN_ID) tgCall("sendMessage", { chat_id: ADMIN_ID,
+      text: "⏰ 30 daqiqadan beri tugamadi: "+r.fzr+"\n"+r.package+" — id "+uid+"\nQo'lda tekshiring." });
+  }
+}
+
+async function sweep(){
+  try{
+    const db = load();
+    const jobs = [];
+    let changed = false;
+    Object.keys(db).forEach(function(uid){
+      const u = db[uid];
+      if(!u || !Array.isArray(u.orders)) return;
+      u.orders.forEach(function(r){
+        if(r.status === "sent" && r.fzr){ jobs.push([uid, r.id]); return; }
+        /* yuborilmay osilib qolgan (server o'chib qolgan bo'lsa) — pulni qaytaramiz */
+        if(r.status === "wait" && r.auto && !r.fzr &&
+           Date.now() - new Date(r.at).getTime() > 300000){
+          if(typeof u.balance !== "number") u.balance = 0;
+          u.balance += r.price;
+          r.status = "refund"; r.fail = "yuborilmadi";
+          changed = true;
+          send(uid, "↩️ Buyurtma yuborilmadi, "+r.price+" so'm balansga qaytarildi.");
+        }
+      });
+    });
+    if(changed) save(db);
+    for(let i = 0; i < jobs.length; i++){ await checkOne(jobs[i][0], jobs[i][1]); }
+  }catch(e){ console.log("SWEEP xato:", e.message); }
+}
+setInterval(sweep, 30000);
 
 function who2(w){ return w.name + (w.username ? " (@"+w.username+")" : ""); }
 
@@ -291,15 +491,13 @@ function handleCb(cq){
 app.post("/webhook", (req,res)=>{
   res.sendStatus(200);
   const hdr = req.get("X-Telegram-Bot-Api-Secret-Token") || "";
-  console.log("WH1 secret bor?", !!SECRET, "mos?", (!SECRET || hdr === SECRET));
   if(SECRET && hdr !== SECRET) return;
   try{
     const cq = req.body && req.body.callback_query;
     if(cq){ handleCb(cq); return; }
     const msg = req.body && req.body.message;
-    if(!msg){ console.log("WH2 message yo'q"); return; }
+    if(!msg) return;
     const fromId = String((msg.from && msg.from.id) || "");
-    console.log("WH3 from:", fromId, "text:", JSON.stringify(msg.text || ""), "contact:", !!msg.contact);
     if(!fromId) return;
 
     if(msg.contact && msg.contact.phone_number){
@@ -309,7 +507,9 @@ app.post("/webhook", (req,res)=>{
         return;
       }
       const db = load();
-      db[fromId] = { phone: msg.contact.phone_number, at: new Date().toISOString() };
+      const u = urec(db, fromId);
+      u.phone = msg.contact.phone_number;
+      u.at = new Date().toISOString();
       save(db);
       send(fromId, "✅ Rahmat! Telefon raqamingiz saqlandi.", { remove_keyboard: true });
       return;
@@ -330,14 +530,11 @@ app.post("/webhook", (req,res)=>{
       return;
     }
     if(text.indexOf("/start") === 0){
-      console.log("WH4 start topildi, klaviatura yuborilmoqda");
       send(fromId, "📱 Telefon raqamingizni ulashish uchun pastdagi tugmani bosing.", {
         keyboard: [[{ text: "📱 Raqamni ulashish", request_contact: true }]],
         resize_keyboard: true,
         one_time_keyboard: true
       });
-    } else {
-      console.log("WH5 start emas");
     }
   }catch(e){ console.log("WH XATO:", e.message); }
 });
@@ -350,10 +547,7 @@ function send(chatId, text, markup){
     method:"POST",
     headers:{"Content-Type":"application/json"},
     body: JSON.stringify(body)
-  })
-  .then(function(r){ return r.text(); })
-  .then(function(t){ console.log("SEND javob:", t); })
-  .catch(function(e){ console.log("SEND xato:", e.message); });
+  }).catch(function(e){ console.log("SEND xato:", e.message); });
 }
 
 app.listen(3001,"0.0.0.0",()=>console.log("API 3001-portda ishlayapti"));
