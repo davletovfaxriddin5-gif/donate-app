@@ -1173,9 +1173,40 @@ fetch(VBASE + '/order', {
 }
 
 function saveOrder(o){ try{ const a=getOrders(); a.unshift(o); localStorage.setItem('mt_orders', JSON.stringify(a.slice(0,60))); }catch(e){} }
-function getOrders(){ try{ return JSON.parse(localStorage.getItem('mt_orders')||'[]'); }catch(e){ return []; } }
+var srvOrders = null, histTimer = null, histAt = 0;
+function getOrders(){ if(srvOrders) return srvOrders; try{ return JSON.parse(localStorage.getItem('mt_orders')||'[]'); }catch(e){ return []; } }
+function loadOrders(cb){
+  const uid = tgUser && tgUser.id ? tgUser.id : '';
+  if(!uid){ if(cb) cb(); return; }
+  fetch(VBASE+"/orders?id="+uid+"&t="+Date.now())
+   .then(function(r){ return r.json(); })
+   .then(function(d){
+     if(d && d.ok && Array.isArray(d.orders)){
+       const loc = getOrders(), map = {};
+       d.orders.forEach(function(x){ map[x.id] = x; });
+       loc.forEach(function(x){ if(map[x.id]) x.status = map[x.id].status; });
+       d.orders.forEach(function(x){ if(!loc.some(function(y){ return y.id === x.id; })) loc.push(x); });
+       loc.sort(function(a,b){ return String(b.at||'').localeCompare(String(a.at||'')); });
+       srvOrders = loc;
+       try{ localStorage.setItem('mt_orders', JSON.stringify(loc.slice(0,60))); }catch(e){}
+     }
+     if(cb) cb();
+   })
+   .catch(function(){ if(cb) cb(); });
+}
+function histTick(){
+  clearTimeout(histTimer);
+  if(!document.querySelector('.refresh-btn')) return;
+  if(Date.now() - histAt > 3000){
+    histAt = Date.now();
+    loadOrders(function(){ if(document.querySelector('.refresh-btn')) renderHistory(); });
+    return;
+  }
+  if(!getOrders().some(function(o){ return o.status === 'wait' || o.status === 'sent'; })) return;
+  histTimer = setTimeout(function(){ histAt = 0; histTick(); }, 8000);
+}
 function renderHistory(){
-  let orders=getOrders();
+  let orders=getOrders(); histTick();
   if(histFilter==='done') orders=orders.filter(o=>o.status==='done');
   if(histFilter==='wait') orders=orders.filter(o=>o.status==='wait');
   if(histFilter==='cancel') orders=orders.filter(o=>o.status==='cancel');
