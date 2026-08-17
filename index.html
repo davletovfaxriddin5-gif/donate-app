@@ -620,6 +620,8 @@ const RU = {
   "Server ID kiriting":"Введите Server ID",
   "Buyurtmalar":"Заказы","Moliya":"Финансы","Barchasi":"Все","Bajarildi":"Выполнено",
   "Kutilmoqda":"В ожидании","Bekor qilingan":"Отменено","Pul qaytarildi":"Возврат средств","Yuborilmoqda":"Отправляется","Tungi rejimga o'tish":"Переключиться на тёмный режим","Statusni yangilash":"Обновить статус",
+  "To'lovni amalga oshiring":"Произведите оплату","AYNAN SHU SUMMANI O'TKAZING":"ПЕРЕВЕДИТЕ РОВНО ЭТУ СУММУ","Summani nusxalash":"Скопировать сумму","Karta raqamini nusxalash":"Скопировать номер карты","To'ladim":"Я оплатил","Bekor qilish":"Отменить",
+  "Qancha to'ldirmoqchisiz?":"На какую сумму пополнить?","Vaqt tugadi":"Время истекло","Nusxalandi":"Скопировано","Bekor qilindi":"Отменено","Qabul qilindi — admin tekshiradi":"Принято — админ проверит",
   "Hozircha bo'sh":"Пока пусто","Buyurtma bergach bu yerda ko'rinadi.":"После заказа он появится здесь.",
   "O'yinchi ID":"ID игрока","Holat":"Статус",
   "Telefon raqami":"Номер телефона","Telefon raqamini ulashish":"Поделиться номером телефона",
@@ -1415,60 +1417,111 @@ function toggleTheme(el){
   const lb = el.querySelector('.s'); if(lb) lb.textContent = on ? "Tungi rejimga o'tish" : "Yorug' rejimga o'tish";
   applyTheme();
 }
-let topMethod = null;
+let topMethod = null, topPend = null, topTick = null, topEnd = 0;
+
+function topCard(){
+  const isUz = (topPend ? topPend.m : topMethod) === 'uz';
+  return { num: isUz?CARD_NUMBER:CARD2_NUMBER, hold: isUz?CARD_HOLDER:CARD2_HOLDER,
+           bank: isUz?CARD_BANK:CARD2_BANK, cur: isUz?"so'm":"rubl" };
+}
+
 function renderTopup(){
+  clearInterval(topTick);
+
+  if(topPend){
+    const c = topCard();
+    app.innerHTML = `
+    <div class="page-title" style="margin-bottom:4px">To'lovni amalga oshiring</div>
+    <div id="topClock" style="text-align:center;font-weight:800;font-size:27px;letter-spacing:1px;margin:2px 0 16px">10:00</div>
+    <div style="background:var(--card);border:1px solid var(--stroke);border-radius:var(--radius);padding:16px;margin-bottom:12px">
+      <div class="lbl" style="margin-bottom:8px">AYNAN SHU SUMMANI O'TKAZING</div>
+      <div style="font-weight:800;font-size:26px;letter-spacing:1px">${fmt(topPend.pay)} ${c.cur}</div>
+      <button class="big-btn" style="margin:12px 0 0;justify-content:center;background:var(--card-2)" onclick="copyCard('${topPend.pay}')">Summani nusxalash</button>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--stroke);border-radius:var(--radius);padding:16px;margin-bottom:12px">
+      <div class="lbl" style="margin-bottom:8px">${c.bank}</div>
+      <div style="font-weight:800;font-size:21px;letter-spacing:1px">${c.num}</div>
+      <div style="color:var(--dim);font-size:13px;margin-top:5px">${c.hold}</div>
+      <button class="big-btn" style="margin:12px 0 0;justify-content:center;background:var(--card-2)" onclick="copyCard('${c.num}')">Karta raqamini nusxalash</button>
+    </div>
+    <div class="id-res wait" style="margin-bottom:14px">
+      Summa aynan mos kelishi shart — to'lovingizni shu raqam orqali topamiz.<br>
+      Ko'p yoki kam yuborsangiz, pulni faqat admin orqali qaytarib olasiz.<br>
+      To'lagach "To'ladim" ni bosing, tasdiqlangach balans o'zi to'ladi.
+    </div>
+    <button class="check-btn" style="width:100%;padding:13px" onclick="topPaid()">To'ladim</button>
+    <button class="big-btn" style="margin-top:10px;justify-content:center;background:var(--card-2)" onclick="topCancel()">Bekor qilish</button>`;
+    topEnd = topPend.until;
+    topClockTick();
+    topTick = setInterval(topClockTick, 1000);
+    return;
+  }
+
   if(!topMethod){
     app.innerHTML = profileRow() + `
     <div class="page-title">Hisobni to'ldirish</div>
     <p style="color:var(--dim);font-size:13.5px;margin:-6px 2px 18px">To'lov usulini tanlang</p>
     <div class="pay-grid">
-      <button class="pay" onclick="pickPay('uz')">
-        <span class="box" style="background:#f4f6fb;font-size:24px">💳</span><span class="nm">${CARD_BANK}</span>
-      </button>
-      <button class="pay" onclick="pickPay('ru')">
-        <span class="box" style="background:#eaf1ff;font-size:24px">🏦</span><span class="nm">${CARD2_BANK}</span>
-      </button>
+      <button class="pay" onclick="pickPay('uz')"><span class="box" style="background:#f4f6fb;font-size:24px">💳</span><span class="nm">${CARD_BANK}</span></button>
+      <button class="pay" onclick="pickPay('ru')"><span class="box" style="background:#eaf1ff;font-size:24px">🏦</span><span class="nm">${CARD2_BANK}</span></button>
     </div>
     <button class="guide-btn" style="margin-top:16px" onclick="openLink('${GUIDE_URL}')">
       <span class="ic">📖</span><span class="t">Qo'llanma</span><span class="r">Kanal</span>
     </button>`;
     return;
   }
-  const isUz = topMethod==='uz';
-  const num = isUz ? CARD_NUMBER : CARD2_NUMBER;
-  const hold = isUz ? CARD_HOLDER : CARD2_HOLDER;
-  const bank = isUz ? CARD_BANK : CARD2_BANK;
-  const cur = isUz ? "so'm" : "rubl";
+
+  const c = topCard();
   app.innerHTML = `
   <div class="back-row"><button class="back-btn" onclick="pickPay(null)"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>Orqaga</button></div>
-  <div class="page-title">${bank}</div>
-  <p style="color:var(--dim);font-size:13.5px;margin:-6px 2px 18px">Quyidagi kartaga o'tkazma qiling</p>
-  <div style="background:var(--card);border:1px solid var(--stroke);border-radius:var(--radius);padding:16px;margin-bottom:14px">
-    <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--faint);text-transform:uppercase;margin-bottom:8px">Karta raqami</div>
-    <div style="font-weight:800;font-size:21px;letter-spacing:1px">${num}</div>
-    <div style="color:var(--dim);font-size:13px;margin-top:5px">${hold}</div>
-    <button class="big-btn" style="margin:14px 0 0;justify-content:center;background:var(--card-2)" onclick="copyCard('${num}')">Nusxalash</button>
-  </div>
+  <div class="page-title">${c.bank}</div>
+  <p style="color:var(--dim);font-size:13.5px;margin:-6px 2px 18px">Qancha to'ldirmoqchisiz?</p>
   <div class="form-card">
-    <div class="lbl">QANCHA TO'LDIRMOQCHISIZ (${cur})</div>
+    <div class="lbl">SUMMA (${c.cur})</div>
     <div class="inp-wrap"><input class="inp" id="topAmount" inputmode="numeric" placeholder="Masalan: 50000"></div>
     <button class="check-btn" id="topBtn" style="width:100%;margin-top:14px;padding:13px" onclick="sendTopup()">Davom etish</button>
     <div id="payBox" class="id-res"></div>
   </div>`;
 }
+
+function topClockTick(){
+  const el = document.getElementById('topClock');
+  if(!el){ clearInterval(topTick); return; }
+  let s = Math.round((topEnd - Date.now())/1000);
+  if(s <= 0){ el.textContent = "Vaqt tugadi"; el.style.color = "var(--gold)"; clearInterval(topTick); return; }
+  const m = Math.floor(s/60); s = s % 60;
+  el.textContent = (m<10?'0':'')+m+":"+(s<10?'0':'')+s;
+}
+
 function pickPay(m){ haptic(); topMethod=m; renderTopup(); }
-function copyCard(n){ haptic(); try{ navigator.clipboard.writeText(String(n).replace(/\s/g,'')); }catch(e){} notify('success'); toast('Karta raqami nusxalandi'); }
+function copyCard(n){ haptic(); try{ navigator.clipboard.writeText(String(n).replace(/\s/g,'')); }catch(e){} notify('success'); toast('Nusxalandi'); }
+
+function topPaid(){
+  haptic('medium'); notify('success');
+  topPend=null; clearInterval(topTick);
+  toast("Qabul qilindi — admin tekshiradi");
+  go('home');
+}
+
+function topCancel(){
+  haptic();
+  const id = topPend ? topPend.id : '';
+  topPend=null; clearInterval(topTick);
+  if(id) fetch(VBASE + '/topup-cancel', { method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ id:id, initData:(tg&&tg.initData)||'' }) }).catch(function(){});
+  toast('Bekor qilindi');
+  renderTopup();
+}
+
 function sendTopup(){
   const el=document.getElementById('topAmount');
   const amt=Number(((el&&el.value)||'').replace(/\D/g,''));
   if(!amt || amt<1000){ notify('error'); toast("Kamida 1000 kiriting"); return; }
-  const cur = topMethod==='uz' ? "so'm" : "rubl";
   const bank = topMethod==='uz' ? CARD_BANK : CARD2_BANK;
   const btn = document.getElementById('topBtn');
   const box = document.getElementById('payBox');
   if(btn){ btn.disabled = true; btn.textContent = '…'; }
   if(box){ box.className='id-res wait'; box.textContent='⏳ Tayyorlanmoqda…'; }
-
   fetch(VBASE + '/topup', {
     method:'POST', headers:{'Content-Type':'application/json'},
     body: JSON.stringify({ amount: amt, method: bank, initData: (tg && tg.initData) || '' })
@@ -1476,13 +1529,8 @@ function sendTopup(){
     if(btn){ btn.disabled = false; btn.textContent = 'Davom etish'; }
     if(d && d.ok){
       notify('success');
-      if(box){
-        box.className = 'id-res ok';
-        box.innerHTML = "Kartaga <b>aynan " + fmt(d.pay) + " " + cur + "</b> o'tkazing.<br>" +
-          "<span style=\"color:var(--dim);font-weight:500\">Summa aynan mos kelishi kerak — to'lovingizni shu orqali topamiz. " +
-          "Tasdiqlangach balans o'zi to'ladi.</span>";
-      }
-      if(el) el.value='';
+      topPend = { id: d.id, pay: d.pay, m: topMethod, until: Date.now() + 600000 };
+      renderTopup();
     } else {
       notify('error');
       const m = { amount:"Summa noto'g'ri", pending:"Sizda 3 ta kutilayotgan so'rov bor",
