@@ -622,6 +622,7 @@ const RU = {
   "Kutilmoqda":"В ожидании","Bekor qilingan":"Отменено","Pul qaytarildi":"Возврат средств","Yuborilmoqda":"Отправляется","Tungi rejimga o'tish":"Переключиться на тёмный режим","Statusni yangilash":"Обновить статус",
   "To'lovni amalga oshiring":"Произведите оплату","AYNAN SHU SUMMANI O'TKAZING":"ПЕРЕВЕДИТЕ РОВНО ЭТУ СУММУ","Summani nusxalash":"Скопировать сумму","Karta raqamini nusxalash":"Скопировать номер карты","To'ladim":"Я оплатил","Bekor qilish":"Отменить",
   "Qancha to'ldirmoqchisiz?":"На какую сумму пополнить?","Vaqt tugadi":"Время истекло","Nusxalandi":"Скопировано","Bekor qilindi":"Отменено","Qabul qilindi — admin tekshiradi":"Принято — админ проверит",
+  "Tasdiqlandi":"Подтверждено","Hisob to'ldirish":"Пополнение счёта","Karta":"Карта","To'lovlaringiz shu yerda ko'rinadi.":"Ваши платежи появятся здесь.",
   "Davom etish":"Продолжить","⏳ Tayyorlanmoqda…":"⏳ Подготовка…",
   "Summa aynan mos kelishi shart — to'lovingizni shu raqam orqali topamiz.":"Сумма должна совпадать точно — по ней мы найдём ваш платёж.","Ko'p yoki kam yuborsangiz, pulni faqat admin orqali qaytarib olasiz.":"Если отправите больше или меньше, вернуть деньги можно только через админа.","To'lagandan keyin pastdagi tugmani bosing, tasdiqlangach balans o'zi to'ladi.":"После оплаты нажмите кнопку ниже — после подтверждения баланс пополнится автоматически.",
   "Hozircha bo'sh":"Пока пусто","Buyurtma bergach bu yerda ko'rinadi.":"После заказа он появится здесь.",
@@ -1178,6 +1179,8 @@ fetch(VBASE + '/order', {
 
 function saveOrder(o){ try{ const a=getOrders(); a.unshift(o); localStorage.setItem('mt_orders', JSON.stringify(a.slice(0,60))); }catch(e){} }
 var srvOrders = null, histTimer = null, histAt = 0;
+var srvOrders = null, srvTopups = null, histTimer = null, histAt = 0;
+function getTopups(){ return srvTopups || []; }
 function getOrders(){ if(srvOrders) return srvOrders; try{ return JSON.parse(localStorage.getItem('mt_orders')||'[]'); }catch(e){ return []; } }
 function loadOrders(cb){
   const uid = tgUser && tgUser.id ? tgUser.id : '';
@@ -1185,6 +1188,8 @@ function loadOrders(cb){
   fetch(VBASE+"/orders?id="+uid+"&t="+Date.now())
    .then(function(r){ return r.json(); })
    .then(function(d){
+     if(d && d.ok && Array.isArray(d.orders)){
+     if(d && Array.isArray(d.topups)) srvTopups = d.topups;
      if(d && d.ok && Array.isArray(d.orders)){
        const loc = getOrders(), map = {};
        d.orders.forEach(function(x){ map[x.id] = x; });
@@ -1210,10 +1215,24 @@ function histTick(){
   histTimer = setTimeout(function(){ histAt = 0; histTick(); }, 8000);
 }
 function renderHistory(){
-  let orders=getOrders(); histTick();
-  if(histFilter==='done') orders=orders.filter(o=>o.status==='done');
-  if(histFilter==='wait') orders=orders.filter(o=>o.status==='wait');
-  if(histFilter==='cancel') orders=orders.filter(o=>o.status==='cancel');
+  histTick();
+  const fin = histTab==='finance';
+  let rows;
+  if(fin){
+    const lim = Date.now() - 21*24*3600*1000;
+    rows = getTopups().filter(function(t){
+      const dead = (t.status==='cancel' || t.status==='expired');
+      return !(dead && new Date(t.at).getTime() < lim);
+    });
+    if(histFilter==='done') rows=rows.filter(t=>t.status==='done');
+    if(histFilter==='wait') rows=rows.filter(t=>t.status==='wait');
+    if(histFilter==='cancel') rows=rows.filter(t=>t.status==='cancel'||t.status==='expired');
+  } else {
+    rows = getOrders();
+    if(histFilter==='done') rows=rows.filter(o=>o.status==='done');
+    if(histFilter==='wait') rows=rows.filter(o=>o.status==='wait'||o.status==='sent');
+    if(histFilter==='cancel') rows=rows.filter(o=>o.status==='cancel'||o.status==='refund');
+  }
   app.innerHTML = profileRow() + `
   <div class="page-title">Tarix</div>
   <div class="seg">
@@ -1229,17 +1248,37 @@ function renderHistory(){
   <button class="refresh-btn" onclick="refreshStatus()"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.6-6.4M21 4v5h-5"/></svg>Statusni yangilash</button>
   <div id="histList"></div>`;
   const list=document.getElementById('histList');
-  if(!orders.length){
-    list.innerHTML=`<div class="empty"><div class="em">🧾</div><h3>Hozircha bo'sh</h3><p>Buyurtma bergach bu yerda ko'rinadi.</p></div>`;
+  if(!rows.length){
+    list.innerHTML=`<div class="empty"><div class="em">🧾</div><h3>Hozircha bo'sh</h3><p>${fin?"To'lovlaringiz shu yerda ko'rinadi.":"Buyurtma bergach bu yerda ko'rinadi."}</p></div>`;
     return;
   }
-  list.innerHTML = orders.map(o=>{
+  if(fin){
+    list.innerHTML = rows.map(function(t){
+      const ok = t.status==='done';
+      const bad = (t.status==='cancel'||t.status==='expired');
+      const lbl = ok ? "Tasdiqlandi" : bad ? "Bekor qilingan" : "Kutilmoqda";
+      const style = bad ? ' style="color:#FF6B6B;background:rgba(255,107,107,.14)"' : '';
+      const ic = String(t.method||'').toLowerCase().indexOf('sber')>-1 ? '🏦' : '💳';
+      const date = new Date(t.at).toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+      return `<div class="order">
+        <div class="top">
+          <div class="g"><div class="ic">${ic}</div><div><div class="nm">${t.method||'Karta'}</div><div class="sub">Hisob to'ldirish</div></div></div>
+          <div class="price"${ok?' style="color:#4FE0A0"':''}>+${fmt(t.amount)}<small>so'm</small></div>
+        </div>
+        <div class="sep"></div>
+        <div class="kv"><span class="k">Holat</span><span class="badge-st ${ok?'done':'wait'}"${style}>${lbl}</span></div>
+        <div class="date">${date}</div>
+      </div>`;
+    }).join('');
+    return;
+  }
+  list.innerHTML = rows.map(o=>{
     const st = o.status==='done'?['done','Bajarildi'] : o.status==='cancel'?['wait','Bekor qilingan'] : o.status==='refund'?['wait','Pul qaytarildi'] : o.status==='sent'?['wait','Yuborilmoqda'] : ['wait','Kutilmoqda'];
     const idVal = o.details ? Object.values(o.details)[0] : '';
-    const date = new Date(o.createdAt).toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+    const date = new Date(o.createdAt||o.at).toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
     return `<div class="order">
       <div class="top">
-        <div class="g"><div class="ic">${o.img?`<img src="${o.img}">`:o.glyph}</div>
+        <div class="g"><div class="ic">${o.img?`<img src="${o.img}">`:(o.glyph||'🎮')}</div>
         <div><div class="nm">${o.game}</div><div class="sub">${o.package}</div></div></div>
         <div class="price">-${fmt(o.price)}<small>so'm</small></div>
       </div>
@@ -1250,9 +1289,9 @@ function renderHistory(){
     </div>`;
   }).join('');
 }
-function setHistTab(t){ haptic(); if(t==='finance'){ toast("Moliya bo'limi tez orada"); return; } histTab=t; renderHistory(); }
+function setHistTab(t){ haptic(); histTab=t; renderHistory(); }
 function setFilter(f){ haptic(); histFilter=f; renderHistory(); }
-function refreshStatus(){ haptic('medium'); notify('success'); toast('🔄 Statuslar yangilandi'); }
+function refreshStatus(){ haptic('medium'); loadOrders(function(){ notify('success'); toast(tr('🔄 Statuslar yangilandi')); renderHistory(); }); }
 
 function renderSettings(){
   const name = tgUser?(tgUser.first_name||'Foydalanuvchi'):'Foydalanuvchi';
