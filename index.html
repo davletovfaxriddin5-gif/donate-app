@@ -513,6 +513,9 @@ body.app-ready .wrap, body.app-ready .nav{ opacity:1; transition:opacity .45s ea
 .id-res.bad{ color:var(--gold) }
 .id-res.wait{ color:var(--dim); font-weight:500 }
 .id-res .rg{ color:var(--dim); font-weight:500; font-size:12px; margin-left:7px }
+  .thm-lt{display:none}
+body.light .thm-dk{display:none}
+body.light .thm-lt{display:inline}  
 </style>
 </head>
 <body>
@@ -616,7 +619,7 @@ const RU = {
   "Player ID kiriting":"Введите Player ID","O'yinchi ID kiriting":"Введите ID игрока",
   "Server ID kiriting":"Введите Server ID",
   "Buyurtmalar":"Заказы","Moliya":"Финансы","Barchasi":"Все","Bajarildi":"Выполнено",
-  "Kutilmoqda":"В ожидании","Bekor qilingan":"Отменено","Pul qaytarildi":"Возврат средств","Yuborilmoqda":"Отправляется",
+  "Kutilmoqda":"В ожидании","Bekor qilingan":"Отменено","Pul qaytarildi":"Возврат средств","Yuborilmoqda":"Отправляется","Tungi rejimga o'tish":"Переключиться на тёмный режим","Statusni yangilash":"Обновить статус",
   "Hozircha bo'sh":"Пока пусто","Buyurtma bergach bu yerda ko'rinadi.":"После заказа он появится здесь.",
   "O'yinchi ID":"ID игрока","Holat":"Статус",
   "Telefon raqami":"Номер телефона","Telefon raqamini ulashish":"Поделиться номером телефона",
@@ -1265,7 +1268,7 @@ function renderSettings(){
     </button>
     <button class="svc" onclick="toggleTheme(this)">
       <span class="ic" style="background:#C9902A"><svg viewBox="0 0 24 24"><path d="M21 12.8A8.5 8.5 0 1 1 11.2 3a6.6 6.6 0 0 0 9.8 9.8z"/></svg></span>
-      <span class="txt"><div class="t">Tungi rejim</div><div class="s">Yorug' rejimga o'tish</div></span>
+      <span class="txt"><div class="t">Tungi rejim</div><div class="s"><span class="thm-dk">Yorug' rejimga o'tish</span><span class="thm-lt">Tungi rejimga o'tish</span></div></span>
       <span class="switch ${document.body.classList.contains('light')?'on':''}"></span>
     </button>
   </div>
@@ -1326,8 +1329,15 @@ function sharePhone(){
   haptic();
   const uid = tgUser && tgUser.id ? tgUser.id : '';
   if(!uid){ notify('error'); toast('Telegram orqali oching'); return; }
-  toast("📱 Botda tugmani bosing");
-  openLink("https://t.me/" + BOT_USERNAME + "?start=phone");
+  toast("📱 Botga o'tilmoqda...");
+  fetch("https://api.minatoh.uz/ask-phone",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({initData:(tg&&tg.initData)||""})})
+   .then(function(r){ return r.json(); })
+   .then(function(d){
+     if(d && d.already){ setPhoneText(d.phone); toast("Raqamingiz allaqachon saqlangan"); return; }
+     if(!d || !d.ok){ toast("Xatolik, qayta urining"); return; }
+     setTimeout(function(){ try{ tg.close(); }catch(e){} }, 400);
+   })
+   .catch(function(){ toast("Xatolik, qayta urining"); });
 }
 
 function invite(){
