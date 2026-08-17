@@ -202,6 +202,12 @@ async function fzrStatus(id){
 const crypto = require("crypto");
 const ADMIN_ID = String(process.env.ADMIN_ID || "");
 
+/* Botga /start bosilganda ko'rinadigan salomlashuv */
+const APP_URL   = "https://minatoh.uz/";
+const CHANNEL   = "https://t.me/savdo_mlbb1";
+const SUPPORT   = "https://t.me/dv1mm_garant";
+const BANNER    = "";   /* rasm kerak bo'lsa shu yerga to'liq https havola yozing */
+
 function checkInit(initData){
   try{
     if(!TOKEN || !initData) return null;
@@ -421,6 +427,7 @@ async function sweep(){
 setInterval(sweep, 30000);
 
 function who2(w){ return w.name + (w.username ? " (@"+w.username+")" : ""); }
+function esc(t){ return String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
 
 function expireOld(db){
   const lim = Date.now() - 24*3600*1000;
@@ -565,17 +572,46 @@ app.post("/webhook", (req,res)=>{
       return;
     }
     if(text.indexOf("/start") === 0){
-      const dbs = load();
-      const us = dbs[fromId];
-      if(us && us.phone){
-        send(fromId, "✅ Telefon raqamingiz allaqachon saqlangan: "+us.phone+"\n\nIlovaga qaytish uchun pastdagi Open tugmasini bosing.", { remove_keyboard: true });
+      const dbg = load();
+      const ug = urec(dbg, fromId);
+      const first = !ug.greeted;
+      if(first){ ug.greeted = true; ug.joined = new Date().toISOString(); save(dbg); }
+
+      const openKb = { inline_keyboard: [
+        [{ text: "\uD83D\uDE80 Xaridga o'tish", web_app: { url: APP_URL } }]
+      ]};
+
+      /* Eski foydalanuvchi \u2014 uzun salomlashuv qayta chiqmaydi */
+      if(!first){
+        tgCall("sendMessage", { chat_id: fromId,
+          text: "\uD83D\uDC4B Xaridni davom ettirish uchun pastdagi tugmani bosing.",
+          reply_markup: openKb });
         return;
       }
-      send(fromId, "📱 Telefon raqamingizni ulashish uchun pastdagi tugmani bosing.", {
-        keyboard: [[{ text: "📱 Raqamni ulashish", request_contact: true }]],
-        resize_keyboard: true,
-        one_time_keyboard: true
-      });
+
+      const nm = String((msg.from && msg.from.first_name) || "").trim();
+      const cap =
+        "\uD83D\uDC4B Xush kelibsiz" + (nm ? ", <b>"+esc(nm)+"</b>" : "") + "!\n\n" +
+        "Bu <b>MinatoUz</b> \u2014 o'yin donatlarini kutmasdan olishning eng tez yo'li.\n\n" +
+        "\u26A1\uFE0F PUBG Mobile, Mobile Legends, Free Fire\n" +
+        "\u26A1\uFE0F Telegram Stars va Telegram Premium\n" +
+        "\u26A1\uFE0F To'liq avtomatik \u2014 buyurtma bir daqiqada bajariladi\n" +
+        "\u26A1\uFE0F Qulay to'lov: Humo va Sberbank\n\n" +
+        "\uD83D\uDC47 Pastdagi tugmani bosing va hoziroq boshlang";
+      const kb = { inline_keyboard: [
+        [{ text: "\uD83D\uDE80 Xaridga o'tish", web_app: { url: APP_URL } }],
+        [{ text: "\u26A1\uFE0F Yangiliklar", url: CHANNEL },
+         { text: "\uD83D\uDC68\u200D\uD83D\uDCBB Qo'llab-quvvatlash", url: SUPPORT }]
+      ]};
+      if(BANNER){
+        tgCall("sendPhoto", { chat_id: fromId, photo: BANNER, caption: cap,
+                              parse_mode: "HTML", reply_markup: kb });
+      } else {
+        tgCall("sendMessage", { chat_id: fromId, text: cap,
+                                parse_mode: "HTML", reply_markup: kb,
+                                link_preview_options: { is_disabled: true } });
+      }
+      return;
     }
   }catch(e){ console.log("WH XATO:", e.message); }
 });
