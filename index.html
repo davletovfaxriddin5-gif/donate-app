@@ -1022,6 +1022,17 @@ function renderHome(){
 function openGame(id){ haptic(); curGame = GAMES.find(g=>g.id===id); selPkg = null; curRegion='uzb'; idOk=false; idName=''; idRegion=''; go('game'); }
 function savedIds(gameId){ try{ return JSON.parse(localStorage.getItem('mt_ids_'+gameId)||'[]'); }catch(e){ return []; } }
 function saveId(gameId, val){ try{ let a=savedIds(gameId); a=a.filter(x=>x!==val); a.unshift(val); localStorage.setItem('mt_ids_'+gameId, JSON.stringify(a.slice(0,6))); }catch(e){} }
+function fillId(v){
+  haptic();
+  const g = curGame; if(!g) return;
+  const parts = String(v).trim().split(/\s+/);
+  g.idFields.forEach(function(f,i){
+    const el = document.getElementById('fld_'+f.key);
+    if(el) el.value = parts[i] || '';
+  });
+  resetCheck();
+  checkId();
+}
 
 function renderGame(){
   const g = curGame;
