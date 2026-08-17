@@ -494,6 +494,26 @@ app.post("/topup", (req,res)=>{
   }catch(e){ console.log("TOPUP XATO:", e.message); res.json({ ok:false, error:"server" }); }
 });
 
+/* Mijoz "Bekor qilish" bosganda yoki 10 daqiqa tugaganda */
+app.post("/topup-cancel", (req,res)=>{
+  try{
+    const b = req.body || {};
+    const who = checkInit(b.initData);
+    if(!who) return res.json({ ok:false, error:"auth" });
+    const id = String(b.id||"");
+    const db = load();
+    const u = urec(db, who.id);
+    const t = u.topups.find(function(x){ return x.id === id; });
+    if(!t) return res.json({ ok:false, error:"notfound" });
+    if(t.status !== "wait") return res.json({ ok:true, already:true });
+    t.status = "cancel";
+    save(db);
+    if(ADMIN_ID) tgCall("sendMessage", { chat_id: ADMIN_ID,
+      text: "\u274C TO'LDIRISH "+id+" bekor qilindi\nSumma: "+t.amount+" so'm\nKimdan: "+(t.who||who.id) });
+    res.json({ ok:true });
+  }catch(e){ console.log("TOPCANCEL XATO:", e.message); res.json({ ok:false, error:"server" }); }
+});
+
 function handleCb(cq){
   const from = String((cq.from && cq.from.id) || "");
   if(ADMIN_ID && from !== ADMIN_ID){
