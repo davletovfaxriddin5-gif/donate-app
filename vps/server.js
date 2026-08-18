@@ -124,7 +124,7 @@ const CATALOG = {
     "1166_diamonds":112000, "2398_diamonds":212000, "6160_diamonds":537000
   }},
   mlbb: { cat:"mobile_legends_global", srv:true, items:{
-    "51_5_diamonds":15000, "78_8_diamonds":19500, "156_16_diamonds":33500,
+    "10_1_diamonds":5000, "51_5_diamonds":15000, "78_8_diamonds":19500, "156_16_diamonds":33500,
     "234_23_diamonds":46000, "625_81_diamonds":125000, "1860_335_diamonds":377000,
     "3099_589_diamonds":630000, "4649_883_diamonds":951000, "7740_1548_diamonds":1583000,
     "weekly_pass":22000, "twilight_pass":130000
