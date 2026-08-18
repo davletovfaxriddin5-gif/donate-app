@@ -1860,7 +1860,7 @@ function renderTopup(){
     <div class="page-title">Hisobni to'ldirish</div>
     <p style="color:var(--dim);font-size:13.5px;margin:-6px 2px 18px">To'lov usulini tanlang</p>
     <div class="pay-grid">
-     ${Object.keys(CARDS).map(k=>`<button class="pay" onclick="pickPay('${k}')"><span class="box" style="background:${CARDS[k].bg};font-size:24px">${CARDS[k].icon.indexOf('/')===0 ? `<img src="${CARDS[k].icon}" style="width:34px;height:34px;object-fit:contain">` : CARDS[k].icon}</span><span class="nm">${CARDS[k].bank}</span></button>`).join('')}
+     ${Object.keys(CARDS).map(k=>`<button class="pay" onclick="pickPay('${k}')"><span class="box" style="background:${CARDS[k].bg};font-size:24px">${CARDS[k].icon.indexOf('/')===0 ? `<img src="${CARDS[k].icon}" style="width:100%;height:56px;object-fit:contain">` : CARDS[k].icon}</span><span class="nm">${CARDS[k].bank}</span></button>`).join('')}
     </div>
     <button class="guide-btn" style="margin-top:16px" onclick="openLink('${GUIDE_URL}')">
       <span class="ic">📖</span><span class="t">Qo'llanma</span><span class="r">Kanal</span>
