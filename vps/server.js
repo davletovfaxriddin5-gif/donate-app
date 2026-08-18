@@ -361,7 +361,7 @@ const ADMIN_ID = String(process.env.ADMIN_ID || "");
 const APP_URL   = "https://minatoh.uz/";
 const CHANNEL   = "https://t.me/savdo_mlbb1";
 const SUPPORT   = "https://t.me/dv1mm_garant";
-const BANNER    = "https://minatoh.uz/IMG_4476.jpeg";
+const BANNER    = "https://minatoh.uz/IMG_4477.PNG";
 
 function checkInit(initData){
   try{
