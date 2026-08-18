@@ -357,6 +357,17 @@ async function fzrStatus(id){
 const crypto = require("crypto");
 const ADMIN_ID = String(process.env.ADMIN_ID || "");
 
+/* Kurslar \u2014 index.html dagi RATES bilan bir xil bo'lishi shart */
+const RATES = { "so'm":1, usd:11800, rubl:145 };
+const CARD_CUR = { "Humo":"so'm", "Sberbank":"rubl", "Visa":"usd" };
+function payText(base, pay, bank){
+  const cur = CARD_CUR[bank] || "so'm";
+  const r = RATES[cur] || 1;
+  if(r === 1) return pay + " so'm";
+  const v = (Math.ceil(base / r * 100) / 100) + ((pay - base) / 100);
+  return v.toFixed(2) + " " + cur + "  (" + pay + " so'm balansga)";
+}
+
 /* Botga /start bosilganda ko'rinadigan salomlashuv */
 const APP_URL   = "https://minatoh.uz/";
 const CHANNEL   = "https://t.me/savdo_mlbb1";
@@ -694,7 +705,7 @@ app.post("/topup", (req,res)=>{
 
     if(ADMIN_ID) tgCall("sendMessage", { chat_id: ADMIN_ID,
       text: "💳 TO'LDIRISH "+id+
-            "\nAYNAN: "+pay+" so'm"+
+            "\nAYNAN: "+payText(base, pay, String(b.method||""))+
             "\nKimdan: "+who2(who)+
             "\nid: "+uid+
             "\nUsul: "+(b.method||"-")+
