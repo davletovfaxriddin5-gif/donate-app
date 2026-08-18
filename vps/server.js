@@ -131,17 +131,144 @@ const CATALOG = {
   }}
 };
 
-/* MLBB RU serveri \u2014 boshqa paketlar, boshqa narxlar */
-const MLBB_RU = {
-  "35_diamonds":11000, "55_diamonds":15000, "165_diamonds":42000,
-  "275_diamonds":75000, "565_diamonds":145000, "1155_diamonds":282000,
-  "1765_diamonds":420000, "2975_diamonds":699000, "6000_diamonds":1392000,
-  "super_value_pass":22000, "weekly_pass":28400
+/* MLBB regionlari \u2014 har birida boshqa paketlar va boshqa narxlar */
+const MLBB_REG = {
+  ru: { cat:"mobile_legends_ru", items:{
+    "35_diamonds":11000,
+    "55_diamonds":15000,
+    "super_value_pass":22000,
+    "weekly_pass":28400,
+    "165_diamonds":42000,
+    "275_diamonds":75000,
+    "565_diamonds":145000,
+    "1155_diamonds":282000,
+    "1765_diamonds":420000,
+    "2975_diamonds":699000,
+    "6000_diamonds":1392000
+  }},
+  indonesia: { cat:"mobile_legends_indonesia", items:{
+    "17_2_diamonds":4500,
+    "25_3_diamonds":8000,
+    "40_4_diamonds":10000,
+    "53_6_diamonds":12000,
+    "weekly_elite_pack":15000,
+    "77_8_diamonds":19000,
+    "weekly_pass":30000,
+    "154_16_diamonds":35000,
+    "217_23_diamonds":55000,
+    "367_41_diamonds":83000,
+    "503_65_diamonds":115000,
+    "twilight_pass":115000,
+    "774_101_diamonds":175000,
+    "1708_302_diamonds":385000,
+    "4003_827_diamonds":896000
+  }},
+  malaysia: { cat:"mobile_legends_malaysia", items:{
+    "38_4_diamonds":11000,
+    "weekly_elite_pack":16300,
+    "64_6_diamonds":18000,
+    "weekly_pass":29400,
+    "127_13_diamonds":33000,
+    "254_30_diamonds":66000,
+    "monthly_elite_pack":67000,
+    "317_38_diamonds":83000,
+    "383_46_diamonds":98000,
+    "twilight_pass":123000,
+    "633_83_diamonds":163000,
+    "940_144_diamonds":237000,
+    "1252_194_diamonds":307000,
+    "2501_475_diamonds":656000,
+    "6252_1250_diamonds":1635000
+  }},
+  philippines: { cat:"mobile_legends_philippines", items:{
+    "20_2_diamonds":7600,
+    "51_5_diamonds":15000,
+    "102_10_diamonds":27000,
+    "weekly_diamond_pass":29000,
+    "153_15_diamonds":37000,
+    "203_20_diamonds":48700,
+    "303_33_diamonds":72000,
+    "504_66_diamonds":121000,
+    "twilight_pass":123000,
+    "1007_156_diamonds":242000,
+    "2015_383_diamonds":485000,
+    "5035_1007_diamonds":1212000
+  }},
+  singapore: { cat:"mobile_legends_singapore", items:{
+    "38_4_diamonds":13500,
+    "64_6_diamonds":18200,
+    "weekly_elite_pack":28000,
+    "weekly_pass":29000,
+    "127_13_diamonds":33000,
+    "monthly_elite_pack":71000,
+    "254_30_diamonds":74000,
+    "317_38_diamonds":83000,
+    "383_46_diamonds":99000,
+    "633_83_diamonds":165000,
+    "940_144_diamonds":252000,
+    "1252_194_diamonds":325000,
+    "2501_475_diamonds":649000,
+    "6252_1250_diamonds":1590000
+  }},
+  turkey: { cat:"mobile_legends_turkey", items:{
+    "24_diamonds":8000,
+    "44_diamonds":13700,
+    "weekly_elite_pack":18600,
+    "88_diamonds":19300,
+    "weekly_pass":28300,
+    "133_diamonds":30000,
+    "221_diamonds":46000,
+    "monthly_elite_pack":66000,
+    "494_diamonds":99800,
+    "twilight_pass":113000,
+    "1041_diamonds":201000,
+    "2645_diamonds":502000,
+    "6146_diamonds":1149000
+  }},
+  united_states: { cat:"mobile_legends_united_states", items:{
+    "51_5_diamonds":13500,
+    "weekly_diamond_pass":29700,
+    "253_25_diamonds":64000,
+    "505_66_diamonds":119000,
+    "1010_182_diamonds":239000,
+    "1515_273_diamonds":380000,
+    "2525_480_diamonds":612000,
+    "3030_576_diamonds":711000,
+    "4008_802_diamonds":979000,
+    "5010_1002_diamonds":1215000
+  }},
+  brazil: { cat:"mobile_legends_brazil", items:{
+    "50_5_diamonds":14500,
+    "78_8_diamonds":18000,
+    "weekly_pass":24700,
+    "156_16_diamonds":31000,
+    "150_15_diamonds":33500,
+    "234_23_diamonds":45000,
+    "310_34_diamonds":51000,
+    "250_25_diamonds":53500,
+    "465_51_diamonds":70500,
+    "482_diamonds":71000,
+    "500_65_diamonds":107000,
+    "twilight_pass":113000,
+    "625_81_diamonds":129000,
+    "1860_335_diamonds":397000,
+    "3099_589_diamonds":584000,
+    "4649_883_diamonds":961000,
+    "7740_1548_diamonds":1602000
+  }}
 };
 
-function isRu(region){
+function mlRegion(region){
   const r = String(region||"").toLowerCase();
-  return r.indexOf("russ") > -1 || r === "ru";
+  if(r.indexOf("russ") > -1 || r === "ru") return "ru";
+  if(r.indexOf("indonesi") > -1) return "indonesia";
+  if(r.indexOf("malays") > -1) return "malaysia";
+  if(r.indexOf("philippin") > -1 || r.indexOf("filipin") > -1) return "philippines";
+  if(r.indexOf("singapor") > -1) return "singapore";
+  if(r.indexOf("turk") > -1 || r.indexOf("t\u00fcrk") > -1) return "turkey";
+  if(r.indexOf("united states") > -1 || r === "usa" || r === "us") return "united_states";
+  if(r.indexOf("brazil") > -1 || r.indexOf("brasil") > -1) return "brazil";
+  return "global";
 }
 
 /* O'yin + paket + akkaunt regioni -> qaysi kategoriya va qaysi narx */
@@ -149,7 +276,10 @@ function resolveOffer(game, oid, region){
   const cfg = CATALOG[game];
   if(!cfg) return null;
   let cat = cfg.cat, items = cfg.items;
-  if(game === "mlbb" && isRu(region)){ cat = "mobile_legends_ru"; items = MLBB_RU; }
+  if(game === "mlbb"){
+    const k = mlRegion(region);
+    if(MLBB_REG[k]){ cat = MLBB_REG[k].cat; items = MLBB_REG[k].items; }
+  }
   if(items[oid] == null) return null;
   return { cat: cat, price: items[oid], srv: !!cfg.srv };
 }
