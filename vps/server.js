@@ -746,6 +746,39 @@ app.post("/webhook", (req,res)=>{
       send(fromId, rows.length ? ("⏳ Kutilmoqda:\n\n"+rows.join("\n")) : "✅ Kutilayotgan to'ldirish yo'q");
       return;
     }
+    if(text.indexOf("/help") === 0 || text.indexOf("/yordam") === 0){
+      tgCall("sendMessage", { chat_id: fromId, parse_mode: "HTML",
+        text: "\uD83E\uDD16 <b>MinatoUz \u2014 yordam</b>\n\n" +
+              "\uD83D\uDED2 <b>Donat xarid qilish</b> \u2014 Mini App orqali buyurtma bering.\n" +
+              "\uD83D\uDD0E <b>Nickname va ID</b> \u2014 buyurtma berishdan oldin ma'lumotlaringiz tekshiriladi.\n" +
+              "\uD83C\uDF0D <b>Serverlar</b> \u2014 Global, RU, Indonesia, Malaysia, Philippines, Singapore, Turkey, USA, Brazil.\n" +
+              "\uD83D\uDCB3 <b>Balansni to'ldirish</b> \u2014 ilovadagi \"Hisobni to'ldirish\" bo'limi.\n" +
+              "\uD83D\uDCE6 <b>Buyurtma holati</b> \u2014 ilovadagi \"Tarix\" bo'limida ko'rinadi va o'zi yangilanadi.\n" +
+              "\u23F1 <b>Yetkazish</b> \u2014 odatda 1-2 daqiqada avtomatik tushadi.\n\n" +
+              "\uD83D\uDCAC Muammo bo'lsa \u2014 /support",
+        reply_markup: { inline_keyboard: [
+          [{ text: "\uD83D\uDE80 Xaridga o'tish", web_app: { url: APP_URL } }],
+          [{ text: "\uD83D\uDCAC Qo'llab-quvvatlash", url: SUPPORT }]
+        ]}});
+      return;
+    }
+    if(text.indexOf("/support") === 0){
+      tgCall("sendMessage", { chat_id: fromId, parse_mode: "HTML",
+        text: "\uD83D\uDCAC <b>Qo'llab-quvvatlash</b>\n\n" +
+              "Savol yoki muammo bo'lsa, to'g'ridan-to'g'ri yozing:\n" +
+              "\uD83D\uDC64 " + SUPPORT.replace("https://t.me/", "@") + "\n\n" +
+              "Tezroq yordam berishimiz uchun quyidagilarni yozib yuboring:\n" +
+              "\u2022 Buyurtma raqami (masalan MT12345678)\n" +
+              "\u2022 O'yin va paket nomi\n" +
+              "\u2022 O'yinchi ID va server raqami\n" +
+              "\u2022 Muammoni qisqacha tushuntiring\n\n" +
+              "Buyurtma bajarilmasa, pul avtomatik balansga qaytadi \u2014 bu holatda kutib turing.",
+        reply_markup: { inline_keyboard: [
+          [{ text: "\uD83D\uDC64 Adminga yozish", url: SUPPORT }],
+          [{ text: "\u26A1\uFE0F Yangiliklar", url: CHANNEL }]
+        ]}});
+      return;
+    }
     if(text.indexOf("/start") === 0){
       const dbg = load();
       const ug = urec(dbg, fromId);
