@@ -361,7 +361,7 @@ const ADMIN_ID = String(process.env.ADMIN_ID || "");
 const APP_URL   = "https://minatoh.uz/";
 const CHANNEL   = "https://t.me/savdo_mlbb1";
 const SUPPORT   = "https://t.me/dv1mm_garant";
-const BANNER    = "";   /* rasm kerak bo'lsa shu yerga to'liq https havola yozing */
+const BANNER    = "https://minatoh.uz/IMG_4476.jpeg";
 
 function checkInit(initData){
   try{
