@@ -599,7 +599,7 @@ const BOT_USERNAME = 'minatoh_bot';
 const APP_SHORT_NAME = 'app';
 /* 1 birlik necha so'm turadi. Kurs o'zgarsa faqat shu ikkita raqamni almashtiring.
    PASTROQ qo'ying \u2014 shunda kurs ko'tarilsa zarar ko'rmaysiz. */
-const RATES = { "so'm": 1, usd: 11800, rubl: 145 };
+const RATES = { "so'm": 1, usd: 11500, rubl: 145 };
 function payAmount(base, pay, cur){
   const r = RATES[cur] || 1;
   if(r === 1) return { txt: fmt(pay), raw: String(pay) };
