@@ -692,7 +692,7 @@ const GAMES = [
       {a:'6160', c:'💎', p:537000, oid:'6160_diamonds',im:'/IMG_4436.png'},
     ]},
   { id:'mlbb', name:'MOBILE LEGENDS', glyph:'⚔️', star:'on', badge:'Global', img:'/IMG_4365.jpeg',
-    cur:'💎', region:false, cat:'mobile_legends_global',
+    cur:'💎', region:true, cat:'mobile_legends_global',
     pkgByRegion:{
       ru:[
         {a:'35', c:'💎', p:11000, oid:'35_diamonds', im:'/IMG_4451.png'},
@@ -853,17 +853,46 @@ const GAMES = [
 ];
 
 const REGIONS = [
-  {code:'uzb', label:'UZB / 🌐 Global', flag:'🇺🇿'},
+  {code:'global', label:'UZB / 🌐 Global', flag:'🇺🇿'},
   {code:'ru', label:'RU', flag:'🇷🇺'},
-  {code:'tr', label:'TR', flag:'🇹🇷'},
-  {code:'id', label:'ID', flag:'🇮🇩'},
-  {code:'sg', label:'SG', flag:'🇸🇬'},
-  {code:'my', label:'MY', flag:'🇲🇾'},
+  {code:'turkey', label:'TR', flag:'🇹🇷'},
+  {code:'indonesia', label:'ID', flag:'🇮🇩'},
+  {code:'singapore', label:'SG', flag:'🇸🇬'},
+  {code:'malaysia', label:'MY', flag:'🇲🇾'},
+  {code:'philippines', label:'PH', flag:'🇵🇭'},
+  {code:'united_states', label:'US', flag:'🇺🇸'},
+  {code:'brazil', label:'BR', flag:'🇧🇷'},
 ];
 
-let view = 'home', curGame = null, selPkg = null, curRegion = 'uzb';
+let view = 'home', curGame = null, selPkg = null, curRegion = 'global';
 let curPkgs = null;
-function activePkgs(){ return curPkgs || (curGame ? curGame.packages : []); }
+function activePkgs(){
+  const g = curGame; if(!g) return [];
+  if(curPkgs) return curPkgs;
+  if(g.pkgByRegion && g.pkgByRegion[curRegion]) return g.pkgByRegion[curRegion];
+  return g.packages;
+}
+function paintTabs(only){
+  const tabs = document.querySelectorAll('.region-tabs .rt');
+  if(!tabs.length) return;
+  let shown = 0;
+  tabs.forEach(function(b){
+    const mine = only ? (b.dataset.r === only) : true;
+    b.style.display = mine ? '' : 'none';
+    b.classList.toggle('on', only ? mine : (b.dataset.r === curRegion));
+    if(mine) shown++;
+  });
+  if(only && !shown) tabs.forEach(function(b){ b.style.display=''; b.classList.toggle('on', b.dataset.r===curRegion); });
+}
+function pickRegion(c){
+  if(idOk) return;
+  haptic();
+  curRegion = c; selPkg = null;
+  const gr = document.querySelector('.pkg-grid');
+  if(gr) gr.innerHTML = pkgHtml(activePkgs());
+  paintTabs(null);
+  syncBuy();
+}
 function mlRegion(region){
   const r = String(region||'').toLowerCase();
   if(r.indexOf('russ') > -1 || r === 'ru') return 'ru';
@@ -1166,7 +1195,7 @@ function renderHome(){
   </div>`;
 }
 
-function openGame(id){ haptic(); curGame = GAMES.find(g=>g.id===id); selPkg = null; curPkgs = null; curRegion='uzb'; idOk=false; idName=''; idRegion=''; go('game'); }
+function openGame(id){ haptic(); curGame = GAMES.find(g=>g.id===id); selPkg = null; curPkgs = null; curRegion='global'; idOk=false; idName=''; idRegion=''; go('game'); }
 function savedIds(gameId){ try{ return JSON.parse(localStorage.getItem('mt_ids_'+gameId)||'[]'); }catch(e){ return []; } }
 function saveId(gameId, val){ try{ let a=savedIds(gameId); a=a.filter(x=>x!==val); a.unshift(val); localStorage.setItem('mt_ids_'+gameId, JSON.stringify(a.slice(0,6))); }catch(e){} }
 function fillId(v){
@@ -1215,7 +1244,7 @@ function renderGame(){
     <div id="idRes" class="id-res"></div>
   </div>
   <div class="sec-lbl" style="margin-top:0">Mahsulotni tanlang</div>
-  ${g.region ? `<div class="region-tabs">${REGIONS.map(r=>`<button class="rt ${r.code==='uzb'?'on':''}" data-r="${r.code}" onclick="pickRegion('${r.code}')">${r.flag} ${r.label}</button>`).join('')}</div>` : ''}
+  ${g.region ? `<div class="region-tabs">${REGIONS.map(r=>`<button class="rt ${r.code===curRegion?'on':''}" data-r="${r.code}" onclick="pickRegion('${r.code}')">${r.flag} ${r.label}</button>`).join('')}</div>` : ''}
   <div class="pkg-grid">${pkgHtml(activePkgs())}</div>
   <div class="buy-bar"><button class="buy-btn" id="buyBtn" disabled onclick="buy()">Sotib olish</button></div>`;
 }
@@ -1261,6 +1290,7 @@ function resetCheck(){
     const gr = document.querySelector('.pkg-grid');
     if(gr) gr.innerHTML = pkgHtml(activePkgs());
   }
+  paintTabs(null);
   syncBuy();
 }
 function editId(){ haptic(); resetCheck(); }
@@ -1269,6 +1299,7 @@ function afterCheck(){
   const list = regionPkgs(g, idRegion);
   const changed = (list !== activePkgs());
   curPkgs = list;
+  if(g.region){ curRegion = mlRegion(idRegion); paintTabs(curRegion); }
   if(changed){
     selPkg = null;
     const gr = document.querySelector('.pkg-grid');
