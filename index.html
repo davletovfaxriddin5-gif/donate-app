@@ -597,12 +597,13 @@ const CHANNEL_USERNAME = 'savdo_mlbb1';
 const GUIDE_URL = 'https://t.me/savdo_mlbb1';
 const BOT_USERNAME = 'minatoh_bot';
 const APP_SHORT_NAME = 'app';
-const CARD_NUMBER = '9860 1606 3393 9915';
-const CARD_HOLDER = 'Faxriddin Davlatov';
-const CARD_BANK = 'Humo';
-const CARD2_NUMBER = '2202 2084 9695 4109';
-const CARD2_HOLDER = 'Фахриддин Давлатов';
-const CARD2_BANK = 'Sberbank';
+const CARDS = {
+  uz:   { num:'9860 1606 3393 9915', hold:'Faxriddin Davlatov', bank:'Humo',     cur:"so'm", icon:'\uD83D\uDCB3', bg:'#f4f6fb' },
+  ru:   { num:'2202 2084 9695 4109', hold:'Фахриддин Давлатов', bank:'Sberbank', cur:'rubl', icon:'\uD83C\uDFE6', bg:'#eaf1ff' },
+  visa: { num:'0000 0000 0000 0000', hold:'ISM FAMILIYA',       bank:'Visa',     cur:'usd',  icon:'\uD83C\uDF10', bg:'#eef0ff' }
+};
+const CARD_NUMBER = CARDS.uz.num, CARD_HOLDER = CARDS.uz.hold, CARD_BANK = CARDS.uz.bank;
+const CARD2_NUMBER = CARDS.ru.num, CARD2_HOLDER = CARDS.ru.hold, CARD2_BANK = CARDS.ru.bank;
 
 let balance = 0;
 let cashback = 0;
@@ -1806,8 +1807,8 @@ let topMethod = null, topPend = null, topTick = null, topEnd = 0;
 
 function topCard(){
   const isUz = (topPend ? topPend.m : topMethod) === 'uz';
-  return { num: isUz?CARD_NUMBER:CARD2_NUMBER, hold: isUz?CARD_HOLDER:CARD2_HOLDER,
-           bank: isUz?CARD_BANK:CARD2_BANK, cur: isUz?"so'm":"rubl" };
+  const k = (topPend ? topPend.m : topMethod) || 'uz';
+  return CARDS[k] || CARDS.uz;
 }
 
 function renderTopup(){
@@ -1847,8 +1848,7 @@ function renderTopup(){
     <div class="page-title">Hisobni to'ldirish</div>
     <p style="color:var(--dim);font-size:13.5px;margin:-6px 2px 18px">To'lov usulini tanlang</p>
     <div class="pay-grid">
-      <button class="pay" onclick="pickPay('uz')"><span class="box" style="background:#f4f6fb;font-size:24px">💳</span><span class="nm">${CARD_BANK}</span></button>
-      <button class="pay" onclick="pickPay('ru')"><span class="box" style="background:#eaf1ff;font-size:24px">🏦</span><span class="nm">${CARD2_BANK}</span></button>
+      ${Object.keys(CARDS).map(k=>`<button class="pay" onclick="pickPay('${k}')"><span class="box" style="background:${CARDS[k].bg};font-size:24px">${CARDS[k].icon}</span><span class="nm">${CARDS[k].bank}</span></button>`).join('')}
     </div>
     <button class="guide-btn" style="margin-top:16px" onclick="openLink('${GUIDE_URL}')">
       <span class="ic">📖</span><span class="t">Qo'llanma</span><span class="r">Kanal</span>
@@ -1902,7 +1902,7 @@ function sendTopup(){
   const el=document.getElementById('topAmount');
   const amt=Number(((el&&el.value)||'').replace(/\D/g,''));
   if(!amt || amt<1000){ notify('error'); toast("Kamida 1000 kiriting"); return; }
-  const bank = topMethod==='uz' ? CARD_BANK : CARD2_BANK;
+  const bank = (CARDS[topMethod] || CARDS.uz).bank;
   const btn = document.getElementById('topBtn');
   const box = document.getElementById('payBox');
   if(btn){ btn.disabled = true; btn.textContent = '…'; }
