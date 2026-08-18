@@ -623,7 +623,7 @@ const RU = {
   "To'lovni amalga oshiring":"Произведите оплату","AYNAN SHU SUMMANI O'TKAZING":"ПЕРЕВЕДИТЕ РОВНО ЭТУ СУММУ","Summani nusxalash":"Скопировать сумму","Karta raqamini nusxalash":"Скопировать номер карты","To'ladim":"Я оплатил","Bekor qilish":"Отменить",
   "Qancha to'ldirmoqchisiz?":"На какую сумму пополнить?","Vaqt tugadi":"Время истекло","Nusxalandi":"Скопировано","Bekor qilindi":"Отменено","Qabul qilindi — admin tekshiradi":"Принято — админ проверит",
   "Tasdiqlandi":"Подтверждено","Hisob to'ldirish":"Пополнение счёта","Karta":"Карта","To'lovlaringiz shu yerda ko'rinadi.":"Ваши платежи появятся здесь.",
-  "💬 Fikrlar":"💬 Отзывы","Davom etish":"Продолжить","⏳ Tayyorlanmoqda…":"⏳ Подготовка…",
+  "💬 Fikrlar":"💬 Отзывы","Spamlar uchun qulay yozishmalar joyi":"Удобный чат для заблокированных","Telegram akkauntingiz cheklangan bo'lsa shu yerdan yozing":"Если ваш аккаунт Telegram ограничен, пишите здесь","Admin bilan bog'lanish":"Связь с админом","Chat bo'limi":"Чат","Yuborish":"Отправить","Xabaringizni yozing...":"Напишите сообщение...","Yozishmani faqat siz va admin ko'radi":"Переписку видите только вы и админ","Savolingizni yozing, admin javob beradi.":"Напишите вопрос, админ ответит.","Davom etish":"Продолжить","⏳ Tayyorlanmoqda…":"⏳ Подготовка…",
   "Summa aynan mos kelishi shart — to'lovingizni shu raqam orqali topamiz.":"Сумма должна совпадать точно — по ней мы найдём ваш платёж.","Ko'p yoki kam yuborsangiz, pulni faqat admin orqali qaytarib olasiz.":"Если отправите больше или меньше, вернуть деньги можно только через админа.","To'lagandan keyin pastdagi tugmani bosing, tasdiqlangach balans o'zi to'ladi.":"После оплаты нажмите кнопку ниже — после подтверждения баланс пополнится автоматически.",
   "Hozircha bo'sh":"Пока пусто","Buyurtma bergach bu yerda ko'rinadi.":"После заказа он появится здесь.",
   "O'yinchi ID":"ID игрока","Holat":"Статус",
@@ -922,7 +922,7 @@ const fmt = n => n.toLocaleString('ru-RU').replace(/,/g,' ');
 
 function go(v){
   view = v; window.scrollTo(0,0);
-  const sub = (v==='game' || v==='topup');
+  const sub = (v==='game' || v==='topup' || v==='spam' || v==='chat');
   if(tg&&tg.BackButton){ sub ? tg.BackButton.show() : tg.BackButton.hide(); }
   document.querySelector('.nav').style.display = (v==='game') ? 'none' : 'flex';
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('on', n.dataset.tab===v));
@@ -931,10 +931,12 @@ function go(v){
   else if(v==='history') renderHistory();
   else if(v==='settings'){ renderSettings(); loadPhone(); }
   else if(v==='topup'){ topMethod=null; renderTopup(); }
+  else if(v==='spam') renderSpam();
+  else if(v==='chat') renderChat();
   if(v==='home'||v==='settings') loadBalance();
   syncNavPill(true);
 }
-function onBack(){ haptic(); if(view==='game') go('home'); else if(view==='topup') go('home'); else go('home'); }
+function onBack(){ haptic(); if(view==='chat') go('spam'); else if(view==='spam') go('settings'); else go('home'); }
 let navDragged = false;
 document.querySelectorAll('.nav-item').forEach(n=> n.addEventListener('click', ()=>{ if(navDragged) return; haptic(); go(n.dataset.tab); }));
 
@@ -1524,6 +1526,88 @@ function setHistTab(t){ haptic(); histTab=t; renderHistory(); }
 function setFilter(f){ haptic(); histFilter=f; renderHistory(); }
 function refreshStatus(){ haptic('medium'); loadOrders(function(){ notify('success'); toast(tr('🔄 Statuslar yangilandi')); renderHistory(); }); }
 
+let chatTimer = null, chatLast = 0;
+
+function renderSpam(){
+  clearInterval(chatTimer);
+  app.innerHTML = `
+  <div class="back-row"><button class="back-btn" onclick="go('settings')"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>Orqaga</button></div>
+  <div class="page-title">Admin bilan bog'lanish</div>
+  <div class="id-res wait" style="margin-bottom:16px"><div>Akkauntingiz cheklanmagan bo'lsa, to'g'ridan-to'g'ri adminga yozing.</div><div style="margin-top:6px">Telegram akkauntingiz spam sababli cheklangan va adminga yoza olmayotgan bo'lsangiz, Chat bo'limidan foydalaning.</div><div style="margin-top:6px">Chat bo'limidagi yozishmalarni faqat siz va admin ko'radi.</div></div>
+  <button class="svc" onclick="openLink('https://t.me/${ADMIN_USERNAME}')">
+    <span class="ic" style="background:#2E7BC0"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H8l-4 4V5a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2z"/></svg></span>
+    <span class="txt"><div class="t">@${ADMIN_USERNAME}</div><div class="s">Telegramda to'g'ridan-to'g'ri yozish</div></span>
+    <span class="arw">›</span>
+  </button>
+  <button class="svc" onclick="go('chat')" style="margin-top:10px">
+    <span class="ic" style="background:#3AA76D"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H8l-4 4z"/></svg></span>
+    <span class="txt"><div class="t">Chat bo'limi</div><div class="s">Ilova ichida yozish, cheklov ta'sir qilmaydi</div></span>
+    <span class="arw">›</span>
+  </button>`;
+}
+
+function chatHtml(msgs){
+  if(!msgs.length) return `<div class="empty"><div class="em">\uD83D\uDCAC</div><h3>Hozircha bo'sh</h3><p>Savolingizni yozing, admin javob beradi.</p></div>`;
+  return msgs.map(function(m){
+    const mine = m.who === 'user';
+    const t = new Date(m.at).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
+    return `<div style="display:flex;justify-content:${mine?'flex-end':'flex-start'};margin-bottom:8px">
+      <div style="max-width:78%;background:${mine?'var(--blue)':'var(--card)'};border:1px solid ${mine?'transparent':'var(--stroke)'};border-radius:14px;padding:9px 12px;font-size:14px;line-height:1.4;word-break:break-word">
+        ${esc(m.text)}
+        <div style="font-size:10.5px;opacity:.65;margin-top:4px;text-align:right">${t}</div>
+      </div></div>`;
+  }).join('');
+}
+
+function renderChat(){
+  app.innerHTML = `
+  <div class="back-row"><button class="back-btn" onclick="go('spam')"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>Orqaga</button></div>
+  <div class="page-title" style="margin-bottom:4px">Chat bo'limi</div>
+  <p style="color:var(--dim);font-size:12.5px;margin:0 2px 14px">Yozishmani faqat siz va admin ko'radi</p>
+  <div id="chatBox" style="min-height:220px;margin-bottom:12px"></div>
+  <div class="inp-wrap"><input class="inp" id="chatInp" placeholder="Xabaringizni yozing..."></div>
+  <button class="check-btn" id="chatBtn" style="width:100%;margin-top:12px;padding:13px" onclick="chatSend()">Yuborish</button>`;
+  loadChat(true);
+  clearInterval(chatTimer);
+  chatTimer = setInterval(function(){ if(view==='chat') loadChat(false); else clearInterval(chatTimer); }, 5000);
+}
+
+function loadChat(scroll){
+  fetch(VBASE + '/chat/list', { method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ initData:(tg&&tg.initData)||'' }) })
+   .then(function(r){ return r.json(); })
+   .then(function(d){
+     if(!d || !d.ok) return;
+     const box = document.getElementById('chatBox');
+     if(!box) return;
+     if(d.msgs.length !== chatLast || scroll){
+       chatLast = d.msgs.length;
+       box.innerHTML = chatHtml(d.msgs);
+       if(scroll) window.scrollTo(0, document.body.scrollHeight);
+     }
+   }).catch(function(){});
+}
+
+function chatSend(){
+  const el = document.getElementById('chatInp');
+  const btn = document.getElementById('chatBtn');
+  const text = ((el&&el.value)||'').trim();
+  if(!text){ notify('error'); return; }
+  haptic();
+  if(btn){ btn.disabled = true; btn.textContent = '...'; }
+  fetch(VBASE + '/chat/send', { method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ initData:(tg&&tg.initData)||'', text:text }) })
+   .then(function(r){ return r.json(); })
+   .then(function(d){
+     if(btn){ btn.disabled = false; btn.textContent = tr('Yuborish'); }
+     if(d && d.ok){ if(el) el.value=''; notify('success'); chatLast = -1; loadChat(true); }
+     else { notify('error'); toast(d && d.error==='busy' ? "Biroz kuting" : "Yuborilmadi"); }
+   }).catch(function(){
+     if(btn){ btn.disabled = false; btn.textContent = tr('Yuborish'); }
+     notify('error'); toast("Aloqa yo'q");
+   });
+}
+
 function renderSettings(){
   const name = tgUser?(tgUser.first_name||'Foydalanuvchi'):'Foydalanuvchi';
   const un = tgUser&&tgUser.username?'@'+tgUser.username:'@user';
@@ -1564,6 +1648,11 @@ function renderSettings(){
     <button class="svc" onclick="openLink('https://t.me/${ADMIN_USERNAME}')">
       <span class="ic" style="background:#2E7BC0"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H8l-4 4V5a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2z"/></svg></span>
       <span class="txt"><div class="t">Qo'llab-quvvatlash</div><div class="s">Savollar bo'yicha 24/7 yordam chati orqali bog'laning</div></span>
+      <span class="arw">›</span>
+    </button>
+    <button class="svc" onclick="go('spam')">
+      <span class="ic" style="background:#E0574A"><svg viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg></span>
+      <span class="txt"><div class="t">Spamlar uchun qulay yozishmalar joyi</div><div class="s">Telegram akkauntingiz cheklangan bo'lsa shu yerdan yozing</div></span>
       <span class="arw">›</span>
     </button>
     <button class="svc" onclick="toggleMotion(this)">
