@@ -693,19 +693,131 @@ const GAMES = [
     ]},
   { id:'mlbb', name:'MOBILE LEGENDS', glyph:'⚔️', star:'on', badge:'Global', img:'/IMG_4365.jpeg',
     cur:'💎', region:false, cat:'mobile_legends_global',
-    packagesRu:[
-      {a:'35', c:'💎', p:11000, oid:'35_diamonds', im:'/IMG_4451.png'},
-      {a:'55', c:'💎', p:15000, oid:'55_diamonds', im:'/IMG_4449.png'},
-      {a:'165', c:'💎', p:42000, oid:'165_diamonds', hit:true, im:'/IMG_4455.png'},
-      {a:'275', c:'💎', p:75000, oid:'275_diamonds', im:'/IMG_4459.png'},
-      {a:'565', c:'💎', p:145000, oid:'565_diamonds', hit:true, im:'/IMG_4460.png'},
-      {a:'1155', c:'💎', p:282000, oid:'1155_diamonds', im:'/IMG_4442.png'},
-      {a:'1765', c:'💎', p:420000, oid:'1765_diamonds', im:'/IMG_4443.png'},
-      {a:'2975', c:'💎', p:699000, oid:'2975_diamonds', im:'/IMG_4430.png'},
-      {a:'6000', c:'💎', p:1392000, oid:'6000_diamonds', im:'/IMG_4440.png'},
-      {a:'Super Value Pass', c:'', p:22000, txt:true, oid:'super_value_pass', im:'/IMG_4429.png'},
-      {a:'Haftalik propusk', c:'', p:28400, txt:true, oid:'weekly_pass', im:'/IMG_4446.png'}
-    ],
+    pkgByRegion:{
+      ru:[
+        {a:'35', c:'💎', p:11000, oid:'35_diamonds', im:'/IMG_4451.png'},
+        {a:'55', c:'💎', p:15000, oid:'55_diamonds', im:'/IMG_4449.png'},
+        {a:'super_value_pass', c:'', p:22000, txt:true, oid:'super_value_pass', im:'/IMG_4446.png'},
+        {a:'Haftalik propusk', c:'', p:28400, txt:true, oid:'weekly_pass', im:'/IMG_4446.png'},
+        {a:'165', c:'💎', p:42000, oid:'165_diamonds', im:'/IMG_4455.png'},
+        {a:'275', c:'💎', p:75000, oid:'275_diamonds', im:'/IMG_4459.png'},
+        {a:'565', c:'💎', p:145000, oid:'565_diamonds', im:'/IMG_4460.png'},
+        {a:'1155', c:'💎', p:282000, oid:'1155_diamonds', im:'/IMG_4442.png'},
+        {a:'1765', c:'💎', p:420000, oid:'1765_diamonds', im:'/IMG_4443.png'},
+        {a:'2975', c:'💎', p:699000, oid:'2975_diamonds', im:'/IMG_4430.png'},
+        {a:'6000', c:'💎', p:1392000, oid:'6000_diamonds', im:'/IMG_4440.png'}
+      ],
+      indonesia:[
+        {a:'17+2', c:'💎', p:4500, oid:'17_2_diamonds', im:'/IMG_4451.png'},
+        {a:'25+3', c:'💎', p:8000, oid:'25_3_diamonds', im:'/IMG_4449.png'},
+        {a:'40+4', c:'💎', p:10000, oid:'40_4_diamonds', im:'/IMG_4455.png'},
+        {a:'53+6', c:'💎', p:12000, oid:'53_6_diamonds', im:'/IMG_4459.png'},
+        {a:'Weekly Elite Pack', c:'', p:15000, txt:true, oid:'weekly_elite_pack', im:'/IMG_4446.png'},
+        {a:'77+8', c:'💎', p:19000, oid:'77_8_diamonds', im:'/IMG_4460.png'},
+        {a:'Haftalik propusk', c:'', p:30000, txt:true, oid:'weekly_pass', im:'/IMG_4446.png'},
+        {a:'154+16', c:'💎', p:35000, oid:'154_16_diamonds', im:'/IMG_4442.png'},
+        {a:'217+23', c:'💎', p:55000, oid:'217_23_diamonds', im:'/IMG_4443.png'},
+        {a:'367+41', c:'💎', p:83000, oid:'367_41_diamonds', im:'/IMG_4430.png'},
+        {a:'503+65', c:'💎', p:115000, oid:'503_65_diamonds', im:'/IMG_4440.png'},
+        {a:'Twilight pass', c:'', p:115000, txt:true, oid:'twilight_pass', im:'/IMG_4429.png'},
+        {a:'774+101', c:'💎', p:175000, oid:'774_101_diamonds', im:'/IMG_4440.png'},
+        {a:'1708+302', c:'💎', p:385000, oid:'1708_302_diamonds', im:'/IMG_4440.png'},
+        {a:'4003+827', c:'💎', p:896000, oid:'4003_827_diamonds', im:'/IMG_4440.png'}
+      ],
+      malaysia:[
+        {a:'38+4', c:'💎', p:11000, oid:'38_4_diamonds', im:'/IMG_4451.png'},
+        {a:'Weekly Elite Pack', c:'', p:16300, txt:true, oid:'weekly_elite_pack', im:'/IMG_4446.png'},
+        {a:'64+6', c:'💎', p:18000, oid:'64_6_diamonds', im:'/IMG_4449.png'},
+        {a:'Haftalik propusk', c:'', p:29400, txt:true, oid:'weekly_pass', im:'/IMG_4446.png'},
+        {a:'127+13', c:'💎', p:33000, oid:'127_13_diamonds', im:'/IMG_4455.png'},
+        {a:'254+30', c:'💎', p:66000, oid:'254_30_diamonds', im:'/IMG_4459.png'},
+        {a:'Monthly Elite Pack', c:'', p:67000, txt:true, oid:'monthly_elite_pack', im:'/IMG_4429.png'},
+        {a:'317+38', c:'💎', p:83000, oid:'317_38_diamonds', im:'/IMG_4460.png'},
+        {a:'383+46', c:'💎', p:98000, oid:'383_46_diamonds', im:'/IMG_4442.png'},
+        {a:'Twilight pass', c:'', p:123000, txt:true, oid:'twilight_pass', im:'/IMG_4429.png'},
+        {a:'633+83', c:'💎', p:163000, oid:'633_83_diamonds', im:'/IMG_4443.png'},
+        {a:'940+144', c:'💎', p:237000, oid:'940_144_diamonds', im:'/IMG_4430.png'},
+        {a:'1252+194', c:'💎', p:307000, oid:'1252_194_diamonds', im:'/IMG_4440.png'},
+        {a:'2501+475', c:'💎', p:656000, oid:'2501_475_diamonds', im:'/IMG_4440.png'},
+        {a:'6252+1250', c:'💎', p:1635000, oid:'6252_1250_diamonds', im:'/IMG_4440.png'}
+      ],
+      philippines:[
+        {a:'20+2', c:'💎', p:7600, oid:'20_2_diamonds', im:'/IMG_4451.png'},
+        {a:'51+5', c:'💎', p:15000, oid:'51_5_diamonds', im:'/IMG_4449.png'},
+        {a:'102+10', c:'💎', p:27000, oid:'102_10_diamonds', im:'/IMG_4455.png'},
+        {a:'Weekly Diamond Pass', c:'', p:29000, txt:true, oid:'weekly_diamond_pass', im:'/IMG_4446.png'},
+        {a:'153+15', c:'💎', p:37000, oid:'153_15_diamonds', im:'/IMG_4459.png'},
+        {a:'203+20', c:'💎', p:48700, oid:'203_20_diamonds', im:'/IMG_4460.png'},
+        {a:'303+33', c:'💎', p:72000, oid:'303_33_diamonds', im:'/IMG_4442.png'},
+        {a:'504+66', c:'💎', p:121000, oid:'504_66_diamonds', im:'/IMG_4443.png'},
+        {a:'Twilight pass', c:'', p:123000, txt:true, oid:'twilight_pass', im:'/IMG_4429.png'},
+        {a:'1007+156', c:'💎', p:242000, oid:'1007_156_diamonds', im:'/IMG_4430.png'},
+        {a:'2015+383', c:'💎', p:485000, oid:'2015_383_diamonds', im:'/IMG_4440.png'},
+        {a:'5035+1007', c:'💎', p:1212000, oid:'5035_1007_diamonds', im:'/IMG_4440.png'}
+      ],
+      singapore:[
+        {a:'38+4', c:'💎', p:13500, oid:'38_4_diamonds', im:'/IMG_4451.png'},
+        {a:'64+6', c:'💎', p:18200, oid:'64_6_diamonds', im:'/IMG_4449.png'},
+        {a:'Weekly Elite Pack', c:'', p:28000, txt:true, oid:'weekly_elite_pack', im:'/IMG_4446.png'},
+        {a:'Haftalik propusk', c:'', p:29000, txt:true, oid:'weekly_pass', im:'/IMG_4446.png'},
+        {a:'127+13', c:'💎', p:33000, oid:'127_13_diamonds', im:'/IMG_4455.png'},
+        {a:'Monthly Elite Pack', c:'', p:71000, txt:true, oid:'monthly_elite_pack', im:'/IMG_4429.png'},
+        {a:'254+30', c:'💎', p:74000, oid:'254_30_diamonds', im:'/IMG_4459.png'},
+        {a:'317+38', c:'💎', p:83000, oid:'317_38_diamonds', im:'/IMG_4460.png'},
+        {a:'383+46', c:'💎', p:99000, oid:'383_46_diamonds', im:'/IMG_4442.png'},
+        {a:'633+83', c:'💎', p:165000, oid:'633_83_diamonds', im:'/IMG_4443.png'},
+        {a:'940+144', c:'💎', p:252000, oid:'940_144_diamonds', im:'/IMG_4430.png'},
+        {a:'1252+194', c:'💎', p:325000, oid:'1252_194_diamonds', im:'/IMG_4440.png'},
+        {a:'2501+475', c:'💎', p:649000, oid:'2501_475_diamonds', im:'/IMG_4440.png'},
+        {a:'6252+1250', c:'💎', p:1590000, oid:'6252_1250_diamonds', im:'/IMG_4440.png'}
+      ],
+      turkey:[
+        {a:'24', c:'💎', p:8000, oid:'24_diamonds', im:'/IMG_4451.png'},
+        {a:'44', c:'💎', p:13700, oid:'44_diamonds', im:'/IMG_4449.png'},
+        {a:'Weekly Elite Pack', c:'', p:18600, txt:true, oid:'weekly_elite_pack', im:'/IMG_4446.png'},
+        {a:'88', c:'💎', p:19300, oid:'88_diamonds', im:'/IMG_4455.png'},
+        {a:'Haftalik propusk', c:'', p:28300, txt:true, oid:'weekly_pass', im:'/IMG_4446.png'},
+        {a:'133', c:'💎', p:30000, oid:'133_diamonds', im:'/IMG_4459.png'},
+        {a:'221', c:'💎', p:46000, oid:'221_diamonds', im:'/IMG_4460.png'},
+        {a:'Monthly Elite Pack', c:'', p:66000, txt:true, oid:'monthly_elite_pack', im:'/IMG_4429.png'},
+        {a:'494', c:'💎', p:99800, oid:'494_diamonds', im:'/IMG_4442.png'},
+        {a:'Twilight pass', c:'', p:113000, txt:true, oid:'twilight_pass', im:'/IMG_4429.png'},
+        {a:'1041', c:'💎', p:201000, oid:'1041_diamonds', im:'/IMG_4443.png'},
+        {a:'2645', c:'💎', p:502000, oid:'2645_diamonds', im:'/IMG_4430.png'},
+        {a:'6146', c:'💎', p:1149000, oid:'6146_diamonds', im:'/IMG_4440.png'}
+      ],
+      united_states:[
+        {a:'51+5', c:'💎', p:13500, oid:'51_5_diamonds', im:'/IMG_4451.png'},
+        {a:'Weekly Diamond Pass', c:'', p:29700, txt:true, oid:'weekly_diamond_pass', im:'/IMG_4446.png'},
+        {a:'253+25', c:'💎', p:64000, oid:'253_25_diamonds', im:'/IMG_4449.png'},
+        {a:'505+66', c:'💎', p:119000, oid:'505_66_diamonds', im:'/IMG_4455.png'},
+        {a:'1010+182', c:'💎', p:239000, oid:'1010_182_diamonds', im:'/IMG_4459.png'},
+        {a:'1515+273', c:'💎', p:380000, oid:'1515_273_diamonds', im:'/IMG_4460.png'},
+        {a:'2525+480', c:'💎', p:612000, oid:'2525_480_diamonds', im:'/IMG_4442.png'},
+        {a:'3030+576', c:'💎', p:711000, oid:'3030_576_diamonds', im:'/IMG_4443.png'},
+        {a:'4008+802', c:'💎', p:979000, oid:'4008_802_diamonds', im:'/IMG_4430.png'},
+        {a:'5010+1002', c:'💎', p:1215000, oid:'5010_1002_diamonds', im:'/IMG_4440.png'}
+      ],
+      brazil:[
+        {a:'50+5', c:'💎', p:14500, oid:'50_5_diamonds', im:'/IMG_4451.png'},
+        {a:'78+8', c:'💎', p:18000, oid:'78_8_diamonds', im:'/IMG_4449.png'},
+        {a:'Haftalik propusk', c:'', p:24700, txt:true, oid:'weekly_pass', im:'/IMG_4446.png'},
+        {a:'156+16', c:'💎', p:31000, oid:'156_16_diamonds', im:'/IMG_4455.png'},
+        {a:'150+15', c:'💎', p:33500, oid:'150_15_diamonds', im:'/IMG_4459.png'},
+        {a:'234+23', c:'💎', p:45000, oid:'234_23_diamonds', im:'/IMG_4460.png'},
+        {a:'310+34', c:'💎', p:51000, oid:'310_34_diamonds', im:'/IMG_4442.png'},
+        {a:'250+25', c:'💎', p:53500, oid:'250_25_diamonds', im:'/IMG_4443.png'},
+        {a:'465+51', c:'💎', p:70500, oid:'465_51_diamonds', im:'/IMG_4430.png'},
+        {a:'482', c:'💎', p:71000, oid:'482_diamonds', im:'/IMG_4440.png'},
+        {a:'500+65', c:'💎', p:107000, oid:'500_65_diamonds', im:'/IMG_4440.png'},
+        {a:'Twilight pass', c:'', p:113000, txt:true, oid:'twilight_pass', im:'/IMG_4429.png'},
+        {a:'625+81', c:'💎', p:129000, oid:'625_81_diamonds', im:'/IMG_4440.png'},
+        {a:'1860+335', c:'💎', p:397000, oid:'1860_335_diamonds', im:'/IMG_4440.png'},
+        {a:'3099+589', c:'💎', p:584000, oid:'3099_589_diamonds', im:'/IMG_4440.png'},
+        {a:'4649+883', c:'💎', p:961000, oid:'4649_883_diamonds', im:'/IMG_4440.png'},
+        {a:'7740+1548', c:'💎', p:1602000, oid:'7740_1548_diamonds', im:'/IMG_4440.png'}
+      ]
+    },
     idFields:[{key:'playerId',label:"O'YINCHI ID",ph:"O'yinchi ID kiriting"},{key:'serverId',label:'SERVER ID',ph:'Server ID kiriting'}],
     packages:[
       {a:'56', c:'💎', p:15000, oid:'51_5_diamonds', im:'/IMG_4451.png'},
@@ -751,9 +863,23 @@ const REGIONS = [
 let view = 'home', curGame = null, selPkg = null, curRegion = 'uzb';
 let curPkgs = null;
 function activePkgs(){ return curPkgs || (curGame ? curGame.packages : []); }
-function regionPkgs(g, region){
+function mlRegion(region){
   const r = String(region||'').toLowerCase();
-  if(g.id === 'mlbb' && r.indexOf('russ') > -1 && g.packagesRu) return g.packagesRu;
+  if(r.indexOf('russ') > -1 || r === 'ru') return 'ru';
+  if(r.indexOf('indonesi') > -1) return 'indonesia';
+  if(r.indexOf('malays') > -1) return 'malaysia';
+  if(r.indexOf('philippin') > -1 || r.indexOf('filipin') > -1) return 'philippines';
+  if(r.indexOf('singapor') > -1) return 'singapore';
+  if(r.indexOf('turk') > -1 || r.indexOf('t\u00fcrk') > -1) return 'turkey';
+  if(r.indexOf('united states') > -1 || r === 'usa' || r === 'us') return 'united_states';
+  if(r.indexOf('brazil') > -1 || r.indexOf('brasil') > -1) return 'brazil';
+  return 'global';
+}
+function regionPkgs(g, region){
+  if(g.id === 'mlbb' && g.pkgByRegion){
+    const k = mlRegion(region);
+    if(g.pkgByRegion[k]) return g.pkgByRegion[k];
+  }
   return g.packages;
 }
 let histTab = 'orders', histFilter = 'all';
