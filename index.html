@@ -632,6 +632,7 @@ const RU = {
   "Buyurtmalar":"Заказы","Moliya":"Финансы","Barchasi":"Все","Bajarildi":"Выполнено",
   "Kutilmoqda":"В ожидании","Bekor qilingan":"Отменено","Pul qaytarildi":"Возврат средств","Yuborilmoqda":"Отправляется","Tungi rejimga o'tish":"Переключиться на тёмный режим","Statusni yangilash":"Обновить статус",
   "To'lovni amalga oshiring":"Произведите оплату","AYNAN SHU SUMMANI O'TKAZING":"ПЕРЕВЕДИТЕ РОВНО ЭТУ СУММУ","SUMMA (so'm)":"СУММА (сум)","Summani nusxalash":"Скопировать сумму","Karta raqamini nusxalash":"Скопировать номер карты","To'ladim":"Я оплатил","Bekor qilish":"Отменить",
+  "Summani o'zbek so'mida kiriting, balansingizga aynan shu miqdor qo'shiladi.":"Введите сумму в сумах — именно она зачислится на баланс.","Keyingi ekranda kartaga qancha to'lash kerakligi ko'rsatiladi.":"На следующем экране будет указано, сколько перевести на карту.","Balansingizga qo'shiladi:":"Зачислится на баланс:",
   "Qancha to'ldirmoqchisiz?":"На какую сумму пополнить?","Vaqt tugadi":"Время истекло","Nusxalandi":"Скопировано","Bekor qilindi":"Отменено","Qabul qilindi — admin tekshiradi":"Принято — админ проверит",
   "Tasdiqlandi":"Подтверждено","Hisob to'ldirish":"Пополнение счёта","Karta":"Карта","To'lovlaringiz shu yerda ko'rinadi.":"Ваши платежи появятся здесь.",
   "💬 Fikrlar":"💬 Отзывы","Spamlar uchun qulay yozishmalar joyi":"Удобный чат для заблокированных","Telegram akkauntingiz cheklangan bo'lsa shu yerdan yozing":"Если ваш аккаунт Telegram ограничен, пишите здесь","Admin bilan bog'lanish":"Связь с админом","Akkauntingiz cheklanmagan bo'lsa, to'g'ridan-to'g'ri adminga yozing.":"Если ваш аккаунт не ограничен, пишите админу напрямую.","Telegram akkauntingiz spam sababli cheklangan va adminga yoza olmayotgan bo'lsangiz, Chat bo'limidan foydalaning.":"Если аккаунт Telegram ограничен из-за спама и вы не можете написать админу, воспользуйтесь Чатом.","Chat bo'limidagi yozishmalarni faqat siz va admin ko'radi.":"Переписку в Чате видите только вы и админ.","Telegramda to'g'ridan-to'g'ri yozish":"Написать напрямую в Telegram","Ilova ichida yozish, cheklov ta'sir qilmaydi":"Писать внутри приложения, ограничения не мешают","Hozircha bo'sh":"Пока пусто","Chat bo'limi":"Чат","Yuborish":"Отправить","Xabaringizni yozing...":"Напишите сообщение...","Yozishmani faqat siz va admin ko'radi":"Переписку видите только вы и админ","Savolingizni yozing, admin javob beradi.":"Напишите вопрос, админ ответит.","Davom etish":"Продолжить","⏳ Tayyorlanmoqda…":"⏳ Подготовка…",
@@ -1832,7 +1833,7 @@ function renderTopup(){
     <div style="background:var(--card);border:1px solid var(--stroke);border-radius:var(--radius);padding:16px;margin-bottom:12px">
       <div class="lbl" style="margin-bottom:8px">AYNAN SHU SUMMANI O'TKAZING</div>
       <div style="font-weight:800;font-size:26px;letter-spacing:1px">${payAmount(topPend.base, topPend.pay, c.cur).txt} ${c.cur}</div>
-      ${c.cur === "so'm" ? '' : `<div style="color:var(--dim);font-size:12.5px;margin-top:6px">Balansingizga qo'shiladi: ${fmt(topPend.pay)} so'm</div>`}
+      <span>Balansingizga qo'shiladi:</span> ${fmt(topPend.pay)} so'm</div>
       <button class="big-btn" style="margin:12px 0 0;justify-content:center;background:var(--card-2)" onclick="copyCard('${payAmount(topPend.base, topPend.pay, c.cur).raw}')">Summani nusxalash</button>
     </div>
     <div style="background:var(--card);border:1px solid var(--stroke);border-radius:var(--radius);padding:16px;margin-bottom:12px">
@@ -1874,7 +1875,8 @@ function renderTopup(){
   <p style="color:var(--dim);font-size:13.5px;margin:-6px 2px 18px">Qancha to'ldirmoqchisiz?</p>
   <div class="form-card">
     <div class="lbl">SUMMA (so'm)</div>
-    <p style="color:var(--dim);font-size:12.5px;margin:6px 2px 10px;line-height:1.45">Summani o'zbek so'mida kiriting \u2014 balansingizga aynan shu miqdor qo'shiladi.${c.cur === "so'm" ? '' : ` Keyingi ekranda kartaga qancha ${c.cur} o'tkazishingiz ko'rsatiladi.`}</p>
+    Summani o'zbek so'mida kiriting, balansingizga aynan shu miqdor qo'shiladi.</p>
+    ${c.cur === "so'm" ? '' : `<p style="color:var(--dim);font-size:12.5px;margin:0 2px 10px;line-height:1.45">Keyingi ekranda kartaga qancha to'lash kerakligi ko'rsatiladi.</p>`}
     <div class="inp-wrap"><input class="inp" id="topAmount" inputmode="numeric" placeholder="Masalan: 50000"></div>
     <button class="check-btn" id="topBtn" style="width:100%;margin-top:14px;padding:13px" onclick="sendTopup()">Davom etish</button>
     <div id="payBox" class="id-res"></div>
