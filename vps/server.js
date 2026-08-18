@@ -423,6 +423,63 @@ app.post("/ask-phone", (req,res)=>{
   }catch(e){ console.log("ASKPHONE XATO:", e.message); res.json({ ok:false, error:"server" }); }
 });
 
+/* ---------- Ilova ichidagi yozishmalar (spam cheklovi bo'lganlar uchun) ---------- */
+app.post("/chat/list", (req,res)=>{
+  try{
+    const who = checkInit((req.body||{}).initData);
+    if(!who) return res.json({ ok:false, error:"auth" });
+    const db = load();
+    const u = urec(db, who.id);
+    if(!Array.isArray(u.chat)) u.chat = [];
+    res.json({ ok:true, msgs: u.chat.slice(-60) });
+  }catch(e){ console.log("CHATLIST XATO:", e.message); res.json({ ok:false, error:"server" }); }
+});
+
+app.post("/chat/send", (req,res)=>{
+  try{
+    const b = req.body || {};
+    const who = checkInit(b.initData);
+    if(!who) return res.json({ ok:false, error:"auth" });
+    const text = String(b.text||"").trim().slice(0,1000);
+    if(!text) return res.json({ ok:false, error:"empty" });
+    const db = load();
+    const u = urec(db, who.id);
+    if(!Array.isArray(u.chat)) u.chat = [];
+    const min = Date.now() - 60000;
+    if(u.chat.filter(function(m){ return m.who==="user" && new Date(m.at).getTime() > min; }).length >= 12)
+      return res.json({ ok:false, error:"busy" });
+    u.chat.push({ who:"user", text:text, at:new Date().toISOString() });
+    u.chat = u.chat.slice(-100);
+    save(db);
+    if(ADMIN_ID) tgCall("sendMessage", { chat_id: ADMIN_ID,
+      text: "\uD83D\uDCAC "+who2(who)+"\nid: "+who.id+"\n\n"+text+
+            "\n\n\u2199\uFE0F Javob berish uchun shu xabarga REPLY qiling" });
+    res.json({ ok:true });
+  }catch(e){ console.log("CHATSEND XATO:", e.message); res.json({ ok:false, error:"server" }); }
+});
+
+function adminReply(msg){
+  try{
+    const rt = msg.reply_to_message;
+    if(!rt || !rt.text) return false;
+    const m = rt.text.match(/^id:\s*(\d+)$/m);
+    if(!m) return false;
+    const uid = m[1];
+    const text = String(msg.text||"").trim();
+    if(!text) return false;
+    const db = load();
+    const u = urec(db, uid);
+    if(!Array.isArray(u.chat)) u.chat = [];
+    u.chat.push({ who:"admin", text:text, at:new Date().toISOString() });
+    u.chat = u.chat.slice(-100);
+    save(db);
+    send(uid, "\uD83D\uDCAC Qo'llab-quvvatlashdan javob keldi:\n\n"+text+
+               "\n\nIlovadagi Chat bo'limida davom ettirishingiz mumkin.");
+    send(ADMIN_ID, "\u2705 Yuborildi");
+    return true;
+  }catch(e){ console.log("REPLY XATO:", e.message); return false; }
+}
+
 app.get("/orders", (req,res)=>{
   const db = load();
   const rec = db[String(req.query.id||"")];
@@ -735,6 +792,9 @@ app.post("/webhook", (req,res)=>{
     }
 
     const text = String(msg.text || "");
+    if(ADMIN_ID && fromId === ADMIN_ID && msg.reply_to_message){
+      if(adminReply(msg)) return;
+    }
     if(text.indexOf("/kutish") === 0){
       if(ADMIN_ID && fromId !== ADMIN_ID) return;
       const db = load(); expireOld(db); save(db);
