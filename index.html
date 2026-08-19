@@ -534,6 +534,26 @@ body.light .thm-lt{display:inline}
 .form-card .lbl{ font-size:10px; letter-spacing:.6px; margin-bottom:6px }
 .inp{ font-size:13px; padding:10px 12px }
 .inp-wrap{ margin-bottom:11px }
+/* === Paketlar: yumshoqroq ko'rinish === */
+.pkg{ border:1px solid rgba(255,255,255,.07) !important;
+      background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.015)) !important;
+      box-shadow:0 2px 12px rgba(0,0,0,.28) !important;
+      transition:transform .15s ease, box-shadow .25s ease, border-color .25s ease }
+.pkg:active{ transform:scale(.97) }
+.pkg.sel{ border-color:rgba(110,130,255,.9) !important;
+          box-shadow:0 0 0 1px rgba(110,130,255,.45), 0 0 24px rgba(110,130,255,.30) !important }
+.pkg.promo{ border-color:rgba(245,179,1,.7) !important;
+            animation:promoGlow 3.2s ease-in-out infinite }
+@keyframes promoGlow{
+  0%,100%{ box-shadow:0 0 0 1px rgba(245,179,1,.18), 0 0 9px rgba(245,179,1,.10) }
+  50%    { box-shadow:0 0 0 1px rgba(245,179,1,.42), 0 0 24px rgba(245,179,1,.30) }
+}
+.pkg .hit{ animation:hitGlow 3.2s ease-in-out infinite }
+@keyframes hitGlow{
+  0%,100%{ box-shadow:0 0 5px rgba(245,179,1,.30) }
+  50%    { box-shadow:0 0 15px rgba(245,179,1,.70) }
+}
+.buy-bar .check-btn, .buy-btn{ box-shadow:0 8px 26px -8px rgba(63,85,246,.75) !important }
 </style>
 </head>
 <body>
@@ -1248,7 +1268,7 @@ function fillId(v){
 
 function pkgHtml(list){
   return (list||[]).map((p,i)=>`
-      <button class="pkg ${p.txt?'txt-only':''}" data-i="${i}" onclick="pickPkg(${i})" style="${p.promo?'border-color:#F5B301;box-shadow:0 0 0 1px rgba(245,179,1,.32),0 0 20px rgba(245,179,1,.24)':''}">
+      <button class="pkg ${p.txt?'txt-only':''} ${p.promo?'promo':''}" data-i="${i}" onclick="pickPkg(${i})" style="${p.promo?'border-color:#F5B301;box-shadow:0 0 0 1px rgba(245,179,1,.32),0 0 20px rgba(245,179,1,.24)':''}">
         ${p.hit?`<span class="hit">HIT</span>`:''}
         <span class="pic"><span class="em">${p.im?'<img class="pim" src="'+p.im+'">':p.txt?'🎁':(p.c==='💎'?'💎':p.c==='⭐'?'⭐':'🪙')}</span>${p.x2?`<span class="x2">x2</span>`:''}</span>
         <span class="info"><span class="a ${p.txt?'small':''}">${p.a}${p.c&&p.c.length<=2?' '+p.c:''}</span><span class="p">${fmt(p.p)} so'm</span></span>
