@@ -554,10 +554,13 @@ body.light .thm-lt{display:inline}
   50%    { box-shadow:0 0 22px rgba(245,179,1,1) }
 }
 .buy-bar .check-btn, .buy-btn{ box-shadow:0 8px 26px -8px rgba(63,85,246,.75) !important }
-.lang-list{ display:flex; flex-wrap:wrap; gap:8px; margin:10px 0 4px }
-.lang-list .ll{ display:flex; align-items:center; gap:7px; background:var(--card); border:1px solid var(--stroke);
-                border-radius:999px; padding:8px 14px; font-size:13px; color:var(--dim) }
-.lang-list .ll.on{ background:var(--blue); color:#fff; border-color:transparent }
+.lang-page{ display:flex; flex-direction:column; gap:8px; padding-bottom:20px }
+.lang-page .lrow{ display:flex; align-items:center; gap:12px; width:100%; background:var(--card);
+                  border:1px solid var(--stroke); border-radius:14px; padding:13px 15px; font-size:14px; color:var(--text) }
+.lang-page .lrow.on{ border-color:var(--blue); background:rgba(63,85,246,.14) }
+.lang-page .lf{ font-size:20px; line-height:1 }
+.lang-page .ln{ flex:1; text-align:left }
+.lang-page .lc{ color:#4FE0A0; font-weight:800 }
 </style>
 </head>
 <body>
@@ -663,6 +666,7 @@ let currentLang = 'uz';
 try{ const sv=localStorage.getItem('mt_lang'); if(sv) currentLang=sv; }catch(e){}
 const DICT = {};
 DICT.ru = {
+  "O'zgartirish":"Изменить",
   "Tungi rejim":"Ночной режим","Yorug' rejimga o'tish":"Переключиться на светлый режим",
   "Bosh sahifa":"Главная","Tarix":"История","Sozlamalar":"Настройки","Orqaga":"Назад",
   "Balans":"Баланс","so'm":"сум","Keshbek":"Кэшбэк",
@@ -714,6 +718,7 @@ DICT.ru = {
   "faqat raqam bo'lishi kerak":"должны быть только цифры"
 };
 DICT.en = {
+  "O'zgartirish":"Change",
   "Tungi rejim":"Night mode",
   "Yorug' rejimga o'tish":"Switch to light mode",
   "Bosh sahifa":"Home",
@@ -830,6 +835,7 @@ DICT.en = {
 };
 
 DICT.tr = {
+  "O'zgartirish":"Değiştir",
   "Tungi rejim":"Gece modu",
   "Yorug' rejimga o'tish":"Aydınlık moda geç",
   "Bosh sahifa":"Ana sayfa",
@@ -946,6 +952,7 @@ DICT.tr = {
 };
 
 DICT.kk = {
+  "O'zgartirish":"Өзгерту",
   "Tungi rejim":"Түнгі режим",
   "Yorug' rejimga o'tish":"Жарық режимге ауысу",
   "Bosh sahifa":"Басты бет",
@@ -1062,6 +1069,7 @@ DICT.kk = {
 };
 
 DICT.ky = {
+  "O'zgartirish":"Өзгөртүү",
   "Tungi rejim":"Түнкү режим",
   "Yorug' rejimga o'tish":"Жарык режимге өтүү",
   "Bosh sahifa":"Башкы бет",
@@ -1458,7 +1466,7 @@ const fmt = n => n.toLocaleString('ru-RU').replace(/,/g,' ');
 
 function go(v){
   view = v; window.scrollTo(0,0);
-  const sub = (v==='game' || v==='topup' || v==='spam' || v==='chat');
+  const sub = (v==='game' || v==='topup' || v==='spam' || v==='chat' || v==='lang');
   if(tg&&tg.BackButton){ sub ? tg.BackButton.show() : tg.BackButton.hide(); }
   document.querySelector('.nav').style.display = (v==='game'||v==='chat') ? 'none' : 'flex';
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('on', n.dataset.tab===v));
@@ -1467,12 +1475,13 @@ function go(v){
   else if(v==='history') renderHistory();
   else if(v==='settings'){ renderSettings(); loadPhone(); }
   else if(v==='topup'){ topMethod=null; renderTopup(); }
+  else if(v==='lang') renderLang();
   else if(v==='spam') renderSpam();
   else if(v==='chat') renderChat();
   if(v==='home'||v==='settings') loadBalance();
   syncNavPill(true);
 }
-function onBack(){ haptic(); if(view==='chat') go('spam'); else if(view==='spam') go('settings'); else go('home'); }
+function onBack(){ haptic(); if(view==='chat') go('spam'); else if(view==='spam'||view==='lang') go('settings'); else go('home'); }
 let navDragged = false;
 document.querySelectorAll('.nav-item').forEach(n=> n.addEventListener('click', ()=>{ if(navDragged) return; haptic(); go(n.dataset.tab); }));
 
@@ -2194,12 +2203,11 @@ function renderSettings(){
     Telefon raqamini ulashish
   </button>
   <div class="sec-lbl">Til</div>
-  <button class="svc" onclick="toggleLangList()" style="width:100%">
+  <button class="svc" onclick="go('lang')" style="width:100%">
     <span class="ic" style="background:#4A6BD8"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zM2 12h20M12 2c3 3.5 3 16.5 0 20M12 2c-3 3.5-3 16.5 0 20"/></svg></span>
     <span class="txt"><div class="t">Til</div><div class="s">${langInfo(currentLang).flag} ${langInfo(currentLang).name}</div></span>
-    <span class="arw">${langOpen ? '⌄' : '›'}</span>
+    <span class="arw">›</span>
   </button>
-  ${langOpen ? `<div class="lang-list">${LANGS.map(function(L){ return `<button class="ll ${L.code===currentLang?'on':''}" onclick="setLang('${L.code}')"><span>${L.flag}</span><span>${L.name}</span></button>`; }).join('')}</div>` : ''}
   <div class="sec-lbl">Xizmatlar</div>
   <div class="svc-list">
     <button class="svc" onclick="invite()">
@@ -2237,11 +2245,16 @@ function setLang(l){
   if(old !== 'uz' && DICT[old]) applyMap(revOf(old));
   currentLang = l;
   try{ localStorage.setItem('mt_lang', l); }catch(e){}
-  langOpen = false;
-  renderSettings(); applyLang(); loadPhone();
+  go('settings');
 }
-let langOpen = false;
-function toggleLangList(){ haptic(); langOpen = !langOpen; renderSettings(); applyLang(); loadPhone(); }
+function renderLang(){
+  app.innerHTML = `
+  <div class="back-row"><button class="back-btn" onclick="go('settings')"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>Orqaga</button></div>
+  <div class="page-title">Til</div>
+  <div class="lang-page">
+    ${LANGS.map(function(L){ return `<button class="lrow ${L.code===currentLang?'on':''}" onclick="setLang('${L.code}')"><span class="lf">${L.flag}</span><span class="ln">${L.name}</span>${L.code===currentLang?'<span class="lc">✓</span>':''}</button>`; }).join('')}
+  </div>`;
+}
 let phoneCache = null, phoneLoaded = false;
 function hidePhoneSection(hide){
   const btn = document.querySelector('button[onclick="sharePhone()"]');
