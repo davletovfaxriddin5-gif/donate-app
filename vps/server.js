@@ -739,13 +739,58 @@ app.post("/topup-cancel", (req,res)=>{
   }catch(e){ console.log("TOPCANCEL XATO:", e.message); res.json({ ok:false, error:"server" }); }
 });
 
+/* ---------- Hammaga xabar tarqatish (faqat admin) ---------- */
+let bcast = { armed:false, kind:null, text:"", photo:"", ents:null };
+
+function bcastTargets(){
+  const db = load();
+  return Object.keys(db).filter(function(k){ return /^\d+$/.test(k); });
+}
+
+function doBroadcast(){
+  const ids = bcastTargets();
+  const kind = bcast.kind, text = bcast.text, photo = bcast.photo, ents = bcast.ents;
+  bcast = { armed:false, kind:null, text:"", photo:"", ents:null };
+  let ok = 0, fail = 0, i = 0;
+  send(ADMIN_ID, "\uD83D\uDCE4 Yuborilmoqda\u2026 (" + ids.length + " ta)");
+  function step(){
+    if(i >= ids.length){
+      send(ADMIN_ID, "\u2705 Tugadi\nYuborildi: " + ok + "\nYetib bormadi: " + fail);
+      return;
+    }
+    const uid = ids[i++];
+    const method = kind === "photo" ? "sendPhoto" : "sendMessage";
+    const body = kind === "photo"
+      ? { chat_id: uid, photo: photo, caption: text, caption_entities: ents || undefined }
+      : { chat_id: uid, text: text, entities: ents || undefined };
+    fetch("https://api.telegram.org/bot" + TOKEN + "/" + method, {
+      method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(body)
+    }).then(function(r){ return r.json(); })
+      .then(function(j){ if(j && j.ok) ok++; else fail++; })
+      .catch(function(){ fail++; })
+      .then(function(){ setTimeout(step, 60); });
+  }
+  step();
+}
+
 function handleCb(cq){
   const from = String((cq.from && cq.from.id) || "");
   if(ADMIN_ID && from !== ADMIN_ID){
     tgCall("answerCallbackQuery", { callback_query_id: cq.id, text: "Ruxsat yo'q" });
     return;
   }
-  const parts = String(cq.data||"").split(":");
+  const d = String(cq.data||"");
+  if(d === "bc_ok" || d === "bc_no"){
+    tgCall("answerCallbackQuery", { callback_query_id: cq.id });
+    if(d === "bc_no"){
+      bcast = { armed:false, kind:null, text:"", photo:"", ents:null };
+      send(ADMIN_ID, "\u274C Tarqatish bekor qilindi");
+      return;
+    }
+    doBroadcast();
+    return;
+  }
+  const parts = d.split(":");
   if(parts.length !== 3 || (parts[0] !== "tp_ok" && parts[0] !== "tp_no")){
     tgCall("answerCallbackQuery", { callback_query_id: cq.id });
     return;
@@ -805,6 +850,43 @@ app.post("/webhook", (req,res)=>{
     const text = String(msg.text || "");
     if(ADMIN_ID && fromId === ADMIN_ID && msg.reply_to_message){
       if(adminReply(msg)) return;
+    }
+    if(ADMIN_ID && fromId === ADMIN_ID){
+      if(text.indexOf("/xabar") === 0){
+        bcast = { armed:true, kind:null, text:"", photo:"", ents:null };
+        send(fromId, "\uD83D\uDCE2 Keyingi xabaringiz BARCHA foydalanuvchilarga yuboriladi.\n\n" +
+                     "Rasm (izoh bilan) yoki oddiy matn yuboring.\nBekor qilish uchun /bekor");
+        return;
+      }
+      if(text.indexOf("/bekor") === 0){
+        bcast = { armed:false, kind:null, text:"", photo:"", ents:null };
+        send(fromId, "\u274C Tarqatish bekor qilindi");
+        return;
+      }
+      if(bcast.armed){
+        if(msg.photo && msg.photo.length){
+          bcast.kind = "photo";
+          bcast.photo = msg.photo[msg.photo.length-1].file_id;
+          bcast.text = String(msg.caption || "");
+          bcast.ents = msg.caption_entities || null;
+        } else if(text){
+          bcast.kind = "text";
+          bcast.text = text;
+          bcast.ents = msg.entities || null;
+        } else {
+          send(fromId, "Faqat rasm yoki matn yuboring. Bekor qilish: /bekor");
+          return;
+        }
+        bcast.armed = false;
+        const n = bcastTargets().length;
+        tgCall("sendMessage", { chat_id: fromId,
+          text: "\uD83D\uDCE2 Yuqoridagi xabar " + n + " ta foydalanuvchiga yuborilsinmi?",
+          reply_markup: { inline_keyboard: [[
+            { text: "\u2705 Ha, yuborilsin", callback_data: "bc_ok" },
+            { text: "\u274C Yo'q", callback_data: "bc_no" }
+          ]]}});
+        return;
+      }
     }
     if(text.indexOf("/kutish") === 0){
       if(ADMIN_ID && fromId !== ADMIN_ID) return;
