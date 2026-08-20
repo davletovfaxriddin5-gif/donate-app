@@ -760,9 +760,12 @@ function doBroadcast(){
     }
     const uid = ids[i++];
     const method = kind === "photo" ? "sendPhoto" : "sendMessage";
+    const kb = { inline_keyboard: [[
+      { text: "\uD83D\uDE80 Xaridni boshlash", web_app: { url: APP_URL } }
+    ]]};
     const body = kind === "photo"
-      ? { chat_id: uid, photo: photo, caption: text, caption_entities: ents || undefined }
-      : { chat_id: uid, text: text, entities: ents || undefined };
+      ? { chat_id: uid, photo: photo, caption: text, caption_entities: ents || undefined, reply_markup: kb }
+      : { chat_id: uid, text: text, entities: ents || undefined, reply_markup: kb };
     fetch("https://api.telegram.org/bot" + TOKEN + "/" + method, {
       method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(body)
     }).then(function(r){ return r.json(); })
