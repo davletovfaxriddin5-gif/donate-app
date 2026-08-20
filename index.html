@@ -648,7 +648,8 @@ const RATES = { "so'm": 1, usd: 11500, rubl: 145 };
 function payAmount(base, pay, cur){
   const r = RATES[cur] || 1;
   if(r === 1) return { txt: fmt(pay), raw: String(pay) };
-  const v = (Math.ceil(base / r * 100) / 100) + ((pay - base) / 100);
+  const step = Math.round((pay - base) / 100);      /* 1, 2, 3 ... */
+  const v = (Math.ceil(base / r * 100) / 100) + (step / 100);
   const t = v.toFixed(2);
   return { txt: t, raw: t };
 }
