@@ -364,7 +364,8 @@ function payText(base, pay, bank){
   const cur = CARD_CUR[bank] || "so'm";
   const r = RATES[cur] || 1;
   if(r === 1) return pay + " so'm";
-  const v = (Math.ceil(base / r * 100) / 100) + ((pay - base) / 100);
+  const step = Math.round((pay - base) / 100);      /* 1, 2, 3 ... */
+  const v = (Math.ceil(base / r * 100) / 100) + (step / 100);
   return v.toFixed(2) + " " + cur + "  (" + pay + " so'm balansga)";
 }
 
@@ -693,7 +694,8 @@ app.post("/topup", (req,res)=>{
 
     const used = usedAmounts(db);
     let pay = 0;
-    for(let n = 1; n <= 999; n++){ if(!used.has(base + n)){ pay = base + n; break; } }
+    /* Noyob farq 100 so'mlik qadamlar bilan \u2014 bank SMS'ida aniq ko'rinadi */
+    for(let n = 1; n <= 60; n++){ if(!used.has(base + n*100)){ pay = base + n*100; break; } }
     if(!pay) return res.json({ ok:false, error:"busy" });
 
     const id = "TP"+Date.now().toString().slice(-8);
