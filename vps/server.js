@@ -825,6 +825,83 @@ function handleCb(cq){
     text: (m.text||"") + "\n\n" + note });
 }
 
+/* ---------- Bank SMS orqali avtomatik tasdiqlash ---------- */
+/* iPhone "Komanda" ilovasi SMS matnini shu manzilga yuboradi.
+   Kalit .env dagi SMS_KEY bilan mos kelmasa \u2014 rad etiladi. */
+
+const SMS_KEY = String(process.env.SMS_KEY || "");
+const smsSeen = [];   /* takroriy SMS'larni to'sish uchun */
+
+function smsAmount(txt){
+  /* Humo: "... popolnenie 11810.00 UZS; ..." \u2014 faqat popolnenie dan keyingisi.
+     "Dostupno: ..." dagi summa hisobga OLINMAYDI. */
+  const m = /popolnenie[^0-9]{0,12}([0-9][0-9\s.,]*)\s*(?:UZS|SUM|СУМ)/i.exec(String(txt||""));
+  if(!m) return 0;
+  const raw = m[1].replace(/\s/g, "").replace(/,/g, ".");
+  const v = Math.round(parseFloat(raw));
+  return (isFinite(v) && v > 0) ? v : 0;
+}
+
+app.post("/sms", (req,res)=>{
+  try{
+    const b = req.body || {};
+    if(!SMS_KEY || String(b.key||"") !== SMS_KEY) return res.json({ ok:false, error:"auth" });
+
+    const txt = String(b.text || "").trim();
+    if(!txt) return res.json({ ok:false, error:"empty" });
+
+    /* bir xil SMS ikki marta kelsa \u2014 e'tiborsiz qoldiramiz */
+    if(smsSeen.indexOf(txt) > -1) return res.json({ ok:true, dup:true });
+    smsSeen.push(txt); if(smsSeen.length > 200) smsSeen.shift();
+
+    const amount = smsAmount(txt);
+    if(!amount){
+      if(ADMIN_ID) send(ADMIN_ID, "\u2139\uFE0F SMS tushunilmadi:\n\n" + txt);
+      return res.json({ ok:true, parsed:false });
+    }
+
+    const db = load();
+    expireOld(db);
+    const lim = Date.now() - 60*60*1000;      /* 1 soatdan eskisi hisobga olinmaydi */
+    const hits = [];
+    Object.keys(db).forEach(function(uid){
+      if(!/^\d+$/.test(uid)) return;
+      (db[uid].topups || []).forEach(function(t){
+        if(t.status === "wait" && t.amount === amount && new Date(t.at).getTime() > lim)
+          hits.push({ uid: uid, t: t });
+      });
+    });
+
+    if(hits.length === 0){
+      if(ADMIN_ID) send(ADMIN_ID, "\u26A0\uFE0F " + amount + " so'm keldi, lekin mos to'ldirish topilmadi.\n\n" + txt);
+      return res.json({ ok:true, matched:0 });
+    }
+    if(hits.length > 1){
+      if(ADMIN_ID) send(ADMIN_ID, "\u26A0\uFE0F " + amount + " so'mga " + hits.length +
+        " ta to'ldirish mos keldi \u2014 QO'LDA tasdiqlang.\n\n" + txt);
+      return res.json({ ok:true, matched:hits.length });
+    }
+
+    const h = hits[0];
+    const u = urec(db, h.uid);
+    const t = u.topups.find(function(x){ return x.id === h.t.id; });
+    if(!t || t.status !== "wait") return res.json({ ok:true, already:true });
+
+    t.status = "done";
+    t.auto = true;
+    u.balance += t.amount;
+    save(db);
+
+    send(h.uid, "\u2705 Balansingiz to'ldirildi: +" + t.amount + " so'm\nJoriy balans: " + u.balance + " so'm");
+    if(ADMIN_ID) send(ADMIN_ID, "\uD83E\uDD16 AVTO TASDIQ " + t.id +
+      "\nSumma: " + t.amount + " so'm" +
+      "\nKimga: " + (t.who || h.uid) +
+      "\nYangi balans: " + u.balance);
+
+    res.json({ ok:true, matched:1, id:t.id });
+  }catch(e){ console.log("SMS XATO:", e.message); res.json({ ok:false, error:"server" }); }
+});
+
 app.post("/webhook", (req,res)=>{
   res.sendStatus(200);
   const hdr = req.get("X-Telegram-Bot-Api-Secret-Token") || "";
