@@ -832,14 +832,25 @@ function handleCb(cq){
 const SMS_KEY = String(process.env.SMS_KEY || "");
 const smsSeen = [];   /* takroriy SMS'larni to'sish uchun */
 
-function smsAmount(txt){
-  /* Humo: "... popolnenie 11810.00 UZS; ..." \u2014 faqat popolnenie dan keyingisi.
-     "Dostupno: ..." dagi summa hisobga OLINMAYDI. */
-  const m = /popolnenie[^0-9]{0,12}([0-9][0-9\s.,]*)\s*(?:UZS|SUM|СУМ)/i.exec(String(txt||""));
-  if(!m) return 0;
-  const raw = m[1].replace(/\s/g, "").replace(/,/g, ".");
-  const v = Math.round(parseFloat(raw));
-  return (isFinite(v) && v > 0) ? v : 0;
+function smsHits(txt){
+  /* Humo: "popolnenie 2100.00 UZS; BEEPUL P2P>UZ; 26-08-21 01:50;  Dostupno: ..."
+     Faqat "popolnenie" (pul KIRGANDA). "operacija" \u2014 chiqim, tegilmaydi.
+     Yonidagi sana ham olinadi: Komanda ba'zan butun yozishmani yuboradi,
+     shuning uchun eski xabarlar YANGI to'lov deb hisoblanmasligi kerak. */
+  const out = [];
+  const re = /popolnenie[^0-9]{0,12}([0-9][0-9\s.,]*)\s*(?:UZS|SUM|\u0421\u0423\u041C)[^;]*;[^;]*;\s*(\d{2})-(\d{2})-(\d{2})\s+(\d{2}):(\d{2})/gi;
+  let m;
+  while((m = re.exec(String(txt||"")))){
+    const amt = Math.round(parseFloat(m[1].replace(/\s/g,"").replace(/,/g,".")));
+    if(!isFinite(amt) || amt <= 0) continue;
+    /* Toshkent vaqti = UTC+5 */
+    const ms = Date.UTC(2000 + Number(m[2]), Number(m[3]) - 1, Number(m[4]),
+                        Number(m[5]) - 5, Number(m[6]));
+    const key = amt + "@" + ms;
+    if(out.some(function(x){ return x.key === key; })) continue;
+    out.push({ amount: amt, ms: ms, key: key });
+  }
+  return out;
 }
 
 app.post("/sms", (req,res)=>{
@@ -854,11 +865,22 @@ app.post("/sms", (req,res)=>{
     if(smsSeen.indexOf(txt) > -1) return res.json({ ok:true, dup:true });
     smsSeen.push(txt); if(smsSeen.length > 200) smsSeen.shift();
 
-    const amount = smsAmount(txt);
-    if(!amount){
-      if(ADMIN_ID) send(ADMIN_ID, "\u2139\uFE0F SMS tushunilmadi:\n\n" + txt);
+    const all = smsHits(txt);
+    const fresh = all.filter(function(h){ return Math.abs(Date.now() - h.ms) < 30*60*1000; });
+
+    if(all.length === 0){
+      /* chiqim (operacija) yoki notanish format \u2014 jimgina o'tkazamiz */
       return res.json({ ok:true, parsed:false });
     }
+    if(fresh.length === 0){
+      return res.json({ ok:true, stale:true });
+    }
+    if(fresh.length > 1){
+      if(ADMIN_ID) send(ADMIN_ID, "\u26A0\uFE0F Bitta SMS'da " + fresh.length +
+        " ta yangi to'lov bor \u2014 QO'LDA ko'ring.\n\n" + txt);
+      return res.json({ ok:true, many:true });
+    }
+    const amount = fresh[0].amount;
 
     const db = load();
     expireOld(db);
