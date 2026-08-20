@@ -742,38 +742,125 @@ app.post("/topup-cancel", (req,res)=>{
 });
 
 /* ---------- Hammaga xabar tarqatish (faqat admin) ---------- */
-let bcast = { armed:false, kind:null, text:"", photo:"", ents:null };
+/*  /xabar  \u2014 bitta rasm + "Xaridni boshlash" tugmasi
+    /bonus  \u2014 bitta rasm + "Bonus olish" tugmasi
+    /albom  \u2014 bir nechta rasm, tugmasiz (Telegram albomga tugma qo'ymaydi)
+    /ochir  \u2014 oxirgi tarqatishni HAMMADAN o'chirish (48 soat ichida)  */
+
+let bcast = { armed:false, mode:"btn", kind:null, text:"", photo:"", ents:null,
+              album:[], grp:null, timer:null };
+
+function bcastReset(){
+  if(bcast.timer) clearTimeout(bcast.timer);
+  bcast = { armed:false, mode:"btn", kind:null, text:"", photo:"", ents:null,
+            album:[], grp:null, timer:null };
+}
 
 function bcastTargets(){
   const db = load();
   return Object.keys(db).filter(function(k){ return /^\d+$/.test(k); });
 }
 
+function bcastKb(mode){
+  if(mode === "plain") return undefined;
+  const label = mode === "bonus" ? "\uD83C\uDF81 Bonus olish" : "\uD83D\uDE80 Xaridni boshlash";
+  return { inline_keyboard: [[ { text: label, web_app: { url: APP_URL } } ]] };
+}
+
+function bcastAsk(){
+  const n = bcastTargets().length;
+  const what = bcast.kind === "album" ? (bcast.album.length + " ta rasm")
+             : bcast.kind === "photo" ? "rasm" : "matn";
+  const btn  = bcast.mode === "plain" ? "tugmasiz"
+             : bcast.mode === "bonus" ? "\uD83C\uDF81 Bonus olish tugmasi bilan"
+             : "\uD83D\uDE80 Xaridni boshlash tugmasi bilan";
+  tgCall("sendMessage", { chat_id: ADMIN_ID,
+    text: "\uD83D\uDCE2 " + what + " (" + btn + ")\n" + n + " ta foydalanuvchiga yuborilsinmi?",
+    reply_markup: { inline_keyboard: [[
+      { text: "\u2705 Ha, yuborilsin", callback_data: "bc_ok" },
+      { text: "\u274C Yo'q", callback_data: "bc_no" }
+    ]]}});
+}
+
 function doBroadcast(){
-  const ids = bcastTargets();
-  const kind = bcast.kind, text = bcast.text, photo = bcast.photo, ents = bcast.ents;
-  bcast = { armed:false, kind:null, text:"", photo:"", ents:null };
+  const ids  = bcastTargets();
+  const kind = bcast.kind, mode = bcast.mode, text = bcast.text,
+        photo = bcast.photo, ents = bcast.ents, album = bcast.album.slice();
+  bcastReset();
+
+  const kb = bcastKb(mode);
   let ok = 0, fail = 0, i = 0;
+  const sent = [];                       /* o'chirish uchun saqlanadi */
   send(ADMIN_ID, "\uD83D\uDCE4 Yuborilmoqda\u2026 (" + ids.length + " ta)");
+
   function step(){
     if(i >= ids.length){
-      send(ADMIN_ID, "\u2705 Tugadi\nYuborildi: " + ok + "\nYetib bormadi: " + fail);
+      const db = load();
+      db._bcast = { at: new Date().toISOString(), items: sent };
+      save(db);
+      send(ADMIN_ID, "\u2705 Tugadi\nYuborildi: " + ok + "\nYetib bormadi: " + fail +
+                     "\n\nHammadan o'chirish uchun: /ochir");
       return;
     }
     const uid = ids[i++];
-    const method = kind === "photo" ? "sendPhoto" : "sendMessage";
-    const kb = { inline_keyboard: [[
-      { text: "\uD83D\uDE80 Xaridni boshlash", web_app: { url: APP_URL } }
-    ]]};
-    const body = kind === "photo"
-      ? { chat_id: uid, photo: photo, caption: text, caption_entities: ents || undefined, reply_markup: kb }
-      : { chat_id: uid, text: text, entities: ents || undefined, reply_markup: kb };
+    let method, body;
+    if(kind === "album"){
+      method = "sendMediaGroup";
+      body = { chat_id: uid, media: album.map(function(fid, n){
+        return n === 0
+          ? { type:"photo", media:fid, caption:text, caption_entities: ents || undefined }
+          : { type:"photo", media:fid };
+      })};
+    } else if(kind === "photo"){
+      method = "sendPhoto";
+      body = { chat_id: uid, photo: photo, caption: text,
+               caption_entities: ents || undefined, reply_markup: kb };
+    } else {
+      method = "sendMessage";
+      body = { chat_id: uid, text: text, entities: ents || undefined, reply_markup: kb };
+    }
     fetch("https://api.telegram.org/bot" + TOKEN + "/" + method, {
       method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(body)
     }).then(function(r){ return r.json(); })
-      .then(function(j){ if(j && j.ok) ok++; else fail++; })
+      .then(function(j){
+        if(j && j.ok){
+          ok++;
+          const r = j.result;
+          if(Array.isArray(r)) r.forEach(function(m){ sent.push({ u:uid, m:m.message_id }); });
+          else if(r && r.message_id) sent.push({ u:uid, m:r.message_id });
+        } else fail++;
+      })
       .catch(function(){ fail++; })
       .then(function(){ setTimeout(step, 60); });
+  }
+  step();
+}
+
+function doRecall(){
+  const db = load();
+  const rec = db._bcast;
+  if(!rec || !rec.items || !rec.items.length){
+    send(ADMIN_ID, "O'chiradigan tarqatish topilmadi.");
+    return;
+  }
+  const items = rec.items.slice();
+  delete db._bcast; save(db);
+  let ok = 0, fail = 0, i = 0;
+  send(ADMIN_ID, "\uD83D\uDDD1 O'chirilmoqda\u2026 (" + items.length + " ta xabar)");
+  function step(){
+    if(i >= items.length){
+      send(ADMIN_ID, "\u2705 O'chirildi: " + ok + "\nO'chmadi: " + fail +
+                     (fail ? "\n(48 soatdan eski xabarlarni Telegram o'chirtirmaydi)" : ""));
+      return;
+    }
+    const it = items[i++];
+    fetch("https://api.telegram.org/bot" + TOKEN + "/deleteMessage", {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({ chat_id: it.u, message_id: it.m })
+    }).then(function(r){ return r.json(); })
+      .then(function(j){ if(j && j.ok) ok++; else fail++; })
+      .catch(function(){ fail++; })
+      .then(function(){ setTimeout(step, 40); });
   }
   step();
 }
@@ -785,13 +872,10 @@ function handleCb(cq){
     return;
   }
   const d = String(cq.data||"");
-  if(d === "bc_ok" || d === "bc_no"){
+  if(d === "bc_ok" || d === "bc_no" || d === "bc_del"){
     tgCall("answerCallbackQuery", { callback_query_id: cq.id });
-    if(d === "bc_no"){
-      bcast = { armed:false, kind:null, text:"", photo:"", ents:null };
-      send(ADMIN_ID, "\u274C Tarqatish bekor qilindi");
-      return;
-    }
+    if(d === "bc_no"){ bcastReset(); send(ADMIN_ID, "\u274C Bekor qilindi"); return; }
+    if(d === "bc_del"){ doRecall(); return; }
     doBroadcast();
     return;
   }
@@ -956,21 +1040,54 @@ app.post("/webhook", (req,res)=>{
       if(adminReply(msg)) return;
     }
     if(ADMIN_ID && fromId === ADMIN_ID){
-      if(text.indexOf("/xabar") === 0){
-        bcast = { armed:true, kind:null, text:"", photo:"", ents:null };
+      const arm = { "/xabar":"btn", "/bonus":"bonus", "/albom":"plain" };
+      let hit = null;
+      Object.keys(arm).forEach(function(c){ if(text.indexOf(c) === 0) hit = c; });
+      if(hit){
+        bcastReset();
+        bcast.armed = true;
+        bcast.mode = arm[hit];
+        const tip = hit === "/albom"
+          ? "Bir nechta rasmni birga tanlab yuboring (izoh bilan). Tugma bo'lmaydi."
+          : (hit === "/bonus"
+              ? "Bitta rasm yoki matn yuboring. Ostida \uD83C\uDF81 Bonus olish tugmasi bo'ladi."
+              : "Bitta rasm yoki matn yuboring. Ostida \uD83D\uDE80 Xaridni boshlash tugmasi bo'ladi.");
         send(fromId, "\uD83D\uDCE2 Keyingi xabaringiz BARCHA foydalanuvchilarga yuboriladi.\n\n" +
-                     "Rasm (izoh bilan) yoki oddiy matn yuboring.\nBekor qilish uchun /bekor");
+                     tip + "\nBekor qilish uchun /bekor");
         return;
       }
       if(text.indexOf("/bekor") === 0){
-        bcast = { armed:false, kind:null, text:"", photo:"", ents:null };
+        bcastReset();
         send(fromId, "\u274C Tarqatish bekor qilindi");
+        return;
+      }
+      if(text.indexOf("/ochir") === 0){
+        const db0 = load();
+        const n = (db0._bcast && db0._bcast.items) ? db0._bcast.items.length : 0;
+        if(!n){ send(fromId, "O'chiradigan tarqatish topilmadi."); return; }
+        tgCall("sendMessage", { chat_id: fromId,
+          text: "\uD83D\uDDD1 Oxirgi tarqatish (" + n + " ta xabar) HAMMADAN o'chirilsinmi?",
+          reply_markup: { inline_keyboard: [[
+            { text: "\u2705 Ha, o'chirilsin", callback_data: "bc_del" },
+            { text: "\u274C Yo'q", callback_data: "bc_no" }
+          ]]}});
         return;
       }
       if(bcast.armed){
         if(msg.photo && msg.photo.length){
+          const fid = msg.photo[msg.photo.length-1].file_id;
+          if(msg.media_group_id){
+            /* albom \u2014 rasmlar alohida keladi, 2 soniya kutib yig'amiz */
+            if(bcast.grp !== msg.media_group_id){ bcast.grp = msg.media_group_id; bcast.album = []; }
+            if(bcast.album.length < 10) bcast.album.push(fid);
+            if(msg.caption){ bcast.text = String(msg.caption); bcast.ents = msg.caption_entities || null; }
+            bcast.kind = "album";
+            if(bcast.timer) clearTimeout(bcast.timer);
+            bcast.timer = setTimeout(function(){ bcast.armed = false; bcastAsk(); }, 2000);
+            return;
+          }
           bcast.kind = "photo";
-          bcast.photo = msg.photo[msg.photo.length-1].file_id;
+          bcast.photo = fid;
           bcast.text = String(msg.caption || "");
           bcast.ents = msg.caption_entities || null;
         } else if(text){
@@ -982,13 +1099,7 @@ app.post("/webhook", (req,res)=>{
           return;
         }
         bcast.armed = false;
-        const n = bcastTargets().length;
-        tgCall("sendMessage", { chat_id: fromId,
-          text: "\uD83D\uDCE2 Yuqoridagi xabar " + n + " ta foydalanuvchiga yuborilsinmi?",
-          reply_markup: { inline_keyboard: [[
-            { text: "\u2705 Ha, yuborilsin", callback_data: "bc_ok" },
-            { text: "\u274C Yo'q", callback_data: "bc_no" }
-          ]]}});
+        bcastAsk();
         return;
       }
     }
