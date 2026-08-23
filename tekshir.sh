@@ -38,6 +38,11 @@ pm2 pid minatoh-api >/dev/null 2>&1 && echo "pm2        : online" || echo "pm2  
 echo
 echo "=========== TA'MINOTCHI ==========="
 K=$(grep '^FZR_API_KEY=' .env | cut -d= -f2-)
-C=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 https://api.fzr.cards/api/v2/topups/categories -H "X-API-Key: $K")
-echo "FazerCards : $C"
-if [ "$C" = "200" ]; then echo "             ishlayapti"; else echo "             MUAMMO BOR"; fi
+BODY='{"category_id":"mobile_legends","fields":{"player_id":"1284647747","zone_id":"15219"}}'
+R=$(curl -s --max-time 12 -X POST https://api.fzr.cards/api/v2/topups/validate-id -H "X-API-Key: $K" -H "Content-Type: application/json" -d "$BODY")
+if echo "$R" | grep -q '"ok":true'; then
+  echo "FazerCards : ishlayapti"
+else
+  echo "FazerCards : MUAMMO BOR"
+  echo "javob      : ${R:-bo_sh}"
+fi
