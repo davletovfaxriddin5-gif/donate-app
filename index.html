@@ -561,22 +561,22 @@ body.light .thm-lt{display:inline}
 .lang-page .lf{ font-size:20px; line-height:1 }
 .lang-page .ln{ flex:1; text-align:left }
 .lang-page .lc{ color:#4FE0A0; font-weight:800 }
-/* === Bildirishnoma: to'liq kenglik, ixcham, rangli === */
-.toast{ left:16px !important; right:16px !important; width:auto !important; max-width:none !important;
-        transform:translateY(-24px) !important; text-align:left;
-        padding:15px 18px !important; font-size:15px !important; font-weight:500 !important;
-        background:rgba(24,30,48,.82) !important;
-        -webkit-backdrop-filter:saturate(180%) blur(22px);
-        backdrop-filter:saturate(180%) blur(22px);
-        border:1.5px solid rgba(255,255,255,.10) !important;
-        box-shadow:0 14px 40px -12px rgba(0,0,0,.6) !important;
+/* === Bildirishnoma: nozik, tinch, orqasi ko'rinmaydi === */
+.toast{ left:14px !important; right:14px !important; width:auto !important; max-width:none !important;
+        transform:translateY(-26px) !important; text-align:left;
+        padding:17px 20px !important; font-size:16px !important; font-weight:500 !important;
+        border-radius:15px !important;
+        background:rgba(21,26,41,.97) !important;
+        border:1px solid rgba(255,255,255,.07) !important;
+        box-shadow:0 16px 44px -14px rgba(0,0,0,.7) !important;
         transition:opacity .3s cubic-bezier(.22,1,.36,1), transform .3s cubic-bezier(.22,1,.36,1) !important }
 .toast.show{ transform:translateY(0) !important }
-.toast.t-ok { border-color:rgba(45,212,140,.65) !important; color:#4ce0a4 !important }
-.toast.t-err{ border-color:rgba(255,92,97,.65) !important; color:#ff7a7e !important }
-body.light .toast{ background:rgba(255,255,255,.90) !important }
-body.light .toast.t-ok { color:#0d8a58 !important }
-body.light .toast.t-err{ color:#c8262b !important }
+.toast.t-ok { border-color:rgba(72,206,140,.30) !important; color:#4ed69b !important }
+.toast.t-err{ border-color:rgba(240,90,95,.30) !important; color:#f2777b !important }
+body.light .toast{ background:rgba(252,252,254,.98) !important; border-color:rgba(0,0,0,.08) !important;
+                   box-shadow:0 16px 44px -14px rgba(0,0,0,.22) !important }
+body.light .toast.t-ok { color:#0f8a58 !important }
+body.light .toast.t-err{ color:#cc2a30 !important }
 </style>
 </head>
 <body>
@@ -3465,13 +3465,13 @@ function toast(msg, kind){
   el.classList.add('show');
   if(k === 'ok'){ notify('success'); sndOk(); }
   else if(k === 'err'){ notify('error'); sndErr(); }
-  else { haptic('light'); sndTap(); }
+  else { haptic('light'); }
   clearTimeout(tt); tt = setTimeout(function(){ el.classList.remove('show'); }, 2600);
 }
 function toastOk(m){ toast(m, 'ok'); }
 function toastErr(m){ toast(m, 'err'); }
 
-/* ---- Tovush: qisqa "tik". Fayl kerak emas, ovoz kodda yasaladi. ---- */
+/* ---- Tovush: iPhone "Akkord" va "Sirg'anish" ga yaqin ohanglar ---- */
 let _ac = null, sndOn = true;
 try{ sndOn = localStorage.getItem('mt_snd') !== '0'; }catch(e){}
 function _ctx(){
@@ -3481,25 +3481,48 @@ function _ctx(){
     return _ac;
   }catch(e){ return null; }
 }
-function blip(freq, dur, vol){
+function tone(freq, dur, vol, delay){
+  const c = _ctx(); if(!c) return;
+  try{
+    const t = c.currentTime + (delay || 0);
+    const o = c.createOscillator(), g = c.createGain();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(freq, t);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol, t + 0.025);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(c.destination);
+    o.start(t); o.stop(t + dur + 0.05);
+  }catch(e){}
+}
+/* Akkord \u2014 uchta nota birga, yumshoq (muvaffaqiyat) */
+function sndOk(){
+  if(!sndOn) return;
+  tone(523.25, 0.55, 0.050, 0);
+  tone(659.25, 0.55, 0.042, 0.035);
+  tone(783.99, 0.60, 0.038, 0.070);
+}
+/* Sirg'anish \u2014 pastga tushuvchi ohang (xato) */
+function sndErr(){
   if(!sndOn) return;
   const c = _ctx(); if(!c) return;
   try{
-    const o = c.createOscillator(), g = c.createGain();
-    o.type = 'sine'; o.frequency.value = freq;
     const t = c.currentTime;
+    const o = c.createOscillator(), g = c.createGain();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(760, t);
+    o.frequency.exponentialRampToValueAtTime(190, t + 0.30);
     g.gain.setValueAtTime(0.0001, t);
-    g.gain.exponentialRampToValueAtTime(vol, t + 0.006);
-    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    g.gain.exponentialRampToValueAtTime(0.075, t + 0.03);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.34);
     o.connect(g); g.connect(c.destination);
-    o.start(t); o.stop(t + dur + 0.02);
+    o.start(t); o.stop(t + 0.40);
   }catch(e){}
 }
-function sndTap(){ blip(1500, 0.045, 0.05); }
-function sndOk(){ blip(920, 0.07, 0.09); setTimeout(function(){ blip(1380, 0.10, 0.075); }, 75); }
-function sndErr(){ blip(420, 0.09, 0.09); setTimeout(function(){ blip(300, 0.13, 0.075); }, 85); }
+function sndTap(){ /* bosilganda tovush yo'q \u2014 faqat tebranish */ }
 
-/* Har bir bosilishda yengil tebranish + tik */
+/* Har bir bosilishda yengil tebranish */
+
 let _hapT = 0;
 document.addEventListener('click', function(e){
   const t = e.target && e.target.closest && e.target.closest(
@@ -3509,7 +3532,6 @@ document.addEventListener('click', function(e){
   if(now - _hapT < 90) return;
   _hapT = now;
   haptic('light');
-  sndTap();
 }, true);
 
 go('home');
