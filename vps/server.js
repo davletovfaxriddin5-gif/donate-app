@@ -130,6 +130,15 @@ const CATALOG = {
     "234_23_diamonds":46000, "625_81_diamonds":125000, "1860_335_diamonds":377000,
     "3099_589_diamonds":630000, "4649_883_diamonds":951000, "7740_1548_diamonds":1583000,
     "weekly_pass":22000, "twilight_pass":130000
+  }},
+  /* Telegram Stars/Premium: o'yin ID emas, @username ga yuboriladi.
+     oid dagi raqam = miqdor (stars_1000 -> 1000 dona, premium_3 -> 3 oy) */
+  tgstars: { cat:"telegram_stars", srv:false, tg:"stars", items:{
+    "stars_50":12300, "stars_100":23000, "stars_250":55000, "stars_500":110000,
+    "stars_1000":220000, "stars_2500":550000, "stars_5000":1100000
+  }},
+  tgpremium: { cat:"telegram_premium", srv:false, tg:"premium", items:{
+    "premium_3":169000, "premium_6":225000, "premium_12":399000
   }}
 };
 
@@ -283,7 +292,7 @@ function resolveOffer(game, oid, region){
     if(MLBB_REG[k]){ cat = MLBB_REG[k].cat; items = MLBB_REG[k].items; }
   }
   if(items[oid] == null) return null;
-  return { cat: cat, price: items[oid], srv: !!cfg.srv };
+  return { cat: cat, price: items[oid], srv: !!cfg.srv, tg: cfg.tg || "" };
 }
 
 /* MLBB Global: bu paketlar MY/SG/PH/ID/RU akkauntlarida ishlamaydi */
@@ -297,7 +306,9 @@ const MLBB_BLOCKED_REG = ["indonesia","brazil"];
 const GAME_ALIAS = {
   pubg:"pubg", pubgmobile:"pubg", pubgm:"pubg",
   freefire:"freefire", ff:"freefire", garenafreefire:"freefire",
-  mlbb:"mlbb", mobilelegends:"mlbb", mobilelegend:"mlbb", ml:"mlbb"
+  mlbb:"mlbb", mobilelegends:"mlbb", mobilelegend:"mlbb", ml:"mlbb",
+  tgstars:"tgstars", tgstar:"tgstars", stars:"tgstars", telegramstars:"tgstars",
+  tgpremium:"tgpremium", premium:"tgpremium", telegrampremium:"tgpremium"
 };
 function gameKey(o){
   const cand = [o.gameId, o.game, o.key, o.g];
@@ -335,6 +346,81 @@ async function fzrCreate(cat, oid, fields){
     return { ok:false, why: String(j.error || ("HTTP "+r.status)) };
   }catch(e){
     console.log("FZR order xato:", e.message);
+    return { ok:false, why:"network" };
+  } finally { clearTimeout(tm); }
+}
+
+/* ---------- Telegram Stars / Premium ---------- */
+/* @username ni tozalab, Telegram qoidasiga tekshiramiz.
+   DIQQAT: FazerCards da username ni tekshiradigan endpoint YO'Q.
+   Mavjud, lekin BOSHQA odamning username i bo'lsa buyurtma muvaffaqiyatli bajariladi
+   va qaytarilmaydi. Shuning uchun avval ilova bergan (Telegram tasdiqlagan) nom olinadi. */
+function tgUser(o, who){
+  const d = o.details || {};
+  let u = String(d.username || d.user || d.telegram_username ||
+                 o.username || o.nick || "").trim();
+  if(!u && who && who.username) u = String(who.username);
+  u = u.replace(/^https?:\/\//i, "").replace(/^t\.me\//i, "").replace(/^@+/, "").trim();
+  if(!/^[A-Za-z0-9_]{5,32}$/.test(u)) return "";
+  return u;
+}
+
+/* Jonli kotirovka \u2014 kurs oshib ketsa zarariga sotmaslik uchun */
+const UZS_USD = 12300;                 /* bufer kurs, index.html dagi hisob bilan bir xil */
+const tgQ = { at:0, star:0, prem:{} }; /* 10 daqiqalik kesh */
+async function tgQuotes(){
+  if(Date.now() - tgQ.at < 600000) return true;
+  const ac = new AbortController();
+  const tm = setTimeout(()=>ac.abort(), 15000);
+  try{
+    const h = { "X-API-Key": FZR_KEY };
+    const a = await fetch(FZR_BASE+"/api/v2/telegram/stars", { headers:h, signal:ac.signal });
+    const ja = await a.json().catch(()=>({}));
+    const b = await fetch(FZR_BASE+"/api/v2/telegram/premium", { headers:h, signal:ac.signal });
+    const jb = await b.json().catch(()=>({}));
+    if(!ja.ok || !jb.ok) return false;
+    tgQ.star = Number(ja.price_per_star) || 0;   /* string bo'lib keladi */
+    tgQ.prem = {};
+    (jb.plans||[]).forEach(function(p){ tgQ.prem[String(p.months)] = Number(p.price_usd) || 0; });
+    tgQ.at = Date.now();
+    return true;
+  }catch(e){ return false; }
+  finally { clearTimeout(tm); }
+}
+/* narx tannarxni qoplamasa true qaytaradi (kotirovka olinmasa savdoni to'xtatmaymiz) */
+async function tgTooCheap(kind, n, price){
+  if(!(await tgQuotes())) return false;
+  const usd = kind === "premium" ? (tgQ.prem[String(n)] || 0) : (tgQ.star * n);
+  if(!(usd > 0)) return false;
+  return price < Math.round(usd * UZS_USD);
+}
+
+async function fzrTg(kind, username, n){
+  const ac = new AbortController();
+  const tm = setTimeout(()=>ac.abort(), 25000);
+  const url  = FZR_BASE + (kind === "premium"
+                 ? "/api/v2/telegram/premium/buy" : "/api/v2/telegram/stars/buy");
+  const body = kind === "premium"
+                 ? { telegram_username: username, months: n }
+                 : { telegram_username: username, quantity: n };
+  try{
+    const r = await fetch(url, {
+      method:"POST",
+      headers:{ "Content-Type":"application/json", "X-API-Key": FZR_KEY },
+      body: JSON.stringify(body),
+      signal: ac.signal
+    });
+    const j = await r.json().catch(()=>({}));
+    /* muvaffaqiyat 201 keladi \u2014 r.ok 200..299 ni qamraydi */
+    if(r.ok && j.ok){
+      const id = j.order && j.order.id ? String(j.order.id) : "";
+      if(!id) console.log("FZR TG: id yo'q, javob:", JSON.stringify(j));
+      return { ok:true, id: id };
+    }
+    console.log("FZR TG rad:", r.status, JSON.stringify(j));
+    return { ok:false, why: String(j.error || ("HTTP "+r.status)) };
+  }catch(e){
+    console.log("FZR TG xato:", e.message);
     return { ok:false, why:"network" };
   } finally { clearTimeout(tm); }
 }
@@ -511,13 +597,29 @@ app.post("/order", async (req,res)=>{
     const acc  = String(o.accRegion||"");
     const off  = resolveOffer(game, oid, acc);
 
-    /* narxni server belgilaydi; katalogda yo'q o'yinlar (TG Stars/Premium) qo'lda qoladi */
+    /* narxni server belgilaydi; katalogda yo'q narsalar qo'lda qoladi */
     const auto = !!off;
+    const tg = auto ? off.tg : "";
     const price = auto ? off.price : Math.round(Number(o.price) || 0);
     if(!(price > 0)) return res.json({ ok:false, error:"price" });
 
-    const fields = fzrFields(game, o);
-    if(auto){
+    const fields = tg ? {} : fzrFields(game, o);
+    let tgu = "", tgn = 0;
+
+    if(tg){
+      tgu = tgUser(o, who);
+      if(!tgu) return res.json({ ok:false, error:"username" });
+      tgn = Number(String(oid).split("_")[1] || 0);
+      if(!(tgn > 0)) return res.json({ ok:false, error:"fields" });
+      if(tg === "stars" && (tgn < 50 || tgn > 10000))
+        return res.json({ ok:false, error:"qty" });
+      if(await tgTooCheap(tg, tgn, price)){
+        console.log("TG narx past:", oid, price);
+        if(ADMIN_ID) tgCall("sendMessage", { chat_id: ADMIN_ID,
+          text: "\u26a0\ufe0f Kurs oshdi \u2014 "+oid+" tannarxdan arzon sotilyapti ("+price+" so'm).\nBuyurtma to'xtatildi. Narxni yangilang." });
+        return res.json({ ok:false, error:"rate" });
+      }
+    } else if(auto){
       if(!fields.player_id) return res.json({ ok:false, error:"fields" });
       if(off.srv && !fields.server_id){
         console.log("ORDER: server_id topilmadi, kelgan obyekt:", JSON.stringify(o));
@@ -540,7 +642,8 @@ app.post("/order", async (req,res)=>{
     const rec = {
       id: String(o.id || ("MT"+Date.now().toString().slice(-8))),
       game: String(o.game||""), gkey: game, gameId: String(o.gameId||""),
-      pid: fields.player_id || "", srv: fields.server_id || "",
+      pid: tg ? ("@"+tgu) : (fields.player_id || ""), srv: fields.server_id || "",
+      tg: tg, tgq: tgn,
       package: String(o.package||""), price: price,
       details: o.details || {}, region: o.region || null,
       nick: String(o.nick||""), accRegion: String(o.accRegion||""),
@@ -562,7 +665,7 @@ app.post("/order", async (req,res)=>{
     }
 
     /* FazerCards ga yuboramiz */
-    const r = await fzrCreate(rec.cat, rec.oid, fields);
+    const r = tg ? await fzrTg(tg, tgu, tgn) : await fzrCreate(rec.cat, rec.oid, fields);
 
     const db2 = load();
     const u2 = urec(db2, uid);
@@ -571,6 +674,9 @@ app.post("/order", async (req,res)=>{
     if(r.ok){
       rec2.fzr = r.id; rec2.status = "sent";
       save(db2);
+      /* id kelmasa sweep uni kuzata olmaydi \u2014 pulni QAYTARMAYMIZ (buyurtma qabul qilingan) */
+      if(!r.id && ADMIN_ID) tgCall("sendMessage", { chat_id: ADMIN_ID,
+        text: "\u2757 "+rec.id+" yuborildi, lekin FZR id qaytarmadi.\n"+rec.package+" \u2014 "+rec.pid+"\nPanelda qo'lda tekshiring." });
       send(uid, "⏳ Buyurtma yuborildi: "+rec.package+"\nOdatda 1-2 daqiqada tushadi.\nQoldiq balans: "+u2.balance+" so'm");
       return res.json({ ok:true, balance:u2.balance, order:rec2 });
     }
