@@ -2342,27 +2342,37 @@ const GAMES = [
       {a:'Haftalik propusk', c:'', p:20300, txt:true, oid:'weekly_pass', im:'/IMG_4446.png'},
       {a:'Twilight pass', c:'', p:130000, txt:true, oid:'twilight_pass', im:'/IMG_4429.png'},
     ]},
-    { id:'tgstars', name:'TG STARS', glyph:'⭐', star:'on', badge:'AVTO', img:'/IMG_4370.jpeg',
-    cur:'⭐', region:false, cat:'telegram_stars',
+  { id:'tgstars', name:'TG STARS', glyph:'⭐', star:'on', badge:'AVTO', img:'/IMG_4370.jpeg',
+    cur:'⭐', region:false, custom:'stars',
     idFields:[{key:'username',label:'KIMGA (@username)',ph:'@username'}],
-    packages:[
-      {a:'50', c:'⭐', p:12300, oid:'stars_50'},
-      {a:'100', c:'⭐', p:23000, oid:'stars_100', hit:true},
-      {a:'250', c:'⭐', p:55000, oid:'stars_250'},
-      {a:'500', c:'⭐', p:110000, oid:'stars_500'},
-      {a:'1000', c:'⭐', p:220000, oid:'stars_1000'},
-      {a:'2500', c:'⭐', p:550000, oid:'stars_2500'},
-      {a:'5000', c:'⭐', p:1100000, oid:'stars_5000'},
-    ]},
+    packages:[] },
   { id:'tgpremium', name:'TG PREMIUM', glyph:'👑', star:'on', badge:'AVTO', img:'/IMG_4369.jpeg',
-    cur:'', region:false, cat:'telegram_premium',
+    cur:'', region:false,
     idFields:[{key:'username',label:'KIMGA (@username)',ph:'@username'}],
     packages:[
-      {a:'3 oy', c:'', p:170000, oid:'premium_3', txt:true, im:'/IMG_4437.png'},
-      {a:'6 oy', c:'', p:260000, oid:'premium_6', txt:true, im:'/IMG_4438.png'},
-      {a:'12 oy', c:'', p:430000, oid:'premium_12', txt:true, im:'/IMG_4439.png'},
+      {a:'3 oy', c:'', p:169000, txt:true, oid:'premium_3', im:'/IMG_4437.png'},
+      {a:'6 oy', c:'', p:225000, txt:true, oid:'premium_6', im:'/IMG_4438.png'},
+      {a:'12 oy', c:'', p:399000, txt:true, oid:'premium_12', im:'/IMG_4439.png'},
     ]},
 ];
+
+/* ---------- TG Stars: ixtiyoriy miqdor ----------
+   Narx bosqichli. Bu jadval server.js dagi STARS_TIERS bilan AYNAN bir xil
+   bo'lishi shart — aks holda mijoz bir narx ko'rib, boshqasini to'laydi. */
+const STAR_MIN = 50, STAR_MAX = 10000;
+function starRate(n){ return n<=99 ? 250 : n<=249 ? 240 : n<=999 ? 230 : 220; }
+function starPrice(n){ return n * starRate(n); }
+/* balansga qancha yulduz sig'adi (bosqichlar tufayli oddiy bo'lish ishlamaydi) */
+function maxStars(bal){
+  const T = [[50,99,250],[100,249,240],[250,999,230],[1000,STAR_MAX,220]];
+  let best = 0;
+  T.forEach(function(t){
+    const n = Math.min(t[1], Math.floor(bal / t[2]));
+    if(n >= t[0] && n > best) best = n;
+  });
+  return best;
+}
+let starN = 0;
 
 const REGIONS = [
   {code:'global', label:'UZB / 🌐 Global', flag:'🇺🇿'},
@@ -2710,7 +2720,7 @@ function renderHome(){
   </div>`;
 }
 
-function openGame(id){ haptic(); curGame = GAMES.find(g=>g.id===id); selPkg = null; curPkgs = null; curRegion='global'; idOk=false; idName=''; idRegion=''; go('game'); }
+function openGame(id){ haptic(); curGame = GAMES.find(g=>g.id===id); selPkg = null; curPkgs = null; curRegion='global'; idOk=false; idName=''; idRegion=''; starN=0; go('game'); }
 function savedIds(gameId){ try{ return JSON.parse(localStorage.getItem('mt_ids_'+gameId)||'[]'); }catch(e){ return []; } }
 function saveId(gameId, val){ try{ let a=savedIds(gameId); a=a.filter(x=>x!==val); a.unshift(val); localStorage.setItem('mt_ids_'+gameId, JSON.stringify(a.slice(0,6))); }catch(e){} }
 function fillId(v){
@@ -2758,10 +2768,52 @@ function renderGame(){
     <div id="idOkBox" style="display:none"></div>
     <div id="idRes" class="id-res"></div>
   </div>
-  <div class="sec-lbl" style="margin-top:0">Mahsulotni tanlang</div>
+  <div class="sec-lbl" style="margin-top:0">${g.custom==='stars' ? 'Ixtiyoriy summa' : 'Mahsulotni tanlang'}</div>
   ${g.region ? `<div class="region-tabs">${REGIONS.map(r=>`<button class="rt ${r.code===curRegion?'on':''}" data-r="${r.code}" onclick="pickRegion('${r.code}')">${r.flag} ${r.label}</button>`).join('')}</div>` : ''}
-  <div class="pkg-grid">${pkgHtml(activePkgs())}</div>
+  ${g.custom==='stars' ? `<div class="form-card">
+    <div class="lbl">Summani kiriting (⭐)</div>
+    <div class="inp-wrap"><input class="inp" id="starQty" inputmode="numeric" placeholder="0" autocomplete="off" oninput="onQty()"><span class="info-i">⭐</span></div>
+    <div class="lbl" style="margin-top:14px">Narx</div>
+    <div class="inp-wrap"><input class="inp" id="starSum" readonly value="—" style="opacity:.85"></div>
+    <div id="starHint" style="margin-top:11px;font-size:12.5px;line-height:1.6"></div>
+  </div>` : `<div class="pkg-grid">${pkgHtml(activePkgs())}</div>`}
   <div class="buy-bar"><button class="buy-btn" id="buyBtn" disabled onclick="buy()">Sotib olish</button></div>`;
+  if(g.idFields.length===1 && g.idFields[0].key==='username' && tgUser && tgUser.username){
+    const el = document.getElementById('fld_username');
+    if(el && !el.value) el.value = '@' + tgUser.username;
+  }
+  if(g.custom==='stars'){ starN = 0; onQty(); }
+}
+
+/* Miqdor kiritilganda narxni jonli hisoblaymiz */
+function onQty(){
+  const el = document.getElementById('starQty');
+  if(!el) return;
+  let v = String(el.value||'').replace(/[^0-9]/g,'').replace(/^0+/,'');
+  if(v.length > 5) v = v.slice(0,5);
+  if(el.value !== v) el.value = v;
+  const n = parseInt(v,10) || 0;
+  const price = n ? starPrice(n) : 0;
+  starN = (n >= STAR_MIN && n <= STAR_MAX) ? n : 0;
+
+  const sum = document.getElementById('starSum');
+  if(sum) sum.value = n ? (fmt(price) + " so'm") : '—';
+
+  const h = document.getElementById('starHint');
+  if(h){
+    const mx = maxStars(balance);
+    let warn = '';
+    if(n && n < STAR_MIN) warn = `<div style="color:var(--gold)">Eng kami ${STAR_MIN} ⭐</div>`;
+    else if(n > STAR_MAX) warn = `<div style="color:var(--gold)">Eng ko'pi ${fmt(STAR_MAX)} ⭐</div>`;
+    else if(n && price > balance) warn = `<div style="color:var(--gold)">Balans yetarli emas — ${fmt(balance)} so'm bor</div>`;
+    h.innerHTML = warn
+      + `<div style="color:var(--dim)">1 ⭐ = ${fmt(starRate(n||STAR_MIN))} so'm</div>`
+      + (mx >= STAR_MIN
+          ? `<div style="color:var(--dim)">Balansga sig'adi: ${fmt(mx)} ⭐ (${fmt(starPrice(mx))} so'm)</div>`
+          : `<div style="color:var(--dim)">Eng kichik buyurtma ${STAR_MIN} ⭐ — ${fmt(starPrice(STAR_MIN))} so'm</div>`)
+      + `<div style="color:var(--dim)">Ko'proq olsangiz 1 ⭐ arzonlashadi: 100 dan 240, 250 dan 230, 1000 dan 220 so'm</div>`;
+  }
+  syncBuy();
 }
 function pickPkg(i){ haptic(); selPkg=i; document.querySelectorAll('.pkg').forEach(el=>el.classList.toggle('sel', +el.dataset.i===i));
   syncBuy(); }
@@ -2771,6 +2823,12 @@ const ID_RULES = {
   mlbb:     { playerId:[6,11], serverId:[3,6] }
 };
 function badFormat(gameId, key, v){
+  if(key === 'username'){
+    const u = String(v).replace(/^@+/,'');
+    if(!/^[A-Za-z0-9_]{5,32}$/.test(u))
+      return "faqat lotin harflari, raqam va _ (5-32 belgi)";
+    return null;
+  }
   const r = ID_RULES[gameId] && ID_RULES[gameId][key];
   if(!r) return null;
   if(!/^\d+$/.test(v)) return "faqat raqam bo'lishi kerak";
@@ -2791,7 +2849,9 @@ function setRes(cls, html){
 }
 function syncBuy(){
   const b = document.getElementById('buyBtn');
-  if(b) b.disabled = !(selPkg !== null && idOk);
+  if(!b) return;
+  if(curGame && curGame.custom === 'stars'){ b.disabled = !(idOk && starN > 0); return; }
+  b.disabled = !(selPkg !== null && idOk);
 }
 function resetCheck(){
   idOk = false; idName = ''; idRegion = '';
@@ -2850,7 +2910,18 @@ async function checkId(){
   }
 
   if(!CHECK_GAMES[g.id]){
-    idOk = true; notify('success'); setRes('ok', "✅ Format to'g'ri"); syncBuy(); return true;
+    idOk = true; notify('success');
+    if(vals.username != null){
+      const u   = String(vals.username).replace(/^@+/,'');
+      const own = tgUser && tgUser.username &&
+                  u.toLowerCase() === String(tgUser.username).toLowerCase();
+      setRes(own ? 'ok' : 'bad', own
+        ? "✅ Sizning akkauntingiz — @" + esc(u)
+        : "⚠️ @" + esc(u) + " — bu username TEKSHIRILMAYDI. Xato bo'lsa yulduzlar boshqa odamga ketadi va pul qaytarilmaydi. Diqqat bilan tekshiring.");
+    } else {
+      setRes('ok', "✅ Format to'g'ri");
+    }
+    syncBuy(); return true;
   }
 
   const btns = [].slice.call(document.querySelectorAll('.check-btn'));
@@ -2890,15 +2961,20 @@ async function checkId(){
 }
 function buy(){
   const g=curGame;
-  if(selPkg===null){ notify('error'); toastErr('Paketni tanlang'); return; }
+  const custom = g && g.custom === 'stars';
+  if(custom){
+    if(!starN){ notify('error'); toastErr("Yulduzlar sonini kiriting ("+STAR_MIN+"–"+fmt(STAR_MAX)+")"); return; }
+    if(starPrice(starN) > balance){ notify('error'); toastErr("❌ Balans yetarli emas — "+fmt(balance)+" so'm bor"); return; }
+  } else if(selPkg===null){ notify('error'); toastErr('Paketni tanlang'); return; }
   if(!idOk){ notify('error'); toastErr("Avval ID ni tekshiring"); return; }
-  const p=activePkgs()[selPkg];
+  const p = custom ? { a:String(starN), c:'⭐', p:starPrice(starN), oid:'' } : activePkgs()[selPkg];
   const details={};
   for(const f of g.idFields){ const v=(document.getElementById('fld_'+f.key)?.value||'').trim();
     if(!v){ notify('error'); toastErr(f.label+' kiriting'); return; } details[f.key]=v; }
   saveId(g.id, Object.values(details).join(' '));
   const order={ id:'MT'+Date.now().toString().slice(-8), game:g.name, gameId:g.id, glyph:g.glyph, img:g.img||'',
     package:(p.a+(p.c&&p.c.length<=2?' '+p.c:'')), price:p.p, details, region:g.region?curRegion:null, nick:idName||'', accRegion:idRegion||'', cat:g.cat||'', oid:p.oid||'',
+    qty: custom ? starN : 0,
     tgUser: tgUser?{id:tgUser.id,username:tgUser.username,name:tgUser.first_name}:null,
     status:'wait', createdAt:new Date().toISOString() };
   saveOrder(order); notify('success');
