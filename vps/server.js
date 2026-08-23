@@ -131,16 +131,41 @@ const CATALOG = {
     "3099_589_diamonds":630000, "4649_883_diamonds":951000, "7740_1548_diamonds":1583000,
     "weekly_pass":22000, "twilight_pass":130000
   }},
-  /* Telegram Stars/Premium: o'yin ID emas, @username ga yuboriladi.
-     oid dagi raqam = miqdor (stars_1000 -> 1000 dona, premium_3 -> 3 oy) */
-  tgstars: { cat:"telegram_stars", srv:false, tg:"stars", items:{
-    "stars_50":12300, "stars_100":23000, "stars_250":55000, "stars_500":110000,
-    "stars_1000":220000, "stars_2500":550000, "stars_5000":1100000
-  }},
+  /* Telegram Premium: 3 ta qat'iy paket, @username ga yuboriladi */
   tgpremium: { cat:"telegram_premium", srv:false, tg:"premium", items:{
     "premium_3":169000, "premium_6":225000, "premium_12":399000
   }}
 };
+
+/* ---------- TG Stars: paket yo'q, mijoz miqdorni o'zi kiritadi ----------
+   1 yulduz tannarxi ~188 so'm. Kichik buyurtmada 1 yulduz qimmatroq turadi,
+   shunda 50 tada ham foyda qoladi, 5000 tada esa narx raqobatbardosh bo'ladi.
+   Bosqichlar shunday tanlanganki, KO'PROQ olgan hech qachon ORTIQ to'lamaydi. */
+const STARS_MIN = 50, STARS_MAX = 10000;
+const STARS_TIERS = [
+  { upto:  99,    rate: 250 },   /*  50-99   -> foyda ~3 100-6 200 */
+  { upto:  249,   rate: 240 },   /* 100-249  -> foyda ~5 200-13 000 */
+  { upto:  999,   rate: 230 },   /* 250-999  -> foyda ~10 600-42 200 */
+  { upto:  10000, rate: 220 }    /* 1000+    -> foyda 32 000 dan yuqori */
+];
+function starsRate(n){
+  for(let i = 0; i < STARS_TIERS.length; i++) if(n <= STARS_TIERS[i].upto) return STARS_TIERS[i].rate;
+  return STARS_TIERS[STARS_TIERS.length-1].rate;
+}
+function starsPrice(n){ return n * starsRate(n); }
+
+/* Ilova miqdorni qaysi nom bilan yuborishi aniq emas \u2014 barchasini ko'ramiz.
+   Topilmasa buyurtma rad etiladi va kelgan obyekt logga yoziladi. */
+function starsQty(o){
+  const d = o.details || {};
+  const cand = [o.qty, o.amount, o.quantity, o.stars, o.n, o.a,
+                d.qty, d.amount, d.quantity, d.stars, d.summa, d.miqdor, o.package];
+  for(let i = 0; i < cand.length; i++){
+    const s = String(cand[i] == null ? "" : cand[i]).replace(/[^0-9]/g, "");
+    if(s){ const v = parseInt(s, 10); if(v > 0) return v; }
+  }
+  return 0;
+}
 
 /* MLBB regionlari \u2014 har birida boshqa paketlar va boshqa narxlar */
 const MLBB_REG = {
@@ -595,7 +620,21 @@ app.post("/order", async (req,res)=>{
     const game = gameKey(o);
     const oid  = String(o.oid||"");
     const acc  = String(o.accRegion||"");
-    const off  = resolveOffer(game, oid, acc);
+
+    /* TG Stars: paket emas, mijoz kiritgan miqdor */
+    let stars = 0;
+    if(game === "tgstars"){
+      stars = starsQty(o);
+      if(!stars){
+        console.log("STARS: miqdor topilmadi, kelgan obyekt:", JSON.stringify(o));
+        return res.json({ ok:false, error:"fields" });
+      }
+      if(stars < STARS_MIN || stars > STARS_MAX)
+        return res.json({ ok:false, error:"qty", min:STARS_MIN, max:STARS_MAX });
+    }
+    const off = stars
+      ? { cat:"telegram_stars", price: starsPrice(stars), srv:false, tg:"stars" }
+      : resolveOffer(game, oid, acc);
 
     /* narxni server belgilaydi; katalogda yo'q narsalar qo'lda qoladi */
     const auto = !!off;
@@ -609,9 +648,9 @@ app.post("/order", async (req,res)=>{
     if(tg){
       tgu = tgUser(o, who);
       if(!tgu) return res.json({ ok:false, error:"username" });
-      tgn = Number(String(oid).split("_")[1] || 0);
+      tgn = stars || Number(String(oid).split("_")[1] || 0);
       if(!(tgn > 0)) return res.json({ ok:false, error:"fields" });
-      if(tg === "stars" && (tgn < 50 || tgn > 10000))
+      if(tg === "stars" && (tgn < STARS_MIN || tgn > STARS_MAX))
         return res.json({ ok:false, error:"qty" });
       if(await tgTooCheap(tg, tgn, price)){
         console.log("TG narx past:", oid, price);
@@ -644,7 +683,7 @@ app.post("/order", async (req,res)=>{
       game: String(o.game||""), gkey: game, gameId: String(o.gameId||""),
       pid: tg ? ("@"+tgu) : (fields.player_id || ""), srv: fields.server_id || "",
       tg: tg, tgq: tgn,
-      package: String(o.package||""), price: price,
+      package: String(o.package || (stars ? (stars + " \u2b50") : "")), price: price,
       details: o.details || {}, region: o.region || null,
       nick: String(o.nick||""), accRegion: String(o.accRegion||""),
       oid: oid, cat: auto ? off.cat : "", auto: auto,
