@@ -703,7 +703,7 @@ DICT.ru = {
   "Summa aynan mos kelishi shart — to'lovingizni shu raqam orqali topamiz.":"Сумма должна совпадать точно — по ней мы найдём ваш платёж.","Ko'p yoki kam yuborsangiz, pulni faqat admin orqali qaytarib olasiz.":"Если отправите больше или меньше, вернуть деньги можно только через админа.","To'lagandan keyin pastdagi tugmani bosing, tasdiqlangach balans o'zi to'ladi.":"После оплаты нажмите кнопку ниже — после подтверждения баланс пополнится автоматически.",
   "Hozircha bo'sh":"Пока пусто","Buyurtma bergach bu yerda ko'rinadi.":"После заказа он появится здесь.",
   "O'yinchi ID":"ID игрока","Holat":"Статус",
-  "Telefon raqami":"Номер телефона","Telefon raqamini ulashish":"Поделиться номером телефона",
+  "Telefon raqami":"Номер телефона","Raqamingiz saqlandi":"Номер сохранён","Telefon raqamini ulashish":"Поделиться номером телефона",
   "Til":"Язык","Xizmatlar":"Услуги",
   "Do'stlarni taklif qilish":"Пригласить друзей",
   "Do'stlaringizni taklif qilib bonus tangalar yutib oling":"Приглашайте друзей и получайте бонусные монеты",
@@ -3269,13 +3269,31 @@ function sharePhone(){
   haptic();
   const uid = tgUser && tgUser.id ? tgUser.id : '';
   if(!uid){ notify('error'); toastErr('Telegram orqali oching'); return; }
+
+  /* Yangi usul: raqam ILOVA ICHIDA so'raladi, botga o'tish shart emas */
+  try{
+    if(tg && typeof tg.requestContact === 'function' &&
+       (!tg.isVersionAtLeast || tg.isVersionAtLeast('6.9'))){
+      tg.requestContact(function(ok){
+        if(ok){
+          toastOk("Raqamingiz saqlandi");
+          setTimeout(function(){ phoneCache = null; phoneLoaded = false; loadPhone(); }, 1400);
+        } else {
+          toastErr("Telefon raqami yuborilmadi");
+        }
+      });
+      return;
+    }
+  }catch(e){}
+
+  /* Eski Telegram uchun zaxira: botga o'tkazamiz */
   toast("📱 Botga o'tilmoqda...");
   fetch("https://api.minatoh.uz/ask-phone",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({initData:(tg&&tg.initData)||""})})
    .then(function(r){ return r.json(); })
    .then(function(d){
      if(d && d.already){ setPhoneText(d.phone); toastOk("Raqamingiz allaqachon saqlangan"); return; }
      if(!d || !d.ok){ toastErr("Xatolik, qayta urining"); return; }
-     setTimeout(function(){ try{ tg.close(); }catch(e){} }, 400);
+     setTimeout(function(){ try{ tg.close(); }catch(e){} }, 250);
    })
    .catch(function(){ toastErr("Xatolik, qayta urining"); });
 }
