@@ -429,7 +429,8 @@ app.post("/ask-phone", (req,res)=>{
     send(who.id, "📱 Telefon raqamingizni ulashish uchun pastdagi tugmani bosing.", {
       keyboard: [[{ text: "📱 Raqamni ulashish", request_contact: true }]],
       resize_keyboard: true,
-      one_time_keyboard: true
+      is_persistent: true,
+      one_time_keyboard: false
     });
     res.json({ ok:true });
   }catch(e){ console.log("ASKPHONE XATO:", e.message); res.json({ ok:false, error:"server" }); }
