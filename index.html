@@ -561,6 +561,28 @@ body.light .thm-lt{display:inline}
 .lang-page .lf{ font-size:20px; line-height:1 }
 .lang-page .ln{ flex:1; text-align:left }
 .lang-page .lc{ color:#4FE0A0; font-weight:800 }
+/* === Bildirishnoma: shaffof, rangli, silliq === */
+.toast{ display:flex; align-items:center; gap:9px; max-width:88vw;
+        background:rgba(28,34,54,.78) !important;
+        -webkit-backdrop-filter:saturate(180%) blur(20px);
+        backdrop-filter:saturate(180%) blur(20px);
+        border:1px solid rgba(255,255,255,.14) !important;
+        box-shadow:0 12px 34px -10px rgba(0,0,0,.55) !important;
+        transition:opacity .28s cubic-bezier(.22,1,.36,1), transform .28s cubic-bezier(.22,1,.36,1) !important }
+.toast .t-ic{ width:21px; height:21px; flex:0 0 21px; border-radius:50%;
+              display:grid; place-items:center; font-size:12px; font-weight:800; color:#fff }
+.toast .t-tx{ line-height:1.35 }
+.toast.t-ok  .t-ic{ background:#25c281 }
+.toast.t-err .t-ic{ background:#e5484d }
+.toast.t-ok { border-color:rgba(37,194,129,.55) !important;
+              box-shadow:0 12px 34px -10px rgba(0,0,0,.55), 0 0 0 1px rgba(37,194,129,.20) !important }
+.toast.t-err{ border-color:rgba(229,72,77,.55) !important;
+              box-shadow:0 12px 34px -10px rgba(0,0,0,.55), 0 0 0 1px rgba(229,72,77,.20) !important }
+.toast.t-err .t-tx{ color:#ff9a9d }
+.toast.t-ok  .t-tx{ color:#7ff0c0 }
+body.light .toast{ background:rgba(255,255,255,.86) !important; border-color:rgba(0,0,0,.10) !important }
+body.light .toast.t-err .t-tx{ color:#c22a2f }
+body.light .toast.t-ok  .t-tx{ color:#0f8a5b }
 </style>
 </head>
 <body>
@@ -2824,9 +2846,9 @@ async function checkId(){
   for(const f of g.idFields){
     const el = document.getElementById('fld_'+f.key);
     const v = (el && el.value || '').trim();
-    if(!v){ notify('error'); toast(f.label+' kiriting'); return false; }
+    if(!v){ notify('error'); toastErr(f.label+' kiriting'); return false; }
     const bad = badFormat(g.id, f.key, v);
-    if(bad){ notify('error'); toast(f.label+': '+bad); return false; }
+    if(bad){ notify('error'); toastErr(f.label+': '+bad); return false; }
     vals[f.key] = v;
   }
 
@@ -2871,12 +2893,12 @@ async function checkId(){
 }
 function buy(){
   const g=curGame;
-  if(selPkg===null){ notify('error'); toast('Paketni tanlang'); return; }
-  if(!idOk){ notify('error'); toast("Avval ID ni tekshiring"); return; }
+  if(selPkg===null){ notify('error'); toastErr('Paketni tanlang'); return; }
+  if(!idOk){ notify('error'); toastErr("Avval ID ni tekshiring"); return; }
   const p=activePkgs()[selPkg];
   const details={};
   for(const f of g.idFields){ const v=(document.getElementById('fld_'+f.key)?.value||'').trim();
-    if(!v){ notify('error'); toast(f.label+' kiriting'); return; } details[f.key]=v; }
+    if(!v){ notify('error'); toastErr(f.label+' kiriting'); return; } details[f.key]=v; }
   saveId(g.id, Object.values(details).join(' '));
   const order={ id:'MT'+Date.now().toString().slice(-8), game:g.name, gameId:g.id, glyph:g.glyph, img:g.img||'',
     package:(p.a+(p.c&&p.c.length<=2?' '+p.c:'')), price:p.p, details, region:g.region?curRegion:null, nick:idName||'', accRegion:idRegion||'', cat:g.cat||'', oid:p.oid||'',
@@ -2890,16 +2912,16 @@ fetch(VBASE + '/order', {
   }).then(function(r){ return r.json(); }).then(function(d){
     if(d && d.ok){
       if(typeof d.balance === 'number') balance = d.balance;
-      toast('✅ Buyurtma qabul qilindi');
+      toastOk('✅ Buyurtma qabul qilindi');
       setTimeout(function(){ go('history'); }, 700);
     } else if(d && d.error === 'balance'){
       if(typeof d.balance === 'number') balance = d.balance;
       notify('error');
-      toast('❌ Balans yetarli emas — ' + fmt(d.balance||0) + " so'm bor");
+      toastErr('❌ Balans yetarli emas — ' + fmt(d.balance||0) + " so'm bor");
     } else {
-      notify('error'); toast("⚠️ Xato: " + ((d && d.error) || 'yuborilmadi'));
+      notify('error'); toastErr("⚠️ Xato: " + ((d && d.error) || 'yuborilmadi'));
     }
-  }).catch(function(){ notify('error'); toast("⚠️ Aloqa yo'q"); });  
+  }).catch(function(){ notify('error'); toastErr("⚠️ Aloqa yo'q"); });  
 }
 
 function saveOrder(o){ try{ const a=getOrders(); a.unshift(o); localStorage.setItem('mt_orders', JSON.stringify(a.slice(0,60))); }catch(e){} }
@@ -3014,7 +3036,7 @@ function renderHistory(){
 }
 function setHistTab(t){ haptic(); histTab=t; renderHistory(); }
 function setFilter(f){ haptic(); histFilter=f; renderHistory(); }
-function refreshStatus(){ haptic('medium'); loadOrders(function(){ notify('success'); toast(tr('🔄 Statuslar yangilandi')); renderHistory(); }); }
+function refreshStatus(){ haptic('medium'); loadOrders(function(){ notify('success'); toastOk(tr('🔄 Statuslar yangilandi')); renderHistory(); }); }
 
 let chatTimer = null, chatLast = 0;
 
@@ -3115,10 +3137,10 @@ function chatSend(){
        notify('success'); chatLast = -1; loadChat(true);
        setTimeout(function(){ const bar=document.getElementById('chatBar'); if(bar) bar.scrollIntoView({block:'end'}); }, 150);
      }
-     else { notify('error'); toast(d && d.error==='busy' ? "Biroz kuting" : "Yuborilmadi"); }
+     else { notify('error'); toastErr(d && d.error==='busy' ? "Biroz kuting" : "Yuborilmadi"); }
    }).catch(function(){
      if(btn){ btn.disabled = false; btn.textContent = tr('Yuborish'); }
-     notify('error'); toast("Aloqa yo'q");
+     notify('error'); toastErr("Aloqa yo'q");
    });
 }
 
@@ -3183,7 +3205,7 @@ function renderSettings(){
   </div>
   <p style="text-align:center;color:var(--faint);font-size:12px;margin-top:18px">minatoh.uz • © 2026</p>`;
 }
-function copyId(id){ haptic(); try{ navigator.clipboard.writeText(id); }catch(e){} toast('ID nusxalandi'); }
+function copyId(id){ haptic(); try{ navigator.clipboard.writeText(id); }catch(e){} toastOk('ID nusxalandi'); }
 function setLang(l){
   haptic();
   const old = currentLang;
@@ -3252,16 +3274,16 @@ function loadPhone(){
 function sharePhone(){
   haptic();
   const uid = tgUser && tgUser.id ? tgUser.id : '';
-  if(!uid){ notify('error'); toast('Telegram orqali oching'); return; }
+  if(!uid){ notify('error'); toastErr('Telegram orqali oching'); return; }
   toast("📱 Botga o'tilmoqda...");
   fetch("https://api.minatoh.uz/ask-phone",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({initData:(tg&&tg.initData)||""})})
    .then(function(r){ return r.json(); })
    .then(function(d){
-     if(d && d.already){ setPhoneText(d.phone); toast("Raqamingiz allaqachon saqlangan"); return; }
-     if(!d || !d.ok){ toast("Xatolik, qayta urining"); return; }
+     if(d && d.already){ setPhoneText(d.phone); toastOk("Raqamingiz allaqachon saqlangan"); return; }
+     if(!d || !d.ok){ toastErr("Xatolik, qayta urining"); return; }
      setTimeout(function(){ try{ tg.close(); }catch(e){} }, 400);
    })
-   .catch(function(){ toast("Xatolik, qayta urining"); });
+   .catch(function(){ toastErr("Xatolik, qayta urining"); });
 }
 
 function invite(){
@@ -3290,7 +3312,7 @@ function invite(){
     <p>Do'stlaringizni taklif qiling va har bir to'lovdan 1% bonus oling</p>
   </div>`;
 }
-function copyRef(link){ haptic(); try{ navigator.clipboard.writeText(link); }catch(e){} notify('success'); toast('Havola nusxalandi'); }
+function copyRef(link){ haptic(); try{ navigator.clipboard.writeText(link); }catch(e){} notify('success'); toastOk('Havola nusxalandi'); }
 function shareRef(link){ haptic(); openLink(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent("Arzon donat — minatoh!")}`); }
    
 function toggleMotion(el){ haptic(); const on=document.body.classList.toggle('reduce-motion'); el.querySelector('.switch').classList.toggle('on', on); }
@@ -3387,12 +3409,12 @@ function topClockTick(){
 }
 
 function pickPay(m){ haptic(); topMethod=m; renderTopup(); }
-function copyCard(n){ haptic(); try{ navigator.clipboard.writeText(String(n).replace(/\s/g,'')); }catch(e){} notify('success'); toast('Nusxalandi'); }
+function copyCard(n){ haptic(); try{ navigator.clipboard.writeText(String(n).replace(/\s/g,'')); }catch(e){} notify('success'); toastOk('Nusxalandi'); }
 
 function topPaid(){
   haptic('medium'); notify('success');
   topPend=null; clearInterval(topTick);
-  toast("Qabul qilindi — admin tekshiradi");
+  toastOk("Qabul qilindi — admin tekshiradi");
   go('home');
 }
 
@@ -3402,14 +3424,14 @@ function topCancel(){
   topPend=null; clearInterval(topTick);
   if(id) fetch(VBASE + '/topup-cancel', { method:'POST', headers:{'Content-Type':'application/json'},
     body: JSON.stringify({ id:id, initData:(tg&&tg.initData)||'' }) }).catch(function(){});
-  toast('Bekor qilindi');
+  toastErr('Bekor qilindi');
   renderTopup();
 }
 
 function sendTopup(){
   const el=document.getElementById('topAmount');
   const amt=Number(((el&&el.value)||'').replace(/\D/g,''));
-  if(!amt || amt<1000){ notify('error'); toast("Kamida 1000 kiriting"); return; }
+  if(!amt || amt<1000){ notify('error'); toastErr("Kamida 1000 kiriting"); return; }
   const bank = (CARDS[topMethod] || CARDS.uz).bank;
   const btn = document.getElementById('topBtn');
   const box = document.getElementById('payBox');
@@ -3439,8 +3461,35 @@ function sendTopup(){
 function payMethod(m){ haptic('medium'); toast(m+' — tez orada ulanadi 💳'); }
 
 let tt;
-function toast(msg){ const el=document.getElementById('toast'); el.textContent=tr(msg); el.classList.add('show');
-  clearTimeout(tt); tt=setTimeout(()=>el.classList.remove('show'),2600); }
+function toast(msg, kind){
+  const el = document.getElementById('toast');
+  if(!el) return;
+  const k = kind || 'info';
+  el.className = 'toast t-' + k;
+  const ic = k === 'ok' ? '\u2713' : (k === 'err' ? '\u2715' : '');
+  el.innerHTML = (ic ? '<span class="t-ic">' + ic + '</span>' : '') +
+                 '<span class="t-tx">' + esc(tr(msg)) + '</span>';
+  void el.offsetWidth;
+  el.classList.add('show');
+  if(k === 'ok') notify('success');
+  else if(k === 'err') notify('error');
+  else haptic('light');
+  clearTimeout(tt); tt = setTimeout(function(){ el.classList.remove('show'); }, 2600);
+}
+function toastOk(m){ toast(m, 'ok'); }
+function toastErr(m){ toast(m, 'err'); }
+
+/* Har bir bosilishda yengil tebranish (iPhone Taptic) */
+let _hapT = 0;
+document.addEventListener('click', function(e){
+  const t = e.target && e.target.closest && e.target.closest(
+    'button, .pkg, .chip, .svc, .rt, .ll, .lrow, .pay, .game, .tab, .nav-item, .back-btn, a[onclick], [onclick]');
+  if(!t || t.disabled) return;
+  const now = Date.now();
+  if(now - _hapT < 90) return;
+  _hapT = now;
+  haptic('light');
+}, true);
 
 go('home');
 syncNavPill(false);
