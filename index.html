@@ -561,28 +561,22 @@ body.light .thm-lt{display:inline}
 .lang-page .lf{ font-size:20px; line-height:1 }
 .lang-page .ln{ flex:1; text-align:left }
 .lang-page .lc{ color:#4FE0A0; font-weight:800 }
-/* === Bildirishnoma: shaffof, rangli, silliq === */
-.toast{ display:flex; align-items:center; gap:9px; max-width:88vw;
-        background:rgba(28,34,54,.78) !important;
-        -webkit-backdrop-filter:saturate(180%) blur(20px);
-        backdrop-filter:saturate(180%) blur(20px);
-        border:1px solid rgba(255,255,255,.14) !important;
-        box-shadow:0 12px 34px -10px rgba(0,0,0,.55) !important;
-        transition:opacity .28s cubic-bezier(.22,1,.36,1), transform .28s cubic-bezier(.22,1,.36,1) !important }
-.toast .t-ic{ width:21px; height:21px; flex:0 0 21px; border-radius:50%;
-              display:grid; place-items:center; font-size:12px; font-weight:800; color:#fff }
-.toast .t-tx{ line-height:1.35 }
-.toast.t-ok  .t-ic{ background:#25c281 }
-.toast.t-err .t-ic{ background:#e5484d }
-.toast.t-ok { border-color:rgba(37,194,129,.55) !important;
-              box-shadow:0 12px 34px -10px rgba(0,0,0,.55), 0 0 0 1px rgba(37,194,129,.20) !important }
-.toast.t-err{ border-color:rgba(229,72,77,.55) !important;
-              box-shadow:0 12px 34px -10px rgba(0,0,0,.55), 0 0 0 1px rgba(229,72,77,.20) !important }
-.toast.t-err .t-tx{ color:#ff9a9d }
-.toast.t-ok  .t-tx{ color:#7ff0c0 }
-body.light .toast{ background:rgba(255,255,255,.86) !important; border-color:rgba(0,0,0,.10) !important }
-body.light .toast.t-err .t-tx{ color:#c22a2f }
-body.light .toast.t-ok  .t-tx{ color:#0f8a5b }
+/* === Bildirishnoma: to'liq kenglik, ixcham, rangli === */
+.toast{ left:16px !important; right:16px !important; width:auto !important; max-width:none !important;
+        transform:translateY(-24px) !important; text-align:left;
+        padding:15px 18px !important; font-size:15px !important; font-weight:500 !important;
+        background:rgba(24,30,48,.82) !important;
+        -webkit-backdrop-filter:saturate(180%) blur(22px);
+        backdrop-filter:saturate(180%) blur(22px);
+        border:1.5px solid rgba(255,255,255,.10) !important;
+        box-shadow:0 14px 40px -12px rgba(0,0,0,.6) !important;
+        transition:opacity .3s cubic-bezier(.22,1,.36,1), transform .3s cubic-bezier(.22,1,.36,1) !important }
+.toast.show{ transform:translateY(0) !important }
+.toast.t-ok { border-color:rgba(45,212,140,.65) !important; color:#4ce0a4 !important }
+.toast.t-err{ border-color:rgba(255,92,97,.65) !important; color:#ff7a7e !important }
+body.light .toast{ background:rgba(255,255,255,.90) !important }
+body.light .toast.t-ok { color:#0d8a58 !important }
+body.light .toast.t-err{ color:#c8262b !important }
 </style>
 </head>
 <body>
@@ -3466,20 +3460,46 @@ function toast(msg, kind){
   if(!el) return;
   const k = kind || 'info';
   el.className = 'toast t-' + k;
-  const ic = k === 'ok' ? '\u2713' : (k === 'err' ? '\u2715' : '');
-  el.innerHTML = (ic ? '<span class="t-ic">' + ic + '</span>' : '') +
-                 '<span class="t-tx">' + esc(tr(msg)) + '</span>';
+  el.textContent = tr(msg);
   void el.offsetWidth;
   el.classList.add('show');
-  if(k === 'ok') notify('success');
-  else if(k === 'err') notify('error');
-  else haptic('light');
+  if(k === 'ok'){ notify('success'); sndOk(); }
+  else if(k === 'err'){ notify('error'); sndErr(); }
+  else { haptic('light'); sndTap(); }
   clearTimeout(tt); tt = setTimeout(function(){ el.classList.remove('show'); }, 2600);
 }
 function toastOk(m){ toast(m, 'ok'); }
 function toastErr(m){ toast(m, 'err'); }
 
-/* Har bir bosilishda yengil tebranish (iPhone Taptic) */
+/* ---- Tovush: qisqa "tik". Fayl kerak emas, ovoz kodda yasaladi. ---- */
+let _ac = null, sndOn = true;
+try{ sndOn = localStorage.getItem('mt_snd') !== '0'; }catch(e){}
+function _ctx(){
+  try{
+    if(!_ac) _ac = new (window.AudioContext || window.webkitAudioContext)();
+    if(_ac.state === 'suspended') _ac.resume();
+    return _ac;
+  }catch(e){ return null; }
+}
+function blip(freq, dur, vol){
+  if(!sndOn) return;
+  const c = _ctx(); if(!c) return;
+  try{
+    const o = c.createOscillator(), g = c.createGain();
+    o.type = 'sine'; o.frequency.value = freq;
+    const t = c.currentTime;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol, t + 0.006);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(c.destination);
+    o.start(t); o.stop(t + dur + 0.02);
+  }catch(e){}
+}
+function sndTap(){ blip(1500, 0.045, 0.05); }
+function sndOk(){ blip(920, 0.07, 0.09); setTimeout(function(){ blip(1380, 0.10, 0.075); }, 75); }
+function sndErr(){ blip(420, 0.09, 0.09); setTimeout(function(){ blip(300, 0.13, 0.075); }, 85); }
+
+/* Har bir bosilishda yengil tebranish + tik */
 let _hapT = 0;
 document.addEventListener('click', function(e){
   const t = e.target && e.target.closest && e.target.closest(
@@ -3489,6 +3509,7 @@ document.addEventListener('click', function(e){
   if(now - _hapT < 90) return;
   _hapT = now;
   haptic('light');
+  sndTap();
 }, true);
 
 go('home');
