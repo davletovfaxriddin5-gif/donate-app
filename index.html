@@ -237,6 +237,7 @@ input{font-family:inherit}
 .guide-btn .t{font-weight:700;font-size:15px;color:#9CA9FF}
 .guide-btn .r{margin-left:auto;color:#7E93FF;font-size:13px;font-weight:600}
 .pay-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px}
+.check-btn:disabled{opacity:.45}
 .pay{background:#fff;border-radius:13px;padding:11px 6px 9px;display:flex;flex-direction:column;align-items:center;gap:7px;transition:.14s}
 .pay:active{transform:scale(.96)}
 .pay .box{width:50px;height:50px;border-radius:12px;display:grid;place-items:center;overflow:hidden}
@@ -3575,12 +3576,20 @@ function onStTop(){
   if(b) b.disabled = !(stN > 0) || stBusy;
 }
 
+/* Holatni ekranga yozamiz \u2014 toast ko'rinmay qolsa ham sabab o'qiladi */
+function stSay(msg, bad){
+  const h = document.getElementById('stHint');
+  if(h) h.innerHTML = '<div style="color:' + (bad ? 'var(--gold)' : 'var(--dim)') + '">' + msg + '</div>';
+}
+
 function payStars(){
-  if(!stN || stBusy) return;
+  const b = document.getElementById('stBtn');
+  if(!stN){ stSay('Miqdor kiritilmagan (' + stMin + '\u2013' + fmt(stMax) + ' \u2b50)', true); return; }
+  if(stBusy){ stBusy = false; if(b) b.disabled = false; }
   haptic();
   stBusy = true;
-  const b = document.getElementById('stBtn');
-  if(b){ b.disabled = true; b.textContent = '…'; }
+  if(b){ b.disabled = true; b.textContent = 'Yuborilmoqda\u2026'; }
+  stSay('So\'rov yuborildi\u2026');
   const done = function(){ stBusy = false;
     const x = document.getElementById('stBtn');
     if(x){ x.textContent = "To'lovga o'tish"; x.disabled = !(stN > 0); } };
@@ -3591,44 +3600,48 @@ function payStars(){
   }).then(function(r){ return r.json(); }).then(function(d){
     done();
     if(!d || !d.ok || !d.link){
-      notify('error');
       const e = (d && d.error) || 'javob yo\'q';
-      toastErr(e === 'qty' ? `${stMin}–${fmt(stMax)} ⭐ oralig'ida kiriting`
-             : e === 'auth' ? "⚠️ Telegram tasdiqlamadi — ilovani qayta oching"
-             : "⚠️ Xato: " + e);
+      notify('error');
+      stSay(e === 'qty'  ? stMin + '\u2013' + fmt(stMax) + ' \u2b50 oralig\'ida kiriting'
+          : e === 'auth' ? 'Telegram tasdiqlamadi \u2014 ilovani qayta oching'
+          : 'Server xatosi: ' + e, true);
       return;
     }
+    stSay('Havola olindi, to\'lov oynasi ochilmoqda\u2026');
     openInvoice(d.link);
   }).catch(function(err){
     done(); notify('error');
-    toastErr("⚠️ Aloqa yo'q: " + (err && err.message ? err.message : ''));
+    stSay('Aloqa xatosi: ' + (err && err.message ? err.message : '?'), true);
   });
 }
 
 /* Hisob-fakturani ochish. openInvoice eski mijozlarda bo'lmasligi mumkin,
-   shuning uchun uchta yo'l ketma-ket sinaladi va har biri xabar beradi. */
+   shuning uchun uchta yo'l ketma-ket sinaladi va har biri ekranga yozadi. */
 function openInvoice(link){
+  const ver = (tg && tg.version) || '?';
   if(tg && typeof tg.openInvoice === 'function'){
     try{
       tg.openInvoice(link, function(status){
         if(status === 'paid'){
           notify('success');
-          toastOk("✅ To'lov qabul qilindi — balans to'lmoqda");
+          stSay('\u2705 To\'lov qabul qilindi \u2014 balans to\'lmoqda');
+          toastOk("✅ To'lov qabul qilindi");
           setTimeout(function(){ go('home'); loadBalance(); }, 1500);
         } else if(status === 'failed'){
-          notify('error'); toastErr("❌ To'lov o'tmadi");
+          notify('error'); stSay('To\'lov o\'tmadi', true);
         } else if(status === 'cancelled'){
-          toastErr("To'lov bekor qilindi");
+          stSay('To\'lov bekor qilindi', true);
+        } else {
+          stSay('Holat: ' + status, true);
         }
       });
       return;
     }catch(e){
-      toastErr("openInvoice: " + (e && e.message ? e.message : 'ishlamadi'));
+      stSay('openInvoice xato (v' + ver + '): ' + (e && e.message ? e.message : '?'), true);
     }
   } else {
-    toastErr("Telegram versiyasi eski (" + ((tg && tg.version) || '?') + ")");
+    stSay('openInvoice yo\'q. Telegram v' + ver + '. Zaxira yo\'l sinalmoqda\u2026', true);
   }
-  /* zaxira: t.me havolasini Telegram ichida ochamiz */
   if(tg && typeof tg.openTelegramLink === 'function'){
     try{ tg.openTelegramLink(link); return; }catch(e){}
   }
