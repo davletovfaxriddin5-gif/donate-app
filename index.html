@@ -236,8 +236,8 @@ input{font-family:inherit}
 .guide-btn .ic{width:38px;height:38px;border-radius:11px;background:var(--blue);display:grid;place-items:center;font-size:18px;flex-shrink:0}
 .guide-btn .t{font-weight:700;font-size:15px;color:#9CA9FF}
 .guide-btn .r{margin-left:auto;color:#7E93FF;font-size:13px;font-weight:600}
-.pay-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.pay{background:#fff;border-radius:14px;padding:14px 8px 11px;display:flex;flex-direction:column;align-items:center;gap:9px;transition:.14s}
+.pay-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px}
+.pay{background:#fff;border-radius:13px;padding:11px 6px 9px;display:flex;flex-direction:column;align-items:center;gap:7px;transition:.14s}
 .pay:active{transform:scale(.96)}
 .pay .box{width:50px;height:50px;border-radius:12px;display:grid;place-items:center;overflow:hidden}
 .pay .nm{font-size:12.5px;font-weight:700;color:#1a2236;text-align:center}
@@ -655,7 +655,8 @@ function openLink(url){
 
 const ADMIN_USERNAME = 'dv1mm_garant';
 const CHANNEL_USERNAME = 'savdo_mlbb1';
-const GUIDE_URL = 'https://t.me/savdo_mlbb1';
+const GUIDE_URL = 'https://t.me/minatocards';
+const NEWS_URL  = 'https://t.me/minatoh_uz';
 const BOT_USERNAME = 'minatoh_bot';
 const APP_SHORT_NAME = 'app';
 /* 1 birlik necha so'm turadi. Kurs o'zgarsa faqat shu ikkita raqamni almashtiring.
@@ -3277,6 +3278,11 @@ function renderSettings(){
       <span class="txt"><div class="t">Qo'llab-quvvatlash</div><div class="s">Savollar bo'yicha 24/7 yordam chati orqali bog'laning</div></span>
       <span class="arw">›</span>
     </button>
+    <button class="svc" onclick="openLink('${NEWS_URL}')">
+      <span class="ic" style="background:#229ED9"><svg viewBox="0 0 24 24"><path d="M3 11l18-7-7 18-2.5-7.5z"/><path d="M11.5 14.5L21 4"/></svg></span>
+      <span class="txt"><div class="t">Telegram kanalimiz</div><div class="s">Yangiliklar, chegirmalar va aksiyalardan xabardor bo'ling</div></span>
+      <span class="arw">›</span>
+    </button>
     <button class="svc" onclick="go('spam')">
       <span class="ic" style="background:#E0574A"><svg viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg></span>
       <span class="txt"><div class="t">Spamlar uchun qulay yozishmalar joyi</div><div class="s">Telegram akkauntingiz cheklangan bo'lsa shu yerdan yozing</div></span>
@@ -3484,11 +3490,32 @@ function renderTopup(){
     <div class="page-title">Hisobni to'ldirish</div>
     <p style="color:var(--dim);font-size:13.5px;margin:-6px 2px 18px">To'lov usulini tanlang</p>
     <div class="pay-grid">
-     ${Object.keys(CARDS).map(k=>`<button class="pay" onclick="pickPay('${k}')"><span class="box"style="background:${CARDS[k].bg};font-size:24px;width:100%;height:74px">${CARDS[k].icon.indexOf('/')===0 ? `<img src="${CARDS[k].icon}" style="width:100%;height:74px;object-fit:contain">` : CARDS[k].icon}</span><span class="nm">${CARDS[k].bank}</span></button>`).join('')}
+     ${Object.keys(CARDS).map(k=>`<button class="pay" onclick="pickPay('${k}')"><span class="box"style="background:${CARDS[k].bg};font-size:20px;width:100%;height:46px">${CARDS[k].icon.indexOf('/')===0 ? `<img src="${CARDS[k].icon}" style="width:100%;height:46px;object-fit:contain">` : CARDS[k].icon}</span><span class="nm">${CARDS[k].bank}</span></button>`).join('')}
+     <button class="pay" onclick="pickPay('stars')"><span class="box" style="font-size:30px;width:100%;height:46px">⭐</span><span class="nm">Telegram Stars</span></button>
     </div>
     <button class="guide-btn" style="margin-top:16px" onclick="openLink('${GUIDE_URL}')">
       <span class="ic">📖</span><span class="t">Qo'llanma</span><span class="r">Kanal</span>
     </button>`;
+    return;
+  }
+
+  if(topMethod === 'stars'){
+    app.innerHTML = `
+    <div class="back-row"><button class="back-btn" onclick="pickPay(null)"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>Orqaga</button></div>
+    <div class="page-title">Telegram Stars</div>
+    <p style="color:var(--dim);font-size:13.5px;margin:-6px 2px 18px">Qancha yulduz to'lamoqchisiz?</p>
+    <div class="form-card">
+      <div class="lbl">IXTIYORIY MIQDOR (⭐)</div>
+      <div class="inp-wrap"><input class="inp" id="stTop" inputmode="numeric" placeholder="0" autocomplete="off" oninput="onStTop()"><span class="info-i">⭐</span></div>
+      <div class="lbl" style="margin-top:14px">BALANSGA QO'SHILADI</div>
+      <div class="inp-wrap"><input class="inp" id="stSom" readonly value="—" style="opacity:.85"></div>
+      <div id="stHint" style="margin-top:11px;font-size:12.5px;line-height:1.6;color:var(--dim)"></div>
+      <button class="check-btn" id="stBtn" style="width:100%;margin-top:14px;padding:13px" onclick="payStars()" disabled>To'lovga o'tish</button>
+    </div>
+    <div class="id-res wait" style="margin-top:14px">
+      To'lov Telegram orqali o'tadi. Tasdiqlangach balansingiz o'zi to'ladi — kutish shart emas.
+    </div>`;
+    stN = 0; onStTop();
     return;
   }
 
@@ -3514,6 +3541,75 @@ function topClockTick(){
   if(s <= 0){ el.textContent = "Vaqt tugadi"; el.style.color = "var(--gold)"; clearInterval(topTick); return; }
   const m = Math.floor(s/60); s = s % 60;
   el.textContent = (m<10?'0':'')+m+":"+(s<10?'0':'')+s;
+}
+
+/* ---------- Telegram Stars orqali to'ldirish ----------
+   Kurs serverdan olinadi (server.js dagi STAR_TOPUP_RATE), shu yerda qattiq
+   yozilmaydi — ikkalasi hech qachon bir-biridan ayrilib qolmasligi uchun. */
+let stN = 0, stRate = 140, stMin = 10, stMax = 100000, stBusy = false;
+fetch(VBASE + '/star-rate').then(r=>r.json()).then(function(d){
+  if(d && d.ok){ stRate = d.rate; stMin = d.min; stMax = d.max;
+    if(topMethod === 'stars') onStTop(); }
+}).catch(function(){});
+
+function onStTop(){
+  const el = document.getElementById('stTop');
+  if(!el) return;
+  let v = String(el.value||'').replace(/[^0-9]/g,'').replace(/^0+/,'');
+  if(v.length > 6) v = v.slice(0,6);
+  if(el.value !== v) el.value = v;
+  const n = parseInt(v,10) || 0;
+  stN = (n >= stMin && n <= stMax) ? n : 0;
+
+  const s = document.getElementById('stSom');
+  if(s) s.value = n ? (fmt(n * stRate) + " so'm") : '—';
+  const h = document.getElementById('stHint');
+  if(h){
+    let warn = '';
+    if(n && n < stMin) warn = `<div style="color:var(--gold)">Eng kami ${stMin} ⭐</div>`;
+    else if(n > stMax) warn = `<div style="color:var(--gold)">Eng ko'pi ${fmt(stMax)} ⭐</div>`;
+    h.innerHTML = warn + `<div>1 ⭐ = ${fmt(stRate)} so'm</div>`
+      + `<div>Xohlagan miqdorni kiriting — qancha yulduzingiz bo'lsa shuncha.</div>`;
+  }
+  const b = document.getElementById('stBtn');
+  if(b) b.disabled = !(stN > 0) || stBusy;
+}
+
+function payStars(){
+  if(!stN || stBusy) return;
+  haptic();
+  stBusy = true;
+  const b = document.getElementById('stBtn');
+  if(b){ b.disabled = true; b.textContent = '…'; }
+  const done = function(){ stBusy = false;
+    const x = document.getElementById('stBtn');
+    if(x){ x.textContent = "To'lovga o'tish"; x.disabled = !(stN > 0); } };
+
+  fetch(VBASE + '/star-invoice', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ stars: stN, initData: (tg && tg.initData) || '' })
+  }).then(function(r){ return r.json(); }).then(function(d){
+    done();
+    if(!d || !d.ok || !d.link){
+      notify('error');
+      toastErr(d && d.error === 'qty' ? `${stMin}–${fmt(stMax)} ⭐ oralig'ida kiriting`
+                                      : "⚠️ Hisob-faktura yaratilmadi");
+      return;
+    }
+    if(tg && tg.openInvoice){
+      tg.openInvoice(d.link, function(status){
+        if(status === 'paid'){
+          notify('success');
+          toastOk('✅ To\'lov qabul qilindi — balans to\'lmoqda');
+          setTimeout(function(){ go('home'); loadBalance(); }, 1500);
+        } else if(status === 'failed'){
+          notify('error'); toastErr("❌ To'lov o'tmadi");
+        }
+      });
+    } else {
+      openLink(d.link);
+    }
+  }).catch(function(){ done(); notify('error'); toastErr("⚠️ Aloqa yo'q"); });
 }
 
 function pickPay(m){ haptic(); topMethod=m; renderTopup(); }
