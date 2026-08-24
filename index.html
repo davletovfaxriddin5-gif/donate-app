@@ -3592,24 +3592,47 @@ function payStars(){
     done();
     if(!d || !d.ok || !d.link){
       notify('error');
-      toastErr(d && d.error === 'qty' ? `${stMin}–${fmt(stMax)} ⭐ oralig'ida kiriting`
-                                      : "⚠️ Hisob-faktura yaratilmadi");
+      const e = (d && d.error) || 'javob yo\'q';
+      toastErr(e === 'qty' ? `${stMin}–${fmt(stMax)} ⭐ oralig'ida kiriting`
+             : e === 'auth' ? "⚠️ Telegram tasdiqlamadi — ilovani qayta oching"
+             : "⚠️ Xato: " + e);
       return;
     }
-    if(tg && tg.openInvoice){
-      tg.openInvoice(d.link, function(status){
+    openInvoice(d.link);
+  }).catch(function(err){
+    done(); notify('error');
+    toastErr("⚠️ Aloqa yo'q: " + (err && err.message ? err.message : ''));
+  });
+}
+
+/* Hisob-fakturani ochish. openInvoice eski mijozlarda bo'lmasligi mumkin,
+   shuning uchun uchta yo'l ketma-ket sinaladi va har biri xabar beradi. */
+function openInvoice(link){
+  if(tg && typeof tg.openInvoice === 'function'){
+    try{
+      tg.openInvoice(link, function(status){
         if(status === 'paid'){
           notify('success');
-          toastOk('✅ To\'lov qabul qilindi — balans to\'lmoqda');
+          toastOk("✅ To'lov qabul qilindi — balans to'lmoqda");
           setTimeout(function(){ go('home'); loadBalance(); }, 1500);
         } else if(status === 'failed'){
           notify('error'); toastErr("❌ To'lov o'tmadi");
+        } else if(status === 'cancelled'){
+          toastErr("To'lov bekor qilindi");
         }
       });
-    } else {
-      openLink(d.link);
+      return;
+    }catch(e){
+      toastErr("openInvoice: " + (e && e.message ? e.message : 'ishlamadi'));
     }
-  }).catch(function(){ done(); notify('error'); toastErr("⚠️ Aloqa yo'q"); });
+  } else {
+    toastErr("Telegram versiyasi eski (" + ((tg && tg.version) || '?') + ")");
+  }
+  /* zaxira: t.me havolasini Telegram ichida ochamiz */
+  if(tg && typeof tg.openTelegramLink === 'function'){
+    try{ tg.openTelegramLink(link); return; }catch(e){}
+  }
+  try{ window.location.href = link; }catch(e){}
 }
 
 function pickPay(m){ haptic(); topMethod=m; renderTopup(); }
