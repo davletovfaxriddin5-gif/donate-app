@@ -862,14 +862,26 @@ app.post("/star-invoice", async (req,res)=>{
       return res.json({ ok:false, error:"qty", min:STAR_TOPUP_MIN, max:STAR_TOPUP_MAX });
 
     const som = n * STAR_TOPUP_RATE;
-    const j = await tgAsk("createInvoiceLink", {
+    const inv = {
       title: "Balansni to'ldirish",
       description: n + " Stars = " + som + " so'm balansingizga qo'shiladi",
       payload: "star:" + who.id + ":" + n,
       provider_token: "",
       currency: "XTR",
       prices: [{ label: n + " Stars", amount: n }]
-    });
+    };
+
+    /* send:true \u2014 zaxira yo'l: hisob-fakturani bot chatiga xabar qilib yuboramiz */
+    if(b.send){
+      const s = await tgAsk("sendInvoice", Object.assign({ chat_id: who.id }, inv));
+      if(!s || !s.ok){
+        console.log("STAR sendInvoice xato:", JSON.stringify(s));
+        return res.json({ ok:false, error:"invoice" });
+      }
+      return res.json({ ok:true, sent:true, som: som, stars: n });
+    }
+
+    const j = await tgAsk("createInvoiceLink", inv);
     if(!j || !j.ok || !j.result){
       console.log("STAR invoice xato:", JSON.stringify(j));
       return res.json({ ok:false, error:"invoice" });
