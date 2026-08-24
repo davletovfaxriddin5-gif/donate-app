@@ -3607,7 +3607,6 @@ function payStars(){
           : 'Server xatosi: ' + e, true);
       return;
     }
-    stSay('Havola olindi, to\'lov oynasi ochilmoqda\u2026');
     openInvoice(d.link);
   }).catch(function(err){
     done(); notify('error');
@@ -3615,22 +3614,84 @@ function payStars(){
   });
 }
 
-/* Hisob-fakturani ochish.
-   tg.openInvoice bu mijozda jimgina ishlamadi (chaqiriladi, xato bermaydi,
-   lekin oyna ochilmaydi), shuning uchun ASOSIY yo'l — openTelegramLink.
-   U to'lov oynasini ishonchli ochadi. "paid" callback'i bo'lmaydi, lekin
-   kerak ham emas: pul webhook orqali tushadi, biz esa balansni kuzatamiz. */
+/* Telegram SDK jimgina to'xtaganda sababni console.error ga yozadi \u2014
+   telefonda uni ko'rib bo'lmagani uchun tutib olamiz. */
+const tgErrs = [];
+(function(){
+  const ce = console.error;
+  console.error = function(){
+    try{
+      const s = Array.prototype.slice.call(arguments).join(' ');
+      if(s.indexOf('Telegram') > -1) tgErrs.push(s);
+    }catch(e){}
+    try{ return ce.apply(console, arguments); }catch(e){}
+  };
+})();
+
+/* Hisob-fakturani Mini App ICHIDA ochamiz */
 function openInvoice(link){
+  const ver = (tg && tg.version) || '?';
+  const before = tgErrs.length;
   stSay('To\'lov oynasi ochilmoqda\u2026');
-  if(tg && typeof tg.openTelegramLink === 'function'){
-    try{ tg.openTelegramLink(link); watchBalance(); return; }catch(e){}
+
+  if(!tg || typeof tg.openInvoice !== 'function'){
+    stSay('openInvoice yo\'q (Telegram v' + ver + ')', true);
+    showSendBtn(); return;
   }
-  if(tg && typeof tg.openInvoice === 'function'){
-    try{ tg.openInvoice(link, function(){}); watchBalance(); return; }catch(e){}
+  try{
+    tg.openInvoice(link, function(status){
+      if(status === 'paid'){
+        notify('success');
+        stSay('\u2705 To\'lov qabul qilindi \u2014 balans to\'lmoqda');
+        toastOk("✅ To'lov qabul qilindi");
+        setTimeout(function(){ go('home'); loadBalance(); }, 1500);
+      } else if(status === 'failed'){
+        notify('error'); stSay('To\'lov o\'tmadi', true); showSendBtn();
+      } else if(status === 'cancelled'){
+        stSay('To\'lov bekor qilindi', true);
+      } else {
+        stSay('Holat: ' + status, true);
+      }
+    });
+  }catch(e){
+    stSay('openInvoice xato (v' + ver + '): ' + (e && e.message ? e.message : '?'), true);
+    showSendBtn(); return;
   }
-  try{ window.location.href = link; }catch(e){
-    stSay('Ochib bo\'lmadi \u2014 qaytadan urinib ko\'ring', true);
-  }
+  /* 3 soniyada oyna ochilmasa \u2014 SDK xatosini ko'rsatamiz va zaxira tugmani beramiz */
+  setTimeout(function(){
+    const h = document.getElementById('stHint');
+    if(!h || h.textContent.indexOf('ochilmoqda') < 0) return;
+    const e = tgErrs.length > before ? tgErrs[tgErrs.length-1] : '';
+    stSay(e ? ('SDK: ' + e) : ('Oyna ochilmadi (Telegram v' + ver + ')'), true);
+    showSendBtn();
+  }, 3000);
+}
+
+/* Zaxira: hisob-fakturani bot chatiga yuborib, ilovani yopamiz */
+function showSendBtn(){
+  if(document.getElementById('stSend')) return;
+  const h = document.getElementById('stHint');
+  if(!h) return;
+  const b = document.createElement('button');
+  b.id = 'stSend'; b.className = 'check-btn';
+  b.style.cssText = 'width:100%;margin-top:10px;padding:12px';
+  b.textContent = 'Botga yuborish';
+  b.onclick = function(){
+    b.disabled = true; b.textContent = 'Yuborilmoqda\u2026';
+    fetch(VBASE + '/star-invoice', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ stars: stN, send: true, initData: (tg && tg.initData) || '' })
+    }).then(function(r){ return r.json(); }).then(function(d){
+      if(d && d.ok){
+        stSay('\u2705 To\'lov tugmasi botga yuborildi');
+        setTimeout(function(){ if(tg && tg.close){ try{ tg.close(); }catch(e){} } }, 800);
+      } else {
+        b.disabled = false; b.textContent = 'Botga yuborish';
+        stSay('Yuborilmadi: ' + ((d && d.error) || '?'), true);
+      }
+    }).catch(function(){ b.disabled = false; b.textContent = 'Botga yuborish'; });
+  };
+  h.parentNode.insertBefore(b, h.nextSibling);
 }
 
 /* To'lovdan keyin balans o'zgarishini kutamiz: 3 soniyada bir, 90 soniya davomida */
