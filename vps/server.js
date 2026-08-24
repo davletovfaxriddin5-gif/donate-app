@@ -515,6 +515,21 @@ function urec(db, id){
   return u;
 }
 
+/* javobni kutadigan variant \u2014 createInvoiceLink kabi natija kerak bo'lganda */
+async function tgAsk(method, body){
+  if(!TOKEN) return null;
+  const ac = new AbortController();
+  const tm = setTimeout(()=>ac.abort(), 15000);
+  try{
+    const r = await fetch("https://api.telegram.org/bot"+TOKEN+"/"+method, {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify(body), signal: ac.signal
+    });
+    return await r.json().catch(()=>null);
+  }catch(e){ console.log("TG "+method+" xato:", e.message); return null; }
+  finally { clearTimeout(tm); }
+}
+
 function tgCall(method, body){
   if(!TOKEN) return;
   fetch("https://api.telegram.org/bot"+TOKEN+"/"+method, {
@@ -823,6 +838,78 @@ function usedAmounts(db){
   return set;
 }
 
+/* ---------- Telegram Stars orqali balansni to'ldirish ----------
+   Mijoz yulduz to'laydi, balansiga so'm tushadi. Ixtiyoriy miqdor.
+
+   ZARARGA KIRMASLIK: Telegram olingan yulduzni Fragment orqali ~$0.013 ga
+   yechishga ruxsat beradi. 11 500 kursda bu ~149 so'm, Fragment/birja
+   xarajatlari ~3% ni olib tashlasak ~145 so'm. Shuning uchun quyidagi
+   STAR_TOPUP_RATE 145 dan PAST bo'lishi SHART, aks holda har to'ldirishda
+   zarar ko'rasiz. 140 = yulduzga ~5 so'm foyda.
+   Eslatma: yechish uchun eng kami 1 000 yulduz to'planishi va har to'lovdan
+   keyin 21 kun o'tishi kerak \u2014 bu pul darrov aylanmaga tushmaydi. */
+const STAR_TOPUP_RATE = 140;      /* 1 yulduz = shuncha so'm balansga */
+const STAR_TOPUP_MIN  = 10;       /* juda mayda to'lovlarni to'sish uchun */
+const STAR_TOPUP_MAX  = 100000;
+
+app.post("/star-invoice", async (req,res)=>{
+  try{
+    const b = req.body || {};
+    const who = checkInit(b.initData);
+    if(!who) return res.json({ ok:false, error:"auth" });
+    const n = Math.floor(Number(b.stars) || 0);
+    if(!(n >= STAR_TOPUP_MIN && n <= STAR_TOPUP_MAX))
+      return res.json({ ok:false, error:"qty", min:STAR_TOPUP_MIN, max:STAR_TOPUP_MAX });
+
+    const som = n * STAR_TOPUP_RATE;
+    const j = await tgAsk("createInvoiceLink", {
+      title: "Balansni to'ldirish",
+      description: n + " Stars = " + som + " so'm balansingizga qo'shiladi",
+      payload: "star:" + who.id + ":" + n,
+      provider_token: "",
+      currency: "XTR",
+      prices: [{ label: n + " Stars", amount: n }]
+    });
+    if(!j || !j.ok || !j.result){
+      console.log("STAR invoice xato:", JSON.stringify(j));
+      return res.json({ ok:false, error:"invoice" });
+    }
+    res.json({ ok:true, link: j.result, som: som, stars: n });
+  }catch(e){ console.log("STAR INVOICE XATO:", e.message); res.json({ ok:false, error:"server" }); }
+});
+
+app.get("/star-rate", (req,res)=>{
+  res.json({ ok:true, rate:STAR_TOPUP_RATE, min:STAR_TOPUP_MIN, max:STAR_TOPUP_MAX });
+});
+
+/* To'lov muvaffaqiyatli \u2014 balansni qo'shamiz.
+   charge_id takrorlansa qayta qo'shmaymiz (Telegram xabarni qayta yuborishi mumkin). */
+function starPaid(fromId, sp){
+  const stars  = Math.floor(Number(sp.total_amount) || 0);
+  const charge = String(sp.telegram_payment_charge_id || "");
+  if(!(stars > 0)) return;
+
+  const db = load();
+  const u = urec(db, fromId);
+  if(charge && u.topups.some(function(t){ return t.charge === charge; })) return;
+
+  const som = stars * STAR_TOPUP_RATE;
+  const id  = "ST" + Date.now().toString().slice(-8);
+  u.balance += som;
+  u.topups.unshift({ id:id, amount:som, base:som, method:"Telegram Stars",
+                     stars:stars, charge:charge, status:"ok",
+                     at:new Date().toISOString(), doneAt:new Date().toISOString() });
+  u.topups = u.topups.slice(0,60);
+  save(db);
+
+  send(fromId, "\u2b50 " + stars + " Stars qabul qilindi!\nBalansingizga " + som +
+               " so'm qo'shildi.\nJoriy balans: " + u.balance + " so'm");
+  if(ADMIN_ID) tgCall("sendMessage", { chat_id: ADMIN_ID,
+    text: "\u2b50 STARS TO'LDIRISH " + id + "\n" + stars + " Stars = " + som +
+          " so'm\nid: " + fromId + "\nYangi balans: " + u.balance });
+}
+
+/* ---------- Karta orqali to'ldirish (noyob summa bilan) ---------- */
 app.post("/topup", (req,res)=>{
   try{
     const b = req.body || {};
@@ -1161,10 +1248,25 @@ app.post("/webhook", (req,res)=>{
   try{
     const cq = req.body && req.body.callback_query;
     if(cq){ handleCb(cq); return; }
+
+    /* Stars to'lovi: 10 soniya ichida javob berish SHART, aks holda bekor bo'ladi */
+    const pcq = req.body && req.body.pre_checkout_query;
+    if(pcq){
+      const okPay = String(pcq.invoice_payload||"").indexOf("star:") === 0;
+      tgCall("answerPreCheckoutQuery", { pre_checkout_query_id: pcq.id, ok: okPay,
+        error_message: okPay ? undefined : "To'lovni tekshirib bo'lmadi, qaytadan urinib ko'ring" });
+      return;
+    }
+
     const msg = req.body && req.body.message;
     if(!msg) return;
     const fromId = String((msg.from && msg.from.id) || "");
     if(!fromId) return;
+
+    if(msg.successful_payment){
+      starPaid(fromId, msg.successful_payment);
+      return;
+    }
 
     if(msg.contact && msg.contact.phone_number){
       const ownerId = String(msg.contact.user_id || "");
