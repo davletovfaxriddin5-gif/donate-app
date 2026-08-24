@@ -2450,7 +2450,7 @@ function go(v){
   else if(v==='game') renderGame();
   else if(v==='history') renderHistory();
   else if(v==='settings'){ renderSettings(); loadPhone(); }
-  else if(v==='topup'){ topMethod=null; renderTopup(); }
+  else if(v==='topup'){ topMethod=null; stConfirm=0; stBusy=false; renderTopup(); }
   else if(v==='lang') renderLang();
   else if(v==='spam') renderSpam();
   else if(v==='chat') renderChat();
@@ -3501,6 +3501,22 @@ function renderTopup(){
   }
 
   if(topMethod === 'stars'){
+    if(stConfirm){
+      app.innerHTML = `
+      <div class="back-row"><button class="back-btn" onclick="stBack()"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>Orqaga</button></div>
+      <div style="border:1px solid var(--gold);border-radius:var(--radius);padding:26px 16px;text-align:center;margin-bottom:12px;background:var(--card)">
+        <div style="font-size:54px;line-height:1">⭐</div>
+        <div style="font-size:34px;font-weight:800;color:var(--gold);margin-top:10px">${fmt(stConfirm)} Stars</div>
+        <div style="color:var(--dim);font-size:15px;margin-top:6px">= ${fmt(stConfirm * stRate)} so'm</div>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--stroke);border-radius:var(--radius);padding:16px;margin-bottom:14px;color:var(--dim);font-size:13.5px;line-height:1.5">
+        To'lovni Telegram orqali amalga oshiring. Tasdiqlangach, balansingiz avtomatik to'ldiriladi.
+      </div>
+      <button class="check-btn" id="stBtn" style="width:100%;padding:14px;font-size:15px;font-weight:800;background:var(--gold);color:#1a2236" onclick="payStars()">⭐ To'lovga o'tish</button>
+      <div id="stHint" style="margin-top:11px;font-size:12.5px;line-height:1.6;color:var(--dim)"></div>
+      <button class="big-btn" style="margin-top:10px;justify-content:center;background:var(--card-2)" onclick="stBack()">Bekor qilish</button>`;
+      return;
+    }
     app.innerHTML = `
     <div class="back-row"><button class="back-btn" onclick="pickPay(null)"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>Orqaga</button></div>
     <div class="page-title">Telegram Stars</div>
@@ -3510,8 +3526,8 @@ function renderTopup(){
       <div class="inp-wrap"><input class="inp" id="stTop" inputmode="numeric" placeholder="0" autocomplete="off" oninput="onStTop()"><span class="info-i">⭐</span></div>
       <div class="lbl" style="margin-top:14px">BALANSGA QO'SHILADI</div>
       <div class="inp-wrap"><input class="inp" id="stSom" readonly value="—" style="opacity:.85"></div>
-      <div id="stHint" style="margin-top:11px;font-size:12.5px;line-height:1.6;color:var(--dim)"></div>
-      <button class="check-btn" id="stBtn" style="width:100%;margin-top:14px;padding:13px" onclick="payStars()" disabled>To'lovga o'tish</button>
+      <div id="stHint" style="margin-top:11px;font-size:12.5px;line-height:1.6"></div>
+      <button class="check-btn" id="stBtn" style="width:100%;margin-top:14px;padding:13px" onclick="stGo()" disabled>Davom etish</button>
     </div>
     <div class="id-res wait" style="margin-top:14px">
       To'lov Telegram orqali o'tadi. Tasdiqlangach balansingiz o'zi to'ladi — kutish shart emas.
@@ -3547,7 +3563,7 @@ function topClockTick(){
 /* ---------- Telegram Stars orqali to'ldirish ----------
    Kurs serverdan olinadi (server.js dagi STAR_TOPUP_RATE), shu yerda qattiq
    yozilmaydi — ikkalasi hech qachon bir-biridan ayrilib qolmasligi uchun. */
-let stN = 0, stRate = 140, stMin = 10, stMax = 100000, stBusy = false;
+let stN = 0, stRate = 140, stMin = 10, stMax = 100000, stBusy = false, stConfirm = 0;
 fetch(VBASE + '/star-rate').then(r=>r.json()).then(function(d){
   if(d && d.ok){ stRate = d.rate; stMin = d.min; stMax = d.max;
     if(topMethod === 'stars') onStTop(); }
@@ -3582,9 +3598,16 @@ function stSay(msg, bad){
   if(h) h.innerHTML = '<div style="color:' + (bad ? 'var(--gold)' : 'var(--dim)') + '">' + msg + '</div>';
 }
 
-function payStars(){
-  const b = document.getElementById('stBtn');
+function stGo(){
   if(!stN){ stSay('Miqdor kiritilmagan (' + stMin + '\u2013' + fmt(stMax) + ' \u2b50)', true); return; }
+  haptic(); stConfirm = stN; renderTopup();
+}
+function stBack(){ haptic(); stConfirm = 0; stBusy = false; renderTopup(); }
+
+function payStars(){
+  const n = stConfirm || stN;
+  const b = document.getElementById('stBtn');
+  if(!n){ stSay('Miqdor kiritilmagan', true); return; }
   if(stBusy){ stBusy = false; if(b) b.disabled = false; }
   haptic();
   stBusy = true;
@@ -3592,11 +3615,11 @@ function payStars(){
   stSay('So\'rov yuborildi\u2026');
   const done = function(){ stBusy = false;
     const x = document.getElementById('stBtn');
-    if(x){ x.textContent = "To'lovga o'tish"; x.disabled = !(stN > 0); } };
+    if(x){ x.textContent = "\u2b50 To'lovga o'tish"; x.disabled = false; } };
 
   fetch(VBASE + '/star-invoice', {
     method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({ stars: stN, initData: (tg && tg.initData) || '' })
+    body: JSON.stringify({ stars: n, initData: (tg && tg.initData) || '' })
   }).then(function(r){ return r.json(); }).then(function(d){
     done();
     if(!d || !d.ok || !d.link){
@@ -3663,35 +3686,8 @@ function openInvoice(link){
     if(!h || h.textContent.indexOf('ochilmoqda') < 0) return;
     const e = tgErrs.length > before ? tgErrs[tgErrs.length-1] : '';
     stSay(e ? ('SDK: ' + e) : ('Oyna ochilmadi (Telegram v' + ver + ')'), true);
-    showSendBtn(); showDiagBtn();
+    showSendBtn();
   }, 3000);
-}
-
-/* Telegram bilan aloqa kanali ishlayaptimi? openInvoice jimgina to'xtaganda
-   sabab shu bo'lishi mumkin \u2014 SDK so'rov yuboradi, mijoz javob bermaydi. */
-function showDiagBtn(){
-  if(document.getElementById('stDiag')) return;
-  const h = document.getElementById('stHint');
-  if(!h) return;
-  const b = document.createElement('button');
-  b.id = 'stDiag'; b.className = 'check-btn';
-  b.style.cssText = 'width:100%;margin-top:10px;padding:12px;background:var(--card-2)';
-  b.textContent = 'Telegram aloqasini tekshirish';
-  b.onclick = function(){
-    const proxy  = (typeof window.TelegramWebviewProxy !== 'undefined');
-    const ext    = !!(window.external && 'notify' in window.external);
-    const frame  = (window.parent !== window);
-    const plat   = (tg && tg.platform) || '?';
-    const info   = 'platform: ' + plat + '<br>'
-                 + 'WebviewProxy: ' + (proxy ? 'BOR' : "YO'Q") + '<br>'
-                 + 'external.notify: ' + (ext ? 'BOR' : "YO'Q") + '<br>'
-                 + 'iframe: ' + (frame ? 'HA' : "YO'Q") + '<br>'
-                 + 'initData: ' + ((tg && tg.initData) ? 'BOR' : "YO'Q");
-    stSay(info, true);
-    /* agar kanal ishlasa, quyidagi oyna chiqadi */
-    try{ if(tg && tg.showAlert) tg.showAlert('Aloqa ishlayapti'); }catch(err){}
-  };
-  h.parentNode.insertBefore(b, h.nextSibling);
 }
 
 /* Zaxira: hisob-fakturani bot chatiga yuborib, ilovani yopamiz */
@@ -3707,7 +3703,7 @@ function showSendBtn(){
     b.disabled = true; b.textContent = 'Yuborilmoqda\u2026';
     fetch(VBASE + '/star-invoice', {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ stars: stN, send: true, initData: (tg && tg.initData) || '' })
+      body: JSON.stringify({ stars: (stConfirm || stN), send: true, initData: (tg && tg.initData) || '' })
     }).then(function(r){ return r.json(); }).then(function(d){
       if(d && d.ok){
         stSay('\u2705 To\'lov tugmasi botga yuborildi');
@@ -3746,7 +3742,7 @@ function watchBalance(){
   }, 3000);
 }
 
-function pickPay(m){ haptic(); topMethod=m; renderTopup(); }
+function pickPay(m){ haptic(); topMethod=m; stConfirm=0; stBusy=false; renderTopup(); }
 function copyCard(n){ haptic(); try{ navigator.clipboard.writeText(String(n).replace(/\s/g,'')); }catch(e){} notify('success'); toastOk('Nusxalandi'); }
 
 function topPaid(){
