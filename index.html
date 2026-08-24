@@ -2749,7 +2749,6 @@ function renderGame(){
   const g = curGame;
   const ids = savedIds(g.id);
   app.innerHTML = `
-  <div class="back-row"><button class="back-btn" onclick="go('home')"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>Orqaga</button></div>
   <div class="gd-head">
     <div class="ic">${g.img?`<img src="${g.img}">`:g.glyph}</div>
     <div><div class="nm">${g.name}</div><div class="cur">${g.cur||''}</div></div>
@@ -3135,7 +3134,6 @@ let chatTimer = null, chatLast = 0;
 function renderSpam(){
   clearInterval(chatTimer);
   app.innerHTML = `
-  <div class="back-row"><button class="back-btn" onclick="go('settings')"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>Orqaga</button></div>
   <div class="page-title">Admin bilan bog'lanish</div>
   <div class="id-res wait" style="margin-bottom:16px"><div>Akkauntingiz cheklanmagan bo'lsa, to'g'ridan-to'g'ri adminga yozing.</div><div style="margin-top:6px">Telegram akkauntingiz spam sababli cheklangan va adminga yoza olmayotgan bo'lsangiz, Chat bo'limidan foydalaning.</div><div style="margin-top:6px">Chat bo'limidagi yozishmalarni faqat siz va admin ko'radi.</div></div>
   <button class="svc" onclick="openLink('https://t.me/${ADMIN_USERNAME}')">
@@ -3166,7 +3164,6 @@ function chatHtml(msgs){
 function chatBlur(){ const i = document.getElementById('chatInp'); if(i) i.blur(); }
 function renderChat(){
   app.innerHTML = `
-  <div class="back-row"><button class="back-btn" onclick="go('spam')"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>Orqaga</button></div>
   <div class="page-title" style="margin-bottom:4px">Chat bo'limi</div>
   <p style="color:var(--dim);font-size:12.5px;margin:0 2px 14px">Yozishmani faqat siz va admin ko'radi</p>
   <div id="chatBox" style="min-height:200px;padding-bottom:10px"></div>
@@ -3313,7 +3310,6 @@ function setLang(l){
 }
 function renderLang(){
   app.innerHTML = `
-  <div class="back-row"><button class="back-btn" onclick="go('settings')"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>Orqaga</button></div>
   <div class="page-title">Til</div>
   <div class="lang-page">
     ${LANGS.map(function(L){ return `<button class="lrow ${L.code===currentLang?'on':''}" onclick="setLang('${L.code}')"><span class="lf">${L.flag}</span><span class="ln">${L.name}</span>${L.code===currentLang?'<span class="lc">✓</span>':''}</button>`; }).join('')}
@@ -3407,7 +3403,6 @@ function invite(){
   const link = uid ? `https://t.me/${BOT_USERNAME}?startapp=${uid}` : `https://t.me/${BOT_USERNAME}`;
   window.scrollTo(0,0);
   app.innerHTML = `
-  <div class="back-row"><button class="back-btn" onclick="go('settings')"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>Orqaga</button></div>
   <div class="page-title">Do'stlarni taklif qilish</div>
   <p style="color:var(--dim);font-size:13.5px;margin:-8px 2px 18px">Do'stlaringizni taklif qiling va har bir to'lovdan 1% bonus oling</p>
   <div style="background:var(--card);border:1px solid var(--stroke);border-radius:var(--radius);padding:16px;margin-bottom:14px">
@@ -3503,7 +3498,6 @@ function renderTopup(){
   if(topMethod === 'stars'){
     if(stConfirm){
       app.innerHTML = `
-      <div class="back-row"><button class="back-btn" onclick="stBack()"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>Orqaga</button></div>
       <div style="border:1px solid var(--gold);border-radius:var(--radius);padding:26px 16px;text-align:center;margin-bottom:12px;background:var(--card)">
         <div style="font-size:54px;line-height:1">⭐</div>
         <div style="font-size:34px;font-weight:800;color:var(--gold);margin-top:10px">${fmt(stConfirm)} Stars</div>
@@ -3518,7 +3512,6 @@ function renderTopup(){
       return;
     }
     app.innerHTML = `
-    <div class="back-row"><button class="back-btn" onclick="pickPay(null)"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>Orqaga</button></div>
     <div class="page-title">Telegram Stars</div>
     <p style="color:var(--dim);font-size:13.5px;margin:-6px 2px 18px">Qancha yulduz to'lamoqchisiz?</p>
     <div class="form-card">
@@ -3538,7 +3531,6 @@ function renderTopup(){
 
   const c = topCard();
   app.innerHTML = `
-  <div class="back-row"><button class="back-btn" onclick="pickPay(null)"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>Orqaga</button></div>
   <div class="page-title">${c.bank}</div>
   <p style="color:var(--dim);font-size:13.5px;margin:-6px 2px 18px">Qancha to'ldirmoqchisiz?</p>
   <div class="form-card">
