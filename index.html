@@ -3615,37 +3615,47 @@ function payStars(){
   });
 }
 
-/* Hisob-fakturani ochish. openInvoice eski mijozlarda bo'lmasligi mumkin,
-   shuning uchun uchta yo'l ketma-ket sinaladi va har biri ekranga yozadi. */
+/* Hisob-fakturani ochish.
+   tg.openInvoice bu mijozda jimgina ishlamadi (chaqiriladi, xato bermaydi,
+   lekin oyna ochilmaydi), shuning uchun ASOSIY yo'l — openTelegramLink.
+   U to'lov oynasini ishonchli ochadi. "paid" callback'i bo'lmaydi, lekin
+   kerak ham emas: pul webhook orqali tushadi, biz esa balansni kuzatamiz. */
 function openInvoice(link){
-  const ver = (tg && tg.version) || '?';
-  if(tg && typeof tg.openInvoice === 'function'){
-    try{
-      tg.openInvoice(link, function(status){
-        if(status === 'paid'){
-          notify('success');
-          stSay('\u2705 To\'lov qabul qilindi \u2014 balans to\'lmoqda');
-          toastOk("✅ To'lov qabul qilindi");
-          setTimeout(function(){ go('home'); loadBalance(); }, 1500);
-        } else if(status === 'failed'){
-          notify('error'); stSay('To\'lov o\'tmadi', true);
-        } else if(status === 'cancelled'){
-          stSay('To\'lov bekor qilindi', true);
-        } else {
-          stSay('Holat: ' + status, true);
-        }
-      });
-      return;
-    }catch(e){
-      stSay('openInvoice xato (v' + ver + '): ' + (e && e.message ? e.message : '?'), true);
-    }
-  } else {
-    stSay('openInvoice yo\'q. Telegram v' + ver + '. Zaxira yo\'l sinalmoqda\u2026', true);
-  }
+  stSay('To\'lov oynasi ochilmoqda\u2026');
   if(tg && typeof tg.openTelegramLink === 'function'){
-    try{ tg.openTelegramLink(link); return; }catch(e){}
+    try{ tg.openTelegramLink(link); watchBalance(); return; }catch(e){}
   }
-  try{ window.location.href = link; }catch(e){}
+  if(tg && typeof tg.openInvoice === 'function'){
+    try{ tg.openInvoice(link, function(){}); watchBalance(); return; }catch(e){}
+  }
+  try{ window.location.href = link; }catch(e){
+    stSay('Ochib bo\'lmadi \u2014 qaytadan urinib ko\'ring', true);
+  }
+}
+
+/* To'lovdan keyin balans o'zgarishini kutamiz: 3 soniyada bir, 90 soniya davomida */
+let balWatch = null;
+function watchBalance(){
+  clearInterval(balWatch);
+  const uid = tgUser && tgUser.id ? tgUser.id : '';
+  if(!uid) return;
+  const was = balance;
+  let n = 0;
+  balWatch = setInterval(function(){
+    n++;
+    if(n > 30){ clearInterval(balWatch); return; }
+    fetch(VBASE + '/balance?id=' + uid + '&t=' + Date.now())
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        if(d && d.ok && typeof d.balance === 'number' && d.balance > was){
+          clearInterval(balWatch);
+          balance = d.balance;
+          notify('success');
+          toastOk("✅ Balans to'ldi: " + fmt(balance) + " so'm");
+          go('home');
+        }
+      }).catch(function(){});
+  }, 3000);
 }
 
 function pickPay(m){ haptic(); topMethod=m; renderTopup(); }
