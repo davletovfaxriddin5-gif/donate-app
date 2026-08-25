@@ -59,7 +59,8 @@ async function get(url){
     for(const id of ids){
       const j = await get(BASE + "/api/v2/topups/offers?category_id=" + encodeURIComponent(id));
       if(!j || !j.ok || !Array.isArray(j.offers)){ failed.push(id); await sleep(250); continue; }
-      out[game][id] = { name: j.name || id, note: notes[id] || "", offers: j.offers };
+      out[game][id] = { name: j.name || id, note: j.note || notes[id] || "",
+                        fields: j.fields || [], offers: j.offers };
       total += j.offers.length;
       await sleep(250);          /* API ni bosmaslik uchun */
     }
@@ -87,12 +88,15 @@ async function get(url){
                 ("$" + mx.toFixed(2)).padStart(13));
   }
 
-  /* ---- har bir o'yin qanday ID so'rashi ---- */
-  console.log("\n=== QANDAY ID KERAK ===");
+  /* ---- har bir kategoriya qanday maydon kutishi ---- */
+  console.log("\n=== MAYDONLAR (fields) ===");
+  const seen = {};
   for(const [game, ids] of CATS){
-    const first = Object.keys(out[game] || {})[0];
-    if(!first) continue;
-    const note = (out[game][first].note || "").replace(/\n/g, " ").slice(0, 90);
-    console.log(game.padEnd(24) + " | " + note);
+    Object.keys(out[game] || {}).forEach(function(c){
+      const sig = (out[game][c].fields || []).map(f => f.key + ":" + f.type).join("  ") || "(YO'Q)";
+      if(seen[game] === sig) return;          /* bir xil bo'lsa takrorlamaymiz */
+      seen[game] = sig;
+      console.log(game.padEnd(22) + c.padEnd(28) + sig);
+    });
   }
 })();
