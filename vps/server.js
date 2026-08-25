@@ -481,7 +481,10 @@ function payText(base, pay, bank){
 }
 
 /* Botga /start bosilganda ko'rinadigan salomlashuv */
-const APP_URL   = "https://minatoh.uz/";
+/* DIQQAT: www BILAN. minatoh.uz -> www.minatoh.uz ga 308 yo'naltiradi va
+   o'sha sakrashda iOS Telegram o'rnatgan TelegramWebviewProxy yo'qoladi \u2014
+   shundan keyin openInvoice/openTelegramLink jimgina ishlamay qo'yadi. */
+const APP_URL   = "https://www.minatoh.uz/";
 const CHANNEL   = "https://t.me/savdo_mlbb1";
 const SUPPORT   = "https://t.me/dv1mm_garant";
 const BANNER    = "https://minatoh.uz/IMG_4477.PNG";
@@ -1161,25 +1164,92 @@ function handleCb(cq){
 const SMS_KEY = String(process.env.SMS_KEY || "");
 const smsSeen = [];   /* takroriy SMS'larni to'sish uchun */
 
+/* Kutilayotgan to'lov summasi \u2014 payText bilan bir xil hisob.
+   so'm karta uchun o'sha summaning o'zi, valyuta kartalar uchun tiyinli qiymat. */
+function expectFor(t){
+  const cur = CARD_CUR[String(t.method || "")] || "so'm";
+  const r = RATES[cur] || 1;
+  if(r === 1) return { cur: "so'm", v: t.amount };
+  const step = Math.round((t.amount - t.base) / 100);
+  const v = (Math.ceil(t.base / r * 100) / 100) + (step / 100);
+  return { cur: cur, v: Math.round(v * 100) / 100 };
+}
+
 function smsHits(txt){
-  /* Humo: "popolnenie 2100.00 UZS; BEEPUL P2P>UZ; 26-08-21 01:50;  Dostupno: ..."
-     Faqat "popolnenie" (pul KIRGANDA). "operacija" \u2014 chiqim, tegilmaydi.
-     Yonidagi sana ham olinadi: Komanda ba'zan butun yozishmani yuboradi,
-     shuning uchun eski xabarlar YANGI to'lov deb hisoblanmasligi kerak. */
+  const s = String(txt || "");
   const out = [];
-  const re = /popolnenie[^0-9]{0,12}([0-9][0-9\s.,]*)\s*(?:UZS|SUM|\u0421\u0423\u041C)[^;]*;[^;]*;\s*(\d{2})-(\d{2})-(\d{2})\s+(\d{2}):(\d{2})/gi;
+  const push = function(cur, amt, ms){
+    if(!isFinite(amt) || amt <= 0) return;
+    const key = cur + ":" + amt.toFixed(2) + "@" + ms;
+    if(out.some(function(x){ return x.key === key; })) return;
+    out.push({ cur: cur, amount: amt, ms: ms, key: key });
+  };
+  /* Toshkent vaqti = UTC+5 */
+  const tashMs = function(yy, mm, dd, hh, mi){
+    return Date.UTC(2000 + Number(yy), Number(mm) - 1, Number(dd),
+                    Number(hh) - 5, Number(mi));
+  };
+
+  /* 1) HUMO (so'm): "popolnenie 2100.00 UZS; BEEPUL P2P>UZ; 26-08-21 01:50; ..."
+        Faqat "popolnenie". "operacija" \u2014 chiqim, tegilmaydi. */
   let m;
-  while((m = re.exec(String(txt||"")))){
-    const amt = Math.round(parseFloat(m[1].replace(/\s/g,"").replace(/,/g,".")));
-    if(!isFinite(amt) || amt <= 0) continue;
-    /* Toshkent vaqti = UTC+5 */
-    const ms = Date.UTC(2000 + Number(m[2]), Number(m[3]) - 1, Number(m[4]),
-                        Number(m[5]) - 5, Number(m[6]));
-    const key = amt + "@" + ms;
-    if(out.some(function(x){ return x.key === key; })) continue;
-    out.push({ amount: amt, ms: ms, key: key });
+  const re1 = /popolnenie[^0-9]{0,12}([0-9][0-9\s.,]*)\s*(?:UZS|SUM|\u0421\u0423\u041C)[^;]*;[^;]*;\s*(\d{2})-(\d{2})-(\d{2})\s+(\d{2}):(\d{2})/gi;
+  while((m = re1.exec(s))){
+    push("so'm", Math.round(parseFloat(m[1].replace(/\s/g,"").replace(/,/g,"."))),
+         tashMs(m[2], m[3], m[4], m[5], m[6]));
+  }
+
+  /* 2) HAMKORBANK Visa (USD):
+        "...card Virtual VE *88: 26-08-20 03:13 credit HMB TIETO FO>Andijan +9.29 USD"
+        Faqat "credit" va "+". "purchase ... -N.NN" \u2014 chiqim, tegilmaydi.
+        "summa 0.00 USD, oplata u ..." \u2014 3D kod xabari, "credit" yo'q, o'tmaydi. */
+  const re2 = /card[^:]{0,40}:\s*(\d{2})-(\d{2})-(\d{2})\s+(\d{2}):(\d{2})\s+credit\b[^+]{0,80}\+\s*([0-9]+(?:[.,][0-9]{1,2})?)\s*USD/gi;
+  while((m = re2.exec(s))){
+    push("usd", parseFloat(m[6].replace(/,/g,".")),
+         tashMs(m[1], m[2], m[3], m[4], m[5]));
   }
   return out;
+}
+
+/* SBER (900): tiyin BOR ("перевод 22.25р"), lekin SANA YO'Q \u2014 faqat soat.
+   Kirim: "СЧЁТ3003 23:06 Перевод 700р от Артём Н."
+          "СЧЁТ3003 21:44 Перевод по СБП из Т-Банк +350р от ВЛАДИСЛАВ Д."
+   Chiqim: "СЧЁТ3003 22:58 перевод 1300р" \u2014 oxirida "от Ism" YO'Q, o'tmaydi.
+   "Покупка" va "зачисление ... ATM" ham o'tmaydi.
+   TIYINLI summa AVTO tasdiqlanadi; butun summa faqat xabar qilinadi, chunki
+   unda noyob belgi ko'rinmaydi va boshqa mijozniki bilan adashishi mumkin. */
+function sberHits(txt){
+  const s = String(txt || "");
+  const out = [];
+  const re = /(\d{1,2}):(\d{2})\s+\u041F\u0435\u0440\u0435\u0432\u043E\u0434[^0-9\n]{0,40}([0-9][0-9\s]{0,9}(?:[.,][0-9]{1,2})?)\s*\u0440\s+\u043E\u0442\s+([^\n.]{1,40})/gi;
+  let m;
+  while((m = re.exec(s))){
+    const raw = m[3].replace(/\s/g,"").replace(/,/g,".");
+    const amt = parseFloat(raw);
+    if(!isFinite(amt) || amt <= 0) continue;
+    out.push({ amount: Math.round(amt*100)/100,
+               cents: raw.indexOf(".") > -1,
+               hh: Number(m[1]), mi: Number(m[2]),
+               from: m[4].trim() });
+  }
+  return out;
+}
+
+/* Sana yo'q, shuning uchun soat bo'yicha tekshiramiz.
+   Sber Moskva vaqtida yozadi, telefon Toshkentda bo'lishi mumkin \u2014
+   ikkala hisobdan biri to'g'ri kelsa yetarli. */
+function sberFresh(h){
+  const mins = h.hh * 60 + h.mi;
+  const now  = Date.now();
+  for(let i = 0; i < 2; i++){
+    const off = i === 0 ? 3 : 5;
+    const d = new Date(now + off * 3600 * 1000);
+    const nowMin = d.getUTCHours() * 60 + d.getUTCMinutes();
+    let diff = Math.abs(nowMin - mins);
+    if(diff > 720) diff = 1440 - diff;     /* yarim tundan o'tishi */
+    if(diff <= 60) return true;
+  }
+  return false;
 }
 
 app.post("/sms", (req,res)=>{
@@ -1194,11 +1264,17 @@ app.post("/sms", (req,res)=>{
     if(smsSeen.indexOf(txt) > -1) return res.json({ ok:true, dup:true });
     smsSeen.push(txt); if(smsSeen.length > 200) smsSeen.shift();
 
-    const all = smsHits(txt);
+    const all   = smsHits(txt);
     const fresh = all.filter(function(h){ return Math.abs(Date.now() - h.ms) < 30*60*1000; });
 
-    if(all.length === 0){
-      /* chiqim (operacija) yoki notanish format \u2014 jimgina o'tkazamiz */
+    /* Sber: sanasi yo'q, shuning uchun soat bo'yicha filtrlanadi.
+       Kirim ("... от Ism") bo'lsa umumiy oqimga qo'shiladi. */
+    const sb = sberHits(txt);
+    sb.forEach(function(h){
+      if(sberFresh(h)) fresh.push({ cur:"rubl", amount:h.amount, from:h.from, ms:Date.now() });
+    });
+
+    if(all.length === 0 && sb.length === 0){
       return res.json({ ok:true, parsed:false });
     }
     if(fresh.length === 0){
@@ -1209,7 +1285,9 @@ app.post("/sms", (req,res)=>{
         " ta yangi to'lov bor \u2014 QO'LDA ko'ring.\n\n" + txt);
       return res.json({ ok:true, many:true });
     }
+    const cur    = fresh[0].cur;
     const amount = fresh[0].amount;
+    const label  = cur === "so'm" ? (amount + " so'm") : (amount.toFixed(2) + " " + cur);
 
     const db = load();
     expireOld(db);
@@ -1218,17 +1296,21 @@ app.post("/sms", (req,res)=>{
     Object.keys(db).forEach(function(uid){
       if(!/^\d+$/.test(uid)) return;
       (db[uid].topups || []).forEach(function(t){
-        if(t.status === "wait" && t.amount === amount && new Date(t.at).getTime() > lim)
-          hits.push({ uid: uid, t: t });
+        if(t.status !== "wait" || new Date(t.at).getTime() <= lim) return;
+        const e = expectFor(t);
+        if(e.cur !== cur) return;
+        if(Math.abs(e.v - amount) < 0.005) hits.push({ uid: uid, t: t });
       });
     });
 
     if(hits.length === 0){
-      if(ADMIN_ID) send(ADMIN_ID, "\u26A0\uFE0F " + amount + " so'm keldi, lekin mos to'ldirish topilmadi.\n\n" + txt);
+      if(ADMIN_ID) send(ADMIN_ID, "\u26A0\uFE0F " + label + " keldi" +
+        (fresh[0].from ? " (" + fresh[0].from + ")" : "") +
+        ", lekin mos to'ldirish topilmadi.\n\n" + txt);
       return res.json({ ok:true, matched:0 });
     }
     if(hits.length > 1){
-      if(ADMIN_ID) send(ADMIN_ID, "\u26A0\uFE0F " + amount + " so'mga " + hits.length +
+      if(ADMIN_ID) send(ADMIN_ID, "\u26A0\uFE0F " + label + " ga " + hits.length +
         " ta to'ldirish mos keldi \u2014 QO'LDA tasdiqlang.\n\n" + txt);
       return res.json({ ok:true, matched:hits.length });
     }
@@ -1245,7 +1327,8 @@ app.post("/sms", (req,res)=>{
 
     send(h.uid, "\u2705 Balansingiz to'ldirildi: +" + t.amount + " so'm\nJoriy balans: " + u.balance + " so'm");
     if(ADMIN_ID) send(ADMIN_ID, "\uD83E\uDD16 AVTO TASDIQ " + t.id +
-      "\nSumma: " + t.amount + " so'm" +
+      "\nKelgan: " + label + " (" + (t.method || "-") + ")" +
+      "\nBalansga: " + t.amount + " so'm" +
       "\nKimga: " + (t.who || h.uid) +
       "\nYangi balans: " + u.balance);
 
