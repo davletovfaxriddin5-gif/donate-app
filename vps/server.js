@@ -355,13 +355,78 @@ function fzrFields(game, o){
   return f;
 }
 
-async function fzrCreate(cat, oid, fields){
+/* ---------- Yangi o'yinlar katalogi (games.json) ----------
+   build-games.js yasagan fayl. Server undan narxni oladi (mijoznikiga ishonmaydi)
+   va ilovaga GET /games orqali beradi \u2014 shuning uchun 779 ta paketni
+   ikkala faylga qo'lda yozish kerak emas. */
+const GAMES_FILE = "/root/donate-app/games.json";
+const GLYPH = {
+  arenabreakout:"\uD83D\uDD2B", bloodstrike:"\uD83E\uDE78", callofdutymobile:"\uD83C\uDF96\uFE0F",
+  deltaforce:"\uD83E\uDE96", eafcmobile:"\u26BD", undawn:"\uD83E\uDDDF",
+  genshinimpact:"\uD83C\uDF38", honorofkings:"\uD83D\uDC51", legendofneverland:"\uD83E\uDDDA",
+  magicchessgogo:"\u265F\uFE0F", modernstrikeonline:"\uD83D\uDD25", pointblank:"\uD83C\uDFAF",
+  rainbowsixmobile:"\uD83C\uDF08", swordofjustice:"\u2694\uFE0F", valorant:"\uD83D\uDD3A",
+  wherewindsmeet:"\uD83C\uDF43", zenlesszonezero:"\u26A1"
+};
+let GIDX = {}, APPGAMES = [];
+
+function loadGames(){
+  let raw;
+  try{ raw = JSON.parse(fs.readFileSync(GAMES_FILE, "utf8")); }
+  catch(e){ console.log("games.json o'qilmadi:", e.message); GIDX = {}; APPGAMES = []; return; }
+
+  GIDX = {}; APPGAMES = [];
+  (raw.games || []).forEach(function(g){
+    const cats = [];
+    (g.cats || []).forEach(function(c){
+      const shown = [];
+      (c.offers || []).forEach(function(o){
+        /* narx va tannarx faqat serverda qoladi */
+        GIDX[c.cat + "|" + o.oid] = { price:o.price, cost:o.cost, fields:c.fields || [], gid:g.id };
+        if(!o.off) shown.push({ oid:o.oid, name:o.name, price:o.price });
+      });
+      if(shown.length) cats.push({ cat:c.cat, label:c.label, fields:c.fields || [], offers:shown });
+    });
+    if(cats.length) APPGAMES.push({
+      id:g.id, name:g.name, glyph: GLYPH[g.id] || "\uD83C\uDFAE", img: g.img || "", cats: cats
+    });
+  });
+  console.log("games.json: " + APPGAMES.length + " o'yin, " + Object.keys(GIDX).length + " paket");
+}
+loadGames();
+
+app.get("/games", (req,res)=>{
+  res.json({ ok:true, games: APPGAMES });
+});
+
+/* Maydonlarni kategoriya talabiga qarab yig'amiz \u2014 nomlar o'yinga qarab
+   farq qiladi: riot_id, user_id, player_id, character_id, server, zone_id... */
+function catFields(defs, o){
+  const d = o.details || {};
+  const f = {};
+  let missing = "";
+  (defs || []).forEach(function(x){
+    const v = String(d[x.key] == null ? "" : d[x.key]).trim();
+    if(!v){ if(!missing) missing = x.key; return; }
+    if(x.type === "select" && (x.options || []).length){
+      const ok = x.options.some(function(op){ return String(op.value) === v; });
+      if(!ok){ if(!missing) missing = x.key; return; }
+    }
+    f[x.key] = v;
+  });
+  return { fields:f, missing:missing };
+}
+
+async function fzrCreate(cat, oid, fields, idem){
   const ac = new AbortController();
   const tm = setTimeout(()=>ac.abort(), 25000);
   try{
+    const h = { "Content-Type":"application/json", "X-API-Key": FZR_KEY };
+    /* Bir xil kalit bilan qayta yuborilsa yangi buyurtma yaratilmaydi va
+       QAYTA PUL YECHILMAYDI \u2014 asl buyurtma qaytariladi. */
+    if(idem) h["Idempotency-Key"] = String(idem).slice(0, 255);
     const r = await fetch(FZR_BASE+"/api/v2/topups/order", {
-      method:"POST",
-      headers:{ "Content-Type":"application/json", "X-API-Key": FZR_KEY },
+      method:"POST", headers: h,
       body: JSON.stringify({ category_id: cat, offer_id: oid, fields: fields }),
       signal: ac.signal
     });
@@ -639,9 +704,13 @@ app.post("/order", async (req,res)=>{
     const oid  = String(o.oid||"");
     const acc  = String(o.accRegion||"");
 
+    /* Yangi o'yinlar: ilova cat (kategoriya) yuboradi, narx games.json dan olinadi */
+    const ncat = String(o.cat || "");
+    const nEnt = ncat ? GIDX[ncat + "|" + oid] : null;
+
     /* TG Stars: paket emas, mijoz kiritgan miqdor */
     let stars = 0;
-    if(game === "tgstars"){
+    if(game === "tgstars" && !nEnt){
       stars = starsQty(o);
       if(!stars){
         console.log("STARS: miqdor topilmadi, kelgan obyekt:", JSON.stringify(o));
@@ -650,9 +719,11 @@ app.post("/order", async (req,res)=>{
       if(stars < STARS_MIN || stars > STARS_MAX)
         return res.json({ ok:false, error:"qty", min:STARS_MIN, max:STARS_MAX });
     }
-    const off = stars
-      ? { cat:"telegram_stars", price: starsPrice(stars), srv:false, tg:"stars" }
-      : resolveOffer(game, oid, acc);
+    const off = nEnt
+      ? { cat: ncat, price: nEnt.price, srv:false, tg:"" }
+      : stars
+        ? { cat:"telegram_stars", price: starsPrice(stars), srv:false, tg:"stars" }
+        : resolveOffer(game, oid, acc);
 
     /* narxni server belgilaydi; katalogda yo'q narsalar qo'lda qoladi */
     const auto = !!off;
@@ -660,10 +731,19 @@ app.post("/order", async (req,res)=>{
     const price = auto ? off.price : Math.round(Number(o.price) || 0);
     if(!(price > 0)) return res.json({ ok:false, error:"price" });
 
-    const fields = tg ? {} : fzrFields(game, o);
+    const fields = nEnt ? catFields(nEnt.fields, o).fields
+                 : tg   ? {}
+                        : fzrFields(game, o);
     let tgu = "", tgn = 0;
 
-    if(tg){
+    if(nEnt){
+      const chk = catFields(nEnt.fields, o);
+      if(chk.missing) return res.json({ ok:false, error:"fields", need: chk.missing });
+      if(price < nEnt.cost){
+        console.log("YANGI O'YIN narx past:", ncat, oid, price, "<", nEnt.cost);
+        return res.json({ ok:false, error:"rate" });
+      }
+    } else if(tg){
       tgu = tgUser(o, who);
       if(!tgu) return res.json({ ok:false, error:"username" });
       tgn = stars || Number(String(oid).split("_")[1] || 0);
@@ -699,7 +779,10 @@ app.post("/order", async (req,res)=>{
     const rec = {
       id: String(o.id || ("MT"+Date.now().toString().slice(-8))),
       game: String(o.game||""), gkey: game, gameId: String(o.gameId||""),
-      pid: tg ? ("@"+tgu) : (fields.player_id || ""), srv: fields.server_id || "",
+      pid: tg ? ("@"+tgu)
+          : (fields.player_id || fields.user_id || fields.riot_id ||
+             fields.character_id || Object.values(fields)[0] || ""),
+      srv: fields.server_id || fields.zone_id || fields.server || "",
       tg: tg, tgq: tgn,
       package: String(o.package || (stars ? (stars + " \u2b50") : "")), price: price,
       details: o.details || {}, region: o.region || null,
@@ -722,7 +805,8 @@ app.post("/order", async (req,res)=>{
     }
 
     /* FazerCards ga yuboramiz */
-    const r = tg ? await fzrTg(tg, tgu, tgn) : await fzrCreate(rec.cat, rec.oid, fields);
+    const r = tg ? await fzrTg(tg, tgu, tgn)
+                 : await fzrCreate(rec.cat, rec.oid, fields, "mt-" + rec.id);
 
     const db2 = load();
     const u2 = urec(db2, uid);
