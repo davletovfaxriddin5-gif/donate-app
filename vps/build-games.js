@@ -47,10 +47,48 @@ function regionLabel(catId, catName, gameName){
   return lab;
 }
 
+/* ---------- YASHIRILADIGAN PAKETLAR ----------
+   O'chirilmaydi, faqat ilovada ko'rinmaydi \u2014 fikr o'zgarsa qaytarish oson.
+   Yozish usullari:
+     "matn"      \u2014 nom ichida shu matn bo'lsa
+     "=To'liq"   \u2014 nom AYNAN shunday bo'lsa
+     "num:5"     \u2014 nom 5 raqami bilan boshlansa (5000 mos kelmaydi) */
+const HIDE = {
+  "Blood Strike": ["level up pass", "cornucopia", "pre-order", "preorder",
+                   "ultra skin lucky chest", "0.49 deal"],
+  "Delta Force": ["=19 Delta Coins", "=18 Delta Coins", "blaze supplies"],
+  "Undawn": ["kartu mingguan", "kartu bulanan", "debate of flowers",
+             "glory pass premium", "=1425 RC"],
+  "Honor of Kings": ["=16 Tokens"],
+  "Legend of Neverland": ["candock wish pack", "companion pack", "selection pack",
+                          "superb flower fairy", "meteor wish pack", "special flower fairy",
+                          "chain pack", "rename card", "star guard", "fund plan",
+                          "sapphire investment", "60000 cabala"],
+  "Magic Chess Go Go": ["num:5","num:11","num:12","num:19","num:44","num:59","num:86",
+                        "num:112","num:170","num:172","num:223","num:240","num:257",
+                        "num:296","num:336","num:516","num:568","num:570","num:1060","num:2010"],
+  "Sword of Justice": ["exquisite treasure"],
+};
+/* faqat bitta regionda yashirish kerak bo'lsa */
+const HIDE_CAT = {
+  "valorant_vn": ["=50 VP"],
+};
+
+function isHidden(name, game, cat){
+  const n = String(name || "").toLowerCase().trim();
+  const lead = (n.match(/^(\d+)/) || [])[1];
+  const pats = (HIDE[game] || []).concat(HIDE_CAT[cat] || []);
+  return pats.some(function(p){
+    if(p.indexOf("num:") === 0) return lead === p.slice(4);
+    if(p.indexOf("=") === 0)    return n === p.slice(1).toLowerCase();
+    return n.indexOf(p.toLowerCase()) > -1;
+  });
+}
+
 /* ---------- asosiy ---------- */
 const src = JSON.parse(fs.readFileSync(SRC, "utf8"));
 const out = { rate: UZS, at: new Date().toISOString(), games: [] };
-let nOffers = 0, nCats = 0, warn = [];
+let nOffers = 0, nCats = 0, warn = [], hid = [];
 
 Object.keys(src).forEach(function(gameName){
   const g = { id: slug(gameName), name: gameName, cats: [] };
@@ -76,7 +114,9 @@ Object.keys(src).forEach(function(gameName){
       if(!(usd > 0)) return;
       const cost = Math.round(usd * UZS);
       const p    = sell(cost);
-      cat.offers.push({ oid: o.offer_id, name: o.name, usd: usd, cost: cost, price: p });
+      const off  = isHidden(o.name, gameName, catId);
+      if(off) hid.push(gameName + " | " + catId + " | " + o.name + "  ($" + usd + ")");
+      cat.offers.push({ oid: o.offer_id, name: o.name, usd: usd, cost: cost, price: p, off: off });
       nOffers++;
     });
 
@@ -92,6 +132,7 @@ fs.writeFileSync(DST, JSON.stringify(out));
 console.log("=== TAYYOR ===");
 console.log("o'yin: " + out.games.length + "   kategoriya: " + nCats + "   paket: " + nOffers);
 console.log("fayl: games.json   kurs: " + UZS);
+console.log("yashirildi: " + hid.length + "   ko'rinadi: " + (nOffers - hid.length));
 if(warn.length) console.log("\u26A0\uFE0F  " + warn.join("; "));
 
 let minP = 100, worst = null;
@@ -115,8 +156,13 @@ show.forEach(function(s){
     ("  sot " + o.price).padStart(14) +
     ("  +" + Math.round((o.price - o.cost) / o.cost * 100) + "%").padStart(7));
 });
+console.log("\n=== YASHIRILGANLAR (tekshiring!) ===");
+hid.forEach(function(s){ console.log("  " + s); });
+
 console.log("\nO'yin ro'yxati:");
 out.games.forEach(function(g){
-  console.log("  " + g.id.padEnd(20) + g.cats.length + " region, " +
-              g.cats.reduce((a,c)=>a+c.offers.length,0) + " paket");
+  const vis = g.cats.reduce(function(a,c){ return a + c.offers.filter(function(x){ return !x.off; }).length; }, 0);
+  const all = g.cats.reduce(function(a,c){ return a + c.offers.length; }, 0);
+  console.log("  " + g.id.padEnd(20) + g.cats.length + " region, " + vis + " paket" +
+              (all > vis ? "  (" + (all - vis) + " yashirin)" : ""));
 });
