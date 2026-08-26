@@ -63,19 +63,36 @@ async function validateId(req,res){
     const playerId = String(src.playerId || "").trim();
     const zoneId   = String(src.zoneId || "").trim();
 
-    const cat = FZR_CATS[game];
-    if(!cat) return res.json({ ok:false, reason:"unsupported" });
-    if(!/^\d{4,15}$/.test(playerId)) return res.json({ ok:false, reason:"bad_id" });
-    if(game === "mlbb" && !/^\d{1,6}$/.test(zoneId)) return res.json({ ok:false, reason:"bad_zone" });
-    if(!FZR_KEY){ console.log("VALIDATE: FZR_API_KEY yo'q"); return res.json({ ok:false, reason:"error" }); }
+    /* Yangi o'yinlar kategoriyani va maydonlarni o'zi yuboradi.
+       FazerCards ko'pchilik kategoriyada tekshiruvni qo'llab-quvvatlamaydi —
+       o'shanda "unsupported" qaytadi va ilova format bo'yicha o'tkazadi. */
+    const dynCat = String(src.cat || "").trim();
+    let fields, cat, key;
 
-    const key = game+":"+playerId+":"+zoneId;
+    if(dynCat){
+      if(!GIDX_CATS[dynCat]) return res.json({ ok:false, reason:"unsupported" });
+      cat = dynCat;
+      fields = {};
+      const src2 = src.fields && typeof src.fields === "object" ? src.fields : {};
+      Object.keys(src2).slice(0,6).forEach(function(k){
+        const v = String(src2[k] == null ? "" : src2[k]).trim();
+        if(v) fields[k] = v.slice(0,64);
+      });
+      if(!Object.keys(fields).length) return res.json({ ok:false, reason:"bad_id" });
+      key = cat + ":" + JSON.stringify(fields);
+    } else {
+      cat = FZR_CATS[game];
+      if(!cat) return res.json({ ok:false, reason:"unsupported" });
+      if(!/^\d{4,15}$/.test(playerId)) return res.json({ ok:false, reason:"bad_id" });
+      if(game === "mlbb" && !/^\d{1,6}$/.test(zoneId)) return res.json({ ok:false, reason:"bad_zone" });
+      fields = { player_id: playerId };
+      if(game === "mlbb") fields.zone_id = zoneId;
+      key = game+":"+playerId+":"+zoneId;
+    }
+    if(!FZR_KEY){ console.log("VALIDATE: FZR_API_KEY yo'q"); return res.json({ ok:false, reason:"error" }); }
     const hit = vCache.get(key);
     if(hit && Date.now() - hit.at < 300000) return res.json(hit.data);
     if(!vAllow()) return res.json({ ok:false, reason:"busy" });
-
-    const fields = { player_id: playerId };
-    if(game === "mlbb") fields.zone_id = zoneId;
 
     const ac = new AbortController();
     const tm = setTimeout(()=>ac.abort(), 12000);
@@ -95,6 +112,8 @@ async function validateId(req,res){
       console.log("VALIDATE auth xato:", r.status, JSON.stringify(j));
       return res.json({ ok:false, reason:"error" });
     }
+    if(!r.ok && /not available/i.test(String(j.error || "")))
+      return res.json({ ok:false, reason:"unsupported" });
     if(!r.ok || !j.ok || !j.valid){
       console.log("VALIDATE javob:", r.status, JSON.stringify(j));
       return res.json({ ok:false, reason:"invalid" });
@@ -368,14 +387,14 @@ const GLYPH = {
   rainbowsixmobile:"\uD83C\uDF08", swordofjustice:"\u2694\uFE0F", valorant:"\uD83D\uDD3A",
   wherewindsmeet:"\uD83C\uDF43", zenlesszonezero:"\u26A1"
 };
-let GIDX = {}, APPGAMES = [];
+let GIDX = {}, APPGAMES = [], GIDX_CATS = {};
 
 function loadGames(){
   let raw;
   try{ raw = JSON.parse(fs.readFileSync(GAMES_FILE, "utf8")); }
   catch(e){ console.log("games.json o'qilmadi:", e.message); GIDX = {}; APPGAMES = []; return; }
 
-  GIDX = {}; APPGAMES = [];
+  GIDX = {}; APPGAMES = []; GIDX_CATS = {};
   (raw.games || []).forEach(function(g){
     const cats = [];
     (g.cats || []).forEach(function(c){
@@ -385,7 +404,10 @@ function loadGames(){
         GIDX[c.cat + "|" + o.oid] = { price:o.price, cost:o.cost, fields:c.fields || [], gid:g.id };
         if(!o.off) shown.push({ oid:o.oid, name:o.name, price:o.price });
       });
-      if(shown.length) cats.push({ cat:c.cat, label:c.label, fields:c.fields || [], offers:shown });
+      if(shown.length){
+        GIDX_CATS[c.cat] = 1;
+        cats.push({ cat:c.cat, label:c.label, fields:c.fields || [], offers:shown });
+      }
     });
     if(cats.length) APPGAMES.push({
       id:g.id, name:g.name, glyph: GLYPH[g.id] || "\uD83C\uDFAE", img: g.img || "", cats: cats
