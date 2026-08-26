@@ -79,6 +79,12 @@ async function validateId(req,res){
         if(v) fields[k] = v.slice(0,64);
       });
       if(!Object.keys(fields).length) return res.json({ ok:false, reason:"bad_id" });
+      /* DIQQAT: buyurtmada "server_id", tekshiruvda "zone_id" \u2014 MLBB dagidek.
+         Nomni almashtirmasak "Missing or invalid fields" xatosi keladi. */
+      if(fields.server_id && !fields.zone_id){
+        fields.zone_id = fields.server_id;
+        delete fields.server_id;
+      }
       key = cat + ":" + JSON.stringify(fields);
     } else {
       cat = FZR_CATS[game];
@@ -112,8 +118,10 @@ async function validateId(req,res){
       console.log("VALIDATE auth xato:", r.status, JSON.stringify(j));
       return res.json({ ok:false, reason:"error" });
     }
-    if(!r.ok && /not available/i.test(String(j.error || "")))
+    if(!r.ok && /not available|missing or invalid fields/i.test(String(j.error || ""))){
+      console.log("VALIDATE qo'llab-quvvatlanmaydi:", cat, JSON.stringify(j.error||""));
       return res.json({ ok:false, reason:"unsupported" });
+    }
     if(!r.ok || !j.ok || !j.valid){
       console.log("VALIDATE javob:", r.status, JSON.stringify(j));
       return res.json({ ok:false, reason:"invalid" });
