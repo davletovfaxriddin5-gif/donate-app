@@ -2752,6 +2752,20 @@ function pkgHtml(list){
         <span class="info"><span class="a ${p.txt?'small':''}">${p.a}${p.c&&p.c.length<=2?' '+p.c:''}</span><span class="p">${fmt(p.p)} so'm</span></span>
       </button>`).join('');
 }
+/* Joriy maydonlar: eski o'yinlarda qo'lda yozilgan, yangilarida kategoriyadan.
+   Bu yerdan olinmasa buyurtmaga ID umuman qo'shilmaydi. */
+function curFields(){
+  const g = curGame; if(!g) return [];
+  if(g.cats && g.cats.length){
+    const c = activeCat() || {};
+    return (c.fields || []).map(function(f){
+      return { key:f.key, label:f.label || f.key, ph:f.label || f.key,
+               type:f.type || 'text', options:f.options || [] };
+    });
+  }
+  return g.idFields || [];
+}
+
 function activeCat(){
   const g = curGame;
   if(!g || !g.cats || !g.cats.length) return null;
@@ -2770,12 +2784,7 @@ function renderGame(){
   const cat = dyn ? activeCat() : null;
 
   /* maydonlar: eski o'yinlarda qo'lda yozilgan, yangilarida serverdan keladi */
-  const flds = dyn
-    ? (cat.fields || []).map(function(f){
-        return { key:f.key, label:f.label || f.key, ph:f.label || f.key,
-                 type:f.type || 'text', options:f.options || [] };
-      })
-    : g.idFields;
+  const flds = curFields();
 
   const fldHtml = flds.map(function(f,i){
     const isLast = i === flds.length - 1;
@@ -2887,6 +2896,11 @@ const ID_RULES = {
   mlbb:     { playerId:[6,11], serverId:[3,6] }
 };
 function badFormat(gameId, key, v){
+  if(key === 'riot_id'){
+    if(v.indexOf('#') < 1 || v.length < 4)
+      return "Name#TAG ko'rinishida yozing (masalan Faxriddin#UZ1)";
+    return null;
+  }
   if(key === 'username'){
     const u = String(v).replace(/^@+/,'');
     if(!/^[A-Za-z0-9_]{5,32}$/.test(u))
@@ -2999,7 +3013,7 @@ function afterCheckUser(u, own){
 async function checkId(){
   const g = curGame; if(!g) return false;
   const vals = {};
-  for(const f of g.idFields){
+  for(const f of curFields()){
     const el = document.getElementById('fld_'+f.key);
     const v = (el && el.value || '').trim();
     if(!v){ notify('error'); toastErr(f.label+' kiriting'); return false; }
@@ -3016,9 +3030,8 @@ async function checkId(){
                      u.toLowerCase() === String(tgUser.username).toLowerCase());
       afterCheckUser(u, own);
     } else if(g.cats && g.cats.length){
-      /* yangi o'yinlar: FazerCards ID ni tekshirmaydi, kiritilganini ko'rsatamiz */
-      const c   = activeCat() || {};
-      const key = ((c.fields || [])[0] || {}).key;
+      const c    = activeCat() || {};
+      const key  = ((c.fields || [])[0] || {}).key;
       const main = key ? String(vals[key] || '') : (Object.values(vals)[0] || '');
       const sel  = (c.fields || []).filter(function(f){ return f.type === 'select'; })
         .map(function(f){
@@ -3026,7 +3039,29 @@ async function checkId(){
           const o = (f.options || []).find(function(x){ return String(x.value) === v; });
           return o ? o.label : v;
         }).filter(Boolean).join(' \u00b7 ');
-      afterCheckId(main, (c.label ? c.label : '') + (sel ? ' \u00b7 ' + sel : ''));
+      const sub = (c.label ? c.label : '') + (sel ? ' \u00b7 ' + sel : '');
+
+      /* Avval haqiqiy tekshiruvni sinaymiz. FazerCards ko'p o'yinda uni
+         qo'llab-quvvatlamaydi \u2014 o'shanda format bo'yicha o'tkazamiz. */
+      idOk = false; setRes('wait', 'Tekshirilmoqda\u2026'); syncBuy();
+      const r = await fetch(VBASE + '/validate', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ cat: c.cat, fields: vals })
+      }).then(function(x){ return x.json(); }).catch(function(){ return null; });
+
+      if(r && r.ok && r.valid){
+        idOk = true; idName = r.name || ''; notify('success');
+        afterCheckId(r.name || main, sub + (r.name ? '' : ''));
+        return true;
+      }
+      if(r && !r.ok && (r.reason === 'invalid' || r.reason === 'unconfirmed' || r.reason === 'bad_id')){
+        idOk = false; notify('error');
+        setRes('bad', "\u274C Bunday akkaunt topilmadi. ID ni tekshiring.");
+        syncBuy(); return false;
+      }
+      /* tekshiruv yo'q yoki API javob bermadi */
+      idOk = true; notify('success');
+      afterCheckId(main, sub);
     } else {
       setRes('ok', "✅ Format to'g'ri");
       syncBuy();
@@ -3079,7 +3114,7 @@ function buy(){
   if(!idOk){ notify('error'); toastErr("Avval ID ni tekshiring"); return; }
   const p = custom ? { a:String(starN), c:'⭐', p:starPrice(starN), oid:'' } : activePkgs()[selPkg];
   const details={};
-  for(const f of g.idFields){ const v=(document.getElementById('fld_'+f.key)?.value||'').trim();
+  for(const f of curFields()){ const v=(document.getElementById('fld_'+f.key)?.value||'').trim();
     if(!v){ notify('error'); toastErr(f.label+' kiriting'); return; } details[f.key]=v; }
   saveId(g.id, Object.values(details).join(' '));
   const order={ id:'MT'+Date.now().toString().slice(-8), game:g.name, gameId:g.id, glyph:g.glyph, img:g.img||'',
@@ -3441,7 +3476,7 @@ function loadDynGames(){
       return g && g.id && g.cats && g.cats.length && !GAMES.some(function(x){ return x.id === g.id; });
     }).map(function(g){
       return { id:g.id, name:g.name, glyph:g.glyph || '\uD83C\uDFAE', img:g.img || '',
-               cur:'', region:false, star:'on', badge:'AVTO',
+               cur:'', region:false, star:'', badge:'AVTO',
                cats:g.cats, idFields:[], packages:[] };
     });
     if(!add.length) return;
