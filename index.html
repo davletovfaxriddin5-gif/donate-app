@@ -135,6 +135,7 @@ input{font-family:inherit}
   font-weight:700;font-size:13px;display:flex;align-items:center;gap:6px;color:var(--dim);transition:.15s}
 .region-tabs .rt.on{background:var(--blue);color:#fff;border-color:transparent}
 .pkg-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding-bottom:8px}
+.pkg-sec{grid-column:1/-1;font-size:11px;font-weight:700;letter-spacing:1.2px;color:var(--faint);text-transform:uppercase;margin:12px 2px 2px}
 .pkg{position:relative;background:var(--card);border:1.5px solid rgba(240,169,60,.45);border-radius:14px;
   padding:13px 11px;display:flex;align-items:center;gap:10px;transition:.14s;text-align:left;overflow:hidden}
 .pkg:active{transform:scale(.98)}
@@ -2396,7 +2397,7 @@ function activePkgs(){
   if(g.cats && g.cats.length){
     const c = activeCat();
     return (c && c.offers ? c.offers : []).map(function(o){
-      return { a:o.name, c:'', p:o.price, oid:o.oid, im:o.im||'', txt:!o.im };
+      return { a:o.name, c:'', p:o.price, oid:o.oid, im:o.im||'', grp:o.grp||'', txt:!o.im };
     });
   }
   if(curPkgs) return curPkgs;
@@ -2745,12 +2746,17 @@ function fillId(v){
 }
 
 function pkgHtml(list){
-  return (list||[]).map((p,i)=>`
+  let lastGrp = null;
+  return (list||[]).map((p,i)=>{
+    let head = '';
+    if(p.grp && p.grp !== lastGrp){ head = '<div class="pkg-sec">'+p.grp+'</div>'; lastGrp = p.grp; }
+    return head + `
       <button class="pkg ${p.txt?'txt-only':''} ${p.promo?'promo':''}" data-i="${i}" onclick="pickPkg(${i})" style="${p.promo?'border-color:#F5B301;box-shadow:0 0 0 1px rgba(245,179,1,.32),0 0 20px rgba(245,179,1,.24)':''}">
         ${p.hit?`<span class="hit">HIT</span>`:''}
         <span class="pic"><span class="em">${p.im?'<img class="pim" src="'+p.im+'">':p.txt?'🎁':(p.c==='💎'?'💎':p.c==='⭐'?'⭐':'🪙')}</span>${p.x2?`<span class="x2">x2</span>`:''}</span>
         <span class="info"><span class="a ${p.txt?'small':''}">${p.a}${p.c&&p.c.length<=2?' '+p.c:''}</span><span class="p">${fmt(p.p)} so'm</span></span>
-      </button>`).join('');
+      </button>`;
+  }).join('');
 }
 /* Joriy maydonlar: eski o'yinlarda qo'lda yozilgan, yangilarida kategoriyadan.
    Bu yerdan olinmasa buyurtmaga ID umuman qo'shilmaydi. */
