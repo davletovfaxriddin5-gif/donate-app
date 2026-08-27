@@ -942,7 +942,9 @@ async function checkOne(uid, ordId){
   const d0 = load();
   const u0 = d0[uid]; if(!u0 || !Array.isArray(u0.orders)) return;
   const r0 = u0.orders.find(function(x){ return x.id === ordId; });
-  if(!r0 || !r0.fzr || r0.status !== "sent") return;
+  /* "stuck" ham tekshiriladi — aks holda tarmoq uzilgan paytda osilib qolgan
+     buyurtma abadiy tekshirilmay qoladi va mijozning puli qaytmaydi */
+  if(!r0 || !r0.fzr || (r0.status !== "sent" && r0.status !== "stuck")) return;
 
   const st = await fzrStatus(r0.fzr);
   if(!st) return;
@@ -951,7 +953,7 @@ async function checkOne(uid, ordId){
   const db = load();
   const u = urec(db, uid);
   const r = u.orders.find(function(x){ return x.id === ordId; });
-  if(!r || r.status !== "sent") return;
+  if(!r || (r.status !== "sent" && r.status !== "stuck")) return;
 
   if(s === "completed"){
     r.status = "done"; r.doneAt = new Date().toISOString();
@@ -970,9 +972,11 @@ async function checkOne(uid, ordId){
   }
   if(Date.now() - new Date(r.at).getTime() > 30*60000){
     r.status = "stuck";
+    const yangi = !r.warned;      /* ogohlantirish faqat bir marta */
+    r.warned = true;
     save(db);
-    if(ADMIN_ID) tgCall("sendMessage", { chat_id: ADMIN_ID,
-      text: "⏰ 30 daqiqadan beri tugamadi: "+r.fzr+"\n"+r.package+" — id "+uid+"\nQo'lda tekshiring." });
+    if(ADMIN_ID && yangi) tgCall("sendMessage", { chat_id: ADMIN_ID,
+      text: "⏰ 30 daqiqadan beri tugamadi: "+r.fzr+"\n"+r.package+" — id "+uid+"\nTekshirish davom etadi." });
   }
 }
 
@@ -985,7 +989,11 @@ async function sweep(){
       const u = db[uid];
       if(!u || !Array.isArray(u.orders)) return;
       u.orders.forEach(function(r){
-        if(r.status === "sent" && r.fzr){ jobs.push([uid, r.id]); return; }
+        if((r.status === "sent" || r.status === "stuck") && r.fzr){
+          /* 7 kundan eski bo'lsa cheksiz so'ramaymiz */
+          if(Date.now() - new Date(r.at).getTime() < 7*24*3600000) jobs.push([uid, r.id]);
+          return;
+        }
         /* yuborilmay osilib qolgan (server o'chib qolgan bo'lsa) — pulni qaytaramiz */
         if(r.status === "wait" && r.auto && !r.fzr &&
            Date.now() - new Date(r.at).getTime() > 300000){
