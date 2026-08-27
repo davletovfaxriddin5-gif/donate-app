@@ -47,6 +47,69 @@ const FZR_KEY  = process.env.FZR_API_KEY || "";
 const FZR_BASE = "https://api.fzr.cards";
 const FZR_CATS = { pubg:"pubg_mobile", freefire:"free_fire", mlbb:"mobile_legends" };
 
+/* ---------- shop2topup: FAQAT ID tekshirish ----------
+   FazerCards yangi o'yinlarni tekshira olmaydi. Yetkazish, narx va sweep
+   avvalgidek FazerCards'da qoladi — bu yerda pul harakat qilmaydi.
+   Kalit: FazerCards kategoriyasi -> shop2topup item_id (sinovdan o'tgan). */
+const S2T_KEY  = process.env.S2T_KEY || "";
+const S2T_BASE = "https://shop2topup.com/api/endpoints/v1";
+const S2T_MAP = {
+  arena_breakout:214, arena_breakout_infinite:2798,
+  blood_strike:1638, blood_strike_mena:1638,
+  codm_activision_ca:1002, codm_activision_in:1002, codm_activision_kz:1002,
+  codm_activision_sa:1002, codm_activision_us:1002, codm_garena_sgmy:1002,
+  delta_force:1016, garena_delta_force_indonesia:1016, garena_delta_force_my:1016,
+  eafc_mobile_id:605, eafc_mobile_kh:605, eafc_mobile_my:605, eafc_mobile_sg:605,
+  undawn_garena_global:1078, undawn_garena_id:1078, undawn_garena_sg:1078,
+  honor_of_kings:198,
+  legend_of_neverland:3191, legend_of_neverland_naeu:3191,
+  modern_strike_online:2284,
+  r6_mobile_global:703, r6_mobile_id:703, r6_mobile_my:703, r6_mobile_ph:703,
+  r6_mobile_sg:703, r6_mobile_th:703, r6_mobile_us:703
+};
+/* Maydon nomi o'yinga qarab farq qiladi — birinchi to'lganini olamiz */
+function s2tPid(f){
+  const k = ["player_id","user_id","uid","id","character_id","account_id","riot_id"];
+  for(let i=0;i<k.length;i++){ const v=String(f[k[i]]||"").trim(); if(v) return v; }
+  return "";
+}
+async function s2tValidate(item, fields){
+  if(!S2T_KEY) return { ok:false, reason:"error" };
+  const pid = s2tPid(fields);
+  if(!pid) return { ok:false, reason:"bad_id" };
+  const body = { sub_category_id: item, player_id: pid };
+  const z = String(fields.zone_id || fields.server_id || fields.server || "").trim();
+  if(z) body.zone_id = z;
+
+  const ac = new AbortController();
+  const tm = setTimeout(()=>ac.abort(), 12000);
+  let j = {};
+  try{
+    const r = await fetch(S2T_BASE+"/player/validate", {
+      method:"POST",
+      headers:{ "Content-Type":"application/json", "Authorization":"Bearer "+S2T_KEY },
+      body: JSON.stringify(body), signal: ac.signal
+    });
+    j = await r.json().catch(()=>({}));
+  }catch(e){
+    console.log("S2T validate xato:", e.message);
+    return { ok:false, reason:"error" };
+  } finally { clearTimeout(tm); }
+
+  if(j && j.success && j.data && j.data.player_name)
+    return { ok:true, valid:true, name:String(j.data.player_name), region:"" };
+
+  const er = (j && j.error) || {};
+  const code = String(er.code || "");
+  /* Region mos kelmasa ham nom va region qaytadi — bu ham foydali javob */
+  if(code === "REGION_MISMATCH" && er.player_name)
+    return { ok:true, valid:true, name:String(er.player_name), region:String(er.player_region||"") };
+  if(code === "PLAYER_NOT_FOUND") return { ok:false, reason:"invalid" };
+  if(code === "INVALID_PRODUCT_CONFIG") return { ok:false, reason:"unsupported" };
+  console.log("S2T validate javob:", JSON.stringify(j).slice(0,200));
+  return { ok:false, reason:"error" };
+}
+
 const vCache = new Map();
 let vCount = 0, vWindow = 0;
 function vAllow(){
@@ -98,6 +161,16 @@ async function validateId(req,res){
     if(!FZR_KEY){ console.log("VALIDATE: FZR_API_KEY yo'q"); return res.json({ ok:false, reason:"error" }); }
     const hit = vCache.get(key);
     if(hit && Date.now() - hit.at < 300000) return res.json(hit.data);
+
+    /* shop2topup tekshiradigan kategoriyalar shu yerda hal bo'ladi —
+       FazerCards'ga umuman bormaydi va uning limitini yemaydi */
+    const s2tItem = S2T_MAP[cat];
+    if(s2tItem){
+      const d = await s2tValidate(s2tItem, fields);
+      if(d.ok) vCache.set(key, { at: Date.now(), data: d });
+      return res.json(d);
+    }
+
     if(!vAllow()) return res.json({ ok:false, reason:"busy" });
 
     const ac = new AbortController();
