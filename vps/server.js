@@ -483,7 +483,7 @@ function loadGames(){
       (c.offers || []).forEach(function(o){
         /* narx va tannarx faqat serverda qoladi */
         GIDX[c.cat + "|" + o.oid] = { price:o.price, cost:o.cost, fields:c.fields || [], gid:g.id };
-        if(!o.off) shown.push({ oid:o.oid, name:o.name, price:o.price });
+        if(!o.off) shown.push({ oid:o.oid, name:o.name, price:o.price, im:o.im || "" });
       });
       if(shown.length){
         GIDX_CATS[c.cat] = 1;
