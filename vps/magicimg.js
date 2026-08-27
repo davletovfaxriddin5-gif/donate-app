@@ -34,6 +34,21 @@ const IMG = {
   "lancelot_s_limited_time_gift": "/magic-x12.png"
 };
 
+/* faqat shu kategoriyada boshqa rasm */
+const IMG_CAT = {
+  magic_chess_gogo_global: { "565_diamonds": "/magic-x27.png" },
+  magic_chess_gogo_ru:     { "55_diamonds":  "/magic-x26.png",
+                             "1155_diamonds":"/magic-x25.png" }
+};
+
+/* 2x bonus nomlarini qisqartiramiz */
+const RENAME = {
+  "first_recharge_100_50_50_bonus":    "50+50",
+  "first_recharge_300_150_150_bonus":  "150+150",
+  "first_recharge_500_250_250_bonus":  "250+250",
+  "first_recharge_1000_500_500_bonus": "500+500"
+};
+
 /* sotuvdan olinadiganlar */
 const HIDE = {
   magic_chess_gogo_global: ["1346_diamonds","1825_diamonds","2195_diamonds","2398_diamonds",
@@ -81,7 +96,9 @@ const noimg = [], used = {};
     if(APPLY){
       if(hide.indexOf(o.oid) > -1) o.off = true;
       o.grp = grpOf(o.oid).g;
-      if(IMG[o.oid]) o.im = IMG[o.oid];
+      const pick = (IMG_CAT[c.cat] || {})[o.oid] || IMG[o.oid];
+      if(pick) o.im = pick;
+      if(RENAME[o.oid]) o.name = RENAME[o.oid];
     }
     if(yop){
       if(hide.indexOf(o.oid) > -1) console.log("  YOPILADI: " + o.name);
@@ -89,9 +106,10 @@ const noimg = [], used = {};
     }
     const gg = grpOf(o.oid);
     if(gg.g !== last){ console.log("  [" + (gg.g || "—") + "]"); last = gg.g; }
-    const im = IMG[o.oid] || "";
+    const im = (IMG_CAT[c.cat] || {})[o.oid] || IMG[o.oid] || "";
+    const nm = RENAME[o.oid] || o.name;
     if(im) used[im] = 1; else noimg.push(c.cat + " / " + o.name);
-    console.log("    " + o.name.padEnd(34) + " <- " + (im || "RASM YO'Q"));
+    console.log("    " + nm.padEnd(34) + " <- " + (im || "RASM YO'Q"));
     delete o.__i;
   });
 });
@@ -101,7 +119,7 @@ if(noimg.length){
   noimg.forEach(function(x){ console.log("  " + x); });
 }
 const all = [];
-for(let i=1;i<=24;i++) all.push("/magic-x"+i+".png");
+for(let i=1;i<=27;i++) all.push("/magic-x"+i+".png");
 const unused = all.filter(function(f){ return f !== TILE && !used[f]; });
 if(unused.length) console.log("\nISHLATILMAGAN RASM: " + unused.join(", "));
 
