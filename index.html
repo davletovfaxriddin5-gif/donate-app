@@ -2342,7 +2342,7 @@ const GAMES = [
       {a:'3688', c:'💎', p:630000, oid:'3099_589_diamonds',im:'/IMG_4443.png'},
       {a:'5532', c:'💎', p:951000, oid:'4649_883_diamonds', im:'/IMG_4430.png'},
       {a:'9288', c:'💎', p:1583000, oid:'7740_1548_diamonds', im:'/IMG_4440.png'},
-      {a:'Haftalik propusk', c:'', p:22000, txt:true, oid:'weekly_pass', im:'/IMG_4446.png'},
+      {a:'Haftalik propusk', c:'', p:20300, txt:true, oid:'weekly_pass', im:'/IMG_4446.png'},
       {a:'Twilight pass', c:'', p:130000, txt:true, oid:'twilight_pass', im:'/IMG_4429.png'},
     ]},
   { id:'tgstars', name:'TG STARS', glyph:'⭐', star:'on', badge:'AVTO', img:'/IMG_4370.jpeg',
@@ -2396,7 +2396,7 @@ function activePkgs(){
   if(g.cats && g.cats.length){
     const c = activeCat();
     return (c && c.offers ? c.offers : []).map(function(o){
-      return { a:o.name, c:'', p:o.price, oid:o.oid, txt:true };
+      return { a:o.name, c:'', p:o.price, oid:o.oid, im:o.im||'', txt:!o.im };
     });
   }
   if(curPkgs) return curPkgs;
