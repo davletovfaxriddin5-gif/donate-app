@@ -22,9 +22,10 @@ function grpOf(oid){
   return { n:4, g:"" };
 }
 
-/* KATTA harfni Bosh harfga: "51 BC" -> "51 Bc", "0.99 DEAL" -> "0.99 Deal" */
+/* "51 BC" / "51 Bc" -> "51 Blood Coins"; "0.99 DEAL" -> "0.99 Deal" */
 function fixName(s){
-  return String(s).replace(/\b[A-Z]{2,}\b/g, function(w){
+  let t = String(s).replace(/\bBC\b/gi, "Blood Coins");
+  return t.replace(/\b[A-Z]{2,}\b/g, function(w){
     return w.charAt(0) + w.slice(1).toLowerCase();
   });
 }
