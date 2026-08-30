@@ -491,7 +491,8 @@ function loadGames(){
       }
     });
     if(cats.length) APPGAMES.push({
-      id:g.id, name:g.name, glyph: GLYPH[g.id] || "\uD83C\uDFAE", img: g.img || "", cats: cats
+      id:g.id, name:g.name, glyph: GLYPH[g.id] || "\uD83C\uDFAE", img: g.img || "",
+      maint: !!g.maint, cats: cats
     });
   });
   console.log("games.json: " + APPGAMES.length + " o'yin, " + Object.keys(GIDX).length + " paket");
