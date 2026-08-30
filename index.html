@@ -3139,12 +3139,12 @@ function renderGame(){
 
   /* Video bo'lsa keng banner, bo'lmasa oddiy kichik sarlavha */
   const noMo = document.body.classList.contains('reduce-motion');
-  const head = g.vid
+  const head = (g.vid || g.bg)
     ? '<div class="gd-hero">'
-      + (noMo
-          ? '<img src="' + (g.img || '') + '">'
-          : '<video src="' + g.vid + '" poster="' + (g.img || '') + '" autoplay muted loop playsinline'
-            + ' preload="metadata" disablepictureinpicture></video>')
+      + ((g.vid && !noMo)
+          ? '<video src="' + g.vid + '" poster="' + (g.bg || g.img || '') + '" autoplay muted loop playsinline'
+            + ' preload="metadata" disablepictureinpicture></video>'
+          : '<img src="' + (g.bg || g.img || '') + '">')
       + '<div class="ht">' + esc(g.name) + '</div>'
       + '</div>'
     : '<div class="gd-head">'
@@ -3804,7 +3804,7 @@ function loadDynGames(){
     const add = d.games.filter(function(g){
       return g && g.id && g.cats && g.cats.length && !GAMES.some(function(x){ return x.id === g.id; });
     }).map(function(g){
-      return { id:g.id, name:g.name, glyph:g.glyph || '\uD83C\uDFAE', img:g.img || '', vid:g.vid || '', maint:!!g.maint,
+      return { id:g.id, name:g.name, glyph:g.glyph || '\uD83C\uDFAE', img:g.img || '', vid:g.vid || '', bg:g.bg || '', maint:!!g.maint,
                cur:'', region:false, star:'', badge:'AVTO',
                cats:g.cats, idFields:[], packages:[] };
     });
