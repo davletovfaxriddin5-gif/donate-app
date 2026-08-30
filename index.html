@@ -103,9 +103,9 @@ input{font-family:inherit}
 .gd-head .ic img{width:100%;height:100%;object-fit:cover}
 .gd-head .nm{font-weight:800;font-size:19px;letter-spacing:-.4px;line-height:1.1;text-transform:uppercase}
 .gd-head .cur{font-size:17px;margin-top:3px}
-.gd-head{position:relative;overflow:visible}
-.gd-head .peek{position:absolute;right:6px;bottom:-1px;height:132%;width:auto;pointer-events:none;z-index:3;filter:drop-shadow(0 6px 14px rgba(0,0,0,.45))}
-.gd-head .txt{position:relative;z-index:1;padding-right:96px}
+/* Chetda yashiringan qahramon \u2014 o'lchamlarni shu yerdan sozlanadi */
+:root{ --peek-h:150px; --peek-right:-42px; --peek-top:46% }
+.peek-side{position:fixed;right:var(--peek-right);top:var(--peek-top);height:var(--peek-h);width:auto;z-index:5;pointer-events:none;filter:drop-shadow(-6px 6px 14px rgba(0,0,0,.5))}
 .gd-hero{position:relative;width:100%;aspect-ratio:16/9;border-radius:var(--radius);overflow:hidden;margin-bottom:16px;border:1px solid var(--stroke);background:var(--card-2)}
 .gd-hero video,.gd-hero>img{width:100%;height:100%;object-fit:cover;display:block}
 .gd-hero:after{content:'';position:absolute;inset:0;pointer-events:none;background:linear-gradient(to top,rgba(0,0,0,.72),rgba(0,0,0,.15) 45%,transparent 70%)}
@@ -3152,9 +3152,9 @@ function renderGame(){
       + '</div>'
     : '<div class="gd-head">'
       + '<div class="ic">' + ((g.hicon || g.img) ? '<img src="' + (g.hicon || g.img) + '">' : g.glyph) + '</div>'
-      + '<div class="txt"><div class="nm">' + esc(g.name) + '</div><div class="cur">' + (g.cur||'') + '</div></div>'
-      + (g.peek ? '<img class="peek" src="' + g.peek + '" alt="">' : '')
-      + '</div>';
+      + '<div><div class="nm">' + esc(g.name) + '</div><div class="cur">' + (g.cur||'') + '</div></div>'
+      + '</div>'
+      + (g.peek ? '<img class="peek-side" src="' + g.peek + '" alt="">' : '');
 
   app.innerHTML = head
   + (ids.length ? '<div class="sec-lbl" style="margin-top:0">Saqlangan ID\'lar</div>'
