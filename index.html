@@ -3819,6 +3819,15 @@ function loadDynGames(){
     if(!add.length) return;
     GAMES.push.apply(GAMES, add);
     if(view === 'home') renderHome();
+    /* Sarlavha foni va chetdagi rasmni oldindan yuklaymiz \u2014
+       mijoz o'yinga kirganda ular tayyor turadi */
+    setTimeout(function(){
+      add.forEach(function(g){
+        [g.hbg, g.peek, g.bg].forEach(function(u){
+          if(u){ const im = new Image(); im.src = u; }
+        });
+      });
+    }, 400);
   }).catch(function(){});
 }
 
