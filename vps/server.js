@@ -1165,6 +1165,21 @@ app.post("/topup", (req,res)=>{
   }catch(e){ console.log("TOPUP XATO:", e.message); res.json({ ok:false, error:"server" }); }
 });
 
+/* Mijoz "To'ladim" bosgach ilova shu yerdan holatni kuzatadi.
+   SMS avtomatik tasdiqlasa status "done" bo'ladi va balans qaytariladi. */
+app.post("/topup-status", (req,res)=>{
+  try{
+    const b = req.body || {};
+    const who = checkInit(b.initData);
+    if(!who) return res.json({ ok:false, error:"auth" });
+    const db = load();
+    const u  = urec(db, who.id);
+    const t  = (u.topups || []).find(function(x){ return x.id === String(b.id||""); });
+    if(!t) return res.json({ ok:false, error:"yoq" });
+    res.json({ ok:true, status: t.status, balance: u.balance, auto: !!t.auto });
+  }catch(e){ res.json({ ok:false, error:"server" }); }
+});
+
 /* Mijoz "Bekor qilish" bosganda yoki 10 daqiqa tugaganda */
 app.post("/topup-cancel", (req,res)=>{
   try{
