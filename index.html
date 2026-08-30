@@ -3441,6 +3441,7 @@ async function checkId(){
   syncBuy();
   return idOk;
 }
+var buyBusy = false;
 function buy(){
   const g=curGame;
   const custom = g && g.custom === 'stars';
@@ -3460,24 +3461,32 @@ function buy(){
     qty: custom ? starN : 0,
     tgUser: tgUser?{id:tgUser.id,username:tgUser.username,name:tgUser.first_name}:null,
     status:'wait', createdAt:new Date().toISOString() };
-  saveOrder(order); notify('success');
-fetch(VBASE + '/order', {
+  if(buyBusy) return;
+  buyBusy = true;
+  const _bb = document.getElementById('buyBtn');
+  if(_bb) _bb.disabled = true;
+  function buyDone(){ buyBusy = false; syncBuy(); }
+  fetch(VBASE + '/order', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ order: order, initData: (tg && tg.initData) || '' })
   }).then(function(r){ return r.json(); }).then(function(d){
     if(d && d.ok){
       if(typeof d.balance === 'number') balance = d.balance;
+      saveOrder(order); notify('success');
       toastOk('✅ Buyurtma qabul qilindi');
+      buyDone();
       setTimeout(function(){ go('history'); }, 700);
     } else if(d && d.error === 'balance'){
       if(typeof d.balance === 'number') balance = d.balance;
       notify('error');
       toastErr('❌ Balans yetarli emas — ' + fmt(d.balance||0) + " so'm bor");
+      buyDone();
     } else {
       notify('error'); toastErr("⚠️ Xato: " + ((d && d.error) || 'yuborilmadi'));
+      buyDone();
     }
-  }).catch(function(){ notify('error'); toastErr("⚠️ Aloqa yo'q"); });  
+  }).catch(function(){ notify('error'); toastErr("⚠️ Aloqa yo'q"); buyDone(); });
 }
 
 function saveOrder(o){ try{ const a=getOrders(); a.unshift(o); localStorage.setItem('mt_orders', JSON.stringify(a.slice(0,60))); }catch(e){} }
@@ -3492,9 +3501,16 @@ function loadOrders(cb){
    .then(function(d){
      if(d && Array.isArray(d.topups)) srvTopups = d.topups;
      if(d && d.ok && Array.isArray(d.orders)){
-       const loc = getOrders(), map = {};
+       let loc = getOrders(); const map = {};
        d.orders.forEach(function(x){ map[x.id] = x; });
        loc.forEach(function(x){ if(map[x.id]) x.status = map[x.id].status; });
+       const ghostLim = Date.now() - 5*60*1000;
+       loc = loc.filter(function(x){
+         if(map[x.id]) return true;
+         if(x.status !== 'wait') return true;
+         const t = Date.parse(x.createdAt || x.at || '');
+         return !(t && t < ghostLim);
+       });
        d.orders.forEach(function(x){ if(!loc.some(function(y){ return y.id === x.id; })) loc.push(x); });
        loc.sort(function(a,b){ return String(b.at||'').localeCompare(String(a.at||'')); });
        srvOrders = loc;
