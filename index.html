@@ -2731,7 +2731,16 @@ function renderHome(){
   </div>`;
 }
 
-function openGame(id){ haptic(); curGame = GAMES.find(g=>g.id===id); selPkg = null; curPkgs = null; curRegion='global'; curCat=0; idOk=false; idName=''; idRegion=''; starN=0; go('game'); }
+/* Texnik ish: faqat admin kira oladi */
+const MAINT_OK = [8364461786, 6765145924];
+function canOpen(g){
+  if(!g || !g.maint) return true;
+  return !!(tgUser && MAINT_OK.indexOf(tgUser.id) > -1);
+}
+function openGame(id){
+  const gg = GAMES.find(g=>g.id===id);
+  if(!canOpen(gg)){ toastErr("Bu o'yinda texnik ishlar ketyapti"); return; }
+  haptic(); curGame = gg; selPkg = null; curPkgs = null; curRegion='global'; curCat=0; idOk=false; idName=''; idRegion=''; starN=0; go('game'); }
 function savedIds(gameId){ try{ return JSON.parse(localStorage.getItem('mt_ids_'+gameId)||'[]'); }catch(e){ return []; } }
 function saveId(gameId, val){ try{ let a=savedIds(gameId); a=a.filter(x=>x!==val); a.unshift(val); localStorage.setItem('mt_ids_'+gameId, JSON.stringify(a.slice(0,6))); }catch(e){} }
 function fillId(v){
@@ -3482,7 +3491,7 @@ function loadDynGames(){
     const add = d.games.filter(function(g){
       return g && g.id && g.cats && g.cats.length && !GAMES.some(function(x){ return x.id === g.id; });
     }).map(function(g){
-      return { id:g.id, name:g.name, glyph:g.glyph || '\uD83C\uDFAE', img:g.img || '',
+      return { id:g.id, name:g.name, glyph:g.glyph || '\uD83C\uDFAE', img:g.img || '', maint:!!g.maint,
                cur:'', region:false, star:'', badge:'AVTO',
                cats:g.cats, idFields:[], packages:[] };
     });
