@@ -688,6 +688,7 @@ let currentLang = 'uz';
 try{ const sv=localStorage.getItem('mt_lang'); if(sv) currentLang=sv; }catch(e){}
 const DICT = {};
 DICT.ru = {
+  "⏳ Tekshirilmoqda…":"⏳ Проверяем…",
   "Aloqa yo'q":"Нет связи",
   "Avval ID ni tekshiring":"Сначала проверьте ID",
   "Balans to'ldirildi":"Баланс пополнен",
@@ -761,6 +762,7 @@ DICT.ru = {
   "faqat raqam bo'lishi kerak":"должны быть только цифры"
 };
 DICT.en = {
+  "⏳ Tekshirilmoqda…":"⏳ Checking…",
   "Raqamingiz saqlandi":"Your number is saved",
   "Aloqa yo'q":"No connection",
   "Avval ID ni tekshiring":"Check the ID first",
@@ -900,6 +902,7 @@ DICT.en = {
 };
 
 DICT.tr = {
+  "⏳ Tekshirilmoqda…":"⏳ Kontrol ediliyor…",
   "Raqamingiz saqlandi":"Numaranız kaydedildi",
   "Aloqa yo'q":"Bağlantı yok",
   "Avval ID ni tekshiring":"Önce ID'yi kontrol edin",
@@ -1039,6 +1042,7 @@ DICT.tr = {
 };
 
 DICT.kk = {
+  "⏳ Tekshirilmoqda…":"⏳ Тексерілуде…",
   "Raqamingiz saqlandi":"Нөміріңіз сақталды",
   "Aloqa yo'q":"Байланыс жоқ",
   "Avval ID ni tekshiring":"Алдымен ID тексеріңіз",
@@ -1178,6 +1182,7 @@ DICT.kk = {
 };
 
 DICT.ky = {
+  "⏳ Tekshirilmoqda…":"⏳ Текшерилүүдө…",
   "Raqamingiz saqlandi":"Номериңиз сакталды",
   "Aloqa yo'q":"Байланыш жок",
   "Avval ID ni tekshiring":"Адегенде ID текшериңиз",
@@ -1318,6 +1323,7 @@ DICT.ky = {
 
 
 DICT.de = {
+  "⏳ Tekshirilmoqda…":"⏳ Wird geprüft…",
   "Raqamingiz saqlandi":"Ihre Nummer wurde gespeichert",
   "Aloqa yo'q":"Keine Verbindung",
   "Avval ID ni tekshiring":"Prüfen Sie zuerst die ID",
@@ -1457,6 +1463,7 @@ DICT.de = {
 };
 
 DICT.it = {
+  "⏳ Tekshirilmoqda…":"⏳ Verifica in corso…",
   "Raqamingiz saqlandi":"Il tuo numero è stato salvato",
   "Aloqa yo'q":"Nessuna connessione",
   "Avval ID ni tekshiring":"Controlla prima l'ID",
@@ -1596,6 +1603,7 @@ DICT.it = {
 };
 
 DICT.id = {
+  "⏳ Tekshirilmoqda…":"⏳ Memeriksa…",
   "Raqamingiz saqlandi":"Nomor Anda tersimpan",
   "Aloqa yo'q":"Tidak ada koneksi",
   "Avval ID ni tekshiring":"Periksa ID terlebih dahulu",
@@ -1735,6 +1743,7 @@ DICT.id = {
 };
 
 DICT.pt = {
+  "⏳ Tekshirilmoqda…":"⏳ Verificando…",
   "Raqamingiz saqlandi":"Seu número foi salvo",
   "Aloqa yo'q":"Sem conexão",
   "Avval ID ni tekshiring":"Verifique o ID primeiro",
@@ -1874,6 +1883,7 @@ DICT.pt = {
 };
 
 DICT.vi = {
+  "⏳ Tekshirilmoqda…":"⏳ Đang kiểm tra…",
   "Raqamingiz saqlandi":"Số của bạn đã được lưu",
   "Aloqa yo'q":"Không có kết nối",
   "Avval ID ni tekshiring":"Hãy kiểm tra ID trước",
@@ -2013,6 +2023,7 @@ DICT.vi = {
 };
 
 DICT.ja = {
+  "⏳ Tekshirilmoqda…":"⏳ 確認中…",
   "Raqamingiz saqlandi":"番号を保存しました",
   "Aloqa yo'q":"接続がありません",
   "Avval ID ni tekshiring":"先にIDを確認してください",
@@ -2152,6 +2163,7 @@ DICT.ja = {
 };
 
 DICT.ko = {
+  "⏳ Tekshirilmoqda…":"⏳ 확인 중…",
   "Raqamingiz saqlandi":"번호가 저장되었습니다",
   "Aloqa yo'q":"연결 없음",
   "Avval ID ni tekshiring":"먼저 ID를 확인하세요",
@@ -2291,6 +2303,7 @@ DICT.ko = {
 };
 
 DICT.zh = {
+  "⏳ Tekshirilmoqda…":"⏳ 核实中…",
   "Raqamingiz saqlandi":"您的号码已保存",
   "Aloqa yo'q":"无网络连接",
   "Avval ID ni tekshiring":"请先验证 ID",
@@ -3920,7 +3933,7 @@ function renderTopup(){
       Ko'p yoki kam yuborsangiz, pulni faqat admin orqali qaytarib olasiz.<br>
       To'lagandan keyin pastdagi tugmani bosing, tasdiqlangach balans o'zi to'ladi.
     </div>
-    <button class="check-btn" style="width:100%;padding:13px" onclick="topPaid()">To'ladim</button>
+    <button id="paidBtn" class="check-btn" style="width:100%;padding:13px" onclick="topPaid()">To'ladim</button>
     <button class="big-btn" style="margin-top:10px;justify-content:center;background:var(--card-2)" onclick="topCancel()">Bekor qilish</button>`;
     topEnd = topPend.until;
     topClockTick();
@@ -4190,12 +4203,12 @@ function topPaid(){
   if(!topPend) return;
   haptic('medium');
   const id = topPend.id;
-  clearInterval(topTick);
   if(payWatch) clearInterval(payWatch);
 
   const box = document.getElementById('payBox');
-  const btns = document.querySelectorAll('.check-btn, .big-btn');
-  btns.forEach(function(x){ x.disabled = true; });
+  const pb  = document.getElementById('paidBtn');
+  /* Faqat "To'ladim" o'chadi \u2014 "Bekor qilish" ishlab turishi kerak */
+  if(pb){ pb.disabled = true; pb.textContent = tr("\u23F3 Tekshirilmoqda\u2026"); }
   if(box){ box.className='id-res wait'; box.innerHTML = tr("\u23F3 To'lov tekshirilmoqda\u2026") + '<br><small>' + tr("Bu bir necha daqiqa olishi mumkin") + '</small>'; }
 
   const t0 = Date.now();
@@ -4207,16 +4220,16 @@ function topPaid(){
       .then(function(r){ return r.json(); }).then(function(d){
         if(!d || !d.ok) return;
         if(d.status === 'done'){
-          stop(); topPend=null;
+          stop(); topPend=null; clearInterval(topTick);
           if(typeof d.balance === 'number') balance = d.balance;
           notify('success'); toastOk(tr("Balans to'ldirildi"));
           go('home');
         } else if(d.status === 'no'){
-          stop(); topPend=null;
+          stop(); topPend=null; clearInterval(topTick);
           notify('error'); toastErr(tr("To'lov rad etildi"));
           go('home');
         } else if(Date.now() - t0 > 120000){
-          stop(); topPend=null;
+          stop(); topPend=null; clearInterval(topTick);
           notify('success'); toastOk(tr("Qabul qilindi \u2014 admin tekshiradi"));
           go('home');
         }
@@ -4228,6 +4241,7 @@ function topCancel(){
   haptic();
   const id = topPend ? topPend.id : '';
   topPend=null; clearInterval(topTick);
+  if(payWatch){ clearInterval(payWatch); payWatch=null; }
   if(id) fetch(VBASE + '/topup-cancel', { method:'POST', headers:{'Content-Type':'application/json'},
     body: JSON.stringify({ id:id, initData:(tg&&tg.initData)||'' }) }).catch(function(){});
   toastErr('Bekor qilindi');
