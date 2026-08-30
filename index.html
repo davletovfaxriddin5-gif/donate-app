@@ -103,6 +103,10 @@ input{font-family:inherit}
 .gd-head .ic img{width:100%;height:100%;object-fit:cover}
 .gd-head .nm{font-weight:800;font-size:19px;letter-spacing:-.4px;line-height:1.1;text-transform:uppercase}
 .gd-head .cur{font-size:17px;margin-top:3px}
+.gd-hero{position:relative;width:100%;aspect-ratio:16/9;border-radius:var(--radius);overflow:hidden;margin-bottom:16px;border:1px solid var(--stroke);background:var(--card-2)}
+.gd-hero video,.gd-hero>img{width:100%;height:100%;object-fit:cover;display:block}
+.gd-hero:after{content:'';position:absolute;inset:0;pointer-events:none;background:linear-gradient(to top,rgba(0,0,0,.72),rgba(0,0,0,.15) 45%,transparent 70%)}
+.gd-hero .ht{position:absolute;left:15px;right:15px;bottom:13px;z-index:2;color:#fff;font-weight:800;font-size:20px;letter-spacing:-.4px;line-height:1.1;text-transform:uppercase;text-shadow:0 2px 12px rgba(0,0,0,.8)}
 .saved-ids{display:flex;gap:9px;overflow-x:auto;padding:2px 0 4px;margin-bottom:16px}
 .saved-ids .chip{background:var(--card);border:1px solid var(--stroke);border-radius:12px;padding:10px 14px;
   white-space:nowrap;font-size:12.5px;color:var(--dim);flex-shrink:0}
@@ -3133,11 +3137,22 @@ function renderGame(){
           }).join('') + '</div>'
         : '');
 
-  app.innerHTML =
-  '<div class="gd-head">'
-  + '<div class="ic">' + (g.img ? '<img src="' + g.img + '">' : g.glyph) + '</div>'
-  + '<div><div class="nm">' + esc(g.name) + '</div><div class="cur">' + (g.cur||'') + '</div></div>'
-  + '</div>'
+  /* Video bo'lsa keng banner, bo'lmasa oddiy kichik sarlavha */
+  const noMo = document.body.classList.contains('reduce-motion');
+  const head = g.vid
+    ? '<div class="gd-hero">'
+      + (noMo
+          ? '<img src="' + (g.img || '') + '">'
+          : '<video src="' + g.vid + '" poster="' + (g.img || '') + '" autoplay muted loop playsinline'
+            + ' preload="metadata" disablepictureinpicture></video>')
+      + '<div class="ht">' + esc(g.name) + '</div>'
+      + '</div>'
+    : '<div class="gd-head">'
+      + '<div class="ic">' + (g.img ? '<img src="' + g.img + '">' : g.glyph) + '</div>'
+      + '<div><div class="nm">' + esc(g.name) + '</div><div class="cur">' + (g.cur||'') + '</div></div>'
+      + '</div>';
+
+  app.innerHTML = head
   + (ids.length ? '<div class="sec-lbl" style="margin-top:0">Saqlangan ID\'lar</div>'
       + '<div class="saved-ids">' + ids.map(function(v){
           return '<button class="chip" onclick="fillId(\'' + v + '\')">' + esc(v) + '</button>'; }).join('')
@@ -3789,7 +3804,7 @@ function loadDynGames(){
     const add = d.games.filter(function(g){
       return g && g.id && g.cats && g.cats.length && !GAMES.some(function(x){ return x.id === g.id; });
     }).map(function(g){
-      return { id:g.id, name:g.name, glyph:g.glyph || '\uD83C\uDFAE', img:g.img || '', maint:!!g.maint,
+      return { id:g.id, name:g.name, glyph:g.glyph || '\uD83C\uDFAE', img:g.img || '', vid:g.vid || '', maint:!!g.maint,
                cur:'', region:false, star:'', badge:'AVTO',
                cats:g.cats, idFields:[], packages:[] };
     });
