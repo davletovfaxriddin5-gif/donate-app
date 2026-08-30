@@ -688,6 +688,27 @@ let currentLang = 'uz';
 try{ const sv=localStorage.getItem('mt_lang'); if(sv) currentLang=sv; }catch(e){}
 const DICT = {};
 DICT.ru = {
+  "Aloqa yo'q":"Нет связи",
+  "Avval ID ni tekshiring":"Сначала проверьте ID",
+  "Balans to'ldirildi":"Баланс пополнен",
+  "Bu bir necha daqiqa olishi mumkin":"Это может занять несколько минут",
+  "Bu o'yinda texnik ishlar ketyapti":"В этой игре ведутся технические работы",
+  "Ijaraga bo'limi tez orada 🔜":"Раздел аренды скоро 🔜",
+  "Kamida 1000 kiriting":"Введите минимум 1000",
+  "Qabul qilindi — admin tekshiradi":"Принято — админ проверит",
+  "Raqamingiz allaqachon saqlangan":"Ваш номер уже сохранён",
+  "Telefon raqami yuborilmadi":"Номер телефона не отправлен",
+  "Telegram orqali oching":"Откройте через Telegram",
+  "To'lov rad etildi":"Платёж отклонён",
+  "Xatolik, qayta urining":"Ошибка, попробуйте снова",
+  "Yulduzlar sonini kiriting (":"Введите количество звёзд (",
+  "⏳ To'lov tekshirilmoqda…":"⏳ Проверяем платёж…",
+  "⚠️ Aloqa yo'q":"⚠️ Нет связи",
+  "⚠️ Xato: ":"⚠️ Ошибка: ",
+  "✅ Balans to'ldi: ":"✅ Баланс пополнен: ",
+  "✅ To'lov qabul qilindi":"✅ Платёж принят",
+  "❌ Balans yetarli emas — ":"❌ Недостаточно средств — ",
+  "📱 Botga o'tilmoqda...":"📱 Переход в бот...",
   "O'zgartirish":"Изменить",
   "Tungi rejim":"Ночной режим","Yorug' rejimga o'tish":"Переключиться на светлый режим",
   "Bosh sahifa":"Главная","Tarix":"История","Sozlamalar":"Настройки","Orqaga":"Назад",
@@ -740,6 +761,28 @@ DICT.ru = {
   "faqat raqam bo'lishi kerak":"должны быть только цифры"
 };
 DICT.en = {
+  "Raqamingiz saqlandi":"Your number is saved",
+  "Aloqa yo'q":"No connection",
+  "Avval ID ni tekshiring":"Check the ID first",
+  "Balans to'ldirildi":"Balance topped up",
+  "Bu bir necha daqiqa olishi mumkin":"This may take a few minutes",
+  "Bu o'yinda texnik ishlar ketyapti":"This game is under maintenance",
+  "Ijaraga bo'limi tez orada 🔜":"Rentals coming soon 🔜",
+  "Kamida 1000 kiriting":"Enter at least 1000",
+  "Qabul qilindi — admin tekshiradi":"Received — admin will check",
+  "Raqamingiz allaqachon saqlangan":"Your number is already saved",
+  "Telefon raqami yuborilmadi":"Phone number not sent",
+  "Telegram orqali oching":"Open via Telegram",
+  "To'lov rad etildi":"Payment declined",
+  "Xatolik, qayta urining":"Error, please try again",
+  "Yulduzlar sonini kiriting (":"Enter the number of stars (",
+  "⏳ To'lov tekshirilmoqda…":"⏳ Checking payment…",
+  "⚠️ Aloqa yo'q":"⚠️ No connection",
+  "⚠️ Xato: ":"⚠️ Error: ",
+  "✅ Balans to'ldi: ":"✅ Balance topped up: ",
+  "✅ To'lov qabul qilindi":"✅ Payment accepted",
+  "❌ Balans yetarli emas — ":"❌ Insufficient balance — ",
+  "📱 Botga o'tilmoqda...":"📱 Opening the bot...",
   "O'zgartirish":"Change",
   "Tungi rejim":"Night mode",
   "Yorug' rejimga o'tish":"Switch to light mode",
@@ -857,6 +900,28 @@ DICT.en = {
 };
 
 DICT.tr = {
+  "Raqamingiz saqlandi":"Numaranız kaydedildi",
+  "Aloqa yo'q":"Bağlantı yok",
+  "Avval ID ni tekshiring":"Önce ID'yi kontrol edin",
+  "Balans to'ldirildi":"Bakiye yüklendi",
+  "Bu bir necha daqiqa olishi mumkin":"Bu birkaç dakika sürebilir",
+  "Bu o'yinda texnik ishlar ketyapti":"Bu oyunda bakım çalışması var",
+  "Ijaraga bo'limi tez orada 🔜":"Kiralama bölümü yakında 🔜",
+  "Kamida 1000 kiriting":"En az 1000 girin",
+  "Qabul qilindi — admin tekshiradi":"Alındı — yönetici kontrol edecek",
+  "Raqamingiz allaqachon saqlangan":"Numaranız zaten kayıtlı",
+  "Telefon raqami yuborilmadi":"Telefon numarası gönderilmedi",
+  "Telegram orqali oching":"Telegram üzerinden açın",
+  "To'lov rad etildi":"Ödeme reddedildi",
+  "Xatolik, qayta urining":"Hata, tekrar deneyin",
+  "Yulduzlar sonini kiriting (":"Yıldız sayısını girin (",
+  "⏳ To'lov tekshirilmoqda…":"⏳ Ödeme kontrol ediliyor…",
+  "⚠️ Aloqa yo'q":"⚠️ Bağlantı yok",
+  "⚠️ Xato: ":"⚠️ Hata: ",
+  "✅ Balans to'ldi: ":"✅ Bakiye yüklendi: ",
+  "✅ To'lov qabul qilindi":"✅ Ödeme alındı",
+  "❌ Balans yetarli emas — ":"❌ Bakiye yetersiz — ",
+  "📱 Botga o'tilmoqda...":"📱 Bota geçiliyor...",
   "O'zgartirish":"Değiştir",
   "Tungi rejim":"Gece modu",
   "Yorug' rejimga o'tish":"Aydınlık moda geç",
@@ -974,6 +1039,28 @@ DICT.tr = {
 };
 
 DICT.kk = {
+  "Raqamingiz saqlandi":"Нөміріңіз сақталды",
+  "Aloqa yo'q":"Байланыс жоқ",
+  "Avval ID ni tekshiring":"Алдымен ID тексеріңіз",
+  "Balans to'ldirildi":"Баланс толтырылды",
+  "Bu bir necha daqiqa olishi mumkin":"Бұл бірнеше минут алуы мүмкін",
+  "Bu o'yinda texnik ishlar ketyapti":"Бұл ойында техникалық жұмыс жүріп жатыр",
+  "Ijaraga bo'limi tez orada 🔜":"Жалға беру бөлімі жақында 🔜",
+  "Kamida 1000 kiriting":"Кемінде 1000 енгізіңіз",
+  "Qabul qilindi — admin tekshiradi":"Қабылданды — админ тексереді",
+  "Raqamingiz allaqachon saqlangan":"Нөміріңіз әлдеқашан сақталған",
+  "Telefon raqami yuborilmadi":"Телефон нөмірі жіберілмеді",
+  "Telegram orqali oching":"Telegram арқылы ашыңыз",
+  "To'lov rad etildi":"Төлем қабылданбады",
+  "Xatolik, qayta urining":"Қате, қайта көріңіз",
+  "Yulduzlar sonini kiriting (":"Жұлдыздар санын енгізіңіз (",
+  "⏳ To'lov tekshirilmoqda…":"⏳ Төлем тексерілуде…",
+  "⚠️ Aloqa yo'q":"⚠️ Байланыс жоқ",
+  "⚠️ Xato: ":"⚠️ Қате: ",
+  "✅ Balans to'ldi: ":"✅ Баланс толтырылды: ",
+  "✅ To'lov qabul qilindi":"✅ Төлем қабылданды",
+  "❌ Balans yetarli emas — ":"❌ Баланс жеткіліксіз — ",
+  "📱 Botga o'tilmoqda...":"📱 Ботқа өтілуде...",
   "O'zgartirish":"Өзгерту",
   "Tungi rejim":"Түнгі режим",
   "Yorug' rejimga o'tish":"Жарық режимге ауысу",
@@ -1091,6 +1178,28 @@ DICT.kk = {
 };
 
 DICT.ky = {
+  "Raqamingiz saqlandi":"Номериңиз сакталды",
+  "Aloqa yo'q":"Байланыш жок",
+  "Avval ID ni tekshiring":"Адегенде ID текшериңиз",
+  "Balans to'ldirildi":"Баланс толтурулду",
+  "Bu bir necha daqiqa olishi mumkin":"Бул бир нече мүнөт талап кылышы мүмкүн",
+  "Bu o'yinda texnik ishlar ketyapti":"Бул оюнда техникалык иштер жүрүүдө",
+  "Ijaraga bo'limi tez orada 🔜":"Ижара бөлүмү жакында 🔜",
+  "Kamida 1000 kiriting":"Эң аз 1000 киргизиңиз",
+  "Qabul qilindi — admin tekshiradi":"Кабыл алынды — админ текшерет",
+  "Raqamingiz allaqachon saqlangan":"Номериңиз мурунтан сакталган",
+  "Telefon raqami yuborilmadi":"Телефон номери жөнөтүлгөн жок",
+  "Telegram orqali oching":"Telegram аркылуу ачыңыз",
+  "To'lov rad etildi":"Төлөм четке кагылды",
+  "Xatolik, qayta urining":"Ката, кайра аракет кылыңыз",
+  "Yulduzlar sonini kiriting (":"Жылдыздардын санын киргизиңиз (",
+  "⏳ To'lov tekshirilmoqda…":"⏳ Төлөм текшерилүүдө…",
+  "⚠️ Aloqa yo'q":"⚠️ Байланыш жок",
+  "⚠️ Xato: ":"⚠️ Ката: ",
+  "✅ Balans to'ldi: ":"✅ Баланс толтурулду: ",
+  "✅ To'lov qabul qilindi":"✅ Төлөм кабыл алынды",
+  "❌ Balans yetarli emas — ":"❌ Баланс жетишсиз — ",
+  "📱 Botga o'tilmoqda...":"📱 Ботко өтүлүүдө...",
   "O'zgartirish":"Өзгөртүү",
   "Tungi rejim":"Түнкү режим",
   "Yorug' rejimga o'tish":"Жарык режимге өтүү",
@@ -1209,6 +1318,28 @@ DICT.ky = {
 
 
 DICT.de = {
+  "Raqamingiz saqlandi":"Ihre Nummer wurde gespeichert",
+  "Aloqa yo'q":"Keine Verbindung",
+  "Avval ID ni tekshiring":"Prüfen Sie zuerst die ID",
+  "Balans to'ldirildi":"Guthaben aufgeladen",
+  "Bu bir necha daqiqa olishi mumkin":"Das kann einige Minuten dauern",
+  "Bu o'yinda texnik ishlar ketyapti":"Dieses Spiel wird gerade gewartet",
+  "Ijaraga bo'limi tez orada 🔜":"Vermietung kommt bald 🔜",
+  "Kamida 1000 kiriting":"Mindestens 1000 eingeben",
+  "Qabul qilindi — admin tekshiradi":"Angenommen — der Admin prüft es",
+  "Raqamingiz allaqachon saqlangan":"Ihre Nummer ist bereits gespeichert",
+  "Telefon raqami yuborilmadi":"Telefonnummer nicht gesendet",
+  "Telegram orqali oching":"Über Telegram öffnen",
+  "To'lov rad etildi":"Zahlung abgelehnt",
+  "Xatolik, qayta urining":"Fehler, bitte erneut versuchen",
+  "Yulduzlar sonini kiriting (":"Anzahl der Sterne eingeben (",
+  "⏳ To'lov tekshirilmoqda…":"⏳ Zahlung wird geprüft…",
+  "⚠️ Aloqa yo'q":"⚠️ Keine Verbindung",
+  "⚠️ Xato: ":"⚠️ Fehler: ",
+  "✅ Balans to'ldi: ":"✅ Guthaben aufgeladen: ",
+  "✅ To'lov qabul qilindi":"✅ Zahlung angenommen",
+  "❌ Balans yetarli emas — ":"❌ Guthaben reicht nicht — ",
+  "📱 Botga o'tilmoqda...":"📱 Bot wird geöffnet...",
   "O'zgartirish":"Ändern",
   "Tungi rejim":"Nachtmodus",
   "Yorug' rejimga o'tish":"Zum hellen Modus wechseln",
@@ -1326,6 +1457,28 @@ DICT.de = {
 };
 
 DICT.it = {
+  "Raqamingiz saqlandi":"Il tuo numero è stato salvato",
+  "Aloqa yo'q":"Nessuna connessione",
+  "Avval ID ni tekshiring":"Controlla prima l'ID",
+  "Balans to'ldirildi":"Saldo ricaricato",
+  "Bu bir necha daqiqa olishi mumkin":"Potrebbe richiedere qualche minuto",
+  "Bu o'yinda texnik ishlar ketyapti":"Questo gioco è in manutenzione",
+  "Ijaraga bo'limi tez orada 🔜":"Sezione noleggio in arrivo 🔜",
+  "Kamida 1000 kiriting":"Inserisci almeno 1000",
+  "Qabul qilindi — admin tekshiradi":"Ricevuto — l'admin controllerà",
+  "Raqamingiz allaqachon saqlangan":"Il tuo numero è già salvato",
+  "Telefon raqami yuborilmadi":"Numero di telefono non inviato",
+  "Telegram orqali oching":"Apri tramite Telegram",
+  "To'lov rad etildi":"Pagamento rifiutato",
+  "Xatolik, qayta urining":"Errore, riprova",
+  "Yulduzlar sonini kiriting (":"Inserisci il numero di stelle (",
+  "⏳ To'lov tekshirilmoqda…":"⏳ Verifica del pagamento…",
+  "⚠️ Aloqa yo'q":"⚠️ Nessuna connessione",
+  "⚠️ Xato: ":"⚠️ Errore: ",
+  "✅ Balans to'ldi: ":"✅ Saldo ricaricato: ",
+  "✅ To'lov qabul qilindi":"✅ Pagamento accettato",
+  "❌ Balans yetarli emas — ":"❌ Saldo insufficiente — ",
+  "📱 Botga o'tilmoqda...":"📱 Apertura del bot...",
   "O'zgartirish":"Modifica",
   "Tungi rejim":"Modalità notte",
   "Yorug' rejimga o'tish":"Passa alla modalità chiara",
@@ -1443,6 +1596,28 @@ DICT.it = {
 };
 
 DICT.id = {
+  "Raqamingiz saqlandi":"Nomor Anda tersimpan",
+  "Aloqa yo'q":"Tidak ada koneksi",
+  "Avval ID ni tekshiring":"Periksa ID terlebih dahulu",
+  "Balans to'ldirildi":"Saldo berhasil diisi",
+  "Bu bir necha daqiqa olishi mumkin":"Ini bisa memakan waktu beberapa menit",
+  "Bu o'yinda texnik ishlar ketyapti":"Game ini sedang dalam pemeliharaan",
+  "Ijaraga bo'limi tez orada 🔜":"Bagian sewa segera hadir 🔜",
+  "Kamida 1000 kiriting":"Masukkan minimal 1000",
+  "Qabul qilindi — admin tekshiradi":"Diterima — admin akan memeriksa",
+  "Raqamingiz allaqachon saqlangan":"Nomor Anda sudah tersimpan",
+  "Telefon raqami yuborilmadi":"Nomor telepon tidak terkirim",
+  "Telegram orqali oching":"Buka melalui Telegram",
+  "To'lov rad etildi":"Pembayaran ditolak",
+  "Xatolik, qayta urining":"Terjadi kesalahan, coba lagi",
+  "Yulduzlar sonini kiriting (":"Masukkan jumlah bintang (",
+  "⏳ To'lov tekshirilmoqda…":"⏳ Memeriksa pembayaran…",
+  "⚠️ Aloqa yo'q":"⚠️ Tidak ada koneksi",
+  "⚠️ Xato: ":"⚠️ Kesalahan: ",
+  "✅ Balans to'ldi: ":"✅ Saldo terisi: ",
+  "✅ To'lov qabul qilindi":"✅ Pembayaran diterima",
+  "❌ Balans yetarli emas — ":"❌ Saldo tidak cukup — ",
+  "📱 Botga o'tilmoqda...":"📱 Membuka bot...",
   "O'zgartirish":"Ubah",
   "Tungi rejim":"Mode gelap",
   "Yorug' rejimga o'tish":"Beralih ke mode terang",
@@ -1560,6 +1735,28 @@ DICT.id = {
 };
 
 DICT.pt = {
+  "Raqamingiz saqlandi":"Seu número foi salvo",
+  "Aloqa yo'q":"Sem conexão",
+  "Avval ID ni tekshiring":"Verifique o ID primeiro",
+  "Balans to'ldirildi":"Saldo recarregado",
+  "Bu bir necha daqiqa olishi mumkin":"Isso pode levar alguns minutos",
+  "Bu o'yinda texnik ishlar ketyapti":"Este jogo está em manutenção",
+  "Ijaraga bo'limi tez orada 🔜":"Seção de aluguel em breve 🔜",
+  "Kamida 1000 kiriting":"Digite no mínimo 1000",
+  "Qabul qilindi — admin tekshiradi":"Recebido — o admin vai verificar",
+  "Raqamingiz allaqachon saqlangan":"Seu número já está salvo",
+  "Telefon raqami yuborilmadi":"Número de telefone não enviado",
+  "Telegram orqali oching":"Abra pelo Telegram",
+  "To'lov rad etildi":"Pagamento recusado",
+  "Xatolik, qayta urining":"Erro, tente novamente",
+  "Yulduzlar sonini kiriting (":"Digite a quantidade de estrelas (",
+  "⏳ To'lov tekshirilmoqda…":"⏳ Verificando o pagamento…",
+  "⚠️ Aloqa yo'q":"⚠️ Sem conexão",
+  "⚠️ Xato: ":"⚠️ Erro: ",
+  "✅ Balans to'ldi: ":"✅ Saldo recarregado: ",
+  "✅ To'lov qabul qilindi":"✅ Pagamento aceito",
+  "❌ Balans yetarli emas — ":"❌ Saldo insuficiente — ",
+  "📱 Botga o'tilmoqda...":"📱 Abrindo o bot...",
   "O'zgartirish":"Alterar",
   "Tungi rejim":"Modo noturno",
   "Yorug' rejimga o'tish":"Mudar para o modo claro",
@@ -1677,6 +1874,28 @@ DICT.pt = {
 };
 
 DICT.vi = {
+  "Raqamingiz saqlandi":"Số của bạn đã được lưu",
+  "Aloqa yo'q":"Không có kết nối",
+  "Avval ID ni tekshiring":"Hãy kiểm tra ID trước",
+  "Balans to'ldirildi":"Đã nạp số dư",
+  "Bu bir necha daqiqa olishi mumkin":"Việc này có thể mất vài phút",
+  "Bu o'yinda texnik ishlar ketyapti":"Trò chơi này đang bảo trì",
+  "Ijaraga bo'limi tez orada 🔜":"Mục cho thuê sắp ra mắt 🔜",
+  "Kamida 1000 kiriting":"Nhập tối thiểu 1000",
+  "Qabul qilindi — admin tekshiradi":"Đã nhận — quản trị viên sẽ kiểm tra",
+  "Raqamingiz allaqachon saqlangan":"Số của bạn đã được lưu",
+  "Telefon raqami yuborilmadi":"Chưa gửi được số điện thoại",
+  "Telegram orqali oching":"Mở bằng Telegram",
+  "To'lov rad etildi":"Thanh toán bị từ chối",
+  "Xatolik, qayta urining":"Lỗi, vui lòng thử lại",
+  "Yulduzlar sonini kiriting (":"Nhập số lượng sao (",
+  "⏳ To'lov tekshirilmoqda…":"⏳ Đang kiểm tra thanh toán…",
+  "⚠️ Aloqa yo'q":"⚠️ Không có kết nối",
+  "⚠️ Xato: ":"⚠️ Lỗi: ",
+  "✅ Balans to'ldi: ":"✅ Đã nạp số dư: ",
+  "✅ To'lov qabul qilindi":"✅ Đã nhận thanh toán",
+  "❌ Balans yetarli emas — ":"❌ Số dư không đủ — ",
+  "📱 Botga o'tilmoqda...":"📱 Đang mở bot...",
   "O'zgartirish":"Thay đổi",
   "Tungi rejim":"Chế độ tối",
   "Yorug' rejimga o'tish":"Chuyển sang chế độ sáng",
@@ -1794,6 +2013,28 @@ DICT.vi = {
 };
 
 DICT.ja = {
+  "Raqamingiz saqlandi":"番号を保存しました",
+  "Aloqa yo'q":"接続がありません",
+  "Avval ID ni tekshiring":"先にIDを確認してください",
+  "Balans to'ldirildi":"残高をチャージしました",
+  "Bu bir necha daqiqa olishi mumkin":"数分かかる場合があります",
+  "Bu o'yinda texnik ishlar ketyapti":"このゲームはメンテナンス中です",
+  "Ijaraga bo'limi tez orada 🔜":"レンタル機能は近日公開 🔜",
+  "Kamida 1000 kiriting":"1000以上を入力してください",
+  "Qabul qilindi — admin tekshiradi":"受け付けました — 管理者が確認します",
+  "Raqamingiz allaqachon saqlangan":"番号はすでに保存されています",
+  "Telefon raqami yuborilmadi":"電話番号を送信できませんでした",
+  "Telegram orqali oching":"Telegramから開いてください",
+  "To'lov rad etildi":"支払いが拒否されました",
+  "Xatolik, qayta urining":"エラーです。もう一度お試しください",
+  "Yulduzlar sonini kiriting (":"スターの数を入力してください (",
+  "⏳ To'lov tekshirilmoqda…":"⏳ 支払いを確認しています…",
+  "⚠️ Aloqa yo'q":"⚠️ 接続がありません",
+  "⚠️ Xato: ":"⚠️ エラー: ",
+  "✅ Balans to'ldi: ":"✅ 残高をチャージしました: ",
+  "✅ To'lov qabul qilindi":"✅ 支払いを受け付けました",
+  "❌ Balans yetarli emas — ":"❌ 残高が不足しています — ",
+  "📱 Botga o'tilmoqda...":"📱 ボットを開いています...",
   "O'zgartirish":"変更",
   "Tungi rejim":"ダークモード",
   "Yorug' rejimga o'tish":"ライトモードに切り替え",
@@ -1911,6 +2152,28 @@ DICT.ja = {
 };
 
 DICT.ko = {
+  "Raqamingiz saqlandi":"번호가 저장되었습니다",
+  "Aloqa yo'q":"연결 없음",
+  "Avval ID ni tekshiring":"먼저 ID를 확인하세요",
+  "Balans to'ldirildi":"잔액이 충전되었습니다",
+  "Bu bir necha daqiqa olishi mumkin":"몇 분 정도 걸릴 수 있습니다",
+  "Bu o'yinda texnik ishlar ketyapti":"이 게임은 점검 중입니다",
+  "Ijaraga bo'limi tez orada 🔜":"대여 기능은 곧 제공됩니다 🔜",
+  "Kamida 1000 kiriting":"최소 1000을 입력하세요",
+  "Qabul qilindi — admin tekshiradi":"접수되었습니다 — 관리자가 확인합니다",
+  "Raqamingiz allaqachon saqlangan":"번호가 이미 저장되어 있습니다",
+  "Telefon raqami yuborilmadi":"전화번호를 보내지 못했습니다",
+  "Telegram orqali oching":"Telegram에서 열어주세요",
+  "To'lov rad etildi":"결제가 거절되었습니다",
+  "Xatolik, qayta urining":"오류입니다. 다시 시도하세요",
+  "Yulduzlar sonini kiriting (":"스타 개수를 입력하세요 (",
+  "⏳ To'lov tekshirilmoqda…":"⏳ 결제를 확인하는 중…",
+  "⚠️ Aloqa yo'q":"⚠️ 연결 없음",
+  "⚠️ Xato: ":"⚠️ 오류: ",
+  "✅ Balans to'ldi: ":"✅ 잔액 충전: ",
+  "✅ To'lov qabul qilindi":"✅ 결제가 접수되었습니다",
+  "❌ Balans yetarli emas — ":"❌ 잔액이 부족합니다 — ",
+  "📱 Botga o'tilmoqda...":"📱 봇으로 이동 중...",
   "O'zgartirish":"변경",
   "Tungi rejim":"다크 모드",
   "Yorug' rejimga o'tish":"라이트 모드로 전환",
@@ -2028,6 +2291,28 @@ DICT.ko = {
 };
 
 DICT.zh = {
+  "Raqamingiz saqlandi":"您的号码已保存",
+  "Aloqa yo'q":"无网络连接",
+  "Avval ID ni tekshiring":"请先验证 ID",
+  "Balans to'ldirildi":"余额已充值",
+  "Bu bir necha daqiqa olishi mumkin":"这可能需要几分钟",
+  "Bu o'yinda texnik ishlar ketyapti":"该游戏正在维护中",
+  "Ijaraga bo'limi tez orada 🔜":"租赁功能即将上线 🔜",
+  "Kamida 1000 kiriting":"请至少输入 1000",
+  "Qabul qilindi — admin tekshiradi":"已收到 — 管理员将核实",
+  "Raqamingiz allaqachon saqlangan":"您的号码已保存",
+  "Telefon raqami yuborilmadi":"电话号码未发送",
+  "Telegram orqali oching":"请通过 Telegram 打开",
+  "To'lov rad etildi":"支付被拒绝",
+  "Xatolik, qayta urining":"出错了，请重试",
+  "Yulduzlar sonini kiriting (":"请输入星星数量 (",
+  "⏳ To'lov tekshirilmoqda…":"⏳ 正在核实支付…",
+  "⚠️ Aloqa yo'q":"⚠️ 无网络连接",
+  "⚠️ Xato: ":"⚠️ 错误： ",
+  "✅ Balans to'ldi: ":"✅ 余额已充值： ",
+  "✅ To'lov qabul qilindi":"✅ 支付已接受",
+  "❌ Balans yetarli emas — ":"❌ 余额不足 — ",
+  "📱 Botga o'tilmoqda...":"📱 正在打开机器人...",
   "O'zgartirish":"更改",
   "Tungi rejim":"夜间模式",
   "Yorug' rejimga o'tish":"切换到浅色模式",
@@ -3899,11 +4184,44 @@ function watchBalance(){
 function pickPay(m){ haptic(); topMethod=m; stConfirm=0; stBusy=false; renderTopup(); }
 function copyCard(n){ haptic(); try{ navigator.clipboard.writeText(String(n).replace(/\s/g,'')); }catch(e){} notify('success'); toastOk('Nusxalandi'); }
 
+/* "To'ladim" \u2014 to'lov kelganini 2 daqiqagacha kutamiz */
+let payWatch = null;
 function topPaid(){
-  haptic('medium'); notify('success');
-  topPend=null; clearInterval(topTick);
-  toastOk("Qabul qilindi — admin tekshiradi");
-  go('home');
+  if(!topPend) return;
+  haptic('medium');
+  const id = topPend.id;
+  clearInterval(topTick);
+  if(payWatch) clearInterval(payWatch);
+
+  const box = document.getElementById('payBox');
+  const btns = document.querySelectorAll('.check-btn, .big-btn');
+  btns.forEach(function(x){ x.disabled = true; });
+  if(box){ box.className='id-res wait'; box.innerHTML = tr("\u23F3 To'lov tekshirilmoqda\u2026") + '<br><small>' + tr("Bu bir necha daqiqa olishi mumkin") + '</small>'; }
+
+  const t0 = Date.now();
+  const stop = function(){ clearInterval(payWatch); payWatch=null; };
+
+  payWatch = setInterval(function(){
+    fetch(VBASE + '/topup-status', { method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ id:id, initData:(tg&&tg.initData)||'' }) })
+      .then(function(r){ return r.json(); }).then(function(d){
+        if(!d || !d.ok) return;
+        if(d.status === 'done'){
+          stop(); topPend=null;
+          if(typeof d.balance === 'number') balance = d.balance;
+          notify('success'); toastOk(tr("Balans to'ldirildi"));
+          go('home');
+        } else if(d.status === 'no'){
+          stop(); topPend=null;
+          notify('error'); toastErr(tr("To'lov rad etildi"));
+          go('home');
+        } else if(Date.now() - t0 > 120000){
+          stop(); topPend=null;
+          notify('success'); toastOk(tr("Qabul qilindi \u2014 admin tekshiradi"));
+          go('home');
+        }
+      }).catch(function(){});
+  }, 4000);
 }
 
 function topCancel(){
