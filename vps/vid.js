@@ -1,10 +1,13 @@
-/* O'yin sahifasining tepasiga video banner
-   node vid.js                    -> hozirgi holat
-   node vid.js <id> <fayl> --yes  -> video qo'yadi
-   node vid.js <id> off --yes     -> videoni olib tashlaydi
+/* O'yin sahifasining tepasiga KENG 16:9 banner (rasm yoki video)
+   node vid.js                       -> hozirgi holat
+   node vid.js <id> <fayl> --yes     -> banner qo'yadi
+   node vid.js <id> off --yes        -> bannerni olib tashlaydi
+
+   .mp4 / .webm  -> video banner
+   .webp/.jpg/.png -> rasm banner
 
    Misol:
-     node vid.js legendofneverland /v-neverland.mp4 --yes
+     node vid.js legendofneverland /never-x1.webp --yes
      node vid.js legendofneverland off --yes
 */
 const fs = require("fs");
@@ -17,7 +20,7 @@ const raw = JSON.parse(fs.readFileSync(FILE, "utf8"));
 if(!a.length){
   console.log("HOZIRGI HOLAT:\n");
   (raw.games || []).forEach(function(g){
-    console.log("  " + g.id.padEnd(20) + (g.vid ? g.vid : "\u2014"));
+    console.log("  " + g.id.padEnd(20) + (g.vid || g.bg || "\u2014"));
   });
   console.log("\nQo'yish:  node vid.js <id> /v-nomi.mp4 --yes");
   console.log("Olib tashlash: node vid.js <id> off --yes");
@@ -29,11 +32,13 @@ const g = (raw.games || []).find(function(x){ return x.id === id; });
 if(!g){ console.log("Topilmadi: " + id); process.exit(1); }
 if(!src){ console.log("Fayl nomi kerak"); process.exit(1); }
 
-if(src === "off") console.log(g.name + ": video OLIB TASHLANADI");
-else              console.log(g.name + ": video <- " + src);
+const isVid = /\.(mp4|webm|mov)$/i.test(src);
+if(src === "off") console.log(g.name + ": banner OLIB TASHLANADI");
+else console.log(g.name + ": " + (isVid ? "VIDEO" : "RASM") + " banner <- " + src);
 
 if(APPLY){
-  if(src === "off") delete g.vid; else g.vid = src;
+  delete g.vid; delete g.bg;
+  if(src !== "off"){ if(isVid) g.vid = src; else g.bg = src; }
   const bak = FILE + ".bak-" + Date.now();
   fs.copyFileSync(FILE, bak);
   fs.writeFileSync(FILE, JSON.stringify(raw, null, 1));
