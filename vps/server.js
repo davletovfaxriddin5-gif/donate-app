@@ -1187,6 +1187,8 @@ app.post("/topup-cancel", (req,res)=>{
 /* ---------- Hammaga xabar tarqatish (faqat admin) ---------- */
 /*  /xabar  \u2014 bitta rasm + "Xaridni boshlash" tugmasi
     /bonus  \u2014 bitta rasm + "Bonus olish" tugmasi
+    /oyin   \u2014 bitta rasm + "Yangi o'yinlarni ko'rish" tugmasi
+    /yangi  \u2014 bitta rasm + "Yangilikni sinab ko'rish" tugmasi
     /albom  \u2014 bir nechta rasm, tugmasiz (Telegram albomga tugma qo'ymaydi)
     /ochir  \u2014 oxirgi tarqatishni HAMMADAN o'chirish (48 soat ichida)  */
 
@@ -1206,7 +1208,10 @@ function bcastTargets(){
 
 function bcastKb(mode){
   if(mode === "plain") return undefined;
-  const label = mode === "bonus" ? "\uD83C\uDF81 Bonus olish" : "\uD83D\uDE80 Xaridni boshlash";
+  const L = { bonus: "\uD83C\uDF81 Bonus olish",
+              oyin:  "\uD83C\uDFAE Yangi o'yinlarni ko'rish",
+              yangi: "\u2728 Yangilikni sinab ko'rish" };
+  const label = L[mode] || "\uD83D\uDE80 Xaridni boshlash";
   return { inline_keyboard: [[ { text: label, web_app: { url: APP_URL } } ]] };
 }
 
@@ -1216,6 +1221,8 @@ function bcastAsk(){
              : bcast.kind === "photo" ? "rasm" : "matn";
   const btn  = bcast.mode === "plain" ? "tugmasiz"
              : bcast.mode === "bonus" ? "\uD83C\uDF81 Bonus olish tugmasi bilan"
+             : bcast.mode === "oyin"  ? "\uD83C\uDFAE Yangi o'yinlar tugmasi bilan"
+             : bcast.mode === "yangi" ? "\u2728 Yangilik tugmasi bilan"
              : "\uD83D\uDE80 Xaridni boshlash tugmasi bilan";
   tgCall("sendMessage", { chat_id: ADMIN_ID,
     text: "\uD83D\uDCE2 " + what + " (" + btn + ")\n" + n + " ta foydalanuvchiga yuborilsinmi?",
@@ -1578,7 +1585,7 @@ app.post("/webhook", (req,res)=>{
       if(adminReply(msg)) return;
     }
     if(ADMIN_ID && fromId === ADMIN_ID){
-      const arm = { "/xabar":"btn", "/bonus":"bonus", "/albom":"plain" };
+      const arm = { "/xabar":"btn", "/bonus":"bonus", "/oyin":"oyin", "/yangi":"yangi", "/albom":"plain" };
       let hit = null;
       Object.keys(arm).forEach(function(c){ if(text.indexOf(c) === 0) hit = c; });
       if(hit){
@@ -1587,9 +1594,13 @@ app.post("/webhook", (req,res)=>{
         bcast.mode = arm[hit];
         const tip = hit === "/albom"
           ? "Bir nechta rasmni birga tanlab yuboring (izoh bilan). Tugma bo'lmaydi."
-          : (hit === "/bonus"
-              ? "Bitta rasm yoki matn yuboring. Ostida \uD83C\uDF81 Bonus olish tugmasi bo'ladi."
-              : "Bitta rasm yoki matn yuboring. Ostida \uD83D\uDE80 Xaridni boshlash tugmasi bo'ladi.");
+          : hit === "/bonus"
+            ? "Bitta rasm yoki matn yuboring. Ostida \uD83C\uDF81 Bonus olish tugmasi bo'ladi."
+          : hit === "/oyin"
+            ? "Bitta rasm yoki matn yuboring. Ostida \uD83C\uDFAE Yangi o'yinlarni ko'rish tugmasi bo'ladi."
+          : hit === "/yangi"
+            ? "Bitta rasm yoki matn yuboring. Ostida \u2728 Yangilikni sinab ko'rish tugmasi bo'ladi."
+          : "Bitta rasm yoki matn yuboring. Ostida \uD83D\uDE80 Xaridni boshlash tugmasi bo'ladi.";
         send(fromId, "\uD83D\uDCE2 Keyingi xabaringiz BARCHA foydalanuvchilarga yuboriladi.\n\n" +
                      tip + "\nBekor qilish uchun /bekor");
         return;
