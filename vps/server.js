@@ -898,10 +898,14 @@ app.post("/order", async (req,res)=>{
     save(db);
 
     const det = Object.keys(rec.details).map(function(k){ return k+": "+rec.details[k]; }).join("\n");
-    if(ADMIN_ID) tgCall("sendMessage", { chat_id: ADMIN_ID,
+    if(ADMIN_ID) tgCall("sendMessage", Object.assign({ chat_id: ADMIN_ID,
       text: (auto ? "🤖 AVTO BUYURTMA " : "🧾 QO'LDA BUYURTMA ")+rec.id+"\n"+rec.game+" — "+rec.package+"\n"+
             (rec.nick ? ("👤 "+rec.nick+(rec.accRegion?" ("+rec.accRegion+")":"")+"\n") : "")+
-            det+"\n💰 "+rec.price+" so'm\n👥 id: "+uid+"\nQoldiq: "+u.balance });
+            det+"\n💰 "+rec.price+" so'm\n👥 id: "+uid+"\nQoldiq: "+u.balance },
+      auto ? {} : { reply_markup: { inline_keyboard: [[
+        { text: "\u2705 Bajarildi", callback_data: "od_ok:"+uid+":"+rec.id },
+        { text: "\u274C Bekor + pul", callback_data: "od_no:"+uid+":"+rec.id }
+      ]]}}));
 
     if(!auto){
       send(uid, "✅ Buyurtma qabul qilindi: "+rec.package+"\nTez orada bajariladi.\nQoldiq balans: "+u.balance+" so'm");
@@ -1343,6 +1347,36 @@ function handleCb(cq){
     if(d === "bc_no"){ bcastReset(); send(ADMIN_ID, "\u274C Bekor qilindi"); return; }
     if(d === "bc_del"){ doRecall(); return; }
     doBroadcast();
+    return;
+  }
+  /* Qo'lda bajariladigan buyurtma — admin tasdiqlaydi yoki bekor qiladi */
+  if(d.indexOf("od_ok:") === 0 || d.indexOf("od_no:") === 0){
+    const p = d.split(":");
+    if(p.length !== 3){ tgCall("answerCallbackQuery", { callback_query_id: cq.id }); return; }
+    const dbo = load();
+    const uo = urec(dbo, p[1]);
+    const r = (uo.orders || []).find(function(x){ return x.id === p[2]; });
+    if(!r || r.status !== "wait"){
+      tgCall("answerCallbackQuery", { callback_query_id: cq.id, text: "Allaqachon ko'rib chiqilgan" });
+      return;
+    }
+    let nt;
+    if(p[0] === "od_ok"){
+      r.status = "done"; r.doneAt = new Date().toISOString();
+      nt = "\u2705 Bajarildi";
+      send(p[1], "\u2705 "+r.package+" hisobingizga tushdi!");
+    } else {
+      if(typeof uo.balance !== "number") uo.balance = 0;
+      uo.balance += r.price;
+      r.status = "refund"; r.fail = "qo'lda bekor qilindi";
+      nt = "\u274C Bekor \u2014 "+r.price+" qaytarildi";
+      send(p[1], "\u274C Buyurtma bajarilmadi. "+r.price+" so'm balansga qaytarildi.\nJoriy balans: "+uo.balance+" so'm");
+    }
+    save(dbo);
+    tgCall("answerCallbackQuery", { callback_query_id: cq.id, text: nt });
+    const mo = cq.message;
+    if(mo && mo.chat) tgCall("editMessageText", { chat_id: mo.chat.id, message_id: mo.message_id,
+      text: (mo.text||"") + "\n\n" + nt });
     return;
   }
   const parts = d.split(":");
