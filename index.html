@@ -4056,7 +4056,7 @@ function toggleTheme(el){
 let topMethod = null, topPend = null, topTick = null, topEnd = 0;
 
 /* USDT (TON) — server.js dagi TON_RATE / TON_MIN bilan bir xil bo'lishi SHART */
-const USDT_RATE = 11500, USDT_MIN = 10;
+const USDT_RATE = 11500, USDT_MIN = 4;
 function onUsdtAmt(){
   const el = document.getElementById('topAmount'), out = document.getElementById('usdtOut');
   if(!el || !out) return;
@@ -4204,7 +4204,9 @@ function renderTopup(){
       <div class="inp-wrap"><input class="inp" id="usdtOut" readonly value="—" style="opacity:.85"></div>
       <div style="color:var(--dim);font-size:12.5px;margin-top:10px;line-height:1.5">
         Kurs: 1 USDT = ${fmt(USDT_RATE)} so'm<br>
-        Eng kam: ${USDT_MIN} USDT (${fmt(USDT_MIN * USDT_RATE)} so'm)
+        Eng kam: ${USDT_MIN} USDT (${fmt(USDT_MIN * USDT_RATE)} so'm)<br>
+        <span style="color:var(--gold)">Telegram Wallet har o'tkazmadan 1 USDT komissiya oladi.
+        Tonkeeper yoki boshqa hamyondan yuborsangiz ancha arzon.</span>
       </div>
       <button class="check-btn" id="topBtn" style="width:100%;margin-top:14px;padding:13px" onclick="sendTopup()">Davom etish</button>
       <div id="payBox" class="id-res"></div>
