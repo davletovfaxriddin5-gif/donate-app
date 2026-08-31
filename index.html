@@ -591,16 +591,13 @@ body.light .toast{ background:rgba(252,252,254,.98) !important; border-color:rgb
                    box-shadow:0 16px 44px -14px rgba(0,0,0,.22) !important }
 body.light .toast.t-ok { color:#0f8a58 !important }
 body.light .toast.t-err{ color:#cc2a30 !important }
-/* ===== Bosilganda ichkariga kirish effekti ===== */
-button, .pkg, .svc, .pay, .order, .chips .c, .seg button, .rt, .ll, .lrow,
-.back-btn, .stat, .bal-btn, .check-btn, .buy-btn, .refresh-btn, .big-btn, .guide-btn, .rent{
-  transition: transform .13s cubic-bezier(.2,.85,.3,1), opacity .13s ease;
+/* ===== Tarix bo'limida bosilganda ozgina ichkariga kirish ===== */
+.refresh-btn, .order[onclick], .sheet .sh-close{
+  transition: transform .13s cubic-bezier(.2,.85,.3,1);
 }
-.tapped{ transform: scale(.94) !important; opacity:.88 }
-.order.tapped, .buy-btn.tapped, .refresh-btn.tapped, .big-btn.tapped,
-.guide-btn.tapped, .svc.tapped, .seg button.tapped{ transform: scale(.975) !important }
-.pkg.tapped, .pay.tapped, .stat.tapped{ transform: scale(.955) !important }
-.game.tapped .tile{ transform: scale(.93) !important }
+.refresh-btn.tapped, .chips .c.tapped, .seg button.tapped{ transform: scale(.975) !important }
+.order.tapped{ transform: scale(.99) !important }
+.sheet .sh-close.tapped{ transform: scale(.99) !important }
 
 /* ===== Buyurtma tafsilotlari (pastdan chiquvchi oyna) ===== */
 .sheet-bg{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(3px);
@@ -4504,7 +4501,7 @@ function sndTap(){ /* bosilganda tovush yo'q \u2014 faqat tebranish */ }
 /* Har bir bosilishda yengil tebranish */
 
 let _hapT = 0;
-const TAP_SEL = 'button, .pkg, .chip, .chips .c, .svc, .rt, .ll, .lrow, .pay, .game, .tab, .back-btn, .stat, .order, .rent, a[onclick], [onclick]';
+const TAP_SEL = '.refresh-btn, .chips .c, .seg button, .order[onclick], .sh-close';
 let _tapEl = null, _tapT = 0, _tapY = 0, _tapX = 0;
 function tapDown(e){
   const p = (e.touches && e.touches[0]) || e;
