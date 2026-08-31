@@ -23,8 +23,51 @@ const TOKEN = process.env.BOT_TOKEN || "";
 const SECRET = process.env.WEBHOOK_SECRET || "";
 const DB = "/root/donate-app/data.json";
 
-function load(){ try{ return JSON.parse(fs.readFileSync(DB,"utf8")); }catch(e){ return {}; } }
-function save(d){ try{ fs.writeFileSync(DB, JSON.stringify(d)); }catch(e){} }
+/* dbOk: oxirgi load() haqiqatan muvaffaqiyatli bo'ldimi.
+   Xato bo'lsa load() bo'sh {} qaytaradi \u2014 va o'sha bo'shlikni saqlash
+   BUTUN BAZANI o'chirib yuboradi. Shuning uchun save() uni rad etadi. */
+let dbOk = true;
+function load(){
+  try{
+    const d = JSON.parse(fs.readFileSync(DB, "utf8"));
+    dbOk = true;
+    return d;
+  }catch(e){
+    if(e.code === "ENOENT"){ dbOk = true; return {}; }   /* fayl hali yo'q \u2014 normal */
+    dbOk = false;
+    console.log("\u26A0\uFE0F DB O'QISH XATOSI:", e.message);
+    return {};
+  }
+}
+function save(d){
+  if(!dbOk){
+    console.log("\u26A0\uFE0F Oxirgi o'qish xato edi \u2014 SAQLASH BEKOR QILINDI (baza saqlanib qoldi)");
+    return;
+  }
+  try{
+    const out = JSON.stringify(d);
+    let old = 0;
+    try{ old = fs.statSync(DB).size; }catch(e){}
+    /* Tripwire: baza keskin kichrayayotgan bo'lsa yozmaymiz.
+       Bu ilovada ma'lumot faqat ko'payadi, hech qachon 4 barobar kamaymaydi. */
+    if(old > 1000 && out.length < old / 4){
+      console.log("\u26A0\uFE0F DB keskin kichrayapti ("+old+" -> "+out.length+" bayt) \u2014 SAQLASH BEKOR QILINDI");
+      return;
+    }
+    fs.writeFileSync(DB + ".tmp", out);
+    fs.renameSync(DB + ".tmp", DB);      /* atomik almashtirish */
+  }catch(e){ console.log("DB saqlash xatosi:", e.message); }
+}
+
+/* Kuniga bir marta zaxira \u2014 7 kunlik aylanma (data.json.bak0 ... bak6) */
+function dbBackup(){
+  try{
+    const st = fs.statSync(DB);
+    if(st.size > 100) fs.copyFileSync(DB, DB + ".bak" + (new Date().getDay()));
+  }catch(e){}
+}
+setInterval(dbBackup, 6*3600*1000);
+setTimeout(dbBackup, 60000);
 
 app.use((req,res,next)=>{
   res.header("Access-Control-Allow-Origin","*");
