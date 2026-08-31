@@ -591,6 +591,43 @@ body.light .toast{ background:rgba(252,252,254,.98) !important; border-color:rgb
                    box-shadow:0 16px 44px -14px rgba(0,0,0,.22) !important }
 body.light .toast.t-ok { color:#0f8a58 !important }
 body.light .toast.t-err{ color:#cc2a30 !important }
+/* ===== Bosilganda ichkariga kirish effekti ===== */
+button, .pkg, .svc, .pay, .order, .chips .c, .seg button, .rt, .ll, .lrow,
+.back-btn, .stat, .bal-btn, .check-btn, .buy-btn, .refresh-btn, .big-btn, .guide-btn, .rent{
+  transition: transform .13s cubic-bezier(.2,.85,.3,1), opacity .13s ease;
+}
+.tapped{ transform: scale(.94) !important; opacity:.88 }
+.order.tapped, .buy-btn.tapped, .refresh-btn.tapped, .big-btn.tapped,
+.guide-btn.tapped, .svc.tapped, .seg button.tapped{ transform: scale(.975) !important }
+.pkg.tapped, .pay.tapped, .stat.tapped{ transform: scale(.955) !important }
+.game.tapped .tile{ transform: scale(.93) !important }
+
+/* ===== Buyurtma tafsilotlari (pastdan chiquvchi oyna) ===== */
+.sheet-bg{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(3px);
+  -webkit-backdrop-filter:blur(3px);z-index:200;opacity:0;transition:opacity .22s ease}
+.sheet-bg.on{opacity:1}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:201;background:var(--card);
+  border-radius:24px 24px 0 0;border-top:1px solid var(--stroke-2);
+  padding:10px 16px calc(env(safe-area-inset-bottom) + 16px);
+  transform:translateY(100%);transition:transform .32s cubic-bezier(.22,.9,.3,1);
+  max-height:88vh;overflow-y:auto;-webkit-overflow-scrolling:touch;max-width:460px;margin:0 auto}
+.sheet.on{transform:translateY(0)}
+.sheet .grab{width:38px;height:4px;border-radius:99px;background:var(--stroke-2);margin:0 auto 15px}
+.sheet .sh-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:15px}
+.sheet .sh-g{display:flex;align-items:center;gap:11px;min-width:0}
+.sheet .sh-ic{width:52px;height:52px;border-radius:14px;background:var(--card-2);display:grid;
+  place-items:center;font-size:22px;flex-shrink:0;overflow:hidden}
+.sheet .sh-ic img{width:100%;height:100%;object-fit:cover}
+.sheet .sh-nm{font-weight:700;font-size:17px;letter-spacing:-.3px}
+.sheet .sh-sub{color:var(--dim);font-size:13px;margin-top:2px}
+.sheet .sh-box{background:var(--card-2);border-radius:16px;overflow:hidden;margin-bottom:14px}
+.sheet .sh-row{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:14px 15px;font-size:13.5px}
+.sheet .sh-row + .sh-row{border-top:1px solid var(--stroke)}
+.sheet .sh-row .k{color:var(--dim);flex-shrink:0}
+.sheet .sh-row .v{font-weight:600;text-align:right;word-break:break-word}
+.sheet .sh-close{width:100%;background:var(--card-2);border:1px solid var(--stroke-2);border-radius:16px;
+  padding:15px;font-weight:600;font-size:15px;color:var(--text)}
+body.light .sheet-bg{background:rgba(0,0,0,.35)}
 </style>
 </head>
 <body>
@@ -740,6 +777,7 @@ DICT.ru = {
   "Summa aynan mos kelishi shart — to'lovingizni shu raqam orqali topamiz.":"Сумма должна совпадать точно — по ней мы найдём ваш платёж.","Ko'p yoki kam yuborsangiz, pulni faqat admin orqali qaytarib olasiz.":"Если отправите больше или меньше, вернуть деньги можно только через админа.","To'lagandan keyin pastdagi tugmani bosing, tasdiqlangach balans o'zi to'ladi.":"После оплаты нажмите кнопку ниже — после подтверждения баланс пополнится автоматически.",
   "Hozircha bo'sh":"Пока пусто","Buyurtma bergach bu yerda ko'rinadi.":"После заказа он появится здесь.",
   "O'yinchi ID":"ID игрока","Holat":"Статус",
+  "Buyurtma raqami":"Номер заказа","Server ID":"Server ID","Nickname":"Никнейм","Server":"Сервер","Narx":"Цена","Yaratilgan":"Создан","Bajarilgan":"Выполнен","Yopish":"Закрыть",
   "Telefon raqami":"Номер телефона","Raqamingiz saqlandi":"Номер сохранён","Telefon raqamini ulashish":"Поделиться номером телефона",
   "Til":"Язык","Xizmatlar":"Услуги",
   "Do'stlarni taklif qilish":"Пригласить друзей",
@@ -868,6 +906,7 @@ DICT.en = {
   "To'lagandan keyin pastdagi tugmani bosing, tasdiqlangach balans o'zi to'ladi.":"After paying, tap the button below; your balance is credited once confirmed.",
   "Buyurtma bergach bu yerda ko'rinadi.":"Your orders will appear here.",
   "O'yinchi ID":"Player ID",
+  "Buyurtma raqami":"Order number","Server ID":"Server ID","Nickname":"Nickname","Server":"Server","Narx":"Price","Yaratilgan":"Created","Bajarilgan":"Completed","Yopish":"Close",
   "Holat":"Status",
   "Telefon raqami":"Phone number",
   "Telefon raqamini ulashish":"Share phone number",
@@ -1008,6 +1047,7 @@ DICT.tr = {
   "To'lagandan keyin pastdagi tugmani bosing, tasdiqlangach balans o'zi to'ladi.":"Ödedikten sonra aşağıdaki düğmeye basın; onaylandığında bakiye otomatik yüklenir.",
   "Buyurtma bergach bu yerda ko'rinadi.":"Siparişleriniz burada görünecek.",
   "O'yinchi ID":"Oyuncu ID",
+  "Buyurtma raqami":"Sipariş numarası","Server ID":"Sunucu ID","Nickname":"Takma ad","Server":"Sunucu","Narx":"Fiyat","Yaratilgan":"Oluşturuldu","Bajarilgan":"Tamamlandı","Yopish":"Kapat",
   "Holat":"Durum",
   "Telefon raqami":"Telefon numarası",
   "Telefon raqamini ulashish":"Telefon numarasını paylaş",
@@ -1148,6 +1188,7 @@ DICT.kk = {
   "To'lagandan keyin pastdagi tugmani bosing, tasdiqlangach balans o'zi to'ladi.":"Төлегеннен кейін төмендегі түймені басыңыз; расталған соң баланс өзі толады.",
   "Buyurtma bergach bu yerda ko'rinadi.":"Тапсырыстарыңыз осында көрінеді.",
   "O'yinchi ID":"Ойыншы ID",
+  "Buyurtma raqami":"Тапсырыс нөмірі","Server ID":"Server ID","Nickname":"Никнейм","Server":"Сервер","Narx":"Бағасы","Yaratilgan":"Жасалды","Bajarilgan":"Орындалды","Yopish":"Жабу",
   "Holat":"Мәртебе",
   "Telefon raqami":"Телефон нөмірі",
   "Telefon raqamini ulashish":"Телефон нөмірін бөлісу",
@@ -1288,6 +1329,7 @@ DICT.ky = {
   "To'lagandan keyin pastdagi tugmani bosing, tasdiqlangach balans o'zi to'ladi.":"Төлөгөндөн кийин төмөнкү баскычты басыңыз; ырасталгандан кийин баланс өзү толот.",
   "Buyurtma bergach bu yerda ko'rinadi.":"Буйрутмаларыңыз ушул жерде көрүнөт.",
   "O'yinchi ID":"Оюнчу ID",
+  "Buyurtma raqami":"Буйрутма номери","Server ID":"Server ID","Nickname":"Никнейм","Server":"Сервер","Narx":"Баасы","Yaratilgan":"Түзүлдү","Bajarilgan":"Аткарылды","Yopish":"Жабуу",
   "Holat":"Статус",
   "Telefon raqami":"Телефон номери",
   "Telefon raqamini ulashish":"Телефон номерин бөлүшүү",
@@ -1429,6 +1471,7 @@ DICT.de = {
   "To'lagandan keyin pastdagi tugmani bosing, tasdiqlangach balans o'zi to'ladi.":"Tippen Sie nach der Zahlung auf die Schaltfläche unten; nach der Bestätigung wird das Guthaben automatisch gutgeschrieben.",
   "Buyurtma bergach bu yerda ko'rinadi.":"Ihre Bestellungen erscheinen hier.",
   "O'yinchi ID":"Spieler-ID",
+  "Buyurtma raqami":"Bestellnummer","Server ID":"Server-ID","Nickname":"Spielername","Server":"Server","Narx":"Preis","Yaratilgan":"Erstellt","Bajarilgan":"Abgeschlossen","Yopish":"Schließen",
   "Holat":"Status",
   "Telefon raqami":"Telefonnummer",
   "Telefon raqamini ulashish":"Telefonnummer teilen",
@@ -1569,6 +1612,7 @@ DICT.it = {
   "To'lagandan keyin pastdagi tugmani bosing, tasdiqlangach balans o'zi to'ladi.":"Dopo il pagamento tocca il pulsante qui sotto; una volta confermato il saldo si ricarica da solo.",
   "Buyurtma bergach bu yerda ko'rinadi.":"I tuoi ordini appariranno qui.",
   "O'yinchi ID":"ID giocatore",
+  "Buyurtma raqami":"Numero ordine","Server ID":"ID server","Nickname":"Nickname","Server":"Server","Narx":"Prezzo","Yaratilgan":"Creato","Bajarilgan":"Completato","Yopish":"Chiudi",
   "Holat":"Stato",
   "Telefon raqami":"Numero di telefono",
   "Telefon raqamini ulashish":"Condividi il numero",
@@ -1709,6 +1753,7 @@ DICT.id = {
   "To'lagandan keyin pastdagi tugmani bosing, tasdiqlangach balans o'zi to'ladi.":"Setelah membayar, tekan tombol di bawah; saldo terisi otomatis setelah dikonfirmasi.",
   "Buyurtma bergach bu yerda ko'rinadi.":"Pesanan Anda akan muncul di sini.",
   "O'yinchi ID":"ID pemain",
+  "Buyurtma raqami":"Nomor pesanan","Server ID":"ID server","Nickname":"Nama panggilan","Server":"Server","Narx":"Harga","Yaratilgan":"Dibuat","Bajarilgan":"Selesai","Yopish":"Tutup",
   "Holat":"Status",
   "Telefon raqami":"Nomor telepon",
   "Telefon raqamini ulashish":"Bagikan nomor telepon",
@@ -1849,6 +1894,7 @@ DICT.pt = {
   "To'lagandan keyin pastdagi tugmani bosing, tasdiqlangach balans o'zi to'ladi.":"Depois de pagar, toque no botão abaixo; o saldo é creditado assim que for confirmado.",
   "Buyurtma bergach bu yerda ko'rinadi.":"Seus pedidos aparecerão aqui.",
   "O'yinchi ID":"ID do jogador",
+  "Buyurtma raqami":"Número do pedido","Server ID":"ID do servidor","Nickname":"Apelido","Server":"Servidor","Narx":"Preço","Yaratilgan":"Criado","Bajarilgan":"Concluído","Yopish":"Fechar",
   "Holat":"Status",
   "Telefon raqami":"Número de telefone",
   "Telefon raqamini ulashish":"Compartilhar número",
@@ -1989,6 +2035,7 @@ DICT.vi = {
   "To'lagandan keyin pastdagi tugmani bosing, tasdiqlangach balans o'zi to'ladi.":"Sau khi thanh toán, hãy nhấn nút bên dưới; số dư sẽ tự cộng khi được xác nhận.",
   "Buyurtma bergach bu yerda ko'rinadi.":"Đơn hàng của bạn sẽ hiển thị ở đây.",
   "O'yinchi ID":"ID người chơi",
+  "Buyurtma raqami":"Mã đơn hàng","Server ID":"ID máy chủ","Nickname":"Biệt danh","Server":"Máy chủ","Narx":"Giá","Yaratilgan":"Đã tạo","Bajarilgan":"Hoàn thành","Yopish":"Đóng",
   "Holat":"Trạng thái",
   "Telefon raqami":"Số điện thoại",
   "Telefon raqamini ulashish":"Chia sẻ số điện thoại",
@@ -2129,6 +2176,7 @@ DICT.ja = {
   "To'lagandan keyin pastdagi tugmani bosing, tasdiqlangach balans o'zi to'ladi.":"お支払い後に下のボタンを押してください。承認され次第、残高に自動で反映されます。",
   "Buyurtma bergach bu yerda ko'rinadi.":"ご注文がここに表示されます。",
   "O'yinchi ID":"プレイヤーID",
+  "Buyurtma raqami":"注文番号","Server ID":"サーバーID","Nickname":"ニックネーム","Server":"サーバー","Narx":"価格","Yaratilgan":"作成日時","Bajarilgan":"完了日時","Yopish":"閉じる",
   "Holat":"ステータス",
   "Telefon raqami":"電話番号",
   "Telefon raqamini ulashish":"電話番号を共有",
@@ -2269,6 +2317,7 @@ DICT.ko = {
   "To'lagandan keyin pastdagi tugmani bosing, tasdiqlangach balans o'zi to'ladi.":"결제 후 아래 버튼을 누르세요. 승인되면 잔액이 자동으로 충전됩니다.",
   "Buyurtma bergach bu yerda ko'rinadi.":"주문 내역이 여기에 표시됩니다.",
   "O'yinchi ID":"플레이어 ID",
+  "Buyurtma raqami":"주문 번호","Server ID":"서버 ID","Nickname":"닉네임","Server":"서버","Narx":"가격","Yaratilgan":"생성됨","Bajarilgan":"완료됨","Yopish":"닫기",
   "Holat":"상태",
   "Telefon raqami":"전화번호",
   "Telefon raqamini ulashish":"전화번호 공유",
@@ -2409,6 +2458,7 @@ DICT.zh = {
   "To'lagandan keyin pastdagi tugmani bosing, tasdiqlangach balans o'zi to'ladi.":"付款后请点击下方按钮；确认后余额将自动到账。",
   "Buyurtma bergach bu yerda ko'rinadi.":"您的订单将显示在这里。",
   "O'yinchi ID":"玩家 ID",
+  "Buyurtma raqami":"订单编号","Server ID":"服务器 ID","Nickname":"昵称","Server":"服务器","Narx":"价格","Yaratilgan":"创建时间","Bajarilgan":"完成时间","Yopish":"关闭",
   "Holat":"状态",
   "Telefon raqami":"电话号码",
   "Telefon raqamini ulashish":"分享电话号码",
@@ -3593,7 +3643,7 @@ function renderHistory(){
     const st = o.status==='done'?['done','Bajarildi'] : o.status==='cancel'?['wait','Bekor qilingan'] : o.status==='refund'?['wait','Pul qaytarildi'] : o.status==='sent'?['wait','Yuborilmoqda'] : ['wait','Kutilmoqda'];
     const idVal = o.details ? Object.values(o.details)[0] : '';
     const date = new Date(o.createdAt||o.at).toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
-    return `<div class="order">
+    return `<div class="order" onclick="openOrderSheet('${String(o.id||'').replace(/'/g,'')}')">
       <div class="top">
         <div class="g"><div class="ic">${o.img?`<img src="${o.img}">`:(o.glyph||'🎮')}</div>
         <div><div class="nm">${o.game}</div><div class="sub">${o.package}</div></div></div>
@@ -3609,6 +3659,62 @@ function renderHistory(){
 function setHistTab(t){ haptic(); histTab=t; renderHistory(); }
 function setFilter(f){ haptic(); histFilter=f; renderHistory(); }
 function refreshStatus(){ haptic('medium'); loadOrders(function(){ notify('success'); toastOk(tr('🔄 Statuslar yangilandi')); renderHistory(); }); }
+
+/* ===== Buyurtma tafsilotlari ===== */
+function closeSheet(){
+  const bg = document.getElementById('shBg'), sh = document.getElementById('shBox');
+  if(!bg && !sh) return;
+  if(bg) bg.classList.remove('on');
+  if(sh) sh.classList.remove('on');
+  setTimeout(function(){ if(bg) bg.remove(); if(sh) sh.remove(); }, 300);
+}
+function shRow(k, v){
+  if(v === null || v === undefined || v === '') return '';
+  return '<div class="sh-row"><span class="k">'+k+'</span><span class="v">'+v+'</span></div>';
+}
+function shDate(d){
+  if(!d) return '';
+  const t = new Date(d);
+  if(isNaN(t.getTime())) return '';
+  return t.toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+}
+function openOrderSheet(id){
+  const o = getOrders().filter(function(x){ return String(x.id) === String(id); })[0];
+  if(!o) return;
+  haptic('medium');
+  closeSheet();
+  const st = o.status==='done'?['done','Bajarildi'] : o.status==='cancel'?['wait','Bekor qilingan']
+           : o.status==='refund'?['wait','Pul qaytarildi'] : o.status==='sent'?['wait','Yuborilmoqda']
+           : ['wait','Kutilmoqda'];
+  const dv = o.details ? Object.values(o.details) : [];
+  const done = shDate(o.doneAt || o.done_at || o.completedAt || o.finishedAt || '');
+  const bg = document.createElement('div'); bg.className='sheet-bg'; bg.id='shBg'; bg.onclick=closeSheet;
+  const sh = document.createElement('div'); sh.className='sheet'; sh.id='shBox';
+  sh.innerHTML = `<div class="grab"></div>
+    <div class="sh-top">
+      <div class="sh-g">
+        <div class="sh-ic">${o.img?`<img src="${o.img}">`:(o.glyph||'🎮')}</div>
+        <div><div class="sh-nm">${o.game||''}</div><div class="sh-sub">${o.package||''}</div></div>
+      </div>
+      <span class="badge-st ${st[0]}">${st[1]}</span>
+    </div>
+    <div class="sh-box">
+      ${shRow('Buyurtma raqami', o.id ? '#'+o.id : '')}
+      ${shRow("O'yinchi ID", dv[0] || o.pid || '')}
+      ${shRow('Server ID', dv[1] || o.srv || '')}
+      ${shRow('Nickname', o.nick || '')}
+      ${shRow('Server', o.accRegion || '')}
+      ${shRow('Narx', fmt(o.price) + " so'm")}
+      ${shRow('Holat', '<span style="color:'+(st[0]==='done'?'#4FE0A0':'var(--gold)')+'">'+st[1]+'</span>')}
+      ${shRow('Yaratilgan', shDate(o.createdAt || o.at))}
+      ${shRow('Bajarilgan', done)}
+    </div>
+    <button class="sh-close" onclick="closeSheet()">Yopish</button>`;
+  document.body.appendChild(bg);
+  document.body.appendChild(sh);
+  try{ applyLang(); }catch(e){}
+  requestAnimationFrame(function(){ bg.classList.add('on'); sh.classList.add('on'); });
+}
 
 let chatTimer = null, chatLast = 0;
 
@@ -4398,6 +4504,38 @@ function sndTap(){ /* bosilganda tovush yo'q \u2014 faqat tebranish */ }
 /* Har bir bosilishda yengil tebranish */
 
 let _hapT = 0;
+const TAP_SEL = 'button, .pkg, .chip, .chips .c, .svc, .rt, .ll, .lrow, .pay, .game, .tab, .back-btn, .stat, .order, .rent, a[onclick], [onclick]';
+let _tapEl = null, _tapT = 0, _tapY = 0, _tapX = 0;
+function tapDown(e){
+  const p = (e.touches && e.touches[0]) || e;
+  const t = e.target && e.target.closest && e.target.closest(TAP_SEL);
+  if(!t || t.disabled || t.classList.contains('nav-item')) return;
+  if(_tapEl) _tapEl.classList.remove('tapped');
+  _tapEl = t; _tapT = Date.now();
+  _tapY = p ? p.clientY : 0; _tapX = p ? p.clientX : 0;
+  t.classList.add('tapped');
+}
+function tapUp(){
+  const el = _tapEl; _tapEl = null;
+  if(!el) return;
+  const wait = Math.max(0, 120 - (Date.now() - _tapT));
+  setTimeout(function(){ el.classList.remove('tapped'); }, wait);
+}
+function tapMove(e){
+  if(!_tapEl) return;
+  const p = (e.touches && e.touches[0]) || e;
+  if(!p) return;
+  if(Math.abs(p.clientY - _tapY) > 10 || Math.abs(p.clientX - _tapX) > 10){
+    _tapEl.classList.remove('tapped'); _tapEl = null;
+  }
+}
+document.addEventListener('touchstart', tapDown, {passive:true, capture:true});
+document.addEventListener('touchmove',  tapMove, {passive:true, capture:true});
+document.addEventListener('touchend',   tapUp,   {passive:true, capture:true});
+document.addEventListener('touchcancel',tapUp,   {passive:true, capture:true});
+document.addEventListener('mousedown',  tapDown, true);
+document.addEventListener('mouseup',    tapUp,   true);
+
 document.addEventListener('click', function(e){
   const t = e.target && e.target.closest && e.target.closest(
     'button, .pkg, .chip, .svc, .rt, .ll, .lrow, .pay, .game, .tab, .nav-item, .back-btn, a[onclick], [onclick]');
