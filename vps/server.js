@@ -1026,6 +1026,38 @@ async function sweep(){
 }
 setInterval(sweep, 30000);
 
+/* ---------- Valyuta kurslari ----------
+   HECH QANDAY kurs qo'lda yozilmagan \u2014 server ularni o'zi oladi va
+   6 soatda bir yangilaydi. FX_FALLBACK faqat internet uzilganda ishlaydi
+   va taxminiy; u ishlatilganda log'da ogohlantirish chiqadi. */
+let FX = { at: 0, live: false, usd: {} };
+const FX_FALLBACK = { USD:1, RUB:86.4, KZT:462, KGS:87.4, TRY:48.1, EUR:0.861,
+                      BRL:5.18, IDR:17710, VND:25600, CNY:6.72, JPY:160, KRW:1376, UZS:12200 };
+async function fxLoad(){
+  try{
+    const r = await fetch("https://open.er-api.com/v6/latest/USD");
+    const d = await r.json();
+    if(d && d.rates && d.rates.KRW && d.rates.RUB){
+      FX = { at: Date.now(), live: true, usd: d.rates };
+      console.log("FX yangilandi: KRW="+d.rates.KRW+" RUB="+d.rates.RUB);
+      return;
+    }
+    console.log("FX: javob kutilgandek emas");
+  }catch(e){ console.log("FX xato:", e.message); }
+  if(!FX.at){
+    FX = { at: Date.now(), live: false, usd: FX_FALLBACK };
+    console.log("\u26A0\uFE0F FX: zaxira kurslar ishlatilyapti \u2014 taxminiy!");
+  }
+}
+fxLoad();
+setInterval(fxLoad, 6*3600*1000);
+
+/* Ilova shu yerdan kurslarni oladi. som = 1 USD nechchi so'm (11500).
+   USDT to'ldirish bilan BIR XIL kurs \u2014 shunda mijozning hisobi izchil bo'ladi. */
+app.get("/fx", (req,res)=>{
+  res.json({ ok:true, som: TON_RATE, live: FX.live, at: FX.at, usd: FX.usd });
+});
+
 /* ---------- USDT (TON) to'lovlarini blokcheyndan o'qish ----------
    Har 30 soniyada oxirgi hodisalar o'qiladi. Mos memo topilsa balans to'ldiriladi.
    event_id data.json da saqlanadi \u2014 shuning uchun server o'chib qayta yonsa ham
