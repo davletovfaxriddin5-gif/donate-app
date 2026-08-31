@@ -3060,7 +3060,7 @@ function renderHome(){
   app.innerHTML = profileRow() + `
   <div class="balance">
     <div class="lbl">Balans</div>
-    <div class="amt">${fmt(balance)}<small>so'm</small></div>
+    <div class="amt">${money(balance,false)}</div>
     <div class="bal-actions">
       <button class="bal-btn" onclick="go('topup')">
         <svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="2.5"/><path d="M3 10h18M16 15h2"/></svg>
@@ -3119,7 +3119,7 @@ function pkgHtml(list){
       <button class="pkg ${p.txt?'txt-only':''} ${p.promo?'promo':''}" data-i="${i}" onclick="pickPkg(${i})" style="${p.promo?'border-color:#F5B301;box-shadow:0 0 0 1px rgba(245,179,1,.32),0 0 20px rgba(245,179,1,.24)':''}">
         ${p.hit?`<span class="hit">HIT</span>`:''}
         <span class="pic"><span class="em">${p.im?'<img class="pim" src="'+p.im+'">':p.txt?'🎁':(p.c==='💎'?'💎':p.c==='⭐'?'⭐':'🪙')}</span>${p.x2?`<span class="x2">x2</span>`:''}</span>
-        <span class="info"><span class="a ${p.txt?'small':''}">${p.a}${p.c&&p.c.length<=2?' '+p.c:''}</span><span class="p">${fmt(p.p)} so'm</span></span>
+        <span class="info"><span class="a ${p.txt?'small':''}">${p.a}${p.c&&p.c.length<=2?' '+p.c:''}</span><span class="p">${money(p.p,true)}</span></span>
       </button>`;
   }).join('');
 }
@@ -3254,7 +3254,7 @@ function onQty(){
   starN = (n >= STAR_MIN && n <= STAR_MAX) ? n : 0;
 
   const sum = document.getElementById('starSum');
-  if(sum) sum.value = n ? (fmt(price) + " so'm") : '—';
+  if(sum) sum.value = n ? (money(price,true) + (somSub(price)?'  ('+somSub(price)+')':'')) : '—';
 
   const h = document.getElementById('starHint');
   if(h){
@@ -3262,7 +3262,7 @@ function onQty(){
     let warn = '';
     if(n && n < STAR_MIN) warn = `<div style="color:var(--gold)">Eng kami ${STAR_MIN} ⭐</div>`;
     else if(n > STAR_MAX) warn = `<div style="color:var(--gold)">Eng ko'pi ${fmt(STAR_MAX)} ⭐</div>`;
-    else if(n && price > balance) warn = `<div style="color:var(--gold)">Balans yetarli emas — ${fmt(balance)} so'm bor</div>`;
+    else if(n && price > balance) warn = `<div style="color:var(--gold)">Balans yetarli emas — ${money(balance,false)} bor</div>`;
     h.innerHTML = warn
       + `<div style="color:var(--dim)">1 ⭐ = ${fmt(starRate(n||STAR_MIN))} so'm</div>`
       + (mx >= STAR_MIN
@@ -3494,7 +3494,7 @@ function buy(){
   const custom = g && g.custom === 'stars';
   if(custom){
     if(!starN){ notify('error'); toastErr("Yulduzlar sonini kiriting ("+STAR_MIN+"–"+fmt(STAR_MAX)+")"); return; }
-    if(starPrice(starN) > balance){ notify('error'); toastErr("❌ Balans yetarli emas — "+fmt(balance)+" so'm bor"); return; }
+    if(starPrice(starN) > balance){ notify('error'); toastErr("❌ Balans yetarli emas — "+money(balance,false)+" bor"); return; }
   } else if(selPkg===null){ notify('error'); toastErr('Paketni tanlang'); return; }
   if(!idOk){ notify('error'); toastErr("Avval ID ni tekshiring"); return; }
   const p = custom ? { a:String(starN), c:'⭐', p:starPrice(starN), oid:'' } : activePkgs()[selPkg];
@@ -3645,7 +3645,7 @@ function renderHistory(){
       <div class="top">
         <div class="g"><div class="ic">${o.img?`<img src="${o.img}">`:(o.glyph||'🎮')}</div>
         <div><div class="nm">${o.game}</div><div class="sub">${o.package}</div></div></div>
-        <div class="price">-${fmt(o.price)}<small>so'm</small></div>
+        <div class="price">-${money(o.price,true)}</div>
       </div>
       <div class="sep"></div>
       <div class="kv"><span class="k">O'yinchi ID</span><span class="v">${idVal}</span></div>
@@ -3702,7 +3702,7 @@ function openOrderSheet(id){
       ${shRow('Server ID', dv[1] || o.srv || '')}
       ${shRow('Nickname', o.nick || '')}
       ${shRow('Server', o.accRegion || '')}
-      ${shRow('Narx', fmt(o.price) + " so'm")}
+      ${shRow('Narx', money(o.price,true) + (somSub(o.price)?' <span style="opacity:.6;font-weight:500">('+somSub(o.price)+')</span>':''))}
       ${shRow('Holat', '<span style="color:'+(st[0]==='done'?'#4FE0A0':'var(--gold)')+'">'+st[1]+'</span>')}
       ${shRow('Yaratilgan', shDate(o.createdAt || o.at))}
       ${shRow('Bajarilgan', done)}
@@ -3835,7 +3835,7 @@ function renderSettings(){
       </div>
     </div>
     <div class="stat-row">
-      <div class="stat"><div class="k">Balans</div><div class="v">${fmt(balance)}<small>so'm</small></div></div>
+      <div class="stat"><div class="k">Balans</div><div class="v">${money(balance,false)}</div></div>
       <div class="stat"><div class="k">Keshbek</div><div class="v gold">${cashback}</div></div>
     </div>
   </div>
@@ -3892,7 +3892,7 @@ function setLang(l){
   if(old !== 'uz' && DICT[old]) applyMap(revOf(old));
   currentLang = l;
   try{ localStorage.setItem('mt_lang', l); }catch(e){}
-  go('settings');
+  if(!FXR) loadFx(function(){ go('settings'); }); else go('settings');
 }
 function renderLang(){
   app.innerHTML = `
@@ -4055,7 +4055,47 @@ function toggleTheme(el){
 }
 let topMethod = null, topPend = null, topTick = null, topEnd = 0;
 
-/* USDT (TON) — server.js dagi TON_RATE / TON_MIN bilan bir xil bo'lishi SHART */
+/* ---------- Valyutalar: har bir til uchun ----------
+   Kurslar serverdan olinadi (GET /fx), bu yerda QO'LDA yozilgan kurs YO'Q. */
+const CUR = {
+  uz:{c:'UZS',s:"so'm",p:0,d:0}, ru:{c:'RUB',s:'₽',p:0,d:0},
+  en:{c:'USD',s:'$',p:1,d:2},    kk:{c:'KZT',s:'₸',p:0,d:0},
+  ky:{c:'KGS',s:'сом',p:0,d:0},  tr:{c:'TRY',s:'₺',p:0,d:0},
+  de:{c:'EUR',s:'€',p:0,d:2},    it:{c:'EUR',s:'€',p:0,d:2},
+  pt:{c:'BRL',s:'R$',p:1,d:2},   id:{c:'IDR',s:'Rp',p:1,d:0},
+  vi:{c:'VND',s:'₫',p:0,d:0},    zh:{c:'CNY',s:'¥',p:1,d:2},
+  ja:{c:'JPY',s:'¥',p:1,d:0},    ko:{c:'KRW',s:'₩',p:1,d:0}
+};
+let FXR = null;                     /* {som, usd:{...}} — serverdan */
+
+function curNow(){ return CUR[currentLang] || CUR.uz; }
+
+/* som -> joriy valyuta.
+   up=true  : NARX  — yuqoriga yaxlitlanadi
+   up=false : BALANS — pastga yaxlitlanadi
+   Shu tartib muhim: aks holda mijoz "balans 13000, narx 13000" ko'rib
+   "balans yetarli emas" xatosini olardi. */
+function money(som, up){
+  const cu = curNow();
+  if(cu.c === 'UZS') return fmt(Math.round(som)) + " so'm";
+  if(!FXR || !FXR.usd || !FXR.usd[cu.c] || !FXR.som) return fmt(Math.round(som)) + " so'm";
+  const v = (Number(som) / FXR.som) * FXR.usd[cu.c];
+  const k = Math.pow(10, cu.d);
+  const r = (up === false ? Math.floor(v * k) : Math.ceil(v * k)) / k;
+  const t = r.toLocaleString('en-US', { minimumFractionDigits: cu.d, maximumFractionDigits: cu.d });
+  return cu.p ? (cu.s + t) : (t + ' ' + cu.s);
+}
+/* So'mdagi asl summa — chet tilda kichik matnda ko'rsatiladi,
+   chunki o'zbek kartasi bilan to'laydiganlar uchun aynan shu raqam kerak. */
+function somSub(som){
+  return curNow().c === 'UZS' ? '' : fmt(Math.round(som)) + " so'm";
+}
+function loadFx(cb){
+  fetch(VBASE + '/fx').then(function(r){ return r.json(); }).then(function(d){
+    if(d && d.ok && d.usd){ FXR = { som: d.som, usd: d.usd }; }
+    if(cb) cb();
+  }).catch(function(){ if(cb) cb(); });
+}
 const USDT_RATE = 11500, USDT_MIN = 4;
 function onUsdtAmt(){
   const el = document.getElementById('topAmount'), out = document.getElementById('usdtOut');
@@ -4267,7 +4307,7 @@ function onStTop(){
     let warn = '';
     if(n && n < stMin) warn = `<div style="color:var(--gold)">Eng kami ${stMin} ⭐</div>`;
     else if(n > stMax) warn = `<div style="color:var(--gold)">Eng ko'pi ${fmt(stMax)} ⭐</div>`;
-    h.innerHTML = warn + `<div>1 ⭐ = ${fmt(stRate)} so'm</div>`
+    h.innerHTML = warn + `<div>1 ⭐ = ${money(stRate,true)}</div>`
       + `<div>Xohlagan miqdorni kiriting — qancha yulduzingiz bo'lsa shuncha.</div>`;
   }
   const b = document.getElementById('stBtn');
@@ -4417,7 +4457,7 @@ function watchBalance(){
           clearInterval(balWatch);
           balance = d.balance;
           notify('success');
-          toastOk("✅ Balans to'ldi: " + fmt(balance) + " so'm");
+          toastOk("✅ Balans to'ldi: " + money(balance,false));
           go('home');
         }
       }).catch(function(){});
@@ -4652,6 +4692,7 @@ applyLang();
 loadPhone();
 loadBalance();
 loadDynGames();
+if(currentLang !== 'uz') loadFx(function(){ try{ go(view); }catch(e){} });
 
 const splashT0 = Date.now();
 function hideSplash(){
