@@ -639,6 +639,16 @@ const ADMIN_ID = String(process.env.ADMIN_ID || "");
 
 /* Kurslar \u2014 index.html dagi RATES bilan bir xil bo'lishi shart */
 const RATES = { "so'm": 1, usd: 11500, rubl: 145 };
+
+/* ---------- USDT (TON tarmog'i) orqali to'ldirish ---------- */
+const TON_KEY  = process.env.TON_KEY  || "";
+const TON_ADDR = process.env.TON_ADDR || "";
+/* Haqiqiy Tether USD jetton shartnomasi. Boshqa jetton QABUL QILINMAYDI \u2014
+   aks holda kimdir soxta "USDT" yasab bepul balans to'ldirib olardi. */
+const USDT_JETTON = "0:b113a994b5024a16719f69139328eb759596c38a25f59028b146fecdc3621dfe";
+const USDT_DEC    = 1000000;          /* 6 kasrli: "2000000" = 2 USDT */
+const TON_MIN     = 10;               /* eng kam to'lov, USDT */
+const TON_RATE    = 11500;            /* 1 USDT = shuncha so'm (index.html bilan bir xil) */
 const CARD_CUR = { "Humo":"so'm", "Sberbank":"rubl", "Visa":"usd" };
 function payText(base, pay, bank){
   const cur = CARD_CUR[bank] || "so'm";
@@ -1016,6 +1026,96 @@ async function sweep(){
 }
 setInterval(sweep, 30000);
 
+/* ---------- USDT (TON) to'lovlarini blokcheyndan o'qish ----------
+   Har 30 soniyada oxirgi hodisalar o'qiladi. Mos memo topilsa balans to'ldiriladi.
+   event_id data.json da saqlanadi \u2014 shuning uchun server o'chib qayta yonsa ham
+   bitta to'lov ikki marta hisoblanmaydi. */
+
+function tonSeen(db){
+  if(!db._ton || !Array.isArray(db._ton.seen)) db._ton = { seen: [] };
+  return db._ton;
+}
+
+async function tonCheck(){
+  if(!TON_KEY || !TON_ADDR) return;
+  let ev;
+  try{
+    const r = await fetch("https://tonapi.io/v2/accounts/"+TON_ADDR+"/events?limit=30",
+      { headers: { "Authorization": "Bearer "+TON_KEY } });
+    if(!r.ok){ console.log("TON API:", r.status); return; }
+    ev = await r.json();
+  }catch(e){ console.log("TON xato:", e.message); return; }
+
+  const events = (ev && ev.events) || [];
+  if(!events.length) return;
+
+  const db = load();
+  const st = tonSeen(db);
+  let changed = false;
+
+  for(const e of events){
+    if(e.in_progress) continue;                       /* hali tugamagan */
+    if(st.seen.indexOf(e.event_id) > -1) continue;    /* allaqachon hisoblangan */
+
+    for(const a of (e.actions || [])){
+      if(a.type !== "JettonTransfer" || a.status !== "ok") continue;
+      const j = a.JettonTransfer || {};
+      if(!j.jetton || j.jetton.address !== USDT_JETTON) continue;   /* faqat haqiqiy USDT */
+      if(!j.recipients_wallet && !j.recipient) continue;
+
+      const memo = String(j.comment || "").trim().toLowerCase();
+      const usdt = Number(j.amount || 0) / USDT_DEC;
+      if(!memo || !(usdt > 0)) continue;
+
+      /* memo bo'yicha kutilayotgan to'ldirishni topamiz */
+      let uid = "", rec = null;
+      Object.keys(db).forEach(function(k){
+        if(!/^\d+$/.test(k)) return;
+        (db[k].topups || []).forEach(function(t){
+          if(t.status === "wait" && t.memo && t.memo.toLowerCase() === memo){ uid = k; rec = t; }
+        });
+      });
+
+      st.seen.push(e.event_id);
+      if(st.seen.length > 400) st.seen.shift();
+      changed = true;
+
+      if(!rec){
+        if(ADMIN_ID) send(ADMIN_ID, "\u26A0\uFE0F USDT keldi: "+usdt.toFixed(2)+
+          "\nMemo: "+(j.comment||"(bo'sh)")+"\nMos to'ldirish topilmadi \u2014 QO'LDA ko'ring.");
+        continue;
+      }
+      if(usdt + 0.01 < TON_MIN){
+        if(ADMIN_ID) send(ADMIN_ID, "\u26A0\uFE0F USDT "+usdt.toFixed(2)+" (memo "+memo+
+          ") eng kam summadan kam \u2014 QO'LDA ko'ring.");
+        continue;
+      }
+
+      /* Kelgan summani hisoblaymiz \u2014 e'lon qilinganini emas.
+         Ko'proq yuborsa ko'proq, ozroq yuborsa ozroq tushadi. */
+      const som = Math.floor(usdt * TON_RATE);
+      const u = urec(db, uid);
+      if(typeof u.balance !== "number") u.balance = 0;
+      rec.status = "done";
+      rec.auto   = true;
+      rec.usdt   = usdt;
+      rec.amount = som;
+      u.balance += som;
+
+      send(uid, "\u2705 Balansingiz to'ldirildi: +"+som+" so'm ("+usdt.toFixed(2)+
+        " USDT)\nJoriy balans: "+u.balance+" so'm");
+      if(ADMIN_ID) send(ADMIN_ID, "\uD83E\uDD16 AVTO TASDIQ (USDT) "+rec.id+
+        "\nKelgan: "+usdt.toFixed(2)+" USDT"+
+        "\nMemo: "+memo+
+        "\nBalansga: "+som+" so'm"+
+        "\nKimga: "+(rec.who || uid)+
+        "\nYangi balans: "+u.balance);
+    }
+  }
+  if(changed) save(db);
+}
+setInterval(tonCheck, 30000);
+
 function who2(w){ return w.name + (w.username ? " (@"+w.username+")" : ""); }
 function esc(t){ return String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
 
@@ -1036,7 +1136,7 @@ function usedAmounts(db){
   const set = new Set();
   Object.keys(db).forEach(function(k){
     const t = db[k] && db[k].topups;
-    if(Array.isArray(t)) t.forEach(function(x){ if(x.status === "wait") set.add(x.amount); });
+    if(Array.isArray(t)) t.forEach(function(x){ if(x.status === "wait" && !x.memo) set.add(x.amount); });
   });
   return set;
 }
@@ -1139,6 +1239,43 @@ app.post("/topup", (req,res)=>{
     const u = urec(db, uid);
     if(u.topups.filter(function(t){ return t.status==="wait"; }).length >= 3)
       return res.json({ ok:false, error:"pending" });
+
+    /* --- USDT (TON): noyob summa emas, noyob MEMO beriladi --- */
+    if(/usdt|ton/i.test(String(b.method || ""))){
+      if(!TON_ADDR) return res.json({ ok:false, error:"off" });
+      const usdt = Math.ceil(base / TON_RATE * 100) / 100;
+      if(usdt + 0.001 < TON_MIN) return res.json({ ok:false, error:"min", min:TON_MIN });
+
+      const busy = new Set();
+      Object.keys(db).forEach(function(k){
+        if(!/^\d+$/.test(k)) return;
+        (db[k].topups || []).forEach(function(t){ if(t.status === "wait" && t.memo) busy.add(t.memo); });
+      });
+      let memo = "";
+      for(let i = 0; i < 20; i++){
+        const m = "mt-" + crypto.randomBytes(3).toString("hex");
+        if(!busy.has(m)){ memo = m; break; }
+      }
+      if(!memo) return res.json({ ok:false, error:"busy" });
+
+      const tid = "TP" + Date.now().toString().slice(-8);
+      u.topups.unshift({ id:tid, amount:base, base:base, method:String(b.method||""),
+                         memo:memo, usdtWant:usdt, status:"wait",
+                         at:new Date().toISOString(), who:who2(who) });
+      u.topups = u.topups.slice(0,60);
+      save(db);
+
+      if(ADMIN_ID) tgCall("sendMessage", { chat_id: ADMIN_ID,
+        text: "\uD83D\uDCB3 TO'LDIRISH " + tid + " (USDT)" +
+              "\nKutilmoqda: " + usdt.toFixed(2) + " USDT (" + base + " so'm)" +
+              "\nMemo: " + memo +
+              "\nKimdan: " + who2(who) + "\nid: " + uid +
+              "\nJoriy balans: " + u.balance +
+              "\n\nAvtomatik tasdiqlanadi \u2014 tugma kerak emas." });
+
+      return res.json({ ok:true, id:tid, memo:memo, usdt:usdt.toFixed(2),
+                        addr:TON_ADDR, min:TON_MIN });
+    }
 
     const used = usedAmounts(db);
     let pay = 0;
@@ -1549,6 +1686,7 @@ app.post("/sms", (req,res)=>{
       if(!/^\d+$/.test(uid)) return;
       (db[uid].topups || []).forEach(function(t){
         if(t.status !== "wait" || new Date(t.at).getTime() <= lim) return;
+        if(t.memo) return;              /* USDT to'lovi \u2014 bank SMS'i unga tegmasin */
         const e = expectFor(t);
         if(e.cur !== cur) return;
         if(Math.abs(e.v - amount) < 0.005) hits.push({ uid: uid, t: t });
