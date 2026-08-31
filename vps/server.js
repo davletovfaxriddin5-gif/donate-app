@@ -1189,7 +1189,9 @@ async function tonCheck(){
   }
   if(changed) save(db);
 }
-setInterval(tonCheck, 30000);
+/* sweep() ham 30 soniyada ishlaydi. Ikkalasi bir vaqtda yozmasligi uchun
+   tonCheck 15 soniyaga suriladi \u2014 aynan shu to'qnashuv bazani yo'q qilgan edi. */
+setTimeout(function(){ tonCheck(); setInterval(tonCheck, 30000); }, 15000);
 
 function who2(w){ return w.name + (w.username ? " (@"+w.username+")" : ""); }
 function esc(t){ return String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
@@ -1914,6 +1916,23 @@ app.post("/webhook", (req,res)=>{
         bcastAsk();
         return;
       }
+    }
+    /* /balans <uid> <summa>  \u2014 balansni QO'LDA o'rnatish (faqat admin).
+       Baza yo'qolganda tiklash uchun. */
+    if(text.indexOf("/balans") === 0){
+      if(ADMIN_ID && fromId !== ADMIN_ID) return;
+      const a = text.trim().split(/\s+/);
+      if(a.length < 3 || !/^\d+$/.test(a[1]) || !/^-?\d+$/.test(a[2])){
+        send(fromId, "Ishlatilishi:\n/balans <foydalanuvchi_id> <summa>\n\nMasalan:\n/balans 123456789 21000");
+        return;
+      }
+      const db = load();
+      const u = urec(db, a[1]);
+      const eski = (typeof u.balance === "number") ? u.balance : 0;
+      u.balance = Number(a[2]);
+      save(db);
+      send(fromId, "\u2705 "+a[1]+"\nEski: "+eski+" so'm\nYangi: "+u.balance+" so'm");
+      return;
     }
     if(text.indexOf("/kutish") === 0){
       if(ADMIN_ID && fromId !== ADMIN_ID) return;
