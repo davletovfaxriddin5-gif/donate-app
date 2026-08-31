@@ -93,17 +93,44 @@ function dbBackup(){
   }catch(e){ console.log("Zaxira xatosi:", e.message); return ""; }
 }
 
+/* To'liq arxiv: data.json + games.json + fzr-offers.json + .env
+   Server butunlay yo'qolsa, GitHub'dagi kod + shu arxiv = hamma narsa qaytadi. */
+const BKFILES = ["data.json", "games.json", "fzr-offers.json", ".env"];
+
+function bkArchive(){
+  try{
+    if(!fs.existsSync(BKDIR)) fs.mkdirSync(BKDIR, { recursive:true });
+    const have = BKFILES.filter(function(f){
+      try{ return fs.statSync("/root/donate-app/"+f).size > 10; }catch(e){ return false; }
+    });
+    if(!have.length) return "";
+    const name = "toliq-" + bkName().replace(/^data-|\.json$/g, "") + ".tar.gz";
+    require("child_process").execSync(
+      "tar -czf " + BKDIR + "/" + name + " -C /root/donate-app " + have.join(" "),
+      { timeout: 60000 });
+    /* oxirgi 10 ta to'liq arxiv qoladi \u2014 ular data.json dan kattaroq */
+    const old = fs.readdirSync(BKDIR).filter(f => /^toliq-.*\.tar\.gz$/.test(f)).sort().reverse();
+    old.slice(10).forEach(function(f){ try{ fs.unlinkSync(BKDIR+"/"+f); }catch(e){} });
+    return name;
+  }catch(e){ console.log("To'liq arxiv xatosi:", e.message); return ""; }
+}
+
 /* Telegram'ga hujjat sifatida yuborish \u2014 serverdan tashqaridagi nusxa */
 async function bkToTelegram(note){
   if(!TOKEN || !ADMIN_ID) return;
   try{
-    const buf = fs.readFileSync(DB);
-    if(buf.length < 50) return;
+    const name = bkArchive();
+    if(!name){ console.log("Zaxira: arxiv yaratilmadi"); return; }
+    const buf = fs.readFileSync(BKDIR + "/" + name);
+    let users = 0;
+    try{ users = Object.keys(load()).filter(x => /^\d+$/.test(x)).length; }catch(e){}
     const fd = new FormData();
     fd.append("chat_id", ADMIN_ID);
-    fd.append("caption", (note || "\uD83D\uDCBE Avtomatik zaxira") + "\n" + bkName() +
-                         "\n" + buf.length + " bayt");
-    fd.append("document", new Blob([buf], { type:"application/json" }), bkName());
+    fd.append("caption", (note || "\uD83D\uDCBE To'liq zaxira") +
+              "\nFoydalanuvchilar: " + users +
+              "\nHajmi: " + buf.length + " bayt" +
+              "\nIchida: " + BKFILES.join(", "));
+    fd.append("document", new Blob([buf], { type:"application/gzip" }), name);
     const r = await fetch("https://api.telegram.org/bot"+TOKEN+"/sendDocument",
                           { method:"POST", body: fd });
     if(!r.ok) console.log("Zaxira TG'ga ketmadi:", r.status);
@@ -1979,22 +2006,27 @@ app.post("/webhook", (req,res)=>{
     /* /zaxira \u2014 ro'yxat yoki yangi zaxira olish */
     if(text.indexOf("/zaxira") === 0){
       if(ADMIN_ID && fromId !== ADMIN_ID) return;
-      if(/yangi/i.test(text)){
+      if(/yangi|toliq|to'liq/i.test(text)){
         const n = dbBackup();
-        bkToTelegram("\uD83D\uDCBE Qo'lda olingan zaxira");
-        send(fromId, n ? ("\u2705 Zaxira olindi: " + n + "\nHujjat ham yuborilyapti.")
+        bkToTelegram("\uD83D\uDCBE Qo'lda olingan to'liq zaxira");
+        send(fromId, n ? ("\u2705 Zaxira olindi: " + n + "\nTo'liq arxiv Telegram'ga yuborilyapti\u2026")
                        : "\u274C Zaxira olinmadi (baza bo'shmi?)");
         return;
       }
       const l = bkList();
       if(!l.length){ send(fromId, "Hali zaxira yo'q. Olish: /zaxira yangi"); return; }
       let cur = 0; try{ cur = fs.statSync(DB).size; }catch(e){}
-      const rows = l.slice(0,15).map(function(f){
+      let arx = [];
+      try{ arx = fs.readdirSync(BKDIR).filter(f => /^toliq-.*\.tar\.gz$/.test(f)).sort().reverse(); }catch(e){}
+      const rows = l.slice(0,12).map(function(f){
         let sz = 0; try{ sz = fs.statSync(BKDIR+"/"+f).size; }catch(e){}
         return f + "  \u2014 " + sz + " bayt";
       });
-      send(fromId, "\uD83D\uDCBE Zaxiralar (jami " + l.length + " ta)\nHozirgi baza: " + cur + " bayt\n\n" +
-                   rows.join("\n") + "\n\nTiklash: /tiklash " + l[0] +
+      send(fromId, "\uD83D\uDCBE Zaxiralar\nHozirgi baza: " + cur + " bayt" +
+                   "\nBaza nusxalari: " + l.length + " ta" +
+                   "\nTo'liq arxivlar: " + arx.length + " ta\n\n" +
+                   rows.join("\n") +
+                   "\n\nTiklash: /tiklash " + l[0] +
                    "\nYangi olish: /zaxira yangi");
       return;
     }
