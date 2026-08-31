@@ -4151,7 +4151,7 @@ function renderTopup(){
     <div class="pay-grid">
      ${Object.keys(CARDS).map(k=>`<button class="pay" onclick="pickPay('${k}')"><span class="box"style="background:${CARDS[k].bg};font-size:20px;width:100%;height:46px">${CARDS[k].icon.indexOf('/')===0 ? `<img src="${CARDS[k].icon}" style="width:100%;height:46px;object-fit:contain">` : CARDS[k].icon}</span><span class="nm">${CARDS[k].bank}</span></button>`).join('')}
      <button class="pay" onclick="pickPay('stars')"><span class="box" style="font-size:30px;width:100%;height:46px">⭐</span><span class="nm">Telegram Stars</span></button>
-     <button class="pay" onclick="pickPay('usdt')"><span class="box" style="font-size:27px;width:100%;height:46px">💵</span><span class="nm">USDT (TON)</span></button>
+     <button class="pay" onclick="pickPay('usdt')"><span class="box" style="font-size:27px;width:100%;height:46px"><img src="/ton-x1.webp" style="width:100%;height:46px;object-fit:contain" onerror="this.replaceWith(document.createTextNode('💵'))"></span><span class="nm">USDT (TON)</span></button>
     </div>
     <button class="guide-btn" style="margin-top:16px" onclick="openLink('${GUIDE_URL}')">
       <span class="ic">📖</span><span class="t">Qo'llanma</span><span class="r">Kanal</span>
