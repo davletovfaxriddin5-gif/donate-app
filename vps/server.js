@@ -59,15 +59,60 @@ function save(d){
   }catch(e){ console.log("DB saqlash xatosi:", e.message); }
 }
 
-/* Kuniga bir marta zaxira \u2014 7 kunlik aylanma (data.json.bak0 ... bak6) */
+/* ---------- ZAXIRA TIZIMI ----------
+   1) Har 30 daqiqada butun data.json nusxasi /root/donate-backups/ ga
+   2) Har 6 soatda nusxa TELEGRAM'ga hujjat sifatida yuboriladi \u2014 server
+      butunlay yo'qolsa ham zaxira Telegram'da qoladi
+   3) /zaxira \u2014 ro'yxat, /zaxira yangi \u2014 hozir olish, /tiklash <nom> \u2014 qaytarish */
+const BKDIR = "/root/donate-backups";
+
+function bkName(){
+  const d = new Date(), z = n => String(n).padStart(2,"0");
+  return "data-" + d.getFullYear() + z(d.getMonth()+1) + z(d.getDate()) +
+         "-" + z(d.getHours()) + z(d.getMinutes()) + ".json";
+}
+function bkList(){
+  try{ return fs.readdirSync(BKDIR).filter(f => /^data-.*\.json$/.test(f)).sort().reverse(); }
+  catch(e){ return []; }
+}
 function dbBackup(){
   try{
+    if(!fs.existsSync(BKDIR)) fs.mkdirSync(BKDIR, { recursive:true });
     const st = fs.statSync(DB);
-    if(st.size > 100) fs.copyFileSync(DB, DB + ".bak" + (new Date().getDay()));
-  }catch(e){}
+    if(st.size < 50) return "";                 /* bo'sh bazani zaxiralamaymiz */
+    const name = bkName();
+    fs.copyFileSync(DB, BKDIR + "/" + name);
+    /* Tozalash: oxirgi 48 tasi (24 soat) + har kunning birinchisi 60 kungacha */
+    const all = bkList(), keep = new Set(all.slice(0,48)), seen = new Set();
+    all.forEach(function(f){
+      const day = f.slice(5,13);
+      if(!seen.has(day)){ seen.add(day); keep.add(f); }
+    });
+    all.forEach(function(f){ if(!keep.has(f)){ try{ fs.unlinkSync(BKDIR+"/"+f); }catch(e){} } });
+    return name;
+  }catch(e){ console.log("Zaxira xatosi:", e.message); return ""; }
 }
-setInterval(dbBackup, 6*3600*1000);
-setTimeout(dbBackup, 60000);
+
+/* Telegram'ga hujjat sifatida yuborish \u2014 serverdan tashqaridagi nusxa */
+async function bkToTelegram(note){
+  if(!TOKEN || !ADMIN_ID) return;
+  try{
+    const buf = fs.readFileSync(DB);
+    if(buf.length < 50) return;
+    const fd = new FormData();
+    fd.append("chat_id", ADMIN_ID);
+    fd.append("caption", (note || "\uD83D\uDCBE Avtomatik zaxira") + "\n" + bkName() +
+                         "\n" + buf.length + " bayt");
+    fd.append("document", new Blob([buf], { type:"application/json" }), bkName());
+    const r = await fetch("https://api.telegram.org/bot"+TOKEN+"/sendDocument",
+                          { method:"POST", body: fd });
+    if(!r.ok) console.log("Zaxira TG'ga ketmadi:", r.status);
+  }catch(e){ console.log("Zaxira TG xatosi:", e.message); }
+}
+
+setInterval(dbBackup, 30*60*1000);
+setTimeout(function(){ dbBackup(); bkToTelegram("\uD83D\uDCBE Server ishga tushdi \u2014 zaxira"); }, 60000);
+setInterval(function(){ bkToTelegram(); }, 6*3600*1000);
 
 app.use((req,res,next)=>{
   res.header("Access-Control-Allow-Origin","*");
@@ -755,6 +800,7 @@ async function tgAsk(method, body){
   finally { clearTimeout(tm); }
 }
 
+const pendTop = {};      /* /toldirish: admin -> kutilayotgan foydalanuvchi id */
 function tgCall(method, body){
   if(!TOKEN) return;
   fetch("https://api.telegram.org/bot"+TOKEN+"/"+method, {
@@ -1825,6 +1871,19 @@ app.post("/webhook", (req,res)=>{
     const fromId = String((msg.from && msg.from.id) || "");
     if(!fromId) return;
 
+    /* Username va ismni yozib boramiz \u2014 /toldirish shu orqali odamni topadi.
+       Telegram bot API'sida username -> id qidiruvi YO'Q, shuning uchun
+       faqat o'zimiz ko'rgan odamlarni topa olamiz. */
+    try{
+      const un = String((msg.from && msg.from.username) || "").toLowerCase();
+      const nm = String((msg.from && msg.from.first_name) || "").trim();
+      if(un || nm){
+        const dbU = load();
+        const uu = urec(dbU, fromId);
+        if(uu.un !== un || uu.nm !== nm){ uu.un = un; uu.nm = nm; save(dbU); }
+      }
+    }catch(e){}
+
     if(msg.successful_payment){
       starPaid(fromId, msg.successful_payment);
       return;
@@ -1916,6 +1975,95 @@ app.post("/webhook", (req,res)=>{
         bcastAsk();
         return;
       }
+    }
+    /* /zaxira \u2014 ro'yxat yoki yangi zaxira olish */
+    if(text.indexOf("/zaxira") === 0){
+      if(ADMIN_ID && fromId !== ADMIN_ID) return;
+      if(/yangi/i.test(text)){
+        const n = dbBackup();
+        bkToTelegram("\uD83D\uDCBE Qo'lda olingan zaxira");
+        send(fromId, n ? ("\u2705 Zaxira olindi: " + n + "\nHujjat ham yuborilyapti.")
+                       : "\u274C Zaxira olinmadi (baza bo'shmi?)");
+        return;
+      }
+      const l = bkList();
+      if(!l.length){ send(fromId, "Hali zaxira yo'q. Olish: /zaxira yangi"); return; }
+      let cur = 0; try{ cur = fs.statSync(DB).size; }catch(e){}
+      const rows = l.slice(0,15).map(function(f){
+        let sz = 0; try{ sz = fs.statSync(BKDIR+"/"+f).size; }catch(e){}
+        return f + "  \u2014 " + sz + " bayt";
+      });
+      send(fromId, "\uD83D\uDCBE Zaxiralar (jami " + l.length + " ta)\nHozirgi baza: " + cur + " bayt\n\n" +
+                   rows.join("\n") + "\n\nTiklash: /tiklash " + l[0] +
+                   "\nYangi olish: /zaxira yangi");
+      return;
+    }
+    /* /tiklash <nom> \u2014 zaxiradan qaytarish */
+    if(text.indexOf("/tiklash") === 0){
+      if(ADMIN_ID && fromId !== ADMIN_ID) return;
+      const nm2 = text.replace("/tiklash","").trim();
+      if(!nm2){ send(fromId, "Ishlatilishi: /tiklash <fayl nomi>\nRo'yxat: /zaxira"); return; }
+      if(!/^data-[0-9-]+\.json$/.test(nm2)){ send(fromId, "\u274C Nom noto'g'ri. Ro'yxat: /zaxira"); return; }
+      const p = BKDIR + "/" + nm2;
+      if(!fs.existsSync(p)){ send(fromId, "\u274C Bunday zaxira yo'q. Ro'yxat: /zaxira"); return; }
+      try{
+        const txt = fs.readFileSync(p, "utf8");
+        const parsed = JSON.parse(txt);                 /* buzilgan zaxirani tiklamaymiz */
+        const users = Object.keys(parsed).filter(x => /^\d+$/.test(x)).length;
+        try{ fs.copyFileSync(DB, BKDIR + "/oldindan-" + bkName()); }catch(e){}
+        fs.writeFileSync(DB + ".tmp", txt);
+        fs.renameSync(DB + ".tmp", DB);
+        dbOk = true;
+        send(fromId, "\u2705 Tiklandi: " + nm2 +
+                     "\nFoydalanuvchilar: " + users +
+                     "\nHajmi: " + txt.length + " bayt" +
+                     "\n\nEski holat ham saqlandi (oldindan-...)");
+      }catch(e){ send(fromId, "\u274C Tiklash xatosi: " + e.message); }
+      return;
+    }
+    /* /toldirish @username  \u2014 ikki qadamli balans to'ldirish */
+    if(text.indexOf("/toldirish") === 0 || text.indexOf("/to'ldirish") === 0){
+      if(ADMIN_ID && fromId !== ADMIN_ID) return;
+      const q = text.replace(/^\/to'?ldirish/, "").trim().replace(/^@/, "").toLowerCase();
+      if(!q){
+        send(fromId, "Ishlatilishi:\n/toldirish @username\nyoki\n/toldirish 123456789");
+        return;
+      }
+      const db = load();
+      let hit = "";
+      Object.keys(db).forEach(function(k){
+        if(!/^\d+$/.test(k)) return;
+        if(k === q) hit = k;
+        else if(db[k].un && db[k].un === q) hit = k;
+      });
+      if(!hit){
+        send(fromId, "\u274C \"" + q + "\" topilmadi.\n\nBot bu odamni faqat u botga kirgandan keyin taniydi. " +
+                     "Uning id raqamini buyurtma xabaridan (\uD83D\uDC65 id: ...) olib, shu raqam bilan urinib ko'ring.");
+        return;
+      }
+      const u = urec(db, hit);
+      pendTop[fromId] = hit;
+      save(db);
+      send(fromId, "\uD83D\uDC64 " + (u.nm || hit) + (u.un ? " (@" + u.un + ")" : "") +
+                   "\nid: " + hit +
+                   "\nJoriy balans: " + u.balance + " so'm" +
+                   "\n\nQancha so'm QO'SHMOQCHISIZ? Raqam yozing." +
+                   "\n(Balansni aniq o'rnatish uchun: /balans " + hit + " <summa>)" +
+                   "\nBekor qilish: /bekor");
+      return;
+    }
+    /* /toldirish dan keyingi raqam */
+    if(pendTop[fromId] && /^-?\d+$/.test(text.trim())){
+      const target = pendTop[fromId];
+      delete pendTop[fromId];
+      const db = load();
+      const u = urec(db, target);
+      const eski = u.balance;
+      u.balance += Number(text.trim());
+      save(db);
+      send(fromId, "\u2705 " + (u.nm || target) + "\n" + eski + " \u2192 " + u.balance + " so'm");
+      send(target, "\u2705 Balansingiz to'ldirildi!\nJoriy balans: " + u.balance + " so'm");
+      return;
     }
     /* /balans <uid> <summa>  \u2014 balansni QO'LDA o'rnatish (faqat admin).
        Baza yo'qolganda tiklash uchun. */
