@@ -3611,6 +3611,7 @@ function renderHistory(){
   </div>
   <button class="refresh-btn" onclick="refreshStatus()"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.6-6.4M21 4v5h-5"/></svg>Statusni yangilash</button>
   <div id="histList"></div>`;
+  setTimeout(bindHistTaps, 0);
   const list=document.getElementById('histList');
   if(!rows.length){
     list.innerHTML=`<div class="empty"><div class="em">🧾</div><h3>Hozircha bo'sh</h3><p>${fin?"To'lovlaringiz shu yerda ko'rinadi.":"Buyurtma bergach bu yerda ko'rinadi."}</p></div>`;
@@ -3710,6 +3711,7 @@ function openOrderSheet(id){
   document.body.appendChild(bg);
   document.body.appendChild(sh);
   try{ applyLang(); }catch(e){}
+  try{ bindHistTaps(); }catch(e){}
   requestAnimationFrame(function(){ bg.classList.add('on'); sh.classList.add('on'); });
 }
 
@@ -4526,12 +4528,21 @@ function tapMove(e){
     _tapEl.classList.remove('tapped'); _tapEl = null;
   }
 }
-document.addEventListener('touchstart', tapDown, {passive:true, capture:true});
-document.addEventListener('touchmove',  tapMove, {passive:true, capture:true});
-document.addEventListener('touchend',   tapUp,   {passive:true, capture:true});
-document.addEventListener('touchcancel',tapUp,   {passive:true, capture:true});
-document.addEventListener('mousedown',  tapDown, true);
-document.addEventListener('mouseup',    tapUp,   true);
+/* Tinglovchilar FAQAT tarix elementlariga ulanadi.
+   document ga ulansa iOS butun ilovadagi eski :active qoidalarini yoqib yuboradi. */
+function bindTap(el){
+  if(!el || el._tapBound) return;
+  el._tapBound = true;
+  el.addEventListener('touchstart', tapDown, {passive:true});
+  el.addEventListener('touchmove',  tapMove, {passive:true});
+  el.addEventListener('touchend',   tapUp,   {passive:true});
+  el.addEventListener('touchcancel',tapUp,   {passive:true});
+  el.addEventListener('mousedown',  tapDown);
+  el.addEventListener('mouseup',    tapUp);
+}
+function bindHistTaps(){
+  try{ document.querySelectorAll(TAP_SEL).forEach(bindTap); }catch(e){}
+}
 
 document.addEventListener('click', function(e){
   const t = e.target && e.target.closest && e.target.closest(
