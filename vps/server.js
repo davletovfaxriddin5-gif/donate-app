@@ -647,7 +647,7 @@ const TON_ADDR = process.env.TON_ADDR || "";
    aks holda kimdir soxta "USDT" yasab bepul balans to'ldirib olardi. */
 const USDT_JETTON = "0:b113a994b5024a16719f69139328eb759596c38a25f59028b146fecdc3621dfe";
 const USDT_DEC    = 1000000;          /* 6 kasrli: "2000000" = 2 USDT */
-const TON_MIN     = 10;               /* eng kam to'lov, USDT */
+const TON_MIN     = 4;               /* eng kam to'lov, USDT */
 const TON_RATE    = 11500;            /* 1 USDT = shuncha so'm (index.html bilan bir xil) */
 const CARD_CUR = { "Humo":"so'm", "Sberbank":"rubl", "Visa":"usd" };
 function payText(base, pay, bank){
