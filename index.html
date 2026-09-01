@@ -3471,7 +3471,14 @@ async function checkId(){
         setRes('bad', "\u274C Bunday akkaunt topilmadi. ID ni tekshiring.");
         syncBuy(); return false;
       }
-      /* tekshiruv yo'q yoki API javob bermadi */
+      /* Tekshiruv javob bermadi (timeout yoki xato) \u2014 ID ni O'TKAZIB YUBORMAYMIZ.
+         Aks holda xato ID bilan xarid qilinib, pul begonaga ketardi. */
+      if(r && !r.ok && r.reason !== 'unsupported'){
+        idOk = false; notify('error');
+        setRes('bad', "\u26A0\uFE0F Hozir tekshirib bo'lmadi. Bir daqiqadan keyin qayta urinib ko'ring.");
+        syncBuy(); return false;
+      }
+      /* Bu o'yinda tekshiruv umuman yo'q \u2014 formatga qarab o'tkazamiz */
       idOk = true; notify('success');
       afterCheckId(main, sub);
     } else {
