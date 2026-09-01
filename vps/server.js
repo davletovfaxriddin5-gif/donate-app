@@ -209,7 +209,9 @@ async function s2tValidate(item, fields){
   if(z) body.zone_id = z;
 
   const ac = new AbortController();
-  const tm = setTimeout(()=>ac.abort(), 12000);
+  /* Blood Strike'da MAVJUD BO'LMAGAN ID uchun shop2topup ~24 soniya javob beradi
+     (haqiqiy ID uchun 0.2s). 12 soniya kam edi \u2014 javob kelmasdan uzilardi. */
+  const tm = setTimeout(()=>ac.abort(), 30000);
   let j = {};
   try{
     const r = await fetch(S2T_BASE+"/player/validate", {
@@ -220,6 +222,9 @@ async function s2tValidate(item, fields){
     j = await r.json().catch(()=>({}));
   }catch(e){
     console.log("S2T validate xato:", e.message);
+    /* Timeout \u2014 alohida sabab. Ilova buni "tekshirilmadi" deb bilishi va
+       ID ni O'TKAZIB YUBORMASLIGI kerak. */
+    if(/abort/i.test(e.message||"")) return { ok:false, reason:"timeout" };
     return { ok:false, reason:"error" };
   } finally { clearTimeout(tm); }
 
