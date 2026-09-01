@@ -58,19 +58,24 @@ input{font-family:inherit}
 .coin .dot{width:14px;height:14px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#FFE07A,#F0B429)}
 
 .balance{background:linear-gradient(150deg,#2B2FE8 0%,#3D33EE 55%,#4A3BF2 100%);
-  border-radius:26px;padding:20px 20px 18px;margin-bottom:20px;
-  box-shadow:0 16px 40px -14px rgba(43,47,232,.7);position:relative;overflow:hidden}
+  border-radius:22px;padding:15px 17px 14px;margin-bottom:20px;
+  box-shadow:0 14px 34px -14px rgba(43,47,232,.65);position:relative;overflow:hidden}
 .balance::after{content:"";position:absolute;right:-46px;top:-58px;width:190px;height:190px;border-radius:50%;
   background:rgba(255,255,255,.07)}
-.balance .lbl{font-size:14px;color:rgba(255,255,255,.62);font-weight:500;letter-spacing:-.2px}
-.balance .amt{font-weight:800;font-size:40px;letter-spacing:-1.6px;line-height:1;margin:4px 0 18px;color:#fff}
-.balance .amt small{font-size:16px;font-weight:600;color:rgba(255,255,255,.62);margin-left:6px;letter-spacing:0}
-.bal-actions{display:grid;grid-template-columns:1fr 1fr;gap:11px;position:relative;z-index:1}
+/* iPhone'ning o'z shrifti (SF Pro) — raqamlar shu bilan chiroyli chiqadi */
+.balance .lbl{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif;
+  font-size:13px;color:rgba(255,255,255,.6);font-weight:400;letter-spacing:-.1px}
+.balance .amt{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",system-ui,sans-serif;
+  font-weight:600;font-size:30px;letter-spacing:-.7px;line-height:1.1;margin:1px 0 13px;color:#fff;
+  font-variant-numeric:proportional-nums}
+.balance .amt small{font-size:15px;font-weight:500;color:rgba(255,255,255,.6);margin-left:5px;letter-spacing:0}
+.bal-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;position:relative;z-index:1}
 .bal-btn{background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.17);
-  border-radius:20px;padding:15px 6px;display:flex;flex-direction:column;
-  align-items:center;gap:9px;font-size:12.5px;font-weight:500;color:#fff;line-height:1.25;text-align:center;transition:.15s}
+  border-radius:17px;padding:11px 6px;display:flex;flex-direction:column;
+  align-items:center;gap:7px;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif;
+  font-size:12px;font-weight:400;color:#fff;line-height:1.25;text-align:center;transition:.15s}
 .bal-btn:active{transform:scale(.96);background:rgba(255,255,255,.22)}
-.bal-btn svg{width:25px;height:25px;fill:#fff;stroke:none}
+.bal-btn svg{width:21px;height:21px;fill:#fff;stroke:none}
 
 .sec-lbl{font-size:11px;font-weight:700;letter-spacing:1.2px;color:var(--faint);text-transform:uppercase;margin:18px 2px 10px}
 
@@ -336,7 +341,7 @@ body{ font-size:13px; font-weight:400; letter-spacing:-.1px }
 .game .star{ border-radius:22px 0 14px 0 }
 .game .badge{ border-radius:9px }
 .balance{ border-radius:24px }
-.bal-btn{ border-radius:20px }
+.bal-btn{ border-radius:17px }
 .pkg{ border-radius:18px }
 .pkg .hit{ border-radius:9px }
 .pkg .pic .x2{ border-radius:8px }
