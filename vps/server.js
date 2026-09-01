@@ -685,7 +685,7 @@ async function cdCreate(gameKey, productId, playerId, myId){
   if(!CD_KEY) return { ok:false, why:"CD_KEY yo'q" };
   try{
     const r = await cdCall("/orders", { method:"POST", body: JSON.stringify({
-      game: gameKey, product_id: String(productId), player_id: String(playerId),
+      game_key: gameKey, product_id: String(productId), player_id: String(playerId),
       external_id: "mt-" + myId
     })});
     const j = r.j || {};
@@ -1141,7 +1141,7 @@ app.post("/order", async (req,res)=>{
     save(db2);
     send(uid, "❌ Buyurtmani bajarib bo'lmadi. "+rec2.price+" so'm balansga qaytarildi.\nJoriy balans: "+u2.balance+" so'm");
     if(ADMIN_ID) tgCall("sendMessage", { chat_id: ADMIN_ID,
-      text: "⚠️ FZR rad etdi: "+r.why+"\n"+rec.package+" — id "+uid+"\nQaytarildi: "+rec2.price+" so'm" });
+      text: "⚠️ "+(cdGame ? "coindrop" : "FZR")+" rad etdi: "+r.why+"\n"+rec.package+" — id "+uid+"\nQaytarildi: "+rec2.price+" so'm" });
     res.json({ ok:false, error:"supplier", balance:u2.balance });
 
   }catch(e){ console.log("ORDER XATO:", e.message); res.json({ ok:false, error:"server" }); }
