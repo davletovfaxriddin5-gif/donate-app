@@ -186,6 +186,13 @@ const S2T_MAP = {
 function s2tPid(f){
   const k = ["player_id","user_id","uid","id","character_id","account_id","riot_id"];
   for(let i=0;i<k.length;i++){ const v=String(f[k[i]]||"").trim(); if(v) return v; }
+  /* Mini App games.json dagi nomlarni yuboradi \u2014 ular camelCase bo'lishi mumkin
+     (playerId, userId). Nomlarni normallashtirib qayta qidiramiz. */
+  const norm = {};
+  Object.keys(f || {}).forEach(function(key){
+    norm[String(key).replace(/[-\s]/g,"_").replace(/([a-z0-9])([A-Z])/g,"$1_$2").toLowerCase()] = f[key];
+  });
+  for(let i=0;i<k.length;i++){ const v=String(norm[k[i]]||"").trim(); if(v) return v; }
   return "";
 }
 async function s2tValidate(item, fields){
@@ -193,7 +200,12 @@ async function s2tValidate(item, fields){
   const pid = s2tPid(fields);
   if(!pid) return { ok:false, reason:"bad_id" };
   const body = { sub_category_id: item, player_id: pid };
-  const z = String(fields.zone_id || fields.server_id || fields.server || "").trim();
+  const nz = {};
+  Object.keys(fields || {}).forEach(function(key){
+    nz[String(key).replace(/[-\s]/g,"_").replace(/([a-z0-9])([A-Z])/g,"$1_$2").toLowerCase()] = fields[key];
+  });
+  const z = String(fields.zone_id || fields.server_id || fields.server ||
+                   nz.zone_id || nz.server_id || nz.server || "").trim();
   if(z) body.zone_id = z;
 
   const ac = new AbortController();
