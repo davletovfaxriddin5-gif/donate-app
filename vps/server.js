@@ -330,6 +330,11 @@ app.post("/validate", validateId);
 /* DIQQAT: narxlar shu yerda turadi. index.html dagi narxlar bilan BIR XIL bo'lishi shart.
    Mijoz yuborgan narxga ishonmaymiz — server o'zi jadvaldan oladi. */
 const CATALOG = {
+  /* Standoff 2 \u2014 coindrop.uz orqali (CD_GAMES ga qarang).
+     Narxlar bracket jadvali bo'yicha; tannarx coindrop price_uzs. */
+  standoff2: { cat:"", srv:false, items:{
+    "100G":20000, "200G":38500, "300G":60500, "500G":89000
+  }},
   pubg: { cat:"pubg_mobile_auto", srv:false, items:{
     "60_uc":14000, "325_uc":62000, "660_uc":123000,
     "1800_uc":307000, "3850_uc":613000, "8100_uc":1226000
@@ -634,6 +639,54 @@ function catFields(defs, o){
     f[x.key] = v;
   });
   return { fields:f, missing:missing };
+}
+
+/* ---------- coindrop.uz (uchinchi yetkazib beruvchi) ----------
+   Faqat CD_GAMES dagi o'yinlar shu yerga ketadi. FazerCards yo'liga TEGILMAYDI. */
+const CD_KEY  = process.env.CD_KEY || "";
+const CD_BASE = "https://coindrop.uz/api/v1";
+/* ilovadagi o'yin kaliti (gkey) -> coindrop game_key */
+const CD_GAMES = { standoff2: "standoff2-buydon" };
+
+async function cdCall(path, opt){
+  const o = Object.assign({ headers:{} }, opt || {});
+  o.headers["X-API-Key"] = CD_KEY;
+  if(o.body) o.headers["Content-Type"] = "application/json";
+  const r = await fetch(CD_BASE + path, o);
+  let j = null;
+  try{ j = await r.json(); }catch(e){}
+  return { code: r.status, j: j };
+}
+
+/* Buyurtma yuborish \u2014 javob shakli fzrCreate bilan bir xil: {ok, id, why} */
+async function cdCreate(gameKey, productId, playerId, myId){
+  if(!CD_KEY) return { ok:false, why:"CD_KEY yo'q" };
+  try{
+    const r = await cdCall("/orders", { method:"POST", body: JSON.stringify({
+      game: gameKey, product_id: String(productId), player_id: String(playerId),
+      external_id: "mt-" + myId
+    })});
+    const j = r.j || {};
+    if(r.code === 200 && j.success !== false){
+      const ord = j.order || j;
+      return { ok:true, id: String(ord.id || ord.order_id || "") };
+    }
+    return { ok:false, why: (j.error || j.message || ("HTTP " + r.code)) };
+  }catch(e){ return { ok:false, why: e.message }; }
+}
+
+/* Holat: {done} | {failed, why} | {} (hali ketyapti) */
+async function cdStatus(id){
+  try{
+    const r = await cdCall("/orders/" + encodeURIComponent(id));
+    const j = r.j || {};
+    const o = j.order || j;
+    const s = String(o.status || "").toLowerCase();
+    if(/success|done|complete|delivered/.test(s)) return { done:true };
+    if(/fail|error|cancel|refund|reject/.test(s))
+      return { failed:true, why: String(o.error || o.message || s) };
+    return {};
+  }catch(e){ return {}; }
 }
 
 async function fzrCreate(cat, oid, fields, idem){
@@ -1038,9 +1091,12 @@ app.post("/order", async (req,res)=>{
       return res.json({ ok:true, balance:u.balance, order:rec });
     }
 
-    /* FazerCards ga yuboramiz */
-    const r = tg ? await fzrTg(tg, tgu, tgn)
-                 : await fzrCreate(rec.cat, rec.oid, fields, "mt-" + rec.id);
+    /* Yetkazib beruvchiga yuboramiz \u2014 coindrop yoki FazerCards */
+    const cdGame = CD_GAMES[game];
+    const r = cdGame
+      ? await cdCreate(cdGame, rec.oid, rec.pid, rec.id)
+      : (tg ? await fzrTg(tg, tgu, tgn)
+            : await fzrCreate(rec.cat, rec.oid, fields, "mt-" + rec.id));
 
     const db2 = load();
     const u2 = urec(db2, uid);
@@ -1048,6 +1104,7 @@ app.post("/order", async (req,res)=>{
 
     if(r.ok){
       rec2.fzr = r.id; rec2.status = "sent";
+      if(cdGame) rec2.cd = 1;                    /* kim yuborganini eslab qolamiz */
       save(db2);
       /* id kelmasa sweep uni kuzata olmaydi \u2014 pulni QAYTARMAYMIZ (buyurtma qabul qilingan) */
       if(!r.id && ADMIN_ID) tgCall("sendMessage", { chat_id: ADMIN_ID,
@@ -1076,6 +1133,38 @@ async function checkOne(uid, ordId){
   /* "stuck" ham tekshiriladi — aks holda tarmoq uzilgan paytda osilib qolgan
      buyurtma abadiy tekshirilmay qoladi va mijozning puli qaytmaydi */
   if(!r0 || !r0.fzr || (r0.status !== "sent" && r0.status !== "stuck")) return;
+
+  /* --- coindrop buyurtmasi bo'lsa alohida yo'l --- */
+  if(r0.cd){
+    const cs = await cdStatus(r0.fzr);
+    if(!cs.done && !cs.failed){
+      if(Date.now() - new Date(r0.at).getTime() > 30*60000 && !r0.warned){
+        const dW = load(); const uW = urec(dW, uid);
+        const rW = uW.orders.find(function(x){ return x.id === ordId; });
+        if(rW){ rW.status = "stuck"; rW.warned = true; save(dW);
+          if(ADMIN_ID) tgCall("sendMessage", { chat_id: ADMIN_ID,
+            text: "\u23F0 coindrop 30 daq tugamadi: "+rW.fzr+"\n"+rW.package+" \u2014 id "+uid });
+        }
+      }
+      return;
+    }
+    const dC = load(); const uC = urec(dC, uid);
+    const rC = uC.orders.find(function(x){ return x.id === ordId; });
+    if(!rC || (rC.status !== "sent" && rC.status !== "stuck")) return;
+    if(cs.done){
+      rC.status = "done"; rC.doneAt = new Date().toISOString();
+      save(dC);
+      send(uid, "\u2705 "+rC.package+" hisobingizga tushdi!\nID: "+(rC.pid||""));
+    } else {
+      uC.balance += rC.price;
+      rC.status = "refund"; rC.fail = cs.why || "coindrop rad etdi";
+      save(dC);
+      send(uid, "\u274C Buyurtma bajarilmadi. "+rC.price+" so'm balansga qaytarildi.\nJoriy balans: "+uC.balance+" so'm");
+      if(ADMIN_ID) tgCall("sendMessage", { chat_id: ADMIN_ID,
+        text: "\u26A0\uFE0F coindrop rad etdi: "+(cs.why||"-")+"\n"+rC.package+" \u2014 id "+uid+"\nQaytarildi: "+rC.price+" so'm" });
+    }
+    return;
+  }
 
   const st = await fzrStatus(r0.fzr);
   if(!st) return;
