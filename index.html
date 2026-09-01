@@ -2556,14 +2556,14 @@ const GAMES = [
       {a:'2398', c:'💎', p:212000, oid:'2398_diamonds', im:'/IMG_4435.png'},
       {a:'6160', c:'💎', p:537000, oid:'6160_diamonds',im:'/IMG_4436.png'},
     ]},
-  { id:'standoff2', name:'STANDOFF 2', glyph:'🔫', star:'on', badge:'Global', img:'/standoff2.jpg',
-    cur:'🧈', region:false, cat:'',
+  { id:'standoff2', name:'STANDOFF 2', glyph:'🔫', star:'on', badge:'Global', img:'/stand-x5.jpg',
+    cur:'🧈', region:false, cat:'', noCheck:true,
     idFields:[{key:'playerId',label:"O'YINCHI ID",ph:'Player ID kiriting'}],
     packages:[
-      {a:'100', c:'🧈', p:20000, oid:'100G'},
-      {a:'200', c:'🧈', p:38500, oid:'200G', hit:true},
-      {a:'300', c:'🧈', p:60500, oid:'300G'},
-      {a:'500', c:'🧈', p:89000, oid:'500G'},
+      {a:'100', c:'🧈', p:20000, oid:'100G', im:'/stand-x1.png'},
+      {a:'200', c:'🧈', p:38500, oid:'200G', hit:true, im:'/stand-x2.png'},
+      {a:'300', c:'🧈', p:60500, oid:'300G', im:'/stand-x3.png'},
+      {a:'500', c:'🧈', p:89000, oid:'500G', im:'/stand-x4.png'},
     ]},
   { id:'mlbb', name:'MOBILE LEGENDS', glyph:'⚔️', star:'on', badge:'Global', img:'/IMG_4365.jpeg',
     cur:'💎', region:true, cat:'mobile_legends_global',
@@ -3180,7 +3180,7 @@ function renderGame(){
       inp = '<div class="inp-wrap"><input class="inp" id="fld_' + f.key + '" placeholder="'
           + esc(f.ph) + '" autocomplete="off" oninput="resetCheck()"><span class="info-i">i</span></div>';
     }
-    return '<div class="lbl">' + esc(f.label) + '</div>' + (isLast && flds.length > 1
+    return '<div class="lbl">' + esc(f.label) + '</div>' + (isLast && flds.length > 1 && !g.noCheck
       ? '<div class="row-inp">' + inp + '<button class="check-btn" onclick="checkId()">Tekshirish</button></div>'
       : inp);
   }).join('');
@@ -3223,7 +3223,7 @@ function renderGame(){
       + '</div>' : '')
   + '<div class="form-card">'
   +   '<div id="idForm">' + fldHtml
-  +     (flds.length === 1
+  +     (flds.length === 1 && !g.noCheck
         ? '<button class="check-btn" style="width:100%;margin-top:14px;padding:13px" onclick="checkId()">Tekshirish</button>'
         : '')
   +   '</div>'
@@ -3286,6 +3286,10 @@ function pickPkg(i){ haptic(); selPkg=i; document.querySelectorAll('.pkg').forEa
 const ID_RULES = {
   pubg:     { playerId:[10,12] },
   freefire: { playerId:[8,12] },
+  /* Standoff 2 da tekshiruv yo'q — kamida raqam ekanini talab qilamiz,
+     aks holda bitta harf yozib ham sotib olish tugmasi ochilardi.
+     Chegara ataylab keng: haqiqiy ID to'silib qolmasin. */
+  standoff2:{ playerId:[5,15] },
   mlbb:     { playerId:[6,11], serverId:[3,6] }
 };
 function badFormat(gameId, key, v){
@@ -3326,6 +3330,21 @@ function syncBuy(){
 }
 function resetCheck(){
   idOk = false; idName = ''; idRegion = '';
+  /* Tekshiruvsiz o'yin (masalan Standoff 2): tugma yo'q, shuning uchun
+     ID yozilgan zahoti "Sotib olish" ochiladi. */
+  if(curGame && curGame.noCheck){
+    const flds = curGame.idFields || [];
+    let all = flds.length > 0;
+    flds.forEach(function(f){
+      const el = document.getElementById('fld_' + f.key);
+      const v = el ? String(el.value||'').trim() : '';
+      if(!v || badFormat(curGame.id, f.key, v)) all = false;
+    });
+    idOk = all;
+    setRes('', '');
+    syncBuy();
+    return;
+  }
   setRes('', '');
   const f = document.getElementById('idForm');
   const b = document.getElementById('idOkBox');
