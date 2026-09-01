@@ -136,8 +136,10 @@ input{font-family:inherit}
   background:var(--blue-soft);color:#7E93FF;display:grid;place-items:center;font-size:11.5px;font-weight:700;font-style:italic}
 .row-inp{display:flex;gap:10px;align-items:stretch}
 .row-inp .inp-wrap{flex:1;margin-bottom:0}
-.check-btn{background:var(--blue-grad);border-radius:12px;padding:0 18px;font-weight:700;font-size:13.5px;color:#fff;
-  white-space:nowrap;box-shadow:0 8px 20px -8px rgba(63,85,246,.6)}
+.check-btn{background:linear-gradient(135deg,#4F46F5 0%,#5B4BF7 100%);border-radius:999px;padding:0 20px;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif;
+  font-weight:500;font-size:14px;color:#fff;letter-spacing:-.1px;
+  white-space:nowrap;box-shadow:0 10px 26px -10px rgba(79,70,245,.85)}
 .check-btn:active{transform:scale(.98)}
 .region-tabs{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:16px}
 .region-tabs .rt{background:var(--card);border:1px solid var(--stroke);border-radius:12px;padding:10px 14px;
@@ -303,7 +305,7 @@ body{ font-size:13px; font-weight:400; letter-spacing:-.1px }
 .gd-head .nm{ font-size:17px; font-weight:600 }
 .inp{ font-size:13px; font-weight:400 }
 .form-card .lbl{ font-weight:500 }
-.check-btn{ font-size:13px; font-weight:500 }
+.check-btn{ font-size:14px; font-weight:500 }
 .region-tabs .rt{ font-size:12.5px; font-weight:500 }
 
 .pkg{ padding:12px 10px; gap:8px }
@@ -351,7 +353,8 @@ body{ font-size:13px; font-weight:400; letter-spacing:-.1px }
 .seg{ border-radius:18px }
 .seg button{ border-radius:14px }
 .inp{ border-radius:14px }
-.check-btn, .back-btn, .region-tabs .rt, .saved-ids .chip{ border-radius:14px }
+.back-btn, .region-tabs .rt, .saved-ids .chip{ border-radius:14px }
+.check-btn{ border-radius:999px }
 .buy-btn{ border-radius:18px }
 .big-btn, .guide-btn, .refresh-btn, .lang-toggle, .stat, .pay{ border-radius:17px }
 .lang-toggle button{ border-radius:13px }
@@ -585,16 +588,24 @@ body.light .thm-lt{display:inline}
 .lang-page .lc{ color:#4FE0A0; font-weight:800 }
 /* === Bildirishnoma: nozik, tinch, orqasi ko'rinmaydi === */
 .toast{ left:14px !important; right:14px !important; width:auto !important; max-width:none !important;
-        transform:translateY(-26px) !important; text-align:left;
-        padding:11px 16px !important; font-size:13.5px !important; font-weight:500 !important;
-        line-height:1.3 !important; border-radius:12px !important;
-        background:rgba(21,26,41,.97) !important;
-        border:1px solid rgba(255,255,255,.07) !important;
-        box-shadow:0 16px 44px -14px rgba(0,0,0,.7) !important;
-        transition:opacity .3s cubic-bezier(.22,1,.36,1), transform .3s cubic-bezier(.22,1,.36,1) !important }
-.toast.show{ transform:translateY(0) !important }
-.toast.t-ok { border-color:rgba(72,206,140,.30) !important; color:#4ed69b !important }
-.toast.t-err{ border-color:rgba(240,90,95,.30) !important; color:#f2777b !important }
+        transform:translateY(-30px) scale(.97) !important; text-align:left;
+        padding:14px 18px !important; font-size:14px !important; font-weight:400 !important;
+        font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif !important;
+        letter-spacing:-.1px !important;
+        line-height:1.35 !important; border-radius:18px !important;
+        background:rgba(24,30,48,.82) !important;
+        backdrop-filter:blur(22px) saturate(180%) !important;
+        -webkit-backdrop-filter:blur(22px) saturate(180%) !important;
+        border:1px solid rgba(255,255,255,.10) !important;
+        box-shadow:0 20px 50px -16px rgba(0,0,0,.75), inset 0 1px 0 rgba(255,255,255,.07) !important;
+        transition:opacity .38s cubic-bezier(.22,1,.36,1), transform .38s cubic-bezier(.22,1,.36,1) !important }
+.toast.show{ transform:translateY(0) scale(1) !important }
+.toast.t-ok { border-color:rgba(72,206,140,.32) !important; color:#5FE3AC !important;
+              box-shadow:0 20px 50px -16px rgba(0,0,0,.75), 0 0 30px -6px rgba(72,206,140,.35),
+                         inset 0 1px 0 rgba(255,255,255,.07) !important }
+.toast.t-err{ border-color:rgba(240,90,95,.32) !important; color:#FF8A8E !important;
+              box-shadow:0 20px 50px -16px rgba(0,0,0,.75), 0 0 30px -6px rgba(240,90,95,.35),
+                         inset 0 1px 0 rgba(255,255,255,.07) !important }
 body.light .toast{ background:rgba(252,252,254,.98) !important; border-color:rgba(0,0,0,.08) !important;
                    box-shadow:0 16px 44px -14px rgba(0,0,0,.22) !important }
 body.light .toast.t-ok { color:#0f8a58 !important }
