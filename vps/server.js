@@ -333,7 +333,7 @@ const CATALOG = {
   /* Standoff 2 \u2014 coindrop.uz orqali (CD_GAMES ga qarang).
      Narxlar bracket jadvali bo'yicha; tannarx coindrop price_uzs. */
   standoff2: { cat:"", srv:false, items:{
-    "100G":20000, "200G":38500, "300G":60500, "500G":89000
+    "100G":18000, "200G":34500, "300G":54500, "500G":86000
   }},
   pubg: { cat:"pubg_mobile_auto", srv:false, items:{
     "60_uc":14000, "325_uc":62000, "660_uc":123000,
