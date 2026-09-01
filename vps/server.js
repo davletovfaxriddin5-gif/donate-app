@@ -292,6 +292,9 @@ async function validateId(req,res){
     /* shop2topup tekshiradigan kategoriyalar shu yerda hal bo'ladi —
        FazerCards'ga umuman bormaydi va uning limitini yemaydi */
     const s2tItem = S2T_MAP[cat];
+    console.log("VALIDATE cat=" + JSON.stringify(cat) +
+                " fields=" + JSON.stringify(fields) +
+                " -> " + (s2tItem ? ("shop2topup item " + s2tItem) : "FazerCards"));
     if(s2tItem){
       const d = await s2tValidate(s2tItem, fields);
       if(d.ok) vCache.set(key, { at: Date.now(), data: d });
