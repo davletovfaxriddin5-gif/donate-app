@@ -105,7 +105,8 @@ input{font-family:inherit}
 .gd-head .cur{font-size:17px;margin-top:3px}
 /* Chetda yashiringan qahramon \u2014 o'lchamlarni shu yerdan sozlanadi */
 :root{ --peek-h:124px; --peek-right:-12px; --peek-top:300px }
-.gd-head.hasbg{background-size:cover;background-position:center;overflow:hidden;position:relative}
+.gd-head.hasbg{background-size:cover;background-position:center;overflow:hidden;position:relative;
+  background-clip:padding-box;border-color:rgba(11,17,32,.85)}
 .gd-head.hasbg>*{position:relative;z-index:2}
 .gd-head.hasbg:before{content:'';position:absolute;inset:0;z-index:1;background:linear-gradient(90deg,rgba(11,17,32,.86),rgba(11,17,32,.62) 55%,rgba(11,17,32,.30))}
 .peek-side{position:absolute;right:var(--peek-right);top:var(--peek-top);height:var(--peek-h);width:auto;z-index:5;pointer-events:none;filter:drop-shadow(-6px 6px 14px rgba(0,0,0,.5))}
