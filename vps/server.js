@@ -573,7 +573,9 @@ const GAME_ALIAS = {
   freefire:"freefire", ff:"freefire", garenafreefire:"freefire",
   mlbb:"mlbb", mobilelegends:"mlbb", mobilelegend:"mlbb", ml:"mlbb",
   tgstars:"tgstars", tgstar:"tgstars", stars:"tgstars", telegramstars:"tgstars",
-  tgpremium:"tgpremium", premium:"tgpremium", telegrampremium:"tgpremium"
+  tgpremium:"tgpremium", premium:"tgpremium", telegrampremium:"tgpremium",
+  /* gameKey() raqamlarni olib tashlaydi: "standoff2" -> "standoff" */
+  standoff:"standoff2", standoffii:"standoff2", so:"standoff2"
 };
 function gameKey(o){
   const cand = [o.gameId, o.game, o.key, o.g];
