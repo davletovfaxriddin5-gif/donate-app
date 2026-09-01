@@ -282,6 +282,11 @@ input{font-family:inherit}
 .rent .g{display:flex;align-items:center;gap:4px}
 .rent .g svg{width:18px;height:18px}
 
+.ttl-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.ttl-row .page-title{margin-bottom:0}
+.chg-btn{background:none;border:none;padding:4px 2px;color:#7E93FF;font-size:14px;font-weight:500;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif;white-space:nowrap}
+.chg-btn:active{opacity:.55}
 .toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 12px);transform:translateX(-50%) translateY(-20px);
   background:var(--card-2);border:1px solid var(--stroke-2);color:#fff;padding:12px 18px;border-radius:13px;
   font-size:13px;font-weight:600;z-index:99;opacity:0;transition:.25s;box-shadow:0 12px 30px rgba(0,0,0,.5);
@@ -4291,7 +4296,8 @@ function renderTopup(){
 
   if(topMethod === 'usdt'){
     app.innerHTML = `
-    <div class="page-title">USDT (TON)</div>
+    <div class="ttl-row"><div class="page-title">USDT (TON)</div>
+      <button class="chg-btn" onclick="backToPays()">O'zgartirish</button></div>
     <p style="color:var(--dim);font-size:13.5px;margin:-6px 2px 18px">Qancha to'ldirmoqchisiz?</p>
     <div class="form-card">
       <div class="lbl">SUMMA (so'm)</div>
@@ -4317,7 +4323,8 @@ function renderTopup(){
 
   const c = topCard();
   app.innerHTML = `
-  <div class="page-title">${c.bank}</div>
+  <div class="ttl-row"><div class="page-title">${c.bank}</div>
+    <button class="chg-btn" onclick="backToPays()">O'zgartirish</button></div>
   <p style="color:var(--dim);font-size:13.5px;margin:-6px 2px 18px">Qancha to'ldirmoqchisiz?</p>
   <div class="form-card">
     <div class="lbl">SUMMA (so'm)</div>
@@ -4521,6 +4528,8 @@ function watchBalance(){
 }
 
 function pickPay(m){ haptic(); topMethod=m; stConfirm=0; stBusy=false; renderTopup(); }
+/* To'lov usulini almashtirish — bosh sahifaga chiqmasdan kartalar ro'yxatiga qaytadi */
+function backToPays(){ haptic(); topMethod=null; stConfirm=0; stBusy=false; renderTopup(); }
 function copyCard(n){ haptic(); try{ navigator.clipboard.writeText(String(n).replace(/\s/g,'')); }catch(e){} notify('success'); toastOk('Nusxalandi'); }
 
 /* "To'ladim" \u2014 to'lov kelganini 2 daqiqagacha kutamiz */
