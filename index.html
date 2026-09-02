@@ -747,7 +747,9 @@ const BOT_USERNAME = 'minatoh_bot';
 const APP_SHORT_NAME = 'app';
 /* 1 birlik necha so'm turadi. Kurs o'zgarsa faqat shu ikkita raqamni almashtiring.
    PASTROQ qo'ying \u2014 shunda kurs ko'tarilsa zarar ko'rmaysiz. */
-const RATES = { "so'm": 1, usd: 11500, rubl: 145 };
+/* To'lov kurslari — serverdan avtomatik yangilanadi (loadFx).
+   Quyidagilar faqat zaxira, server javob bermasa ishlatiladi. */
+let RATES = { "so'm": 1, usd: 11500, rubl: 133 };
 function payAmount(base, pay, cur){
   const r = RATES[cur] || 1;
   if(r === 1) return { txt: fmt(pay), raw: String(pay) };
@@ -4214,6 +4216,13 @@ function somSub(som){
 function loadFx(cb){
   fetch(VBASE + '/fx').then(function(r){ return r.json(); }).then(function(d){
     if(d && d.ok && d.usd){ FXR = { som: d.som, usd: d.usd }; }
+    /* To'lov kurslari — server bozorga qarab yangilab turadi */
+    if(d && d.ok && d.rates && d.rates.usd > 0 && d.rates.rubl > 0){
+      RATES = { "so'm": 1, usd: d.rates.usd, rubl: d.rates.rubl };
+      /* MUHIM: narx ko'rsatish ham AYNAN shu kursdan hisoblansin.
+         Aks holda mijoz bir summa ko'rib, to'ldirishda boshqasini to'lardi. */
+      if(FXR) FXR.som = d.rates.usd;
+    }
     if(cb) cb();
   }).catch(function(){ if(cb) cb(); });
 }
@@ -4385,13 +4394,66 @@ function renderTopup(){
     <button class="chg-btn" onclick="backToPays()">O'zgartirish</button></div>
   <p style="color:var(--dim);font-size:13.5px;margin:-6px 2px 18px">Qancha to'ldirmoqchisiz?</p>
   <div class="form-card">
-    <div class="lbl">SUMMA (so'm)</div>
-    Summani o'zbek so'mida kiriting, balansingizga aynan shu miqdor qo'shiladi.</p>
-    ${c.cur === "so'm" ? '' : `<p style="color:var(--dim);font-size:12.5px;margin:0 2px 10px;line-height:1.45">Keyingi ekranda kartaga qancha to'lash kerakligi ko'rsatiladi.</p>`}
-    <div class="inp-wrap"><input class="inp" id="topAmount" inputmode="numeric" placeholder="Masalan: 50000"></div>
+    <div class="lbl">BALANSGA TUSHADI (so'm)</div>
+    <div class="inp-wrap"><input class="inp" id="topAmount" inputmode="numeric" placeholder="Masalan: 50000" oninput="onTopSom()"></div>
+    ${c.cur === "so'm" ? '' : `
+    <div class="lbl" style="margin-top:14px">TO'LAYSIZ (${curSym(c.cur)})</div>
+    <div class="inp-wrap"><input class="inp" id="topForeign" inputmode="decimal" placeholder="0.00" oninput="onTopForeign()"></div>
+    <div id="topRate" style="color:var(--dim);font-size:12.5px;margin-top:9px;line-height:1.5"></div>`}
     <button class="check-btn" id="topBtn" style="width:100%;margin-top:14px;padding:13px" onclick="sendTopup()">Davom etish</button>
     <div id="payBox" class="id-res"></div>
   </div>`;
+  if(c.cur !== "so'm") showTopRate();
+}
+
+/* ---------- Ikki tomonlama kalkulyator ----------
+   Ikkalasi ham RATES dan hisoblanadi — ya'ni bu yerda ko'ringan summa
+   haqiqatda to'lanadigan summa bilan bir xil bo'ladi. */
+function curSym(cur){ return cur === 'rubl' ? '₽' : cur === 'usd' ? '$' : cur; }
+function topRateVal(){
+  const c = topCard();
+  const r = RATES[c.cur] || 1;
+  return { cur:c.cur, sym:curSym(c.cur), r:r };
+}
+function onTopSom(){
+  const a = document.getElementById('topAmount'), f = document.getElementById('topForeign');
+  if(!a || !f) return;
+  const n = Number(String(a.value||'').replace(/\D/g,''));
+  const t = topRateVal();
+  f.value = n ? (Math.ceil(n / t.r * 100) / 100).toFixed(2) : '';
+  showTopRate();
+}
+function onTopForeign(){
+  const a = document.getElementById('topAmount'), f = document.getElementById('topForeign');
+  if(!a || !f) return;
+  let v = String(f.value||'').replace(/,/g,'.').replace(/[^0-9.]/g,'');
+  const p = v.split('.'); if(p.length > 2) v = p[0] + '.' + p.slice(1).join('');
+  if(f.value !== v) f.value = v;
+  const n = parseFloat(v);
+  const t = topRateVal();
+  a.value = (n > 0) ? String(Math.floor(n * t.r)) : '';
+  showTopRate();
+}
+function showTopRate(){
+  const h = document.getElementById('topRate');
+  if(!h) return;
+  const t = topRateVal();
+  const a = document.getElementById('topAmount');
+  const n = a ? Number(String(a.value||'').replace(/\D/g,'')) : 0;
+  let line = '1 ' + t.sym + ' = ' + fmt(t.r) + " so'm";
+  if(n > 0){
+    const pay = (Math.ceil(n / t.r * 100) / 100).toFixed(2);
+    line += '<br><span style="color:var(--text)">' + pay + ' ' + t.sym +
+            ' \u2192 ' + fmt(n) + " so'm balansga</span>";
+    /* Mijozning O'Z tilidagi valyutasi — faqat mo'ljal uchun.
+       To'lov baribir karta valyutasida ketadi. */
+    const cu = curNow();
+    if(cu && cu.c !== 'UZS' && cu.c !== (t.cur === 'rubl' ? 'RUB' : 'USD')){
+      const est = money(n, true);
+      if(est && est.indexOf("so'm") < 0) line += '<br>\u2248 ' + est;
+    }
+  }
+  h.innerHTML = line;
 }
 
 function topClockTick(){
@@ -4816,7 +4878,7 @@ sendRef();
 loadPhone();
 loadBalance();
 loadDynGames();
-if(currentLang !== 'uz') loadFx(function(){ try{ go(view); }catch(e){} });
+loadFx(function(){ if(currentLang !== 'uz'){ try{ go(view); }catch(e){} } });
 
 const splashT0 = Date.now();
 function hideSplash(){
