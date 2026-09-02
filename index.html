@@ -282,6 +282,18 @@ input{font-family:inherit}
 .rent .g{display:flex;align-items:center;gap:4px}
 .rent .g svg{width:18px;height:18px}
 
+.ref-list{background:var(--card);border:1px solid var(--stroke);border-radius:var(--radius);padding:6px 0;overflow:hidden}
+.ref-head{display:flex;align-items:center;justify-content:space-between;padding:12px 16px 10px;
+  font-weight:700;font-size:14px;border-bottom:1px solid var(--stroke)}
+.ref-head span{background:var(--blue-soft);color:#8CA0FF;border-radius:99px;padding:2px 10px;font-size:12.5px}
+.ref-row{display:flex;align-items:center;gap:11px;padding:11px 16px}
+.ref-row + .ref-row{border-top:1px solid var(--stroke)}
+.ref-av{width:36px;height:36px;border-radius:50%;background:var(--card-2);display:grid;place-items:center;
+  font-weight:700;font-size:15px;color:var(--dim);flex-shrink:0}
+.ref-nm{flex:1;min-width:0}
+.ref-nm .a{font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ref-nm .b{color:var(--dim);font-size:12px;margin-top:2px}
+.ref-c{color:var(--dim);font-size:12.5px;flex-shrink:0}
 .ttl-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .ttl-row .page-title{margin-bottom:0}
 .chg-btn{background:none;border:none;padding:4px 2px;color:#7E93FF;font-size:12.5px;font-weight:500;
@@ -4103,11 +4115,46 @@ function invite(){
       <button class="big-btn" style="margin:0;justify-content:center;background:var(--blue);border-color:transparent;color:#fff" onclick="shareRef('${link}')">Ulashish</button>
     </div>
   </div>
-  <div class="empty" style="background:var(--card);border:1px solid var(--stroke);border-radius:var(--radius);padding:36px 20px">
+  <div id="refBox" class="empty" style="background:var(--card);border:1px solid var(--stroke);border-radius:var(--radius);padding:36px 20px">
     <div class="em">👥</div>
     <h3>Hali hech kim taklif qilmadingiz</h3>
     <p>Do'stlaringizni taklif qiling va har bir to'lovdan 1% bonus oling</p>
   </div>`;
+  loadRefs();
+}
+/* Telegram havoladagi startapp qiymatini serverga yuboramiz.
+   Server kim kimni taklif qilganini yozib qo'yadi (bonus berilmaydi). */
+function sendRef(){
+  try{
+    const rp = (tg && tg.initDataUnsafe && tg.initDataUnsafe.start_param) || '';
+    if(!tg || !tg.initData) return;
+    fetch(VBASE + '/ref', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ initData: tg.initData, ref: String(rp||'') })
+    }).catch(function(){});
+  }catch(e){}
+}
+function loadRefs(){
+  const uid = tgUser && tgUser.id ? tgUser.id : '';
+  const box = document.getElementById('refBox');
+  if(!uid || !box) return;
+  fetch(VBASE + '/refs?id=' + encodeURIComponent(uid))
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if(!d || !d.ok || !d.list || !d.list.length) return;
+      const rows = d.list.map(function(x){
+        const nm = x.nm || 'Foydalanuvchi';
+        const un = x.un ? '@' + x.un : ('id ' + x.id);
+        const dt = x.at ? new Date(x.at).toLocaleDateString('ru-RU') : '';
+        return '<div class="ref-row">'
+             + '<div class="ref-av">' + esc(nm.charAt(0).toUpperCase()) + '</div>'
+             + '<div class="ref-nm"><div class="a">' + esc(nm) + '</div>'
+             + '<div class="b">' + esc(un) + (dt ? ' \u00B7 ' + dt : '') + '</div></div>'
+             + '<div class="ref-c">' + x.orders + '</div></div>';
+      }).join('');
+      box.innerHTML = '<div class="ref-head">Taklif qilinganlar <span>' + d.count + '</span></div>' + rows;
+      box.className = 'ref-list';
+    }).catch(function(){});
 }
 function copyRef(link){ haptic(); try{ navigator.clipboard.writeText(link); }catch(e){} notify('success'); toastOk('Havola nusxalandi'); }
 function shareRef(link){ haptic(); openLink(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent("Arzon donat — minatoh!")}`); }
@@ -4765,6 +4812,7 @@ let langTimer=null;
 function scheduleLang(){ applyLang(); initFx(); }
 try{ new MutationObserver(()=>scheduleLang()).observe(document.getElementById('app'), {childList:true, subtree:true}); }catch(e){}
 applyLang();
+sendRef();
 loadPhone();
 loadBalance();
 loadDynGames();
