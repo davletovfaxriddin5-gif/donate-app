@@ -827,8 +827,38 @@ async function fzrStatus(id){
 const crypto = require("crypto");
 const ADMIN_ID = String(process.env.ADMIN_ID || "");
 
-/* Kurslar \u2014 index.html dagi RATES bilan bir xil bo'lishi shart */
-const RATES = { "so'm": 1, usd: 11500, rubl: 145 };
+/* ---------- To'lov kurslari ----------
+   RATES faqat MIJOZ QANCHA TO'LASHINI belgilaydi (Sberbank rublda, Visa dollarda).
+   Paket narxlariga TA'SIR QILMAYDI — ular so'mda, CATALOG da.
+   Qiymatlar fxLoad() da bozor kursidan avtomatik yangilanadi;
+   quyidagilar faqat boshlang'ich/zaxira. */
+const RATES = { "so'm": 1, usd: 11500, rubl: 133 };
+
+/* Bufer: bozordan shuncha PAST kurs qo'yamiz -> mijozdan biroz ko'proq
+   valyuta so'raladi -> kurs sakrasa ham zarar bo'lmaydi. */
+const FX_BUF = 0.973;
+/* Aqlga sig'adigan chegara. Bundan tashqarida bo'lsa kurs QABUL QILINMAYDI
+   (API buzilsa yoki g'alati son qaytarsa, narxlar buzilib ketmasin). */
+const FX_SANE = { usd: [8000, 20000], rubl: [80, 260] };
+
+function fxApply(usdPerSom, rubPerUsd){
+  const out = [];
+  const som = Number(usdPerSom);                 /* 1 USD = shuncha so'm */
+  const rub = Number(rubPerUsd);                 /* 1 USD = shuncha rubl */
+  if(som > 0){
+    const v = Math.floor(som * FX_BUF);
+    if(v >= FX_SANE.usd[0] && v <= FX_SANE.usd[1] && v !== RATES.usd){
+      out.push("usd " + RATES.usd + " -> " + v); RATES.usd = v;
+    }
+  }
+  if(som > 0 && rub > 0){
+    const v = Math.floor(som / rub * FX_BUF);    /* 1 rubl = shuncha so'm */
+    if(v >= FX_SANE.rubl[0] && v <= FX_SANE.rubl[1] && v !== RATES.rubl){
+      out.push("rubl " + RATES.rubl + " -> " + v); RATES.rubl = v;
+    }
+  }
+  if(out.length) console.log("Kurs yangilandi: " + out.join(", "));
+}
 
 /* ---------- USDT (TON tarmog'i) orqali to'ldirish ---------- */
 const TON_KEY  = process.env.TON_KEY  || "";
@@ -1267,6 +1297,9 @@ async function fxLoad(){
     if(d && d.rates && d.rates.KRW && d.rates.RUB){
       FX = { at: Date.now(), live: true, usd: d.rates };
       console.log("FX yangilandi: KRW="+d.rates.KRW+" RUB="+d.rates.RUB);
+      /* To'lov kurslarini ham yangilaymiz.
+         d.rates.UZS = 1 USD nechchi so'm, d.rates.RUB = 1 USD nechchi rubl */
+      fxApply(d.rates.UZS, d.rates.RUB);
       return;
     }
     console.log("FX: javob kutilgandek emas");
@@ -1282,7 +1315,7 @@ setInterval(fxLoad, 6*3600*1000);
 /* Ilova shu yerdan kurslarni oladi. som = 1 USD nechchi so'm (11500).
    USDT to'ldirish bilan BIR XIL kurs \u2014 shunda mijozning hisobi izchil bo'ladi. */
 app.get("/fx", (req,res)=>{
-  res.json({ ok:true, som: TON_RATE, live: FX.live, at: FX.at, usd: FX.usd });
+  res.json({ ok:true, som: TON_RATE, live: FX.live, at: FX.at, usd: FX.usd, rates: RATES });
 });
 
 /* ---------- USDT (TON) to'lovlarini blokcheyndan o'qish ----------
