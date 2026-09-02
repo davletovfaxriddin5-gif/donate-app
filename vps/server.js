@@ -1486,6 +1486,58 @@ function starPaid(fromId, sp){
 }
 
 /* ---------- Karta orqali to'ldirish (noyob summa bilan) ---------- */
+/* ---------- Referal: kim kimni taklif qilgan ----------
+   BONUS BERILMAYDI — faqat kuzatuv. Bonus keyinroq qo'shiladi. */
+app.post("/ref", (req,res)=>{
+  try{
+    const b = req.body || {};
+    const who = checkInit(b.initData);
+    if(!who) return res.json({ ok:false, error:"auth" });
+    const uid = String(who.id);
+    const by  = String(b.ref || "").replace(/\D/g,"");
+
+    const db = load();
+    const u  = urec(db, uid);
+    /* ismni har doim yangilab boramiz — ro'yxatda ko'rinishi uchun */
+    let ch = false;
+    if(u.nm !== who.name){ u.nm = who.name; ch = true; }
+    const un = String(who.username||"").toLowerCase();
+    if(u.un !== un){ u.un = un; ch = true; }
+
+    if(by && by !== uid && !u.refBy){
+      const inv = urec(db, by);
+      u.refBy = by;
+      u.refAt = new Date().toISOString();
+      if(!Array.isArray(inv.refs)) inv.refs = [];
+      if(inv.refs.indexOf(uid) < 0) inv.refs.push(uid);
+      ch = true;
+      if(ADMIN_ID) tgCall("sendMessage", { chat_id: ADMIN_ID,
+        text: "\uD83D\uDC65 YANGI REFERAL\n" + who2(who) + " (id " + uid + ")\n" +
+              "Taklif qilgan: " + (inv.nm || by) + (inv.un ? " (@"+inv.un+")" : "") + " (id " + by + ")" });
+    }
+    if(ch) save(db);
+    res.json({ ok:true, refBy: u.refBy || "" });
+  }catch(e){ res.json({ ok:false, error:"server" }); }
+});
+
+/* Taklif qilinganlar ro'yxati */
+app.get("/refs", (req,res)=>{
+  try{
+    const uid = String(req.query.id || "").replace(/\D/g,"");
+    if(!uid) return res.json({ ok:false, error:"id" });
+    const db = load();
+    const u  = db[uid] || {};
+    const ids = Array.isArray(u.refs) ? u.refs : [];
+    const list = ids.map(function(k){
+      const r = db[k] || {};
+      return { id:k, nm:r.nm || "", un:r.un || "", at:r.refAt || "",
+               orders:(r.orders||[]).filter(function(x){ return x.status==="done"; }).length };
+    });
+    list.sort(function(a,b){ return String(b.at||"").localeCompare(String(a.at||"")); });
+    res.json({ ok:true, count:list.length, list:list.slice(0,100) });
+  }catch(e){ res.json({ ok:false, error:"server" }); }
+});
+
 app.post("/topup", (req,res)=>{
   try{
     const b = req.body || {};
