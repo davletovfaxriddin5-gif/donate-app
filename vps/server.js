@@ -356,7 +356,7 @@ const CATALOG = {
     "100G":18000, "200G":34500, "300G":54500, "500G":86000
   }},
   pubg: { cat:"pubg_mobile_auto", srv:false, items:{
-    "60_uc":14000, "325_uc":62000, "660_uc":123000,
+    "60_uc":13000, "325_uc":62000, "660_uc":123000,
     "1800_uc":307000, "3850_uc":613000, "8100_uc":1226000
   }},
   freefire: { cat:"free_fire_cis", srv:false, items:{
