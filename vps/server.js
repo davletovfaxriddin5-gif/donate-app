@@ -230,7 +230,7 @@ async function aluuValidate(m, fields){
     const v = String(j.valid || "").toLowerCase();
     const nm = String(j.nickname || j.name || "").trim();
     if(v === "valid" && nm && nm.toLowerCase() !== "na"){
-      return { ok:true, name: nm, region: String(j.region || j.server || "") };
+      return { ok:true, valid:true, name: nm, region: String(j.region || j.server || "") };
     }
     if(v === "invalid") return { ok:false, reason:"invalid" };
     console.log("ALUU javob:", txt.slice(0,160));
