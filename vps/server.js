@@ -183,6 +183,64 @@ const S2T_MAP = {
   r6_mobile_sg:703, r6_mobile_th:703, r6_mobile_us:703
 };
 /* Maydon nomi o'yinga qarab farq qiladi — birinchi to'lganini olamiz */
+/* ---------- aluu.in nickname tekshiruvi (uchinchi manba) ----------
+   Bepul: kuniga 100 ta so'rov. FazerCards va shop2topup yo'liga TEGMAYDI. */
+const ALUU_KEY  = process.env.ALUU_KEY || "";
+const ALUU_BASE = "https://aluu.in/api/check/game-check";
+/* games.json dagi kategoriya nomi -> aluu.in kodi va kerakli maydonlar */
+const ALUU_MAP = {
+  where_winds_meet: { code:"wwm", srv:false }
+};
+
+function aluuPid(f){
+  const k = ["character_id","player_id","user_id","uid","id","account_id"];
+  for(let i=0;i<k.length;i++){ const v=String(f[k[i]]||"").trim(); if(v) return v; }
+  const n = {};
+  Object.keys(f||{}).forEach(function(x){
+    n[String(x).replace(/[-\s]/g,"_").replace(/([a-z0-9])([A-Z])/g,"$1_$2").toLowerCase()] = f[x];
+  });
+  for(let i=0;i<k.length;i++){ const v=String(n[k[i]]||"").trim(); if(v) return v; }
+  return "";
+}
+
+async function aluuValidate(m, fields){
+  if(!ALUU_KEY) return { ok:false, reason:"error" };
+  const pid = aluuPid(fields);
+  if(!pid) return { ok:false, reason:"bad_id" };
+  let url = ALUU_BASE + "?code=" + encodeURIComponent(m.code) +
+            "&characterId=" + encodeURIComponent(pid);
+  if(m.srv){
+    const z = String(fields.server_code || fields.zone_id || fields.server_id || fields.server || "").trim();
+    if(z) url += "&server_code=" + encodeURIComponent(z);
+  }
+  const ac = new AbortController();
+  const tm = setTimeout(()=>ac.abort(), 20000);
+  try{
+    const r = await fetch(url, { headers:{ "x-api-key": ALUU_KEY }, signal: ac.signal });
+    const txt = await r.text();
+    let j = null;
+    try{ j = JSON.parse(txt); }catch(e){}
+    if(!j){ console.log("ALUU javob JSON emas:", txt.slice(0,120)); return { ok:false, reason:"error" }; }
+
+    /* kunlik limit yoki tezlik cheklovi — ID ni O'TKAZIB YUBORMAYMIZ */
+    if(j.code === "FREE_DAILY_LIMIT_REACHED" || j.code === "RATE_LIMITED"){
+      console.log("ALUU limit:", j.code);
+      return { ok:false, reason:"timeout" };
+    }
+    const v = String(j.valid || "").toLowerCase();
+    const nm = String(j.nickname || j.name || "").trim();
+    if(v === "valid" && nm && nm.toLowerCase() !== "na"){
+      return { ok:true, name: nm, region: String(j.region || j.server || "") };
+    }
+    if(v === "invalid") return { ok:false, reason:"invalid" };
+    console.log("ALUU javob:", txt.slice(0,160));
+    return { ok:false, reason:"timeout" };
+  }catch(e){
+    console.log("ALUU xato:", e.message);
+    return { ok:false, reason:"timeout" };
+  } finally { clearTimeout(tm); }
+}
+
 function s2tPid(f){
   const k = ["player_id","user_id","uid","id","character_id","account_id","riot_id"];
   for(let i=0;i<k.length;i++){ const v=String(f[k[i]]||"").trim(); if(v) return v; }
@@ -296,10 +354,18 @@ async function validateId(req,res){
 
     /* shop2topup tekshiradigan kategoriyalar shu yerda hal bo'ladi —
        FazerCards'ga umuman bormaydi va uning limitini yemaydi */
+    /* aluu.in tekshiradigan kategoriyalar — birinchi navbatda shu yerda hal bo'ladi */
+    const aluuM = ALUU_MAP[cat];
     const s2tItem = S2T_MAP[cat];
     console.log("VALIDATE cat=" + JSON.stringify(cat) +
                 " fields=" + JSON.stringify(fields) +
-                " -> " + (s2tItem ? ("shop2topup item " + s2tItem) : "FazerCards"));
+                " -> " + (aluuM ? ("aluu " + aluuM.code)
+                        : s2tItem ? ("shop2topup item " + s2tItem) : "FazerCards"));
+    if(aluuM){
+      const d = await aluuValidate(aluuM, fields);
+      if(d.ok) vCache.set(key, { at: Date.now(), data: d });
+      return res.json(d);
+    }
     if(s2tItem){
       const d = await s2tValidate(s2tItem, fields);
       if(d.ok) vCache.set(key, { at: Date.now(), data: d });
