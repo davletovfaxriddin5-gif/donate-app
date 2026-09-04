@@ -292,6 +292,14 @@ async function aluuCall(code, pid, srv){
       return { ok:false, reason:"timeout", stop:true };
     }
 
+    /* Manba tomonidagi vaqtinchalik nosozlikni "ID noto'g'ri" deb hisoblamaymiz.
+       Aks holda to'g'ri UID kiritgan mijozga "akkaunt topilmadi" deb chiqadi. */
+    const msg = String(j.msg || j.message || "");
+    if(/upstream|timeout|try again|temporar|gateway|server error|unavailable|maintenance/i.test(msg)){
+      console.log("ALUU manba nosoz (" + code + "):", msg.slice(0,140));
+      return { ok:false, reason:"timeout", stop:true };
+    }
+
     /* 1-shakl (wwm): {"valid":"valid","name":"...","serverid":"..."} */
     const v = String(j.valid || "").toLowerCase();
     if(v){
@@ -1708,8 +1716,10 @@ async function tgBlocked(uid){
     const j = await r.json();
     if(j && j.ok) return false;
     const d = String((j && j.description) || "").toLowerCase();
-    /* faqat ANIQ bloklash belgilari — boshqa xatoda odamni o'chirmaymiz */
-    if(/blocked by the user|user is deactivated|chat not found|bot was kicked/.test(d)) return true;
+    /* faqat ANIQ bloklash belgilari.
+       "chat not found" QO'SHILMAYDI: u Mini App havolasi orqali kirgan, lekin
+       botga Start bosmagan odamlarda ham chiqadi — ular chiqib ketgan emas. */
+    if(/blocked by the user|user is deactivated|bot was kicked|bot was blocked/.test(d)) return true;
     return false;
   }catch(e){ return false; }
 }
@@ -1733,6 +1743,13 @@ async function refScan(reportTo){
     const gone = [], back = [];
     for(let i = 0; i < list.length; i++){
       const uid = list[i];
+      const db00 = load();
+      /* Start bosmagan odam \u2014 bot suhbati yo'q. Uni tekshirish ma'nosiz,
+         "chiqib ketgan" ham emas: u shunchaki hali botga kirmagan. */
+      if(!(db00[uid] && db00[uid].greeted)){
+        if(db00[uid] && db00[uid].left){ delete db00[uid].left; delete db00[uid].leftAt; save(db00); }
+        continue;
+      }
       const bad = await tgBlocked(uid);
       const db = load();
       const u = db[uid];
@@ -1772,6 +1789,13 @@ async function scanWorker(){
   while(scanQ.length){
     const uid = scanQ.shift();
     try{
+      const db00 = load();
+      if(!(db00[uid] && db00[uid].greeted)){
+        if(db00[uid] && db00[uid].left){ delete db00[uid].left; delete db00[uid].leftAt; save(db00); }
+        scanSeen.set(uid, Date.now());
+        await new Promise(r => setTimeout(r, 5));
+        continue;
+      }
       const bad = await tgBlocked(uid);
       scanSeen.set(uid, Date.now());
       const db = load();
@@ -1891,16 +1915,21 @@ app.get("/refs", (req,res)=>{
     const list = ids.map(function(k){
       const r = db[k] || {};
       return { id:k, nm:r.nm || "", un:r.un || "", at:r.refAt || "",
-               left: !!r.left,
+               left: !!r.left, started: !!r.greeted,
                orders:(r.orders||[]).filter(function(x){ return x.status==="done"; }).length };
     });
     list.sort(function(a,b){ return String(b.at||"").localeCompare(String(a.at||"")); });
-    const act = list.filter(function(x){ return !x.left; });
-    const gone = list.filter(function(x){ return x.left; });
+    /* FAQAT Start bosganlar hisoblanadi.
+       pend  = havolani ochgan, lekin botga Start bosmagan
+       gone  = Start bosgan, keyin bloklagan/chiqib ketgan */
+    const act  = list.filter(function(x){ return x.started && !x.left; });
+    const pend = list.filter(function(x){ return !x.started; });
+    const gone = list.filter(function(x){ return x.started && x.left; });
     /* Ekran ochildi — shu odamning referallarini tekshirishga qo'yamiz.
        Javob darhol qaytadi, tekshiruv orqa fonda ketadi. */
     const q = scanQueue(ids);
     res.json({ ok:true, count:act.length, total:list.length, gone:gone.length,
+               pending: pend.length, pendList: pend.slice(0,50),
                checking: q, list:act.slice(0,100), leftList:gone.slice(0,50) });
   }catch(e){ res.json({ ok:false, error:"server" }); }
 });
@@ -2131,7 +2160,7 @@ function doBroadcast(){
           fail++;
           /* Tarqatma 403 bersa — odam bloklagan, darhol belgilaymiz */
           const d = String((j && j.description) || "").toLowerCase();
-          if(/blocked by the user|user is deactivated|chat not found|bot was kicked/.test(d)){
+          if(/blocked by the user|user is deactivated|bot was kicked|bot was blocked/.test(d)){
             try{
               const dbB = load(); const ub = dbB[uid];
               if(ub && !ub.left){ ub.left = true; ub.leftAt = new Date().toISOString(); save(dbB); }
@@ -2736,7 +2765,30 @@ app.post("/webhook", (req,res)=>{
       const dbg = load();
       const ug = urec(dbg, fromId);
       const first = !ug.greeted;
-      if(first){ ug.greeted = true; ug.joined = new Date().toISOString(); save(dbg); }
+      let chg = false;
+      if(first){ ug.greeted = true; ug.joined = new Date().toISOString(); chg = true; }
+
+      /* Start bosildi = bot suhbati bor. Noto'g'ri qo'yilgan "chiqib ketgan"
+         belgisi bo'lsa, shu yerda olib tashlanadi. */
+      if(ug.left){ delete ug.left; delete ug.leftAt; chg = true; }
+
+      /* Referal havolasi: t.me/BOT?start=ref_<taklif qilgan id>
+         Referal FAQAT shu yerda, ya'ni Start bosilgandan keyin hisoblanadi. */
+      const pay = String(text.slice(6) || "").trim();
+      const rid = (pay.match(/^ref_?(\d+)$/) || [])[1] || "";
+      if(rid && rid !== fromId && !ug.refBy){
+        const inv = urec(dbg, rid);
+        ug.refBy = rid;
+        ug.refAt = new Date().toISOString();
+        if(!Array.isArray(inv.refs)) inv.refs = [];
+        if(inv.refs.indexOf(fromId) < 0) inv.refs.push(fromId);
+        chg = true;
+        if(ADMIN_ID) tgCall("sendMessage", { chat_id: ADMIN_ID,
+          text: "\uD83D\uDC65 YANGI REFERAL (Start bosdi)\n" +
+                (ug.nm || fromId) + (ug.un ? " (@"+ug.un+")" : "") + " (id " + fromId + ")\n" +
+                "Taklif qilgan: " + (inv.nm || rid) + (inv.un ? " (@"+inv.un+")" : "") + " (id " + rid + ")" });
+      }
+      if(chg) save(dbg);
 
       const openKb = { inline_keyboard: [
         [{ text: "\uD83D\uDE80 Xaridga o'tish", web_app: { url: APP_URL } }]
