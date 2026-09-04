@@ -297,6 +297,10 @@ input{font-family:inherit}
 .ref-nm .a{font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ref-nm .b{color:var(--dim);font-size:12px;margin-top:2px}
 .ref-c{color:var(--dim);font-size:12.5px;flex-shrink:0}
+.ref-head.gone-h{border-top:1px solid var(--stroke);margin-top:6px;color:var(--dim);font-size:13px}
+.ref-head.gone-h span{background:rgba(255,255,255,.06);color:var(--faint)}
+.ref-row.gone{opacity:.45}
+.ref-row.gone .ref-nm .a{text-decoration:line-through}
 .ttl-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .ttl-row .page-title{margin-bottom:0}
 .chg-btn{background:none;border:none;padding:4px 2px;color:#7E93FF;font-size:12.5px;font-weight:500;
@@ -4167,7 +4171,19 @@ function loadRefs(){
              + '<div class="b">' + esc(un) + (dt ? ' \u00B7 ' + dt : '') + '</div></div>'
              + '<div class="ref-c">' + x.orders + (x.un ? ' \u203A' : '') + '</div></div>';
       }).join('');
-      box.innerHTML = '<div class="ref-head">Taklif qilinganlar <span>' + d.count + '</span></div>' + rows;
+      let out = '<div class="ref-head">Taklif qilinganlar <span>' + d.count + '</span></div>' + rows;
+      if(d.leftList && d.leftList.length){
+        const gone = d.leftList.map(function(x){
+          const nm = x.nm || 'Foydalanuvchi';
+          const un = x.un ? '@' + x.un : ('id ' + x.id);
+          return '<div class="ref-row gone">'
+               + '<div class="ref-av"><span>' + esc(nm.charAt(0).toUpperCase()) + '</span></div>'
+               + '<div class="ref-nm"><div class="a">' + esc(nm) + '</div>'
+               + '<div class="b">' + esc(un) + '</div></div></div>';
+        }).join('');
+        out += '<div class="ref-head gone-h">Botdan chiqib ketganlar <span>' + d.gone + '</span></div>' + gone;
+      }
+      box.innerHTML = out;
       box.className = 'ref-list';
     }).catch(function(){});
 }
