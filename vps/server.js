@@ -197,26 +197,42 @@ const ALUU_MAP = {
   /* ✅ TEKSHIRILGAN — characterId yetarli, serverni API o'zi topadi */
   where_winds_meet: { code:"wwm", srv:false },
 
-  /* ✅ TEKSHIRILGAN (800603907 + os_asia).
-     server_code MATNLI bo'lishi shart, raqam ("1") rad etiladi. */
-  genshin_impact: { code:"genshin_login", srv:true, uidSrv:true, srvMap:{
+  /* ✅ TEKSHIRILGAN (800603907 + os_asia; soxta 899999999 rad etildi).
+     server_code MATNLI bo'lishi shart. Ilova server so'ramasa,
+     UID ning birinchi raqamidan aniqlanadi (uidSrv). */
+  genshin_impact_global: { code:"genshin_login", srv:true, uidSrv:true, srvMap:{
     asia:"os_asia", america:"os_usa", usa:"os_usa", us:"os_usa", na:"os_usa",
     europe:"os_euro", eu:"os_euro", twhkmo:"os_cht", cht:"os_cht"
   }},
 
   /* ⚠️ HALI TEKSHIRILMAGAN — server kodlari HoYoverse standarti bo'yicha taxmin.
      games.json da noCheck turgani ma'qul, tasdiqlangach olib tashlanadi. */
-  zenless_zone_zero: { code:"zzz_login", srv:true, srvMap:{
+  zenless_zone_zero_global: { code:"zzz_login", srv:true, srvMap:{
     asia:"prod_gf_jp", america:"prod_gf_us", usa:"prod_gf_us", us:"prod_gf_us",
     europe:"prod_gf_eu", eu:"prod_gf_eu", twhkmo:"prod_gf_sg", cht:"prod_gf_sg"
   }},
+  zenless_zone_zero_us: { code:"zzz_login", srv:true, srvDefault:"prod_gf_us", srvMap:{
+    asia:"prod_gf_jp", america:"prod_gf_us", usa:"prod_gf_us", us:"prod_gf_us",
+    europe:"prod_gf_eu", eu:"prod_gf_eu", twhkmo:"prod_gf_sg", cht:"prod_gf_sg"
+  }},
+  /* zenless_zone_zero_ru — ataylab qo'shilmadi: RU versiyasi alohida hisob tizimi
+     bo'lishi mumkin, tekshirmasdan ulash xavfli */
 
-  /* ⚠️ SERVER RAQAMI HALI TOPILMAGAN (1001 ishlamadi) — noCheck da qolsin */
-  sword_of_justice: { code:["swordofjustice","swordofjustice_eu","swordofjustice_us"], srv:true },
+  /* ⚠️ SERVER RAQAMI HALI TOPILMAGAN (1001 ishlamadi) — noCheck da qolsin.
+     Region kodlari mos keladi: _eu→_eu, _na→_us, _sea→asosiy kod. */
+  sword_of_justice_eu:  { code:"swordofjustice_eu", srv:true },
+  sword_of_justice_na:  { code:"swordofjustice_us", srv:true },
+  sword_of_justice_sea: { code:"swordofjustice",    srv:true },
 
-  /* ⚠️ GLOBAL KOD YO'Q — regionlar navbat bilan sinaladi.
-     Bitta tekshiruv 6 tagacha so'rov yeydi (kunlik limit 100). noCheck da qolsin. */
-  valorant: { code:["valorant_id","valorant_ph","valorant_th","valorant_sg","valorant_my","valorant_kh"], srv:false }
+  /* ⚠️ HALI TEKSHIRILMAGAN — lekin region mijoz tanlagani bo'yicha aniq,
+     shuning uchun bitta tekshiruv = bitta so'rov. */
+  valorant_id: { code:"valorant_id", srv:false },
+  valorant_kh: { code:"valorant_kh", srv:false },
+  valorant_my: { code:"valorant_my", srv:false },
+  valorant_ph: { code:"valorant_ph", srv:false },
+  valorant_sg: { code:"valorant_sg", srv:false },
+  valorant_th: { code:"valorant_th", srv:false }
+  /* valorant_vn — aluu ro'yxatida VN kodi yo'q, qo'shilmadi */
 };
 
 /* games.json kategoriyani "genshin_impact", "genshinimpact" yoki "genshin-impact"
@@ -317,6 +333,7 @@ async function aluuValidate(m, fields){
     srv = String(fields.server_code || fields.zone_id || fields.server_id || fields.server || "").trim();
     if(srv && m.srvMap && m.srvMap[aluuNorm(srv)]) srv = m.srvMap[aluuNorm(srv)];
     if(!srv && m.uidSrv) srv = aluuUidSrv(pid);
+    if(!srv && m.srvDefault) srv = m.srvDefault;
     if(!srv){ console.log("ALUU: server tanlanmagan, cat maydonlari:", JSON.stringify(fields)); return { ok:false, reason:"bad_zone" }; }
   }
 
