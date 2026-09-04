@@ -1651,6 +1651,48 @@ async function refScan(reportTo){
 /* Kuniga bir marta o'zi tekshiradi */
 setInterval(function(){ refScan(null); }, 24*3600*1000);
 
+/* ---------- Tekshiruv navbati ----------
+   Ekran ochilganda o'sha odamning referallari navbatga qo'yiladi va
+   120 ms oralab tekshiriladi. Telegram limiti urilmaydi, natija aniq bo'ladi. */
+const scanQ = [];
+const scanSeen = new Map();          /* uid -> oxirgi tekshiruv vaqti */
+let scanRun = false;
+
+async function scanWorker(){
+  if(scanRun) return;
+  scanRun = true;
+  while(scanQ.length){
+    const uid = scanQ.shift();
+    try{
+      const bad = await tgBlocked(uid);
+      scanSeen.set(uid, Date.now());
+      const db = load();
+      const u = db[uid];
+      if(u){
+        if(bad && !u.left){ u.left = true; u.leftAt = new Date().toISOString(); save(db); }
+        else if(!bad && u.left){ delete u.left; delete u.leftAt; save(db); }
+      }
+    }catch(e){}
+    await new Promise(r => setTimeout(r, 120));
+  }
+  scanRun = false;
+}
+
+/* Ro'yxatdagilarni navbatga qo'yamiz. 2 daqiqa ichida tekshirilganlar o'tkazib yuboriladi. */
+function scanQueue(ids){
+  const now = Date.now();
+  let n = 0;
+  ids.forEach(function(uid){
+    const last = scanSeen.get(uid) || 0;
+    if(now - last < 2*60*1000) return;
+    if(scanQ.indexOf(uid) > -1) return;
+    if(scanQ.length > 800) return;
+    scanQ.push(uid); n++;
+  });
+  if(n) scanWorker();
+  return n;
+}
+
 /* ---------- Profil rasmi ----------
    Telegram rasmni faqat bot tokeni bilan beradi. Token ilovaga chiqmasligi uchun
    server o'zi olib, bayt sifatida uzatadi. 6 soat keshlanadi. */
@@ -1747,8 +1789,11 @@ app.get("/refs", (req,res)=>{
     list.sort(function(a,b){ return String(b.at||"").localeCompare(String(a.at||"")); });
     const act = list.filter(function(x){ return !x.left; });
     const gone = list.filter(function(x){ return x.left; });
+    /* Ekran ochildi — shu odamning referallarini tekshirishga qo'yamiz.
+       Javob darhol qaytadi, tekshiruv orqa fonda ketadi. */
+    const q = scanQueue(ids);
     res.json({ ok:true, count:act.length, total:list.length, gone:gone.length,
-               list:act.slice(0,100), leftList:gone.slice(0,50) });
+               checking: q, list:act.slice(0,100), leftList:gone.slice(0,50) });
   }catch(e){ res.json({ ok:false, error:"server" }); }
 });
 
