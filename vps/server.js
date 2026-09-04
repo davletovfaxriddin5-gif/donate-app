@@ -1779,7 +1779,8 @@ function bcastKb(mode){
   if(mode === "plain") return undefined;
   const L = { bonus: "\uD83C\uDF81 Bonus olish",
               oyin:  "\uD83C\uDFAE Yangi o'yinlarni ko'rish",
-              yangi: "\u2728 Yangilikni sinab ko'rish" };
+              yangi: "\u2728 Yangilikni sinab ko'rish",
+              kirish:"\uD83C\uDFAE MinatoUz kirish" };
   const label = L[mode] || "\uD83D\uDE80 Xaridni boshlash";
   return { inline_keyboard: [[ { text: label, web_app: { url: APP_URL } } ]] };
 }
@@ -1787,6 +1788,8 @@ function bcastKb(mode){
 function bcastAsk(){
   const n = bcastTargets().length;
   const what = bcast.kind === "album" ? (bcast.album.length + " ta rasm")
+             : bcast.kind === "video" ? "video"
+             : bcast.kind === "animation" ? "GIF"
              : bcast.kind === "photo" ? "rasm" : "matn";
   const btn  = bcast.mode === "plain" ? "tugmasiz"
              : bcast.mode === "bonus" ? "\uD83C\uDF81 Bonus olish tugmasi bilan"
@@ -1830,6 +1833,15 @@ function doBroadcast(){
           ? { type:"photo", media:fid, caption:text, caption_entities: ents || undefined }
           : { type:"photo", media:fid };
       })};
+    } else if(kind === "video"){
+      method = "sendVideo";
+      body = { chat_id: uid, video: photo, caption: text,
+               caption_entities: ents || undefined, reply_markup: kb,
+               supports_streaming: true };
+    } else if(kind === "animation"){
+      method = "sendAnimation";
+      body = { chat_id: uid, animation: photo, caption: text,
+               caption_entities: ents || undefined, reply_markup: kb };
     } else if(kind === "photo"){
       method = "sendPhoto";
       body = { chat_id: uid, photo: photo, caption: text,
@@ -2198,7 +2210,7 @@ app.post("/webhook", (req,res)=>{
       if(adminReply(msg)) return;
     }
     if(ADMIN_ID && fromId === ADMIN_ID){
-      const arm = { "/xabar":"btn", "/bonus":"bonus", "/oyin":"oyin", "/yangi":"yangi", "/albom":"plain" };
+      const arm = { "/xabar":"btn", "/bonus":"bonus", "/oyin":"oyin", "/yangi":"yangi", "/albom":"plain", "/kirish":"kirish" };
       let hit = null;
       Object.keys(arm).forEach(function(c){ if(text.indexOf(c) === 0) hit = c; });
       if(hit){
@@ -2252,12 +2264,22 @@ app.post("/webhook", (req,res)=>{
           bcast.photo = fid;
           bcast.text = String(msg.caption || "");
           bcast.ents = msg.caption_entities || null;
+        } else if(msg.video){
+          bcast.kind = "video";
+          bcast.photo = msg.video.file_id;
+          bcast.text = String(msg.caption || "");
+          bcast.ents = msg.caption_entities || null;
+        } else if(msg.animation){
+          bcast.kind = "animation";
+          bcast.photo = msg.animation.file_id;
+          bcast.text = String(msg.caption || "");
+          bcast.ents = msg.caption_entities || null;
         } else if(text){
           bcast.kind = "text";
           bcast.text = text;
           bcast.ents = msg.entities || null;
         } else {
-          send(fromId, "Faqat rasm yoki matn yuboring. Bekor qilish: /bekor");
+          send(fromId, "Faqat rasm, video yoki matn yuboring. Bekor qilish: /bekor");
           return;
         }
         bcast.armed = false;
