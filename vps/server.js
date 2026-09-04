@@ -1587,6 +1587,43 @@ function starPaid(fromId, sp){
 /* ---------- Karta orqali to'ldirish (noyob summa bilan) ---------- */
 /* ---------- Referal: kim kimni taklif qilgan ----------
    BONUS BERILMAYDI — faqat kuzatuv. Bonus keyinroq qo'shiladi. */
+/* ---------- Profil rasmi ----------
+   Telegram rasmni faqat bot tokeni bilan beradi. Token ilovaga chiqmasligi uchun
+   server o'zi olib, bayt sifatida uzatadi. 6 soat keshlanadi. */
+const avCache = new Map();
+app.get("/avatar", async (req,res)=>{
+  const uid = String(req.query.id || "").replace(/\D/g,"");
+  if(!uid || !TOKEN) return res.status(404).end();
+  try{
+    const hit = avCache.get(uid);
+    if(hit && Date.now() - hit.at < 6*3600*1000){
+      if(!hit.buf) return res.status(404).end();
+      res.set("Content-Type", hit.type || "image/jpeg");
+      res.set("Cache-Control", "public, max-age=21600");
+      return res.end(hit.buf);
+    }
+    const pr = await fetch("https://api.telegram.org/bot"+TOKEN+
+      "/getUserProfilePhotos?user_id="+uid+"&limit=1").then(r=>r.json());
+    const ph = pr && pr.ok && pr.result && pr.result.photos && pr.result.photos[0];
+    if(!ph || !ph.length){ avCache.set(uid, { at:Date.now(), buf:null }); return res.status(404).end(); }
+    const fid = ph[Math.min(1, ph.length-1)].file_id;   /* o'rtacha o'lcham */
+    const fr = await fetch("https://api.telegram.org/bot"+TOKEN+
+      "/getFile?file_id="+encodeURIComponent(fid)).then(r=>r.json());
+    if(!fr || !fr.ok || !fr.result || !fr.result.file_path){
+      avCache.set(uid, { at:Date.now(), buf:null }); return res.status(404).end();
+    }
+    const img = await fetch("https://api.telegram.org/file/bot"+TOKEN+"/"+fr.result.file_path);
+    if(!img.ok){ avCache.set(uid, { at:Date.now(), buf:null }); return res.status(404).end(); }
+    const buf = Buffer.from(await img.arrayBuffer());
+    const type = img.headers.get("content-type") || "image/jpeg";
+    avCache.set(uid, { at:Date.now(), buf:buf, type:type });
+    if(avCache.size > 500) avCache.delete(avCache.keys().next().value);
+    res.set("Content-Type", type);
+    res.set("Cache-Control", "public, max-age=21600");
+    res.end(buf);
+  }catch(e){ res.status(404).end(); }
+});
+
 app.post("/ref", (req,res)=>{
   try{
     const b = req.body || {};
@@ -1596,14 +1633,24 @@ app.post("/ref", (req,res)=>{
     const by  = String(b.ref || "").replace(/\D/g,"");
 
     const db = load();
+    const isNewRec = !db[uid];
     const u  = urec(db, uid);
     /* ismni har doim yangilab boramiz — ro'yxatda ko'rinishi uchun */
     let ch = false;
     if(u.nm !== who.name){ u.nm = who.name; ch = true; }
     const un = String(who.username||"").toLowerCase();
     if(u.un !== un){ u.un = un; ch = true; }
+    if(!u.firstAt && isNewRec){ u.firstAt = new Date().toISOString(); ch = true; }
 
-    if(by && by !== uid && !u.refBy){
+    /* Referal FAQAT yangi odam uchun hisoblanadi.
+       Botga avval kirgan mijoz havola orqali qayta kirsa — hisoblanmaydi.
+       firstAt yo'q = eski foydalanuvchi (bu funksiya qo'shilishidan oldingi). */
+    const ageMin = u.firstAt ? (Date.now() - new Date(u.firstAt).getTime())/60000 : 1e9;
+    const used   = (u.orders||[]).length > 0 || (u.topups||[]).length > 0 ||
+                   (u.balance||0) > 0 || !!u.phone;
+    const fresh  = ageMin <= 30 && !used;
+
+    if(by && by !== uid && !u.refBy && fresh){
       const inv = urec(db, by);
       u.refBy = by;
       u.refAt = new Date().toISOString();
@@ -2180,8 +2227,12 @@ app.post("/webhook", (req,res)=>{
       const nm = String((msg.from && msg.from.first_name) || "").trim();
       if(un || nm){
         const dbU = load();
+        const isNew = !dbU[fromId];
         const uu = urec(dbU, fromId);
-        if(uu.un !== un || uu.nm !== nm){ uu.un = un; uu.nm = nm; save(dbU); }
+        let c2 = false;
+        if(uu.un !== un || uu.nm !== nm){ uu.un = un; uu.nm = nm; c2 = true; }
+        if(!uu.firstAt && isNew){ uu.firstAt = new Date().toISOString(); c2 = true; }
+        if(c2) save(dbU);
       }
     }catch(e){}
 
