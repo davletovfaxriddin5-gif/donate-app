@@ -4150,10 +4150,12 @@ function openTg(un){
   try{ if(tg && tg.openTelegramLink){ tg.openTelegramLink(url); return; } }catch(e){}
   try{ window.open(url, '_blank'); }catch(e){}
 }
-function loadRefs(){
+let refTimer = null;
+function loadRefs(again){
   const uid = tgUser && tgUser.id ? tgUser.id : '';
   const box = document.getElementById('refBox');
   if(!uid || !box) return;
+  if(!again && refTimer){ clearTimeout(refTimer); refTimer = null; }
   fetch(VBASE + '/refs?id=' + encodeURIComponent(uid))
     .then(function(r){ return r.json(); })
     .then(function(d){
@@ -4185,6 +4187,12 @@ function loadRefs(){
       }
       box.innerHTML = out;
       box.className = 'ref-list';
+      /* Server hali tekshirayotgan bo'lsa — tugagach ro'yxatni yangilaymiz */
+      if(d.checking > 0 && document.getElementById('refBox')){
+        if(refTimer) clearTimeout(refTimer);
+        refTimer = setTimeout(function(){ refTimer = null; loadRefs(true); },
+                              Math.min(20000, 1500 + d.checking * 130));
+      }
     }).catch(function(){});
 }
 function copyRef(link){ haptic(); try{ navigator.clipboard.writeText(link); }catch(e){} notify('success'); toastOk('Havola nusxalandi'); }
