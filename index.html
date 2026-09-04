@@ -427,6 +427,13 @@ body{ font-size:13px; font-weight:400; letter-spacing:-.1px }
 body.light .stat, body.light .id-chip{ border-color:rgba(16,24,40,.14) }
 body.light .svc + .svc{ border-top-color:rgba(16,24,40,.10) }
 body.light .order .sep{ background:rgba(16,24,40,.10) }
+/* Rejim almashganda silliq o'tish. .theming faqat almashish paytida turadi,
+   shuning uchun qolgan animatsiyalarga xalaqit bermaydi. */
+body.theming, body.theming *{
+  transition: background-color .4s ease, color .4s ease,
+              border-color .4s ease, fill .4s ease, box-shadow .4s ease !important;
+}
+body.reduce-motion.theming, body.reduce-motion.theming *{ transition:none !important; }
 /* === Yorug' rejim === */
 body.light{
   --bg:#EEF1F8;
@@ -802,7 +809,7 @@ DICT.ru = {
   "❌ Balans yetarli emas — ":"❌ Недостаточно средств — ",
   "📱 Botga o'tilmoqda...":"📱 Переход в бот...",
   "O'zgartirish":"Изменить",
-  "Tungi rejim":"Ночной режим","Yorug' rejimga o'tish":"Переключиться на светлый режим",
+  "Tungi rejim":"Ночной режим","Yorug' rejim":"Светлый режим","Yorug' rejimga o'tish":"Переключиться на светлый режим",
   "Bosh sahifa":"Главная","Tarix":"История","Sozlamalar":"Настройки","Orqaga":"Назад",
   "Balans":"Баланс","so'm":"сум","Keshbek":"Кэшбэк",
   "Hisobni to'ldirish":"Пополнить счёт","Qo'llab-quvvatlash":"Поддержка",
@@ -879,7 +886,7 @@ DICT.en = {
   "❌ Balans yetarli emas — ":"❌ Insufficient balance — ",
   "📱 Botga o'tilmoqda...":"📱 Opening the bot...",
   "O'zgartirish":"Change",
-  "Tungi rejim":"Night mode",
+  "Tungi rejim":"Night mode","Yorug' rejim":"Light mode",
   "Yorug' rejimga o'tish":"Switch to light mode",
   "Bosh sahifa":"Home",
   "Tarix":"History",
@@ -1021,7 +1028,7 @@ DICT.tr = {
   "❌ Balans yetarli emas — ":"❌ Bakiye yetersiz — ",
   "📱 Botga o'tilmoqda...":"📱 Bota geçiliyor...",
   "O'zgartirish":"Değiştir",
-  "Tungi rejim":"Gece modu",
+  "Tungi rejim":"Gece modu","Yorug' rejim":"Aydınlık mod",
   "Yorug' rejimga o'tish":"Aydınlık moda geç",
   "Bosh sahifa":"Ana sayfa",
   "Tarix":"Geçmiş",
@@ -1163,7 +1170,7 @@ DICT.kk = {
   "❌ Balans yetarli emas — ":"❌ Баланс жеткіліксіз — ",
   "📱 Botga o'tilmoqda...":"📱 Ботқа өтілуде...",
   "O'zgartirish":"Өзгерту",
-  "Tungi rejim":"Түнгі режим",
+  "Tungi rejim":"Түнгі режим","Yorug' rejim":"Жарық режим",
   "Yorug' rejimga o'tish":"Жарық режимге ауысу",
   "Bosh sahifa":"Басты бет",
   "Tarix":"Тарих",
@@ -1305,7 +1312,7 @@ DICT.ky = {
   "❌ Balans yetarli emas — ":"❌ Баланс жетишсиз — ",
   "📱 Botga o'tilmoqda...":"📱 Ботко өтүлүүдө...",
   "O'zgartirish":"Өзгөртүү",
-  "Tungi rejim":"Түнкү режим",
+  "Tungi rejim":"Түнкү режим","Yorug' rejim":"Жарык режим",
   "Yorug' rejimga o'tish":"Жарык режимге өтүү",
   "Bosh sahifa":"Башкы бет",
   "Tarix":"Тарых",
@@ -1448,7 +1455,7 @@ DICT.de = {
   "❌ Balans yetarli emas — ":"❌ Guthaben reicht nicht — ",
   "📱 Botga o'tilmoqda...":"📱 Bot wird geöffnet...",
   "O'zgartirish":"Ändern",
-  "Tungi rejim":"Nachtmodus",
+  "Tungi rejim":"Nachtmodus","Yorug' rejim":"Heller Modus",
   "Yorug' rejimga o'tish":"Zum hellen Modus wechseln",
   "Bosh sahifa":"Startseite",
   "Tarix":"Verlauf",
@@ -1590,7 +1597,7 @@ DICT.it = {
   "❌ Balans yetarli emas — ":"❌ Saldo insufficiente — ",
   "📱 Botga o'tilmoqda...":"📱 Apertura del bot...",
   "O'zgartirish":"Modifica",
-  "Tungi rejim":"Modalità notte",
+  "Tungi rejim":"Modalità notte","Yorug' rejim":"Modalità chiara",
   "Yorug' rejimga o'tish":"Passa alla modalità chiara",
   "Bosh sahifa":"Home",
   "Tarix":"Cronologia",
@@ -1732,7 +1739,7 @@ DICT.id = {
   "❌ Balans yetarli emas — ":"❌ Saldo tidak cukup — ",
   "📱 Botga o'tilmoqda...":"📱 Membuka bot...",
   "O'zgartirish":"Ubah",
-  "Tungi rejim":"Mode gelap",
+  "Tungi rejim":"Mode gelap","Yorug' rejim":"Mode terang",
   "Yorug' rejimga o'tish":"Beralih ke mode terang",
   "Bosh sahifa":"Beranda",
   "Tarix":"Riwayat",
@@ -1874,7 +1881,7 @@ DICT.pt = {
   "❌ Balans yetarli emas — ":"❌ Saldo insuficiente — ",
   "📱 Botga o'tilmoqda...":"📱 Abrindo o bot...",
   "O'zgartirish":"Alterar",
-  "Tungi rejim":"Modo noturno",
+  "Tungi rejim":"Modo noturno","Yorug' rejim":"Modo claro",
   "Yorug' rejimga o'tish":"Mudar para o modo claro",
   "Bosh sahifa":"Início",
   "Tarix":"Histórico",
@@ -2016,7 +2023,7 @@ DICT.vi = {
   "❌ Balans yetarli emas — ":"❌ Số dư không đủ — ",
   "📱 Botga o'tilmoqda...":"📱 Đang mở bot...",
   "O'zgartirish":"Thay đổi",
-  "Tungi rejim":"Chế độ tối",
+  "Tungi rejim":"Chế độ tối","Yorug' rejim":"Chế độ sáng",
   "Yorug' rejimga o'tish":"Chuyển sang chế độ sáng",
   "Bosh sahifa":"Trang chủ",
   "Tarix":"Lịch sử",
@@ -2158,7 +2165,7 @@ DICT.ja = {
   "❌ Balans yetarli emas — ":"❌ 残高が不足しています — ",
   "📱 Botga o'tilmoqda...":"📱 ボットを開いています...",
   "O'zgartirish":"変更",
-  "Tungi rejim":"ダークモード",
+  "Tungi rejim":"ダークモード","Yorug' rejim":"ライトモード",
   "Yorug' rejimga o'tish":"ライトモードに切り替え",
   "Bosh sahifa":"ホーム",
   "Tarix":"履歴",
@@ -2300,7 +2307,7 @@ DICT.ko = {
   "❌ Balans yetarli emas — ":"❌ 잔액이 부족합니다 — ",
   "📱 Botga o'tilmoqda...":"📱 봇으로 이동 중...",
   "O'zgartirish":"변경",
-  "Tungi rejim":"다크 모드",
+  "Tungi rejim":"다크 모드","Yorug' rejim":"라이트 모드",
   "Yorug' rejimga o'tish":"라이트 모드로 전환",
   "Bosh sahifa":"홈",
   "Tarix":"내역",
@@ -2442,7 +2449,7 @@ DICT.zh = {
   "❌ Balans yetarli emas — ":"❌ 余额不足 — ",
   "📱 Botga o'tilmoqda...":"📱 正在打开机器人...",
   "O'zgartirish":"更改",
-  "Tungi rejim":"夜间模式",
+  "Tungi rejim":"夜间模式","Yorug' rejim":"浅色模式",
   "Yorug' rejimga o'tish":"切换到浅色模式",
   "Bosh sahifa":"首页",
   "Tarix":"记录",
@@ -3974,7 +3981,7 @@ function renderSettings(){
     </button>
     <button class="svc" onclick="toggleTheme(this)">
       <span class="ic" style="background:#C9902A"><svg viewBox="0 0 24 24"><path d="M21 12.8A8.5 8.5 0 1 1 11.2 3a6.6 6.6 0 0 0 9.8 9.8z"/></svg></span>
-      <span class="txt"><div class="t">Tungi rejim</div><div class="s">${document.body.classList.contains('light')?"Tungi rejimga o'tish":"Yorug' rejimga o'tish"}</div></span>
+      <span class="txt"><div class="t">${document.body.classList.contains('light')?tr("Yorug' rejim"):tr("Tungi rejim")}</div><div class="s">${document.body.classList.contains('light')?tr("Tungi rejimga o'tish"):tr("Yorug' rejimga o'tish")}</div></span>
       <span class="switch ${document.body.classList.contains('light')?'on':''}"></span>
     </button>
   </div>
@@ -4222,12 +4229,19 @@ function toggleMotion(el){ haptic(); const on=document.body.classList.toggle('re
   try{ tg && tg.setHeaderColor && tg.setHeaderColor(c); }catch(e){}
   try{ tg && tg.setBackgroundColor && tg.setBackgroundColor(c); }catch(e){}
 }
+let themeT = null;
 function toggleTheme(el){
   haptic();
+  /* .theming \u2014 0.4s davomida ranglar silliq o'zgaradi */
+  document.body.classList.add('theming');
+  if(themeT) clearTimeout(themeT);
+  themeT = setTimeout(function(){ document.body.classList.remove('theming'); themeT = null; }, 460);
+
   const on = document.body.classList.toggle('light');
   try{ localStorage.setItem('mt_theme', on ? 'light' : 'dark'); }catch(e){}
   const sw = el.querySelector('.switch'); if(sw) sw.classList.toggle('on', on);
-  const lb = el.querySelector('.s'); if(lb) lb.textContent = on ? "Tungi rejimga o'tish" : "Yorug' rejimga o'tish";
+  const tl = el.querySelector('.t'); if(tl) tl.textContent = on ? tr("Yorug' rejim") : tr("Tungi rejim");
+  const lb = el.querySelector('.s'); if(lb) lb.textContent = on ? tr("Tungi rejimga o'tish") : tr("Yorug' rejimga o'tish");
   applyTheme();
 }
 let topMethod = null, topPend = null, topTick = null, topEnd = 0;
