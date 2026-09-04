@@ -187,13 +187,62 @@ const S2T_MAP = {
    Bepul: kuniga 100 ta so'rov. FazerCards va shop2topup yo'liga TEGMAYDI. */
 const ALUU_KEY  = process.env.ALUU_KEY || "";
 const ALUU_BASE = "https://aluu.in/api/check/game-check";
-/* games.json dagi kategoriya nomi -> aluu.in kodi va kerakli maydonlar */
+/* games.json dagi kategoriya nomi -> aluu.in kodi va kerakli maydonlar
+   code   : bitta kod yoki kodlar ro'yxati (ro'yxat bo'lsa navbat bilan sinaladi)
+   srv    : server_code yuborish shartmi
+   srvMap : ilova yuboradigan qiymat -> aluu kutadigan qiymat
+            (kalitlar normallashgan holda: harf+raqam, tagchiziqsiz)
+   uidSrv : server yuborilmasa, UID ning birinchi raqamidan aniqlanadimi */
 const ALUU_MAP = {
-  where_winds_meet: { code:"wwm", srv:false }
+  /* ✅ TEKSHIRILGAN — characterId yetarli, serverni API o'zi topadi */
+  where_winds_meet: { code:"wwm", srv:false },
+
+  /* ✅ TEKSHIRILGAN (800603907 + os_asia).
+     server_code MATNLI bo'lishi shart, raqam ("1") rad etiladi. */
+  genshin_impact: { code:"genshin_login", srv:true, uidSrv:true, srvMap:{
+    asia:"os_asia", america:"os_usa", usa:"os_usa", us:"os_usa", na:"os_usa",
+    europe:"os_euro", eu:"os_euro", twhkmo:"os_cht", cht:"os_cht"
+  }},
+
+  /* ⚠️ HALI TEKSHIRILMAGAN — server kodlari HoYoverse standarti bo'yicha taxmin.
+     games.json da noCheck turgani ma'qul, tasdiqlangach olib tashlanadi. */
+  zenless_zone_zero: { code:"zzz_login", srv:true, srvMap:{
+    asia:"prod_gf_jp", america:"prod_gf_us", usa:"prod_gf_us", us:"prod_gf_us",
+    europe:"prod_gf_eu", eu:"prod_gf_eu", twhkmo:"prod_gf_sg", cht:"prod_gf_sg"
+  }},
+
+  /* ⚠️ SERVER RAQAMI HALI TOPILMAGAN (1001 ishlamadi) — noCheck da qolsin */
+  sword_of_justice: { code:["swordofjustice","swordofjustice_eu","swordofjustice_us"], srv:true },
+
+  /* ⚠️ GLOBAL KOD YO'Q — regionlar navbat bilan sinaladi.
+     Bitta tekshiruv 6 tagacha so'rov yeydi (kunlik limit 100). noCheck da qolsin. */
+  valorant: { code:["valorant_id","valorant_ph","valorant_th","valorant_sg","valorant_my","valorant_kh"], srv:false }
 };
 
+/* games.json kategoriyani "genshin_impact", "genshinimpact" yoki "genshin-impact"
+   deb yozgan bo'lishi mumkin — tagchiziq/chiziqchani e'tiborsiz qoldirib qidiramiz */
+function aluuNorm(s){ return String(s==null?"":s).toLowerCase().replace(/[^a-z0-9]/g,""); }
+const ALUU_NORM = {};
+Object.keys(ALUU_MAP).forEach(function(k){ ALUU_NORM[aluuNorm(k)] = ALUU_MAP[k]; });
+function aluuLookup(cat){
+  if(!cat) return null;
+  return ALUU_MAP[cat] || ALUU_NORM[aluuNorm(cat)] || null;
+}
+
+/* Genshin UID ning birinchi raqami regionni bildiradi — ilova server yubormasa zaxira yo'l */
+function aluuUidSrv(pid){
+  const s = String(pid==null?"":pid);
+  if(/^18/.test(s)) return "os_asia";
+  const c = s.charAt(0);
+  if(c === "6") return "os_usa";
+  if(c === "7") return "os_euro";
+  if(c === "8") return "os_asia";
+  if(c === "9") return "os_cht";
+  return "";
+}
+
 function aluuPid(f){
-  const k = ["character_id","player_id","user_id","uid","id","account_id"];
+  const k = ["character_id","player_id","user_id","uid","id","account_id","riot_id","username"];
   for(let i=0;i<k.length;i++){ const v=String(f[k[i]]||"").trim(); if(v) return v; }
   const n = {};
   Object.keys(f||{}).forEach(function(x){
@@ -203,16 +252,12 @@ function aluuPid(f){
   return "";
 }
 
-async function aluuValidate(m, fields){
-  if(!ALUU_KEY) return { ok:false, reason:"error" };
-  const pid = aluuPid(fields);
-  if(!pid) return { ok:false, reason:"bad_id" };
-  let url = ALUU_BASE + "?code=" + encodeURIComponent(m.code) +
+/* Bitta kod bilan bitta so'rov. stop:true — keyingi kodlarni sinash MA'NOSIZ
+   (limit, tarmoq xatosi, notanish javob): boshqa kodda ham xuddi shu bo'ladi. */
+async function aluuCall(code, pid, srv){
+  let url = ALUU_BASE + "?code=" + encodeURIComponent(code) +
             "&characterId=" + encodeURIComponent(pid);
-  if(m.srv){
-    const z = String(fields.server_code || fields.zone_id || fields.server_id || fields.server || "").trim();
-    if(z) url += "&server_code=" + encodeURIComponent(z);
-  }
+  if(srv) url += "&server_code=" + encodeURIComponent(srv);
   const ac = new AbortController();
   const tm = setTimeout(()=>ac.abort(), 20000);
   try{
@@ -220,25 +265,71 @@ async function aluuValidate(m, fields){
     const txt = await r.text();
     let j = null;
     try{ j = JSON.parse(txt); }catch(e){}
-    if(!j){ console.log("ALUU javob JSON emas:", txt.slice(0,120)); return { ok:false, reason:"error" }; }
+    if(!j){
+      console.log("ALUU javob JSON emas (" + code + "):", txt.slice(0,120));
+      return { ok:false, reason:"error", stop:true };
+    }
 
     /* kunlik limit yoki tezlik cheklovi — ID ni O'TKAZIB YUBORMAYMIZ */
     if(j.code === "FREE_DAILY_LIMIT_REACHED" || j.code === "RATE_LIMITED"){
       console.log("ALUU limit:", j.code);
-      return { ok:false, reason:"timeout" };
+      return { ok:false, reason:"timeout", stop:true };
     }
+
+    /* 1-shakl (wwm): {"valid":"valid","name":"...","serverid":"..."} */
     const v = String(j.valid || "").toLowerCase();
-    const nm = String(j.nickname || j.name || "").trim();
-    if(v === "valid" && nm && nm.toLowerCase() !== "na"){
-      return { ok:true, valid:true, name: nm, region: String(j.region || j.server || "") };
+    if(v){
+      const nm = String(j.nickname || j.name || "").trim();
+      if(v === "valid" && nm && nm.toLowerCase() !== "na"){
+        return { ok:true, valid:true, name: nm,
+                 region: String(j.region || j.serverid || j.server || "") };
+      }
+      return { ok:false, reason:"invalid" };
     }
-    if(v === "invalid") return { ok:false, reason:"invalid" };
-    console.log("ALUU javob:", txt.slice(0,160));
-    return { ok:false, reason:"timeout" };
+
+    /* 2-shakl (genshin_login / zzz_login):
+       {"success":true,"uid":"...","username":"...","region":"Asia"}
+       DIQQAT: username bo'sh kelishi mumkin — bu xato emas, bu o'yin nick bermaydi */
+    if(j.success === true){
+      const nm2 = String(j.username || j.nickname || j.name || "").trim();
+      return { ok:true, valid:true, name: nm2, region: String(j.region || "") };
+    }
+    if(j.success === false){
+      console.log("ALUU rad etdi (" + code + "):", String(j.msg || j.message || "").slice(0,140));
+      return { ok:false, reason:"invalid" };
+    }
+
+    console.log("ALUU notanish javob (" + code + "):", txt.slice(0,160));
+    return { ok:false, reason:"timeout", stop:true };
   }catch(e){
-    console.log("ALUU xato:", e.message);
-    return { ok:false, reason:"timeout" };
+    console.log("ALUU xato (" + code + "):", e.message);
+    return { ok:false, reason:"timeout", stop:true };
   } finally { clearTimeout(tm); }
+}
+
+async function aluuValidate(m, fields){
+  if(!ALUU_KEY) return { ok:false, reason:"error" };
+  const pid = aluuPid(fields);
+  if(!pid) return { ok:false, reason:"bad_id" };
+
+  let srv = "";
+  if(m.srv){
+    srv = String(fields.server_code || fields.zone_id || fields.server_id || fields.server || "").trim();
+    if(srv && m.srvMap && m.srvMap[aluuNorm(srv)]) srv = m.srvMap[aluuNorm(srv)];
+    if(!srv && m.uidSrv) srv = aluuUidSrv(pid);
+    if(!srv){ console.log("ALUU: server tanlanmagan, cat maydonlari:", JSON.stringify(fields)); return { ok:false, reason:"bad_zone" }; }
+  }
+
+  /* Valorant/Sword of Justice da bir nechta kod bor — birinchi topilgani g'olib */
+  const codes = Array.isArray(m.code) ? m.code : [m.code];
+  let last = { ok:false, reason:"invalid" };
+  for(let i=0;i<codes.length;i++){
+    const d = await aluuCall(codes[i], pid, srv);
+    if(d.ok) return d;
+    if(d.stop) return { ok:false, reason: d.reason };
+    last = { ok:false, reason: d.reason };
+  }
+  return last;
 }
 
 function s2tPid(f){
@@ -355,11 +446,11 @@ async function validateId(req,res){
     /* shop2topup tekshiradigan kategoriyalar shu yerda hal bo'ladi —
        FazerCards'ga umuman bormaydi va uning limitini yemaydi */
     /* aluu.in tekshiradigan kategoriyalar — birinchi navbatda shu yerda hal bo'ladi */
-    const aluuM = ALUU_MAP[cat];
+    const aluuM = aluuLookup(cat);
     const s2tItem = S2T_MAP[cat];
     console.log("VALIDATE cat=" + JSON.stringify(cat) +
                 " fields=" + JSON.stringify(fields) +
-                " -> " + (aluuM ? ("aluu " + aluuM.code)
+                " -> " + (aluuM ? ("aluu " + [].concat(aluuM.code).join("/"))
                         : s2tItem ? ("shop2topup item " + s2tItem) : "FazerCards"));
     if(aluuM){
       const d = await aluuValidate(aluuM, fields);
