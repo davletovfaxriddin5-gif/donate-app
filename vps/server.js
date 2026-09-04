@@ -1587,6 +1587,70 @@ function starPaid(fromId, sp){
 /* ---------- Karta orqali to'ldirish (noyob summa bilan) ---------- */
 /* ---------- Referal: kim kimni taklif qilgan ----------
    BONUS BERILMAYDI — faqat kuzatuv. Bonus keyinroq qo'shiladi. */
+/* ---------- Bloklaganini aniqlash ----------
+   sendChatAction("typing") ko'rinmas signal — mijoz hech narsa sezmaydi.
+   Bloklagan bo'lsa Telegram 403 qaytaradi. */
+async function tgBlocked(uid){
+  if(!TOKEN) return false;
+  try{
+    const r = await fetch("https://api.telegram.org/bot"+TOKEN+"/sendChatAction", {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({ chat_id: String(uid), action: "typing" })
+    });
+    const j = await r.json();
+    if(j && j.ok) return false;
+    const d = String((j && j.description) || "").toLowerCase();
+    /* faqat ANIQ bloklash belgilari — boshqa xatoda odamni o'chirmaymiz */
+    if(/blocked by the user|user is deactivated|chat not found|bot was kicked/.test(d)) return true;
+    return false;
+  }catch(e){ return false; }
+}
+
+/* Referal ro'yxatidagilarni tekshirib, chiqib ketganlarni belgilaydi.
+   O'chirmaydi — "left" deb qo'yadi, ya'ni kim chiqqani ko'rinib turadi. */
+let refScanBusy = false;
+async function refScan(reportTo){
+  if(refScanBusy){ if(reportTo) send(reportTo, "Tekshiruv allaqachon ketyapti\u2026"); return; }
+  refScanBusy = true;
+  try{
+    const db0 = load();
+    const ids = new Set();
+    Object.keys(db0).forEach(function(k){
+      if(!/^\d+$/.test(k)) return;
+      (db0[k].refs || []).forEach(function(x){ ids.add(String(x)); });
+    });
+    const list = Array.from(ids);
+    if(reportTo) send(reportTo, "\uD83D\uDD0D Tekshirilmoqda: " + list.length + " ta odam\u2026");
+
+    const gone = [], back = [];
+    for(let i = 0; i < list.length; i++){
+      const uid = list[i];
+      const bad = await tgBlocked(uid);
+      const db = load();
+      const u = db[uid];
+      if(u){
+        if(bad && !u.left){ u.left = true; u.leftAt = new Date().toISOString(); gone.push(uid); save(db); }
+        else if(!bad && u.left){ delete u.left; delete u.leftAt; back.push(uid); save(db); }
+      }
+      await new Promise(r => setTimeout(r, 120));   /* Telegram limitini urmaslik uchun */
+    }
+    if(reportTo){
+      const db2 = load();
+      let act = 0, lft = 0;
+      list.forEach(function(k){ (db2[k] && db2[k].left) ? lft++ : act++; });
+      send(reportTo, "\u2705 Tekshiruv tugadi\n" +
+        "Jami: " + list.length + "\n" +
+        "Faol: " + act + "\n" +
+        "Chiqib ketgan: " + lft +
+        (gone.length ? "\n\nYangi chiqqanlar: " + gone.length : "") +
+        (back.length ? "\nQaytganlar: " + back.length : ""));
+    }
+  }catch(e){ if(reportTo) send(reportTo, "\u26A0\uFE0F Tekshiruv xatosi: " + e.message); }
+  finally{ refScanBusy = false; }
+}
+/* Kuniga bir marta o'zi tekshiradi */
+setInterval(function(){ refScan(null); }, 24*3600*1000);
+
 /* ---------- Profil rasmi ----------
    Telegram rasmni faqat bot tokeni bilan beradi. Token ilovaga chiqmasligi uchun
    server o'zi olib, bayt sifatida uzatadi. 6 soat keshlanadi. */
@@ -1677,10 +1741,14 @@ app.get("/refs", (req,res)=>{
     const list = ids.map(function(k){
       const r = db[k] || {};
       return { id:k, nm:r.nm || "", un:r.un || "", at:r.refAt || "",
+               left: !!r.left,
                orders:(r.orders||[]).filter(function(x){ return x.status==="done"; }).length };
     });
     list.sort(function(a,b){ return String(b.at||"").localeCompare(String(a.at||"")); });
-    res.json({ ok:true, count:list.length, list:list.slice(0,100) });
+    const act = list.filter(function(x){ return !x.left; });
+    const gone = list.filter(function(x){ return x.left; });
+    res.json({ ok:true, count:act.length, total:list.length, gone:gone.length,
+               list:act.slice(0,100), leftList:gone.slice(0,50) });
   }catch(e){ res.json({ ok:false, error:"server" }); }
 });
 
@@ -1906,7 +1974,17 @@ function doBroadcast(){
           const r = j.result;
           if(Array.isArray(r)) r.forEach(function(m){ sent.push({ u:uid, m:m.message_id }); });
           else if(r && r.message_id) sent.push({ u:uid, m:r.message_id });
-        } else fail++;
+        } else {
+          fail++;
+          /* Tarqatma 403 bersa — odam bloklagan, darhol belgilaymiz */
+          const d = String((j && j.description) || "").toLowerCase();
+          if(/blocked by the user|user is deactivated|chat not found|bot was kicked/.test(d)){
+            try{
+              const dbB = load(); const ub = dbB[uid];
+              if(ub && !ub.left){ ub.left = true; ub.leftAt = new Date().toISOString(); save(dbB); }
+            }catch(e){}
+          }
+        }
       })
       .catch(function(){ fail++; })
       .then(function(){ setTimeout(step, 60); });
@@ -2337,6 +2415,12 @@ app.post("/webhook", (req,res)=>{
         bcastAsk();
         return;
       }
+    }
+    /* /tekshir \u2014 referal ro'yxatidagilarni tekshirish (kim chiqib ketgan) */
+    if(text.indexOf("/tekshir") === 0){
+      if(ADMIN_ID && fromId !== ADMIN_ID) return;
+      refScan(fromId);
+      return;
     }
     /* /zaxira \u2014 ro'yxat yoki yangi zaxira olish */
     if(text.indexOf("/zaxira") === 0){
