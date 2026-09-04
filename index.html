@@ -4108,7 +4108,9 @@ function sharePhone(){
 function invite(){
   haptic();
   const uid = tgUser && tgUser.id ? tgUser.id : '';
-  const link = uid ? `https://t.me/${BOT_USERNAME}?startapp=${uid}` : `https://t.me/${BOT_USERNAME}`;
+  /* Bot CHATIGA olib boradi va Start tugmasi chiqadi. startapp ishlatilmaydi:
+     u to'g'ridan-to'g'ri Mini App ni ochadi, odam botga qo'shilmay qoladi. */
+  const link = uid ? `https://t.me/${BOT_USERNAME}?start=ref_${uid}` : `https://t.me/${BOT_USERNAME}`;
   window.scrollTo(0,0);
   app.innerHTML = `
   <div class="page-title">Do'stlarni taklif qilish</div>
@@ -4159,7 +4161,9 @@ function loadRefs(again){
   fetch(VBASE + '/refs?id=' + encodeURIComponent(uid))
     .then(function(r){ return r.json(); })
     .then(function(d){
-      if(!d || !d.ok || !d.list || !d.list.length) return;
+      if(!d || !d.ok) return;
+      d.list = d.list || []; d.pendList = d.pendList || []; d.leftList = d.leftList || [];
+      if(!d.list.length && !d.pendList.length && !d.leftList.length) return;
       const rows = d.list.map(function(x){
         const nm = x.nm || 'Foydalanuvchi';
         const un = x.un ? '@' + x.un : ('id ' + x.id);
@@ -4173,7 +4177,20 @@ function loadRefs(again){
              + '<div class="b">' + esc(un) + (dt ? ' \u00B7 ' + dt : '') + '</div></div>'
              + '<div class="ref-c">' + x.orders + (x.un ? ' \u203A' : '') + '</div></div>';
       }).join('');
-      let out = '<div class="ref-head">Taklif qilinganlar <span>' + d.count + '</span></div>' + rows;
+      let out = '';
+      if(d.list.length) out += '<div class="ref-head">Taklif qilinganlar <span>' + d.count + '</span></div>' + rows;
+      /* Havolani ochgan, lekin botga Start bosmagan \u2014 hali hisoblanmaydi */
+      if(d.pendList && d.pendList.length){
+        const pend = d.pendList.map(function(x){
+          const nm = x.nm || 'Foydalanuvchi';
+          const un = x.un ? '@' + x.un : ('id ' + x.id);
+          return '<div class="ref-row gone">'
+               + '<div class="ref-av"><span>' + esc(nm.charAt(0).toUpperCase()) + '</span></div>'
+               + '<div class="ref-nm"><div class="a">' + esc(nm) + '</div>'
+               + '<div class="b">' + esc(un) + '</div></div></div>';
+        }).join('');
+        out += '<div class="ref-head gone-h">Botga Start bosmagan <span>' + d.pending + '</span></div>' + pend;
+      }
       if(d.leftList && d.leftList.length){
         const gone = d.leftList.map(function(x){
           const nm = x.nm || 'Foydalanuvchi';
