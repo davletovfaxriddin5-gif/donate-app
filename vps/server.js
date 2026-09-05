@@ -537,9 +537,21 @@ const CATALOG = {
   standoff2: { cat:"", srv:false, items:{
     "100G":18000, "200G":34500, "300G":54500, "500G":86000
   }},
+  /* PUBG narxlari retail() dan EMAS: tannarx USD x 12370 kurs bilan olinadi,
+     keyin bracket qo'shiladi. Mavjud UC paketlari ham shu uslubda. */
   pubg: { cat:"pubg_mobile_auto", srv:false, items:{
     "60_uc":13000, "325_uc":62000, "660_uc":123000,
-    "1800_uc":307000, "3850_uc":613000, "8100_uc":1226000
+    "1800_uc":307000, "3850_uc":613000, "8100_uc":1226000,
+
+    "first_purchase_pack":16000, "prime_1_month":16000, "weekly_deal_pack_1":16000,
+    "weekly_mythic_emblem_value_pack":42500, "weekly_deal_pack_2":42500,
+    "upgradable_firearm_materials_pack":42500, "prime_3_months":42500,
+    "mythic_emblem_pack":69000,
+    "prime_6_months":79500, "elite_pass_lv1_50":79500,
+    "prime_plus_1_month":120000,
+    "prime_12_months":144000, "elite_pass_lv1_100":146500,
+    "elite_pass_plus_lv1_100":357500, "prime_plus_3_months":360000,
+    "prime_plus_6_months":719500, "prime_plus_12_months":1439000
   }},
   freefire: { cat:"free_fire_cis", srv:false, items:{
     "110_diamonds":13000, "341_diamonds":34000, "572_diamonds":54000,
