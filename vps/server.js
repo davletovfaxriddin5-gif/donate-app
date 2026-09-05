@@ -1125,7 +1125,11 @@ function tgCall(method, body){
 app.get("/balance", (req,res)=>{
   const db = load();
   const rec = db[String(req.query.id||"")];
-  res.json({ ok:true, balance: (rec && rec.balance) || 0 });
+  /* started \u2014 bot suhbati bormi (Start bosilganmi).
+     Ilova shu belgi bo'yicha "botga qo'shiling" ogohlantirishini ko'rsatadi. */
+  res.json({ ok:true, balance: (rec && rec.balance) || 0,
+             started: !!(rec && rec.greeted),
+             refBy: (rec && rec.refBy) ? String(rec.refBy) : "" });
 });
 
 /* Mini App "Telefon raqamini ulashish" tugmasi shu yerga uradi:
@@ -1761,12 +1765,21 @@ async function refScan(reportTo){
     }
     if(reportTo){
       const db2 = load();
-      let act = 0, lft = 0;
-      list.forEach(function(k){ (db2[k] && db2[k].left) ? lft++ : act++; });
+      /* Uch guruh: Start bosgan / faqat ilovaga kirgan / bloklagan.
+         "left" faqat Start bosganlarga qo'yiladi, shuning uchun uni
+         "faol" o'lchovi sifatida ishlatib bo'lmaydi. */
+      let act = 0, pend = 0, lft = 0;
+      list.forEach(function(k){
+        const r = db2[k];
+        if(!(r && r.greeted)) pend++;
+        else if(r.left) lft++;
+        else act++;
+      });
       send(reportTo, "\u2705 Tekshiruv tugadi\n" +
         "Jami: " + list.length + "\n" +
-        "Faol: " + act + "\n" +
-        "Chiqib ketgan: " + lft +
+        "Start bosgan (faol): " + act + "\n" +
+        "Faqat ilovaga kirgan: " + pend + "\n" +
+        "Bloklagan: " + lft +
         (gone.length ? "\n\nYangi chiqqanlar: " + gone.length : "") +
         (back.length ? "\nQaytganlar: " + back.length : ""));
     }
