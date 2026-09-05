@@ -427,26 +427,25 @@ body{ font-size:13px; font-weight:400; letter-spacing:-.1px }
 body.light .stat, body.light .id-chip{ border-color:rgba(16,24,40,.14) }
 body.light .svc + .svc{ border-top-color:rgba(16,24,40,.10) }
 body.light .order .sep{ background:rgba(16,24,40,.10) }
-/* Banner ramkasidan chetga chiqib turadigan rasm.
-   Sozlash: --pop-up tepa/past chiqish, --pop-side yon chiqish, --pop-scale kattalik */
-:root{ --pop-up:18px; --pop-side:10px; --pop-scale:1.05 }
+/* Karta chizig'idan chetga chiqib turadigan banner rasmi.
+   Rasm karta ustiga qo'yiladi va har tomondan --pop-x / --pop-y ga
+   kengaytiriladi; shaffof PNG ning chetdagi qismlari (mashina, mototsikl)
+   shu qo'shimcha joyga tushib, kartadan chiqib turgandek ko'rinadi. */
+:root{ --pop-x:26px; --pop-y:22px }
 .gd-head.haspop{position:relative;overflow:visible}
-/* DIQQAT: rasmda width/height ANIQ berilishi shart. auto qoldirilsa
-   brauzer rasmni tabiiy o'lchamida chizadi va ekranni bosib ketadi. */
 .gd-head.haspop .pop{position:absolute;
-  right:calc(var(--pop-side) * -1);
-  top:calc(var(--pop-up) * -1);
-  width:calc(100% + var(--pop-side) * 2);
-  height:calc(100% + var(--pop-up) * 2);
-  max-width:none;object-fit:contain;object-position:right center;
-  transform:scale(var(--pop-scale));transform-origin:right center;
-  pointer-events:none;z-index:1;filter:drop-shadow(0 8px 18px rgba(0,0,0,.5))}
+  left:calc(var(--pop-x) * -1); top:calc(var(--pop-y) * -1);
+  width:calc(100% + var(--pop-x) * 2);
+  height:calc(100% + var(--pop-y) * 2);
+  max-width:none;object-fit:contain;object-position:center;
+  pointer-events:none;z-index:1;
+  filter:drop-shadow(0 6px 16px rgba(0,0,0,.5))}
 .gd-head.haspop:after{content:'';position:absolute;inset:0;z-index:2;
   border-radius:var(--radius);
-  background:linear-gradient(90deg,rgba(11,17,32,.94),rgba(11,17,32,.62) 48%,rgba(11,17,32,0) 88%)}
+  background:linear-gradient(90deg,rgba(11,17,32,.92),rgba(11,17,32,.55) 46%,rgba(11,17,32,0) 82%)}
 .gd-head.haspop>*{position:relative;z-index:3}
 body.light .gd-head.haspop:after{
-  background:linear-gradient(90deg,rgba(255,255,255,.94),rgba(255,255,255,.62) 48%,rgba(255,255,255,0) 88%)}
+  background:linear-gradient(90deg,rgba(255,255,255,.92),rgba(255,255,255,.55) 46%,rgba(255,255,255,0) 82%)}
 
 /* Rejim almashganda silliq o'tish. .theming faqat almashish paytida turadi,
    shuning uchun qolgan animatsiyalarga xalaqit bermaydi. */
@@ -2622,7 +2621,7 @@ function applyMap(map){
 function applyLang(){ const d = DICT[currentLang]; if(d) applyMap(d); }
 
 const GAMES = [
-  { id:'pubg', name:'PUBG MOBILE', glyph:'🎯', star:'on', badge:'Global', img:'/IMG_4367.jpeg', hpop:'/pubg-x18.webp',
+  { id:'pubg', name:'PUBG MOBILE', glyph:'🎯', star:'on', badge:'Global', img:'/IMG_4367.jpeg', hpop:'/pubg-x19.webp',
     cur:'UC', region:false, cat:'pubg_mobile_auto',
     idFields:[{key:'playerId',label:"O'YINCHI ID",ph:'Player ID kiriting'}],
     packages:[
