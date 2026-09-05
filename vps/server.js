@@ -2328,6 +2328,16 @@ function smsHits(txt){
     push("usd", parseFloat(m[6].replace(/,/g,".")),
          tashMs(m[1], m[2], m[3], m[4], m[5]));
   }
+
+  /* 3) HAMKORBANK Visa, lekin SO'MDA tushgan kirim:
+        "...card Virtual VE *88: 26-09-03 19:41 credit XOLMUROD ERGASHEV>Ta +10100.00 UZS. Avail: 2.81 USD"
+        Mijoz USD emas, qavs ichidagi SO'M summasini yuborgan \u2014 bank uni so'mda tushiradi.
+        So'm summasi ham noyob (base + n*100), shuning uchun bemalol solishtirsa bo'ladi. */
+  const re3 = /card[^:]{0,40}:\s*(\d{2})-(\d{2})-(\d{2})\s+(\d{2}):(\d{2})\s+credit\b[^+]{0,80}\+\s*([0-9][0-9\s]*(?:[.,][0-9]{1,2})?)\s*(?:UZS|SUM)/gi;
+  while((m = re3.exec(s))){
+    push("visa-som", Math.round(parseFloat(m[6].replace(/\s/g,"").replace(/,/g,"."))),
+         tashMs(m[1], m[2], m[3], m[4], m[5]));
+  }
   return out;
 }
 
@@ -2407,7 +2417,9 @@ app.post("/sms", (req,res)=>{
     }
     const cur    = fresh[0].cur;
     const amount = fresh[0].amount;
-    const label  = cur === "so'm" ? (amount + " so'm") : (amount.toFixed(2) + " " + cur);
+    const label  = (cur === "so'm")     ? (amount + " so'm")
+                 : (cur === "visa-som") ? (amount + " so'm (Visa kartaga)")
+                 : (amount.toFixed(2) + " " + cur);
 
     const db = load();
     expireOld(db);
@@ -2419,6 +2431,13 @@ app.post("/sms", (req,res)=>{
         if(t.status !== "wait" || new Date(t.at).getTime() <= lim) return;
         if(t.memo) return;              /* USDT to'lovi \u2014 bank SMS'i unga tegmasin */
         const e = expectFor(t);
+        if(cur === "visa-som"){
+          /* Visa kartaga so'mda tushgan pul \u2014 faqat Visa to'ldirishlari bilan,
+             va USD emas, NOYOB SO'M summasi (t.amount) bilan solishtiriladi. */
+          if(e.cur !== "usd") return;
+          if(Math.abs(t.amount - amount) < 0.5) hits.push({ uid: uid, t: t });
+          return;
+        }
         if(e.cur !== cur) return;
         if(Math.abs(e.v - amount) < 0.005) hits.push({ uid: uid, t: t });
       });
