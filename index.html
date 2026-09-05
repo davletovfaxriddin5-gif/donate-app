@@ -442,12 +442,17 @@ body.light .order .sep{ background:rgba(16,24,40,.10) }
   max-width:none;object-fit:fill;
   pointer-events:none;z-index:1;
   filter:drop-shadow(0 6px 16px rgba(0,0,0,.5))}
+/* Qatlam yengil: rasm ko'rinib tursin. Matn o'qilishini quyidagi soya ta'minlaydi. */
 .gd-head.haspop:after{content:'';position:absolute;inset:0;z-index:2;
   border-radius:var(--radius);
-  background:linear-gradient(90deg,rgba(11,17,32,.92),rgba(11,17,32,.55) 46%,rgba(11,17,32,0) 82%)}
+  background:linear-gradient(90deg,rgba(11,17,32,.62),rgba(11,17,32,.26) 38%,rgba(11,17,32,0) 66%)}
 .gd-head.haspop>*{position:relative;z-index:3}
+.gd-head.haspop .nm,.gd-head.haspop .cur{
+  text-shadow:0 1px 2px rgba(0,0,0,.95), 0 2px 10px rgba(0,0,0,.8)}
 body.light .gd-head.haspop:after{
-  background:linear-gradient(90deg,rgba(255,255,255,.92),rgba(255,255,255,.55) 46%,rgba(255,255,255,0) 82%)}
+  background:linear-gradient(90deg,rgba(255,255,255,.66),rgba(255,255,255,.28) 38%,rgba(255,255,255,0) 66%)}
+body.light .gd-head.haspop .nm,body.light .gd-head.haspop .cur{
+  text-shadow:0 1px 2px rgba(255,255,255,.95), 0 2px 10px rgba(255,255,255,.85)}
 
 /* Rejim almashganda silliq o'tish. .theming faqat almashish paytida turadi,
    shuning uchun qolgan animatsiyalarga xalaqit bermaydi. */
