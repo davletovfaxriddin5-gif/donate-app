@@ -427,6 +427,20 @@ body{ font-size:13px; font-weight:400; letter-spacing:-.1px }
 body.light .stat, body.light .id-chip{ border-color:rgba(16,24,40,.14) }
 body.light .svc + .svc{ border-top-color:rgba(16,24,40,.10) }
 body.light .order .sep{ background:rgba(16,24,40,.10) }
+/* Botga Start bosmagan odam uchun ogohlantirish */
+#startNag{position:fixed;left:12px;right:12px;bottom:78px;z-index:60;
+  background:linear-gradient(135deg,#3B4DF0,#5A6BFF);border-radius:16px;
+  padding:14px 16px;box-shadow:0 10px 30px rgba(0,0,0,.45);
+  display:none;align-items:center;gap:12px}
+#startNag.on{display:flex}
+#startNag .tx{flex:1;min-width:0}
+#startNag .tx b{display:block;color:#fff;font-size:14px;margin-bottom:3px}
+#startNag .tx span{display:block;color:rgba(255,255,255,.82);font-size:12px;line-height:1.45}
+#startNag button{flex:none;border:0;border-radius:12px;padding:10px 14px;
+  background:#fff;color:#2A38C8;font-size:13px;font-weight:600}
+#startNag .x{flex:none;border:0;background:transparent;color:rgba(255,255,255,.75);
+  font-size:18px;padding:0 2px;width:24px}
+
 /* Rejim almashganda silliq o'tish. .theming faqat almashish paytida turadi,
    shuning uchun qolgan animatsiyalarga xalaqit bermaydi. */
 body.theming, body.theming *{
@@ -4063,7 +4077,36 @@ function loadBalance(){
       if(view === 'home') renderHome();
       else if(view === 'settings'){ renderSettings(); loadPhone(); }
     }
+    /* Botga Start bosmagan bo'lsa \u2014 ogohlantirish. Bir marta yopilsa, qaytib chiqmaydi. */
+    if(d && d.ok){
+      if(d.refBy) refOwner = String(d.refBy);
+      if(d.started === false) showNag(); else hideNag();
+    }
   }).catch(function(){});
+}
+
+let refOwner = '';
+let nagHidden = false;
+try{ nagHidden = localStorage.getItem('mt_nag') === '1'; }catch(e){}
+function showNag(){
+  if(nagHidden) return;
+  const el = document.getElementById('startNag');
+  if(el) el.classList.add('on');
+}
+function hideNag(persist){
+  if(persist){
+    nagHidden = true;
+    try{ localStorage.setItem('mt_nag','1'); }catch(e){}
+  }
+  const el = document.getElementById('startNag');
+  if(el) el.classList.remove('on');
+}
+function openBotStart(){
+  haptic();
+  const me = tgUser && tgUser.id ? tgUser.id : '';
+  /* Taklif qilgan odam allaqachon yozilgan bo'lsa, uni saqlab qolamiz */
+  const url = 'https://t.me/' + BOT_USERNAME + (refOwner ? ('?start=ref_' + refOwner) : '');
+  try{ tg.openTelegramLink(url); }catch(e){ window.open(url, '_blank'); }
 }
 function loadPhone(){
   const uid = tgUser && tgUser.id ? tgUser.id : '';
@@ -4957,5 +5000,13 @@ function hideSplash(){
 window.addEventListener('load', hideSplash);
 setTimeout(hideSplash, 3400);
 </script>
+<div id="startNag">
+  <div class="tx">
+    <b>Botga qo'shilmagansiz</b>
+    <span>Taklif hisoblanishi va xabarlarni olishingiz uchun botga Start bosing.</span>
+  </div>
+  <button onclick="openBotStart()">Start</button>
+  <button class="x" onclick="hideNag(true)">&times;</button>
+</div>
 </body>
 </html>
