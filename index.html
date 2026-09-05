@@ -431,12 +431,16 @@ body.light .order .sep{ background:rgba(16,24,40,.10) }
    Sozlash: --pop-up tepa/past chiqish, --pop-side yon chiqish, --pop-scale kattalik */
 :root{ --pop-up:18px; --pop-side:10px; --pop-scale:1.05 }
 .gd-head.haspop{position:relative;overflow:visible}
+/* DIQQAT: rasmda width/height ANIQ berilishi shart. auto qoldirilsa
+   brauzer rasmni tabiiy o'lchamida chizadi va ekranni bosib ketadi. */
 .gd-head.haspop .pop{position:absolute;
-  left:calc(var(--pop-side) * -1); right:calc(var(--pop-side) * -1);
-  top:calc(var(--pop-up) * -1);   bottom:calc(var(--pop-up) * -1);
-  width:auto;height:auto;object-fit:contain;object-position:right center;
+  right:calc(var(--pop-side) * -1);
+  top:calc(var(--pop-up) * -1);
+  width:calc(100% + var(--pop-side) * 2);
+  height:calc(100% + var(--pop-up) * 2);
+  max-width:none;object-fit:contain;object-position:right center;
   transform:scale(var(--pop-scale));transform-origin:right center;
-  pointer-events:none;z-index:1;filter:drop-shadow(0 10px 22px rgba(0,0,0,.55))}
+  pointer-events:none;z-index:1;filter:drop-shadow(0 8px 18px rgba(0,0,0,.5))}
 .gd-head.haspop:after{content:'';position:absolute;inset:0;z-index:2;
   border-radius:var(--radius);
   background:linear-gradient(90deg,rgba(11,17,32,.94),rgba(11,17,32,.62) 48%,rgba(11,17,32,0) 88%)}
