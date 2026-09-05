@@ -431,13 +431,14 @@ body.light .order .sep{ background:rgba(16,24,40,.10) }
    Rasm karta ustiga qo'yiladi va har tomondan --pop-x / --pop-y ga
    kengaytiriladi; shaffof PNG ning chetdagi qismlari (mashina, mototsikl)
    shu qo'shimcha joyga tushib, kartadan chiqib turgandek ko'rinadi. */
-:root{ --pop-x:26px; --pop-y:22px }
+/* Rasm 1600x500, ichki ramka 1440x360 markazda (chetda 80px yon, 70px tepa/past).
+   Foiz shu nisbatlardan olingan: 80/1440 = 5.556% , 70/360 = 19.444%.
+   Shu tufayli ichki ramka HAR QANDAY ekranda kartaning aynan ustiga tushadi. */
 .gd-head.haspop{position:relative;overflow:visible}
 .gd-head.haspop .pop{position:absolute;
-  left:calc(var(--pop-x) * -1); top:calc(var(--pop-y) * -1);
-  width:calc(100% + var(--pop-x) * 2);
-  height:calc(100% + var(--pop-y) * 2);
-  max-width:none;object-fit:contain;object-position:center;
+  left:-5.556%; width:111.111%;
+  top:-19.444%; height:138.889%;
+  max-width:none;object-fit:fill;
   pointer-events:none;z-index:1;
   filter:drop-shadow(0 6px 16px rgba(0,0,0,.5))}
 .gd-head.haspop:after{content:'';position:absolute;inset:0;z-index:2;
@@ -2621,7 +2622,7 @@ function applyMap(map){
 function applyLang(){ const d = DICT[currentLang]; if(d) applyMap(d); }
 
 const GAMES = [
-  { id:'pubg', name:'PUBG MOBILE', glyph:'🎯', star:'on', badge:'Global', img:'/IMG_4367.jpeg', hpop:'/pubg-x19.webp',
+  { id:'pubg', name:'PUBG MOBILE', glyph:'🎯', star:'on', badge:'Global', img:'/IMG_4367.jpeg', hpop:'/pubg-x20.webp',
     cur:'UC', region:false, cat:'pubg_mobile_auto',
     idFields:[{key:'playerId',label:"O'YINCHI ID",ph:'Player ID kiriting'}],
     packages:[
