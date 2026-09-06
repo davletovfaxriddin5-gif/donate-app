@@ -623,7 +623,7 @@ const MLBB_REG = {
     "53_6_diamonds":12000,
     "weekly_elite_pack":15000,
     "77_8_diamonds":19000,
-    "weekly_pass":30000,
+    "weekly_pass":26000,
     "154_16_diamonds":35000,
     "217_23_diamonds":55000,
     "367_41_diamonds":83000,
