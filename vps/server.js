@@ -1330,7 +1330,7 @@ app.post("/order", async (req,res)=>{
     if(ADMIN_ID) tgCall("sendMessage", Object.assign({ chat_id: ADMIN_ID,
       text: (auto ? "🤖 AVTO BUYURTMA " : "🧾 QO'LDA BUYURTMA ")+rec.id+"\n"+rec.game+" — "+rec.package+"\n"+
             (rec.nick ? ("👤 "+rec.nick+(rec.accRegion?" ("+rec.accRegion+")":"")+"\n") : "")+
-            det+"\n💰 "+rec.price+" so'm\n👥 id: "+uid+"\nQoldiq: "+u.balance },
+            det+"\n💰 "+rec.price+" so'm\n👤 "+who2(who)+"\n👥 id: "+uid+"\nQoldiq: "+u.balance },
       auto ? {} : { reply_markup: { inline_keyboard: [[
         { text: "\u2705 Bajarildi", callback_data: "od_ok:"+uid+":"+rec.id },
         { text: "\u274C Bekor + pul", callback_data: "od_no:"+uid+":"+rec.id }
