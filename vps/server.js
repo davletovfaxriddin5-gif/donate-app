@@ -546,7 +546,7 @@ const CATALOG = {
     "first_purchase_pack":16000, "prime_1_month":16000, "weekly_deal_pack_1":16000,
     "weekly_mythic_emblem_value_pack":42500, "weekly_deal_pack_2":42500,
     "upgradable_firearm_materials_pack":42500, "prime_3_months":42500,
-    "mythic_emblem_pack":69000,
+    "mythic_emblem_pack":59000,
     "prime_6_months":79500, "elite_pass_lv1_50":79500,
     "prime_plus_1_month":120000,
     "prime_12_months":144000, "elite_pass_lv1_100":146500,
