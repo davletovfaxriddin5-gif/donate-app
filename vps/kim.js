@@ -63,7 +63,7 @@ console.log("\n═════════════════════�
 console.log("👤 " + (u.nm || "-") + (u.un ? "  (@" + u.un + ")" : ""));
 console.log("   id: " + id);
 console.log("   📱 telefon: " + (u.phone ? u.phone : "ulanmagan"));
-console.log("   🤖 botda start: " + (u.greeted ? "bosgan" : "YO'Q"));
+console.log("   🤖 botda start: " + (u.greeted ? "bosgan " + (u.joined ? "(" + dt(u.joined) + ")" : "") : "YO'Q — faqat ilovani ochgan") + (u.left ? "  🚫 BOTNI BLOKLAGAN" : ""));
 console.log("   📅 birinchi kirgan: " + dt(u.firstAt));
 console.log("════════════════════════════════════════");
 
@@ -88,13 +88,20 @@ orders.slice(0, 5).forEach(function (o) {
 if (orders.length > 5) console.log("   ... yana " + (orders.length - 5) + " ta");
 
 /* ---- 4. Referal ---- */
-const active = refs.filter(k => db[k] && (db[k].orders || []).length).length;
+const active  = refs.filter(k => db[k] && (db[k].orders || []).length).length;
+const started = refs.filter(k => db[k] && db[k].greeted).length;
+const blocked = refs.filter(k => db[k] && db[k].left).length;
 console.log("\n👥 TAKLIF QILGAN: " + refs.length + " ta odam");
-console.log("   Ulardan buyurtma bergani: " + active + " ta");
+console.log("   ✅ start bosgan: " + started +
+            "   ⚪ faqat ilovani ochgan: " + (refs.length - started) +
+            "   🚫 bloklagan: " + blocked);
+console.log("   💸 buyurtma bergani: " + active + " ta");
 refs.slice(0, 15).forEach(function (k, i) {
   const x = db[k] || {};
   const n = (x.orders || []).length;
-  console.log("   " + (i + 1) + ". " + nick(k) + " — " + n + " buyurtma, balans " + num(x.balance));
+  const mark = x.left ? "🚫 bloklagan" : (x.greeted ? "✅ start" : "⚪ start YO'Q");
+  console.log("   " + (i + 1) + ". " + nick(k) + " — " + mark +
+              ", " + n + " buyurtma, balans " + num(x.balance));
 });
 if (refs.length > 15) console.log("   ... yana " + (refs.length - 15) + " ta");
 
