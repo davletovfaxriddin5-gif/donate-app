@@ -726,7 +726,29 @@ body.light .order{ border-color:rgba(16,24,40,.07) !important;
 .badge-st{ font-size:11.5px !important; padding:5px 11px !important; letter-spacing:-.1px }
 .order .date{ font-size:11.5px !important; margin-top:12px !important }
 
-.sheet{ border-radius:28px 28px 0 0 !important; padding-top:8px !important }
+/* --- buyurtma oynasi: havodorroq, yozuvlar kattaroq --- */
+.sheet{ border-radius:28px 28px 0 0 !important; padding:10px 18px calc(env(safe-area-inset-bottom) + 18px) !important }
+.sheet .sh-top{ margin-bottom:18px !important }
+.sheet .sh-ic{ width:60px !important; height:60px !important; border-radius:17px !important; font-size:26px !important }
+.sheet .sh-nm{ font-size:20px !important; font-weight:700 !important; letter-spacing:-.4px !important }
+.sheet .sh-sub{ font-size:14.5px !important; margin-top:3px !important }
+.sheet .sh-top .badge-st{ font-size:13px !important; padding:7px 15px !important; font-weight:600 !important }
+.sheet .sh-box{ margin-bottom:16px !important }
+.sheet .sh-row{ padding:18px 16px !important; font-size:15.5px !important }
+.sheet .sh-row .k{ font-weight:400 !important }
+.sheet .sh-row .v{ font-weight:600 !important; font-size:15.5px !important }
+.sheet .sh-close{ padding:17px !important; font-size:16px !important }
+
+/* --- ro'yxatdagi kartalar ham biroz havodorroq --- */
+.order{ padding:17px 17px 15px !important }
+.order .g{ gap:12px !important }
+.order .g .ic{ width:48px !important; height:48px !important }
+.order .g .nm{ font-size:15.5px !important; font-weight:600 !important }
+.order .g .sub{ font-size:12.5px !important }
+.order .price{ font-size:16.5px !important; font-weight:600 !important }
+.order .price small{ font-size:12px !important }
+.order .kv{ font-size:14px !important; margin-bottom:10px !important }
+.order .date{ font-size:12.5px !important }
 .sheet .grab{ width:36px !important; height:5px !important; margin-bottom:16px !important;
         background:rgba(255,255,255,.16) !important }
 body.light .sheet .grab{ background:rgba(16,24,40,.18) !important }
@@ -3768,6 +3790,20 @@ function histTick(){
 document.addEventListener('visibilitychange', function(){
   if(!document.hidden && document.querySelector('.refresh-btn')){ histAt = 0; histTick(); }
 });
+/* Buyurtma ikonkasi: yozuvda rasm bo'lmasa, o'yinlar ro'yxatidan topib olamiz */
+function ordIcon(o){
+  if(o && o.img) return '<img src="' + o.img + '">';
+  var g = null;
+  try{
+    g = GAMES.filter(function(x){
+      return x && (x.name === o.game || x.id === o.gid || x.id === o.game ||
+                   String(x.name||'').toLowerCase() === String(o.game||'').toLowerCase());
+    })[0];
+  }catch(e){}
+  if(g && g.img)   return '<img src="' + g.img + '">';
+  if(g && g.hicon) return '<img src="' + g.hicon + '">';
+  return (o && o.glyph) || (g && g.glyph) || '\uD83C\uDFAE';
+}
 function renderHistory(){
   histTick();
   const fin = histTab==='finance';
@@ -3833,7 +3869,7 @@ function renderHistory(){
     const date = new Date(o.createdAt||o.at).toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
     return `<div class="order" onclick="openOrderSheet('${String(o.id||'').replace(/'/g,'')}')">
       <div class="top">
-        <div class="g"><div class="ic">${o.img?`<img src="${o.img}">`:(o.glyph||'🎮')}</div>
+        <div class="g"><div class="ic">${ordIcon(o)}</div>
         <div><div class="nm">${o.game}</div><div class="sub">${o.package}</div></div></div>
         <div class="price">-${(function(v){var i=v.lastIndexOf(" ");return i>0?v.slice(0,i)+"<small>"+v.slice(i+1)+"</small>":v;})(money(o.price,true))}</div>
       </div>
@@ -3893,7 +3929,7 @@ function openOrderSheet(id){
   sh.innerHTML = `<div class="grab"></div>
     <div class="sh-top">
       <div class="sh-g">
-        <div class="sh-ic">${o.img?`<img src="${o.img}">`:(o.glyph||'🎮')}</div>
+        <div class="sh-ic">${ordIcon(o)}</div>
         <div><div class="sh-nm">${o.game||''}</div><div class="sh-sub">${o.package||''}</div></div>
       </div>
       <span class="badge-st ${st[0]}">${st[1]}</span>
