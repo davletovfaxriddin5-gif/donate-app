@@ -1911,7 +1911,7 @@ app.post("/ref", (req,res)=>{
     const ageMin = u.firstAt ? (Date.now() - new Date(u.firstAt).getTime())/60000 : 1e9;
     const used   = (u.orders||[]).length > 0 || (u.topups||[]).length > 0 ||
                    (u.balance||0) > 0 || !!u.phone;
-    const fresh  = ageMin <= 30 && !used;
+    const fresh  = ageMin <= 30 && !used && !u.greeted;
 
     if(by && by !== uid && !u.refBy && fresh){
       const inv = urec(db, by);
@@ -2820,7 +2820,11 @@ app.post("/webhook", (req,res)=>{
          Referal FAQAT shu yerda, ya'ni Start bosilgandan keyin hisoblanadi. */
       const pay = String(text.slice(6) || "").trim();
       const rid = (pay.match(/^ref_?(\d+)$/) || [])[1] || "";
-      if(rid && rid !== fromId && !ug.refBy){
+      /* Referal FAQAT odamning eng birinchi Start ida hisoblanadi.
+         Botga avval o'zi kirgan odam keyin havola bossa — hisoblanmaydi. */
+      const usedG = (ug.orders||[]).length > 0 || (ug.topups||[]).length > 0 ||
+                    (ug.balance||0) > 0 || !!ug.phone;
+      if(rid && rid !== fromId && !ug.refBy && first && !usedG){
         const inv = urec(dbg, rid);
         ug.refBy = rid;
         ug.refAt = new Date().toISOString();
