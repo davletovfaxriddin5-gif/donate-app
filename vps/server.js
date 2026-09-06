@@ -1450,7 +1450,10 @@ async function checkOne(uid, ordId){
   }
 }
 
+let sweepBusy = false;
 async function sweep(){
+  if(sweepBusy) return;          /* ikkita sweep bir vaqtda ishlamasin */
+  sweepBusy = true;
   try{
     const db = load();
     const jobs = [];
@@ -1478,8 +1481,28 @@ async function sweep(){
     if(changed) save(db);
     for(let i = 0; i < jobs.length; i++){ await checkOne(jobs[i][0], jobs[i][1]); }
   }catch(e){ console.log("SWEEP xato:", e.message); }
+  finally{ sweepBusy = false; }
 }
 setInterval(sweep, 30000);
+
+/* ---------- FazerCards webhook ----------
+   Ta'minotchi buyurtma holati o'zgarganda shu manzilga POST yuboradi.
+   XAVFSIZLIK: xabarning MAZMUNIGA ishonmaymiz. U faqat "borib tekshir"
+   degan signal. Haqiqiy holat sweep() orqali FazerCards API sidan
+   API kalit bilan so'raladi. Shuning uchun soxta xabar hech nima qila olmaydi.
+   Maxfiy kalit manzil ichida (panelda alohida kalit maydoni yo'q). */
+const HOOK = process.env.FZR_HOOK_SECRET || "";
+let hookAt = 0;
+if(HOOK){
+  app.post("/fzr-hook/" + HOOK, (req, res) => {
+    res.json({ ok: true });                    /* darrov javob beramiz */
+    const now = Date.now();
+    if(now - hookAt < 3000) return;            /* ketma-ket xabarlarni bosamiz */
+    hookAt = now;
+    setTimeout(function(){ sweep(); }, 400);   /* ta'minotchi yozib ulgursin */
+  });
+  console.log("FazerCards webhook yoqilgan");
+}
 
 /* ---------- Valyuta kurslari ----------
    HECH QANDAY kurs qo'lda yozilmagan \u2014 server ularni o'zi oladi va
