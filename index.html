@@ -191,6 +191,9 @@ input{font-family:inherit}
   padding:13px;font-weight:700;font-size:14px;color:#9CA9FF;display:flex;align-items:center;justify-content:center;gap:9px;margin-bottom:16px}
 .refresh-btn:active{transform:scale(.99)}
 .refresh-btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+@keyframes mtspin{to{transform:rotate(360deg)}}
+.refresh-btn.busy svg{animation:mtspin .8s linear infinite;transform-origin:50% 50%}
+.refresh-btn.busy{opacity:.85}
 
 .order{background:var(--card);border:1px solid var(--stroke);border-radius:var(--radius);padding:15px;margin-bottom:12px}
 .order .top{display:flex;align-items:center;justify-content:space-between;gap:10px}
@@ -847,7 +850,7 @@ DICT.ru = {
   "Player ID kiriting":"Введите Player ID","O'yinchi ID kiriting":"Введите ID игрока",
   "Server ID kiriting":"Введите Server ID",
   "Buyurtmalar":"Заказы","Moliya":"Финансы","Barchasi":"Все","Bajarildi":"Выполнено",
-  "Kutilmoqda":"В ожидании","Bekor qilingan":"Отменено","Pul qaytarildi":"Возврат средств","Yuborilmoqda":"Отправляется","Tungi rejimga o'tish":"Переключиться на тёмный режим","Statusni yangilash":"Обновить статус",
+  "Kutilmoqda":"В ожидании","Bekor qilingan":"Отменено","Pul qaytarildi":"Возврат средств","Yuborilmoqda":"Отправляется","Tungi rejimga o'tish":"Переключиться на тёмный режим","Statusni yangilash":"Обновить статус","Tekshirilmoqda":"Проверяется",
   "To'lovni amalga oshiring":"Произведите оплату","AYNAN SHU SUMMANI O'TKAZING":"ПЕРЕВЕДИТЕ РОВНО ЭТУ СУММУ","SUMMA (so'm)":"СУММА (сум)","Summani nusxalash":"Скопировать сумму","Karta raqamini nusxalash":"Скопировать номер карты","To'ladim":"Я оплатил","Bekor qilish":"Отменить",
   "Summani o'zbek so'mida kiriting, balansingizga aynan shu miqdor qo'shiladi.":"Введите сумму в сумах — именно она зачислится на баланс.","Keyingi ekranda kartaga qancha to'lash kerakligi ko'rsatiladi.":"На следующем экране будет указано, сколько перевести на карту.","Balansingizga qo'shiladi:":"Зачислится на баланс:",
   "Qancha to'ldirmoqchisiz?":"На какую сумму пополнить?","Vaqt tugadi":"Время истекло","Nusxalandi":"Скопировано","Bekor qilindi":"Отменено","Qabul qilindi — admin tekshiradi":"Принято — админ проверит",
@@ -944,7 +947,7 @@ DICT.en = {
   "Pul qaytarildi":"Refunded",
   "Yuborilmoqda":"Sending",
   "Tungi rejimga o'tish":"Switch to night mode",
-  "Statusni yangilash":"Refresh status",
+  "Statusni yangilash":"Refresh status","Tekshirilmoqda":"Checking",
   "To'lovni amalga oshiring":"Make the payment",
   "AYNAN SHU SUMMANI O'TKAZING":"TRANSFER EXACTLY THIS AMOUNT",
   "SUMMA (so'm)":"AMOUNT (UZS)",
@@ -1086,7 +1089,7 @@ DICT.tr = {
   "Pul qaytarildi":"İade edildi",
   "Yuborilmoqda":"Gönderiliyor",
   "Tungi rejimga o'tish":"Gece moduna geç",
-  "Statusni yangilash":"Durumu yenile",
+  "Statusni yangilash":"Durumu yenile","Tekshirilmoqda":"Kontrol ediliyor",
   "To'lovni amalga oshiring":"Ödemeyi yapın",
   "AYNAN SHU SUMMANI O'TKAZING":"TAM OLARAK BU TUTARI GÖNDERİN",
   "SUMMA (so'm)":"TUTAR (UZS)",
@@ -1228,7 +1231,7 @@ DICT.kk = {
   "Pul qaytarildi":"Ақша қайтарылды",
   "Yuborilmoqda":"Жіберілуде",
   "Tungi rejimga o'tish":"Түнгі режимге ауысу",
-  "Statusni yangilash":"Мәртебені жаңарту",
+  "Statusni yangilash":"Мәртебені жаңарту","Tekshirilmoqda":"Тексерілуде",
   "To'lovni amalga oshiring":"Төлемді жасаңыз",
   "AYNAN SHU SUMMANI O'TKAZING":"ДӘЛ ОСЫ СОМАНЫ АУДАРЫҢЫЗ",
   "SUMMA (so'm)":"СОМА (UZS)",
@@ -1370,7 +1373,7 @@ DICT.ky = {
   "Pul qaytarildi":"Акча кайтарылды",
   "Yuborilmoqda":"Жөнөтүлүүдө",
   "Tungi rejimga o'tish":"Түнкү режимге өтүү",
-  "Statusni yangilash":"Статусту жаңыртуу",
+  "Statusni yangilash":"Статусту жаңыртуу","Tekshirilmoqda":"Текшерилүүдө",
   "To'lovni amalga oshiring":"Төлөмдү аткарыңыз",
   "AYNAN SHU SUMMANI O'TKAZING":"ТАК УШУЛ СУММАНЫ ЖӨНӨТҮҢҮЗ",
   "SUMMA (so'm)":"СУММА (UZS)",
@@ -1513,7 +1516,7 @@ DICT.de = {
   "Pul qaytarildi":"Erstattet",
   "Yuborilmoqda":"Wird gesendet",
   "Tungi rejimga o'tish":"Zum Nachtmodus wechseln",
-  "Statusni yangilash":"Status aktualisieren",
+  "Statusni yangilash":"Status aktualisieren","Tekshirilmoqda":"Wird geprüft",
   "To'lovni amalga oshiring":"Zahlung durchführen",
   "AYNAN SHU SUMMANI O'TKAZING":"GENAU DIESEN BETRAG ÜBERWEISEN",
   "SUMMA (so'm)":"BETRAG (UZS)",
@@ -1655,7 +1658,7 @@ DICT.it = {
   "Pul qaytarildi":"Rimborsato",
   "Yuborilmoqda":"Invio in corso",
   "Tungi rejimga o'tish":"Passa alla modalità notte",
-  "Statusni yangilash":"Aggiorna stato",
+  "Statusni yangilash":"Aggiorna stato","Tekshirilmoqda":"Verifica in corso",
   "To'lovni amalga oshiring":"Effettua il pagamento",
   "AYNAN SHU SUMMANI O'TKAZING":"TRASFERISCI ESATTAMENTE QUESTO IMPORTO",
   "SUMMA (so'm)":"IMPORTO (UZS)",
@@ -1797,7 +1800,7 @@ DICT.id = {
   "Pul qaytarildi":"Dana dikembalikan",
   "Yuborilmoqda":"Mengirim",
   "Tungi rejimga o'tish":"Beralih ke mode gelap",
-  "Statusni yangilash":"Perbarui status",
+  "Statusni yangilash":"Perbarui status","Tekshirilmoqda":"Memeriksa",
   "To'lovni amalga oshiring":"Lakukan pembayaran",
   "AYNAN SHU SUMMANI O'TKAZING":"TRANSFER TEPAT SEJUMLAH INI",
   "SUMMA (so'm)":"JUMLAH (UZS)",
@@ -1939,7 +1942,7 @@ DICT.pt = {
   "Pul qaytarildi":"Reembolsado",
   "Yuborilmoqda":"Enviando",
   "Tungi rejimga o'tish":"Mudar para o modo noturno",
-  "Statusni yangilash":"Atualizar status",
+  "Statusni yangilash":"Atualizar status","Tekshirilmoqda":"Verificando",
   "To'lovni amalga oshiring":"Faça o pagamento",
   "AYNAN SHU SUMMANI O'TKAZING":"TRANSFIRA EXATAMENTE ESTE VALOR",
   "SUMMA (so'm)":"VALOR (UZS)",
@@ -2081,7 +2084,7 @@ DICT.vi = {
   "Pul qaytarildi":"Đã hoàn tiền",
   "Yuborilmoqda":"Đang gửi",
   "Tungi rejimga o'tish":"Chuyển sang chế độ tối",
-  "Statusni yangilash":"Cập nhật trạng thái",
+  "Statusni yangilash":"Cập nhật trạng thái","Tekshirilmoqda":"Đang kiểm tra",
   "To'lovni amalga oshiring":"Thực hiện thanh toán",
   "AYNAN SHU SUMMANI O'TKAZING":"CHUYỂN ĐÚNG SỐ TIỀN NÀY",
   "SUMMA (so'm)":"SỐ TIỀN (UZS)",
@@ -2223,7 +2226,7 @@ DICT.ja = {
   "Pul qaytarildi":"返金済み",
   "Yuborilmoqda":"送信中",
   "Tungi rejimga o'tish":"ダークモードに切り替え",
-  "Statusni yangilash":"ステータスを更新",
+  "Statusni yangilash":"ステータスを更新","Tekshirilmoqda":"確認中",
   "To'lovni amalga oshiring":"お支払いください",
   "AYNAN SHU SUMMANI O'TKAZING":"この金額をちょうど送金してください",
   "SUMMA (so'm)":"金額 (UZS)",
@@ -2365,7 +2368,7 @@ DICT.ko = {
   "Pul qaytarildi":"환불됨",
   "Yuborilmoqda":"전송 중",
   "Tungi rejimga o'tish":"다크 모드로 전환",
-  "Statusni yangilash":"상태 새로고침",
+  "Statusni yangilash":"상태 새로고침","Tekshirilmoqda":"확인 중",
   "To'lovni amalga oshiring":"결제를 진행하세요",
   "AYNAN SHU SUMMANI O'TKAZING":"정확히 이 금액을 송금하세요",
   "SUMMA (so'm)":"금액 (UZS)",
@@ -2507,7 +2510,7 @@ DICT.zh = {
   "Pul qaytarildi":"已退款",
   "Yuborilmoqda":"发送中",
   "Tungi rejimga o'tish":"切换到夜间模式",
-  "Statusni yangilash":"刷新状态",
+  "Statusni yangilash":"刷新状态","Tekshirilmoqda":"检查中",
   "To'lovni amalga oshiring":"请完成付款",
   "AYNAN SHU SUMMANI O'TKAZING":"请准确转账此金额",
   "SUMMA (so'm)":"金额 (UZS)",
@@ -3721,14 +3724,18 @@ function loadOrders(cb){
 function histTick(){
   clearTimeout(histTimer);
   if(!document.querySelector('.refresh-btn')) return;
-  if(Date.now() - histAt > 3000){
+  if(Date.now() - histAt > 2000){
     histAt = Date.now();
     loadOrders(function(){ if(document.querySelector('.refresh-btn')) renderHistory(); });
     return;
   }
   if(!getOrders().some(function(o){ return o.status === 'wait' || o.status === 'sent'; })) return;
-  histTimer = setTimeout(function(){ histAt = 0; histTick(); }, 8000);
+  histTimer = setTimeout(function(){ histAt = 0; histTick(); }, 4000);
 }
+/* Ilovaga qaytganda tarix darrov yangilansin */
+document.addEventListener('visibilitychange', function(){
+  if(!document.hidden && document.querySelector('.refresh-btn')){ histAt = 0; histTick(); }
+});
 function renderHistory(){
   histTick();
   const fin = histTab==='finance';
@@ -3807,7 +3814,19 @@ function renderHistory(){
 }
 function setHistTab(t){ haptic(); histTab=t; renderHistory(); }
 function setFilter(f){ haptic(); histFilter=f; renderHistory(); }
-function refreshStatus(){ haptic('medium'); loadOrders(function(){ notify('success'); toastOk(tr('🔄 Statuslar yangilandi')); renderHistory(); }); }
+function refreshStatus(){
+  haptic('medium');
+  const b = document.querySelector('.refresh-btn');
+  if(b){
+    b.classList.add('busy');
+    const t = b.childNodes[b.childNodes.length - 1];
+    if(t && t.nodeType === 3) t.nodeValue = tr("Tekshirilmoqda");
+  }
+  const t0 = Date.now();
+  loadOrders(function(){
+    setTimeout(function(){ notify('success'); renderHistory(); }, Math.max(0, 600 - (Date.now() - t0)));
+  });
+}
 
 /* ===== Buyurtma tafsilotlari ===== */
 function closeSheet(){
