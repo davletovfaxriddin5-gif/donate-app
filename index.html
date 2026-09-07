@@ -721,12 +721,9 @@ body.light .sheet-bg{background:rgba(0,0,0,.35)}
    -apple-system  = iPhone ning o'z SF Pro si (fayl kerak emas)
    'FSElliot'     = FS Elliot Pro
    'Sispectly'    = Sispectly Harmonies */
-.ph-line{ font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",'FSElliot','Manrope',system-ui,sans-serif !important;
-  font-size:14px !important; font-weight:500 !important; letter-spacing:-.35px !important;
-  line-height:1 !important;                 /* tepa-pastdagi ortiqcha bo'shliq olib tashlandi */
-  font-variant-numeric:tabular-nums !important;   /* raqamlar teng kenglikda, tekis */
-  font-feature-settings:"tnum" 1 !important;
-  margin-top:4px !important }
+.ph-line{ font-size:13px !important; font-weight:500 !important; letter-spacing:-.2px !important;
+  line-height:1.25 !important; margin-top:3px !important;
+  font-variant-numeric:tabular-nums !important; font-feature-settings:"tnum" 1 !important }
 
 /* ===== Sozlamalar profili: ixchamroq, telefon qutisiz ===== */
 .set-profile{ padding:13px !important; border-radius:20px !important; margin-bottom:15px !important }
@@ -743,11 +740,13 @@ body.light .set-profile .avatar{ box-shadow:0 0 0 2px var(--card), 0 0 0 3px rgb
 .set-profile .top > div:last-child{ min-width:0 }
 .set-profile .nm{ font-size:15.5px !important; font-weight:700 !important; font-style:normal !important;
   letter-spacing:-.3px !important }
-.set-profile .un{ font-size:12.5px !important }
+.set-profile .un{ font-size:13px !important; font-weight:500 !important; letter-spacing:-.2px !important }
 .ph-line{ color:#7E93FF; font-size:13.5px; font-weight:500; letter-spacing:-.2px; margin-top:2px }
-.id-chip{ font-size:12px !important; padding:4px 10px !important; margin-top:6px !important;
-  border-radius:9px !important; font-weight:500 !important; letter-spacing:-.2px !important }
-.id-chip svg{ width:13px !important; height:13px !important; transition:.2s }
+.id-chip{ font-size:13px !important; padding:3px 9px !important; margin-top:6px !important;
+  border-radius:8px !important; font-weight:500 !important; letter-spacing:-.2px !important;
+  gap:6px !important; transition:transform .12s, background .12s !important }
+.id-chip:active{ transform:scale(.965) !important; background:var(--card-2) !important }
+.id-chip svg{ width:12px !important; height:12px !important; transition:.2s }
 .id-chip svg.idok{ stroke:#4FE0A0 !important; stroke-width:2.6 !important }
 
 /* ===== Referal kartasi ===== */
