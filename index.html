@@ -710,10 +710,13 @@ body.light .toast.t-err{ color:#cc2a30 !important }
   padding:15px;font-weight:600;font-size:15px;color:var(--text)}
 body.light .sheet-bg{background:rgba(0,0,0,.35)}
 
-/* ===== SINOV: FS Elliot Pro — faqat bitta sarlavhada ===== */
-@font-face{ font-family:'FSElliot'; src:url('/fselliot.woff') format('woff');
-  font-weight:400; font-style:normal; font-display:swap }
-.page-title.ff-test{ font-family:'FSElliot','Manrope',system-ui,sans-serif !important }
+/* ===== SINOV: uchta shrift — faqat bitta sarlavhada =====
+   Almashtirish uchun pastdagi oxirgi qatorda 'FSElliot' o'rniga
+   'Sispectly' yoki 'Amoun' deb yozing. Boshqa hech nimaga tegmang. */
+@font-face{ font-family:'FSElliot';  src:url('/fselliot.woff')  format('woff'); font-weight:400; font-display:swap }
+@font-face{ font-family:'Sispectly'; src:url('/sispectly.woff') format('woff'); font-weight:400; font-display:swap }
+@font-face{ font-family:'Amoun';     src:url('/amoun.woff')     format('woff'); font-weight:400; font-display:swap }
+.page-title.ff-test{ font-family:'Sispectly','Manrope',system-ui,sans-serif !important }
 
 /* ===== Sozlamalar profili: ixchamroq, telefon qutisiz ===== */
 .set-profile .top > div:last-child{ min-width:0 }
