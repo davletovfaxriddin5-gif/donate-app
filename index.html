@@ -368,8 +368,8 @@ body{ font-size:13px; font-weight:400; letter-spacing:-.1px }
 .toast{ font-weight:500 }
     /* === Yumshoq burchaklar === */
 :root{ --radius:20px }
-.game .tile{ border-radius:22px }
-.game .star{ border-radius:22px 0 14px 0 }
+.game .tile{ border-radius:18px }
+.game .star{ border-radius:18px 0 14px 0 }
 .game .badge{ border-radius:9px }
 .balance{ border-radius:24px }
 .bal-btn{ border-radius:17px }
@@ -709,6 +709,11 @@ body.light .toast.t-err{ color:#cc2a30 !important }
 .sheet .sh-close{width:100%;background:var(--card-2);border:1px solid var(--stroke-2);border-radius:16px;
   padding:15px;font-weight:600;font-size:15px;color:var(--text)}
 body.light .sheet-bg{background:rgba(0,0,0,.35)}
+
+/* ===== O'yin plitkalari: chetida nozik halqa (avatarnikiga o'xshash) ===== */
+.game .tile{ box-shadow:0 0 0 1.5px var(--bg), 0 0 0 2.5px rgba(255,255,255,.12) !important }
+body.light .game .tile{ box-shadow:0 0 0 1.5px var(--bg), 0 0 0 2.5px rgba(16,24,40,.14) !important }
+.games{ gap:13px !important }   /* halqa uchun joy: plitkalar bir-biriga tegib qolmasin */
 
 /* ===== SINOV: uchta shrift — faqat bitta sarlavhada =====
    Almashtirish uchun pastdagi oxirgi qatorda 'FSElliot' o'rniga
