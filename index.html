@@ -711,29 +711,34 @@ body.light .toast.t-err{ color:#cc2a30 !important }
 body.light .sheet-bg{background:rgba(0,0,0,.35)}
 
 /* ===== Referal kartasi ===== */
-.ref-card{ background:var(--card); border:1px solid rgba(255,255,255,.055); border-radius:26px;
-  padding:20px; margin-bottom:14px }
-body.light .ref-card{ border-color:rgba(16,24,40,.08) }
-.ref-head{ display:flex; align-items:center; gap:10px; margin-bottom:9px }
-.ref-head span{ font-weight:600; font-size:17px; letter-spacing:-.3px }
-.ref-desc{ color:var(--dim); font-size:14px; line-height:1.45; margin:0 0 16px; letter-spacing:-.2px }
-.ref-linkbox{ display:flex; align-items:center; gap:12px; background:rgba(0,0,0,.30);
-  border-radius:16px; padding:16px; margin-bottom:14px; cursor:pointer; transition:.15s }
-.ref-linkbox:active{ transform:scale(.995) }
-body.light .ref-linkbox{ background:rgba(16,24,40,.05) }
-.ref-linkbox .ref-url{ flex:1; min-width:0; font-size:13.5px; color:var(--text); letter-spacing:-.2px;
+.rlk-card{ background:var(--card); border:1px solid rgba(255,255,255,.055); border-radius:26px;
+  padding:18px; margin-bottom:14px }
+body.light .rlk-card{ border-color:rgba(16,24,40,.08) }
+.rlk-head{ display:flex; align-items:center; gap:10px; margin-bottom:9px }
+.rlk-head span{ font-weight:600; font-size:17px; letter-spacing:-.3px }
+.rlk-desc{ color:var(--dim); font-size:14px; line-height:1.45; margin:0 0 16px; letter-spacing:-.2px }
+.rlk-box{ display:flex; align-items:center; gap:12px; background:rgba(0,0,0,.30);
+  border-radius:14px; padding:11px 14px; margin-bottom:12px; cursor:pointer; transition:.15s }
+.rlk-ic{ display:flex; flex-shrink:0 }
+.rlk-ic svg{ width:19px; height:19px; stroke:var(--faint); fill:none; stroke-width:1.8;
+  stroke-linecap:round; stroke-linejoin:round; transition:.2s }
+.rlk-ic.ok svg{ stroke:#4FE0A0; stroke-width:2.4 }
+.rlk-box:active{ transform:scale(.995) }
+body.light .rlk-box{ background:rgba(16,24,40,.05) }
+.rlk-box .rlk-url{ flex:1; min-width:0; font-size:13.5px; color:var(--text); letter-spacing:-.2px;
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
-.ref-linkbox > svg{ width:19px; height:19px; stroke:var(--faint); fill:none; stroke-width:1.8;
+.rlk-box > svg{ width:19px; height:19px; stroke:var(--faint); fill:none; stroke-width:1.8;
   stroke-linecap:round; stroke-linejoin:round; flex-shrink:0 }
-.ref-actions{ display:grid; grid-template-columns:1fr 1fr; gap:11px }
-.rb{ display:flex; align-items:center; justify-content:center; gap:9px; border:0; border-radius:16px;
-  padding:16px 8px; font-size:15px; font-weight:500; letter-spacing:-.3px; transition:.15s }
-.rb:active{ transform:scale(.985) }
-.rb svg{ width:18px; height:18px; fill:none; stroke-width:1.9; stroke-linecap:round;
+.rlk-acts{ display:grid; grid-template-columns:1fr 1fr; gap:11px }
+.rlk-b{ display:flex; align-items:center; justify-content:center; gap:9px; border:0; border-radius:14px;
+  padding:11px 8px; font-size:14.5px; font-weight:500; letter-spacing:-.3px; transition:.15s;
+  min-height:38px }
+.rlk-b:active{ transform:scale(.985) }
+.rlk-b svg{ width:17px; height:17px; fill:none; stroke-width:1.9; stroke-linecap:round;
   stroke-linejoin:round; flex-shrink:0 }
-.rb-sec{ background:rgba(0,0,0,.30); color:var(--text) } .rb-sec svg{ stroke:var(--text) }
-body.light .rb-sec{ background:rgba(16,24,40,.06) }
-.rb-pri{ background:#2B39F5; color:#fff } .rb-pri svg{ stroke:#fff }
+.rlk-b2{ background:rgba(0,0,0,.30); color:var(--text) } .rlk-b2 svg{ stroke:var(--text) }
+body.light .rlk-b2{ background:rgba(16,24,40,.06) }
+.rlk-b1{ background:#2B39F5; color:#fff } .rlk-b1 svg{ stroke:#fff }
 
 /* ===== Tarix: karta va buyurtma oynasi sayqali ===== */
 .order{ border-radius:20px !important; padding:16px 16px 14px !important;
@@ -4304,19 +4309,19 @@ function invite(){
   app.innerHTML = `
   <div class="page-title">Do'stlarni taklif qilish</div>
   <p style="color:var(--dim);font-size:13.5px;margin:-8px 2px 18px">Do'stlaringizni taklif qiling va har bir to'lovdan 1% bonus oling</p>
-  <div class="ref-card">
-    <div class="ref-head">
+  <div class="rlk-card">
+    <div class="rlk-head">
       <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="#6E7CFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
       <span>Referal havolasi</span>
     </div>
-    <p class="ref-desc">Do'stlaringizni taklif qiling va har bir to'lovdan 1% bonus oling</p>
-    <div class="ref-linkbox" onclick="copyRef('${link}')">
-      <span class="ref-url">${link}</span>
-      <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2.5"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+    <p class="rlk-desc">Do'stlaringizni taklif qiling va har bir to'lovdan 1% bonus oling</p>
+    <div class="rlk-box" onclick="copyRef('${link}')">
+      <span class="rlk-url">${link}</span>
+      <span class="rlk-ic">${COPY_SVG}</span>
     </div>
-    <div class="ref-actions">
-      <button class="rb rb-sec" onclick="copyRef('${link}')"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2.5"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Nusxalash</button>
-      <button class="rb rb-pri" onclick="shareRef('${link}')"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/><line x1="15.4" y1="6.5" x2="8.6" y2="10.5"/></svg>Ulashish</button>
+    <div class="rlk-acts">
+      <button class="rlk-b rlk-b2" onclick="copyRef('${link}')"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2.5"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Nusxalash</button>
+      <button class="rlk-b rlk-b1" onclick="shareRef('${link}')"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/><line x1="15.4" y1="6.5" x2="8.6" y2="10.5"/></svg>Ulashish</button>
     </div>
   </div>
   <div id="refBox" class="empty" style="background:var(--card);border:1px solid var(--stroke);border-radius:var(--radius);padding:36px 20px">
@@ -4405,7 +4410,23 @@ function loadRefs(again){
       }
     }).catch(function(){});
 }
-function copyRef(link){ haptic(); try{ navigator.clipboard.writeText(link); }catch(e){} notify('success'); toastOk('Havola nusxalandi'); }
+const COPY_SVG = '<svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2.5"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+const OK_SVG   = '<svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>';
+function copyRef(link){
+  haptic();
+  try{ navigator.clipboard.writeText(link); }catch(e){}
+  notify('success');
+  toastOk('Havola nusxalandi');
+  const ic = document.querySelector('.rlk-ic');
+  if(ic){
+    ic.innerHTML = OK_SVG; ic.classList.add('ok');
+    clearTimeout(window._cpT);
+    window._cpT = setTimeout(function(){
+      const i2 = document.querySelector('.rlk-ic');
+      if(i2){ i2.classList.remove('ok'); i2.innerHTML = COPY_SVG; }
+    }, 1700);
+  }
+}
 function shareRef(link){
   haptic();
   const txt = "Arzon donat — minatoh!";
