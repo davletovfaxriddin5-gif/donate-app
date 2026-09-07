@@ -729,6 +729,17 @@ body.light .sheet-bg{background:rgba(0,0,0,.35)}
   margin-top:4px !important }
 
 /* ===== Sozlamalar profili: ixchamroq, telefon qutisiz ===== */
+.set-profile{ padding:13px !important; border-radius:20px !important; margin-bottom:15px !important }
+.set-profile .top{ gap:11px !important }
+.set-profile .avatar{ width:46px !important; height:46px !important; font-size:17px !important;
+  /* rasm atrofida nozik halqa: avval karta rangida kichik bo'shliq, keyin ingichka yorug' chiziq */
+  box-shadow:0 0 0 2px var(--card), 0 0 0 3px rgba(255,255,255,.13) !important }
+body.light .set-profile .avatar{ box-shadow:0 0 0 2px var(--card), 0 0 0 3px rgba(16,24,40,.13) !important }
+.set-profile .stat-row{ margin-top:11px !important; gap:9px !important }
+.set-profile .stat{ padding:9px 12px !important; border-radius:12px !important }
+.set-profile .stat .k{ font-size:9.5px !important; letter-spacing:.8px !important }
+.set-profile .stat .v{ font-size:16px !important; font-weight:700 !important; margin-top:2px !important }
+.set-profile .stat .v small{ font-size:11px !important }
 .set-profile .top > div:last-child{ min-width:0 }
 .set-profile .nm{ font-size:15.5px !important; font-weight:700 !important; font-style:normal !important;
   letter-spacing:-.3px !important }
