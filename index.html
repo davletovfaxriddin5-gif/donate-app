@@ -722,7 +722,11 @@ body.light .sheet-bg{background:rgba(0,0,0,.35)}
    'FSElliot'     = FS Elliot Pro
    'Sispectly'    = Sispectly Harmonies */
 .ph-line{ font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",'FSElliot','Manrope',system-ui,sans-serif !important;
-  font-size:14.5px !important; letter-spacing:-.2px !important }
+  font-size:14px !important; font-weight:500 !important; letter-spacing:-.35px !important;
+  line-height:1 !important;                 /* tepa-pastdagi ortiqcha bo'shliq olib tashlandi */
+  font-variant-numeric:tabular-nums !important;   /* raqamlar teng kenglikda, tekis */
+  font-feature-settings:"tnum" 1 !important;
+  margin-top:4px !important }
 
 /* ===== Sozlamalar profili: ixchamroq, telefon qutisiz ===== */
 .set-profile .top > div:last-child{ min-width:0 }
