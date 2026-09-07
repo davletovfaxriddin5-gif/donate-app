@@ -745,7 +745,8 @@ body.light .set-profile .avatar{ box-shadow:0 0 0 2px var(--card), 0 0 0 3px rgb
 .id-chip{ font-size:13px !important; padding:3px 9px !important; margin-top:6px !important;
   border-radius:8px !important; font-weight:500 !important; letter-spacing:-.2px !important;
   gap:6px !important; transition:transform .12s, background .12s !important }
-.id-chip:active{ transform:scale(.965) !important; background:var(--card-2) !important }
+.id-chip:active{ transform:scale(.93) !important; background:var(--card-2) !important;
+  filter:brightness(.88) !important }
 .id-chip svg{ width:12px !important; height:12px !important; transition:.2s }
 .id-chip svg.idok{ stroke:#4FE0A0 !important; stroke-width:2.6 !important }
 
@@ -4159,7 +4160,7 @@ function renderSettings(){
     <div class="top">
       <div class="avatar" style="width:52px;height:52px;font-size:19px">${photo}</div>
       <div><div class="nm">${name}</div><div class="un">${un}</div>
-      <button class="id-chip" onclick="copyId('${uid}')">ID: ${uid} <svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg></button>
+      <button class="id-chip" ontouchstart="" onclick="copyId('${uid}')">ID: ${uid} <svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg></button>
       </div>
     </div>
     <div class="stat-row">
@@ -4216,7 +4217,6 @@ function renderSettings(){
 function copyId(id){
   haptic();
   try{ navigator.clipboard.writeText(id); }catch(e){}
-  toastOk('ID nusxalandi');
   const chip = document.querySelector('button[onclick^="copyId"]');
   const ic   = chip && chip.querySelector('svg');
   if(ic){
