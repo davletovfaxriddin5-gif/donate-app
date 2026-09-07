@@ -710,6 +710,31 @@ body.light .toast.t-err{ color:#cc2a30 !important }
   padding:15px;font-weight:600;font-size:15px;color:var(--text)}
 body.light .sheet-bg{background:rgba(0,0,0,.35)}
 
+/* ===== Referal kartasi ===== */
+.ref-card{ background:var(--card); border:1px solid rgba(255,255,255,.055); border-radius:26px;
+  padding:20px; margin-bottom:14px }
+body.light .ref-card{ border-color:rgba(16,24,40,.08) }
+.ref-head{ display:flex; align-items:center; gap:10px; margin-bottom:9px }
+.ref-head span{ font-weight:600; font-size:17px; letter-spacing:-.3px }
+.ref-desc{ color:var(--dim); font-size:14px; line-height:1.45; margin:0 0 16px; letter-spacing:-.2px }
+.ref-linkbox{ display:flex; align-items:center; gap:12px; background:rgba(0,0,0,.30);
+  border-radius:16px; padding:16px; margin-bottom:14px; cursor:pointer; transition:.15s }
+.ref-linkbox:active{ transform:scale(.995) }
+body.light .ref-linkbox{ background:rgba(16,24,40,.05) }
+.ref-linkbox .ref-url{ flex:1; min-width:0; font-size:13.5px; color:var(--text); letter-spacing:-.2px;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+.ref-linkbox > svg{ width:19px; height:19px; stroke:var(--faint); fill:none; stroke-width:1.8;
+  stroke-linecap:round; stroke-linejoin:round; flex-shrink:0 }
+.ref-actions{ display:grid; grid-template-columns:1fr 1fr; gap:11px }
+.rb{ display:flex; align-items:center; justify-content:center; gap:9px; border:0; border-radius:16px;
+  padding:16px 8px; font-size:15px; font-weight:500; letter-spacing:-.3px; transition:.15s }
+.rb:active{ transform:scale(.985) }
+.rb svg{ width:18px; height:18px; fill:none; stroke-width:1.9; stroke-linecap:round;
+  stroke-linejoin:round; flex-shrink:0 }
+.rb-sec{ background:rgba(0,0,0,.30); color:var(--text) } .rb-sec svg{ stroke:var(--text) }
+body.light .rb-sec{ background:rgba(16,24,40,.06) }
+.rb-pri{ background:#2B39F5; color:#fff } .rb-pri svg{ stroke:#fff }
+
 /* ===== Tarix: karta va buyurtma oynasi sayqali ===== */
 .order{ border-radius:20px !important; padding:16px 16px 14px !important;
         border:1px solid rgba(255,255,255,.05) !important;
@@ -4279,15 +4304,19 @@ function invite(){
   app.innerHTML = `
   <div class="page-title">Do'stlarni taklif qilish</div>
   <p style="color:var(--dim);font-size:13.5px;margin:-8px 2px 18px">Do'stlaringizni taklif qiling va har bir to'lovdan 1% bonus oling</p>
-  <div style="background:var(--card);border:1px solid var(--stroke);border-radius:var(--radius);padding:16px;margin-bottom:14px">
-    <div style="display:flex;align-items:center;gap:9px;margin-bottom:10px">
+  <div class="ref-card">
+    <div class="ref-head">
       <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="#6E7CFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-      <span style="font-weight:800;font-size:16px">Referal havolasi</span>
+      <span>Referal havolasi</span>
     </div>
-    <div style="background:var(--bg-2);border:1px solid var(--stroke-2);border-radius:12px;padding:13px 15px;margin-bottom:12px;font-size:12.5px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${link}</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <button class="big-btn" style="margin:0;justify-content:center;background:var(--card-2)" onclick="copyRef('${link}')">Nusxalash</button>
-      <button class="big-btn" style="margin:0;justify-content:center;background:var(--blue);border-color:transparent;color:#fff" onclick="shareRef('${link}')">Ulashish</button>
+    <p class="ref-desc">Do'stlaringizni taklif qiling va har bir to'lovdan 1% bonus oling</p>
+    <div class="ref-linkbox" onclick="copyRef('${link}')">
+      <span class="ref-url">${link}</span>
+      <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2.5"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+    </div>
+    <div class="ref-actions">
+      <button class="rb rb-sec" onclick="copyRef('${link}')"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2.5"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Nusxalash</button>
+      <button class="rb rb-pri" onclick="shareRef('${link}')"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/><line x1="15.4" y1="6.5" x2="8.6" y2="10.5"/></svg>Ulashish</button>
     </div>
   </div>
   <div id="refBox" class="empty" style="background:var(--card);border:1px solid var(--stroke);border-radius:var(--radius);padding:36px 20px">
