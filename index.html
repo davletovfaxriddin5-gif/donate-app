@@ -710,6 +710,17 @@ body.light .toast.t-err{ color:#cc2a30 !important }
   padding:15px;font-weight:600;font-size:15px;color:var(--text)}
 body.light .sheet-bg{background:rgba(0,0,0,.35)}
 
+/* ===== Sozlamalar profili: ixchamroq, telefon qutisiz ===== */
+.set-profile .top > div:last-child{ min-width:0 }
+.set-profile .nm{ font-size:15.5px !important; font-weight:700 !important; font-style:normal !important;
+  letter-spacing:-.3px !important }
+.set-profile .un{ font-size:12.5px !important }
+.ph-line{ color:#7E93FF; font-size:13.5px; font-weight:500; letter-spacing:-.2px; margin-top:2px }
+.id-chip{ font-size:12px !important; padding:4px 10px !important; margin-top:6px !important;
+  border-radius:9px !important; font-weight:500 !important; letter-spacing:-.2px !important }
+.id-chip svg{ width:13px !important; height:13px !important; transition:.2s }
+.id-chip svg.idok{ stroke:#4FE0A0 !important; stroke-width:2.6 !important }
+
 /* ===== Referal kartasi ===== */
 .rlk-card{ background:var(--card); border:1px solid rgba(255,255,255,.055); border-radius:26px;
   padding:18px; margin-bottom:14px }
@@ -4174,7 +4185,22 @@ function renderSettings(){
   </div>
   <p style="text-align:center;color:var(--faint);font-size:12px;margin-top:18px">minatoh.uz • © 2026</p>`;
 }
-function copyId(id){ haptic(); try{ navigator.clipboard.writeText(id); }catch(e){} toastOk('ID nusxalandi'); }
+function copyId(id){
+  haptic();
+  try{ navigator.clipboard.writeText(id); }catch(e){}
+  toastOk('ID nusxalandi');
+  const chip = document.querySelector('button[onclick^="copyId"]');
+  const ic   = chip && chip.querySelector('svg');
+  if(ic){
+    ic.outerHTML = '<svg class="idok" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>';
+    clearTimeout(window._idT);
+    window._idT = setTimeout(function(){
+      const c2 = document.querySelector('button[onclick^="copyId"]');
+      const o2 = c2 && c2.querySelector('svg');
+      if(o2) o2.outerHTML = '<svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>';
+    }, 1700);
+  }
+}
 function setLang(l){
   haptic();
   const old = currentLang;
@@ -4207,11 +4233,10 @@ function setPhoneText(txt){
     if(!chip){
       chip = document.createElement('div');
       chip.id = 'phoneChip';
-      chip.className = 'id-chip';
-      chip.style.marginTop = '8px';
-      idChip.parentNode.insertBefore(chip, idChip.nextSibling);
+      chip.className = 'ph-line';
+      idChip.parentNode.insertBefore(chip, idChip);   /* ID chipdan YUQORIGA */
     }
-    chip.textContent = '📱 ' + p;
+    chip.textContent = p;
   }
 }
 /* Yangi o'yinlar serverdan keladi (games.json). Ilovada qo'lda yozilmagan —
