@@ -5163,7 +5163,13 @@ var _sfx = null, _sfxReady = false;
     _sfx.addEventListener('canplaythrough', function(){ _sfxReady = true; });
     /* iOS birinchi teginishgacha ovoz chiqarishga ruxsat bermaydi \u2014 shu yerda ochamiz */
     var unlock = function(){
-      try{ _sfx.play().then(function(){ _sfx.pause(); _sfx.currentTime = 0; }).catch(function(){}); }catch(e){}
+      try{
+        _sfx.muted = true;                 /* ochish paytida ovoz eshitilmasin */
+        var done = function(){ try{ _sfx.pause(); _sfx.currentTime = 0; }catch(e){} _sfx.muted = false; };
+        var pr = _sfx.play();
+        if(pr && pr.then) pr.then(done).catch(function(){ _sfx.muted = false; });
+        else done();
+      }catch(e){ try{ _sfx.muted = false; }catch(e2){} }
       document.removeEventListener('touchstart', unlock);
       document.removeEventListener('click', unlock);
     };
