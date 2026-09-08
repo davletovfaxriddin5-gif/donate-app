@@ -714,7 +714,17 @@ body.light .toast.t-err{ color:#cc2a30 !important }
   padding:15px;font-weight:600;font-size:15px;color:var(--text)}
 body.light .sheet-bg{background:rgba(0,0,0,.35)}
 
-/* ===== Yorug' rejim: rasm ustidagi matn ham o'qilsin ===== */
+/* ===== Yorug' rejim: rasm ustidagi matn ham o'qilsin =====
+   Banner ikki xil: hasbg (butun fon rasmi) va haspop (yon personaj). Ikkalasi ham. */
+body.light .gd-head.hasbg:before{
+  background:linear-gradient(90deg,rgba(11,17,32,.86),rgba(11,17,32,.62) 55%,rgba(11,17,32,.30)) !important }
+body.light .gd-head.hasbg,
+body.light .gd-head.hasbg .nm,
+body.light .gd-head.hasbg .cur,
+body.light .gd-head.hasbg .sub{
+  color:#fff !important;
+  text-shadow:0 1px 2px rgba(0,0,0,.95), 0 2px 10px rgba(0,0,0,.8) !important }
+body.light .gd-head.hasbg{ border-color:rgba(11,17,32,.85) !important }
 body.light .gd-head.haspop:after{
   background:linear-gradient(90deg,rgba(11,17,32,.66),rgba(11,17,32,.30) 40%,rgba(11,17,32,0) 68%) !important }
 body.light .gd-head.haspop .nm,
