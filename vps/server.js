@@ -2919,4 +2919,127 @@ function send(chatId, text, markup){
   }).catch(function(e){ console.log("SEND xato:", e.message); });
 }
 
+/* ---------- tg-tools.shop — Telegram gift NFT (FAQAT O'QISH) ----------
+   Kalit .env dagi TGT_KEY da turadi va shu fayldan chiqmaydi.
+   Mini App faqat shu yerga murojaat qiladi, tg-tools ga to'g'ridan-to'g'ri emas.
+   Bu blokda hech narsa sotib olinmaydi — faqat ro'yxat va narxlar o'qiladi.
+   Mavjud yo'llarning birortasiga TEGILMAYDI. */
+const TGT_KEY    = process.env.TGT_KEY || "";
+const TGT_BASE   = "https://api.tg-tools.shop";
+const TGT_MARKUP = 0;               /* ustama, foizda. 0 = sof narx */
+const TGT_TTL    = 5 * 60 * 1000;   /* kesh muddati */
+const tgtCache   = new Map();
+
+async function tgtGet(path){
+  if(!TGT_KEY) return { ok:false, why:"TGT_KEY yo'q" };
+  const hit = tgtCache.get(path);
+  if(hit && Date.now() - hit.at < TGT_TTL) return { ok:true, data: hit.data };
+  const ac = new AbortController();
+  const t  = setTimeout(function(){ ac.abort(); }, 12000);
+  try{
+    const r = await fetch(TGT_BASE + path, {
+      headers: { "X-Api-Key": TGT_KEY },
+      signal: ac.signal
+    });
+    clearTimeout(t);
+    let j = null;
+    try{ j = await r.json(); }catch(e){}
+    if(!r.ok) return { ok:false, why:"HTTP "+r.status, code:r.status };
+    /* ba'zi javoblar { isSuccess, message, data } ichida keladi */
+    const d = (j && j.isSuccess !== undefined && j.data !== undefined) ? j.data : j;
+    tgtCache.set(path, { at: Date.now(), data: d });
+    if(tgtCache.size > 300) tgtCache.delete(tgtCache.keys().next().value);
+    return { ok:true, data: d };
+  }catch(e){
+    clearTimeout(t);
+    return { ok:false, why: e.name === "AbortError" ? "timeout" : e.message };
+  }
+}
+
+/* 1 TON necha dollar — tg-tools o'zi beradi, soatiga bir marta yangilanadi */
+let tgtUsdTon = { v: 0, at: 0 };
+async function tgtTonUsd(){
+  if(tgtUsdTon.v && Date.now() - tgtUsdTon.at < 3600000) return tgtUsdTon.v;
+  const r = await tgtGet("/api/catalog?category=giftcards&page=1&pageSize=1");
+  const u = (r.ok && r.data && r.data.rates) ? Number(r.data.rates.usdPerTon) : 0;
+  if(u > 0){ tgtUsdTon = { v:u, at:Date.now() }; return u; }
+  return tgtUsdTon.v || 0;
+}
+function tgtSom(ton, usdTon){
+  const t = Number(ton);
+  if(!t || !usdTon) return null;
+  return Math.ceil(t * usdTon * TON_RATE * (1 + TGT_MARKUP/100));
+}
+/* rasm maydoni turli nom bilan kelishi mumkin — barchasini tekshiramiz */
+function tgtImg(o){
+  return (o && (o.imageUrl || o.image || o.previewUrl || o.thumbnailUrl || o.mediaUrl)) || "";
+}
+
+/* Kolleksiyalar ro'yxati */
+app.get("/nft/collections", async (req,res)=>{
+  const lim = Math.min(Number(req.query.limit) || 40, 100);
+  const off = Number(req.query.offset) || 0;
+  const q   = String(req.query.search || "").trim();
+  const r = await tgtGet("/api/marketplace/collections?offset="+off+"&limit="+lim
+                        + (q ? "&search="+encodeURIComponent(q) : ""));
+  if(!r.ok) return res.json({ ok:false, why:r.why });
+  const usdTon = await tgtTonUsd();
+  const items = ((r.data && r.data.items) || []).map(function(c){
+    return { address:c.address, name:c.name, img:tgtImg(c), supply:c.supply || 0 };
+  });
+  const out = { ok:true, items:items, total:(r.data && r.data.total) || items.length,
+                hasMore: !!(r.data && r.data.hasMore), usdTon:usdTon };
+  if(req.query.debug === "1") out.sample = (r.data && r.data.items && r.data.items[0]) || null;
+  res.json(out);
+});
+
+/* Bitta kolleksiya haqida — floor, supply, sotuvdagi soni */
+app.get("/nft/collection", async (req,res)=>{
+  const a = String(req.query.address || "").trim();
+  if(!a) return res.json({ ok:false, why:"address yo'q" });
+  const r = await tgtGet("/api/marketplace/collections/"+encodeURIComponent(a));
+  if(!r.ok) return res.json({ ok:false, why:r.why });
+  const usdTon = await tgtTonUsd();
+  const d = r.data || {};
+  res.json({ ok:true, address:d.address || a, name:d.name || "", supply:d.supply || 0,
+             floorTon:d.floorTon || 0, floorSom:tgtSom(d.floorTon, usdTon),
+             listed:d.listedForSale || 0, usdTon:usdTon });
+});
+
+/* Kolleksiya ichidagi NFT lar */
+app.get("/nft/items", async (req,res)=>{
+  const a = String(req.query.address || "").trim();
+  if(!a) return res.json({ ok:false, why:"address yo'q" });
+  const lim  = Math.min(Number(req.query.limit) || 30, 50);
+  const off  = Number(req.query.offset) || 0;
+  const sale = req.query.all === "1" ? "false" : "true";
+  const r = await tgtGet("/api/marketplace/collections/"+encodeURIComponent(a)
+          + "/items?offset="+off+"&limit="+lim+"&sort=price_asc&onSaleOnly="+sale);
+  if(!r.ok) return res.json({ ok:false, why:r.why });
+  const usdTon = await tgtTonUsd();
+  const items = ((r.data && r.data.items) || []).map(function(n){
+    const ton = n.displayPriceTon || n.salePriceTon || 0;
+    return { address:n.address, name:n.name || "NFT", img:tgtImg(n),
+             onSale: !!n.isOnSale, ton:ton, som:tgtSom(ton, usdTon) };
+  });
+  const out = { ok:true, items:items, hasMore: !!(r.data && r.data.hasMore),
+                floorTon:(r.data && r.data.floorTon) || 0, usdTon:usdTon };
+  if(req.query.debug === "1") out.sample = (r.data && r.data.items && r.data.items[0]) || null;
+  res.json(out);
+});
+
+/* Bitta NFT haqida to'liq ma'lumot */
+app.get("/nft/item", async (req,res)=>{
+  const a = String(req.query.address || "").trim();
+  if(!a) return res.json({ ok:false, why:"address yo'q" });
+  const r = await tgtGet("/api/marketplace/nft?address="+encodeURIComponent(a));
+  if(!r.ok) return res.json({ ok:false, why:r.why });
+  const usdTon = await tgtTonUsd();
+  const d = r.data || {};
+  const ton = d.salePriceTon || 0;
+  res.json({ ok:true, address:d.address || a, name:d.name || "NFT", img:tgtImg(d),
+             onSale: !!d.isOnSale, ton:ton, som:tgtSom(ton, usdTon), usdTon:usdTon,
+             raw: req.query.debug === "1" ? d : undefined });
+});
+
 app.listen(3001,"0.0.0.0",()=>console.log("API 3001-portda ishlayapti"));
