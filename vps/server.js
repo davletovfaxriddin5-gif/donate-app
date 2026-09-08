@@ -1237,6 +1237,14 @@ app.post("/order", async (req,res)=>{
     const oid  = String(o.oid||"");
     const acc  = String(o.accRegion||"");
 
+    /* ---- TEXNIK ISH ----
+       .env dagi MAINT ro'yxatidagi o'yinlar buyurtma qabul qilmaydi. */
+    const MAINT = String(process.env.MAINT || "").split(",").map(x=>x.trim()).filter(Boolean);
+    if(MAINT.length && (MAINT.indexOf(game) > -1 || MAINT.indexOf(String(o.cat||"")) > -1)){
+      console.log("MAINT: " + (game || o.cat) + " buyurtmasi rad etildi (uid " + uid + ")");
+      return res.json({ ok:false, error:"maint" });
+    }
+
     /* Yangi o'yinlar: ilova cat (kategoriya) yuboradi, narx games.json dan olinadi */
     const ncat = String(o.cat || "");
     const nEnt = ncat ? GIDX[ncat + "|" + oid] : null;
