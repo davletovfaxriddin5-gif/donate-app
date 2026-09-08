@@ -1030,14 +1030,6 @@ body.nft-mode .nav-inner{ flex:1 1 auto; width:auto }
   stroke-linecap:round; stroke-linejoin:round; flex-shrink:0 }
 .nftm-fil button:active{ transform:scale(.96) }
 
-.nftm-back{ display:inline-flex; align-items:center; gap:5px; height:38px; padding:0 16px 0 10px;
-  margin:0 0 13px; border-radius:999px; background:var(--card-2); border:1px solid var(--stroke-2);
-  color:var(--text); font-size:13.5px; font-weight:600; max-width:100%;
-  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; transition:.14s }
-.nftm-back svg{ width:17px; height:17px; stroke:var(--faint); fill:none; stroke-width:2.2;
-  stroke-linecap:round; stroke-linejoin:round; flex-shrink:0 }
-.nftm-back:active{ transform:scale(.96) }
-
 .nftm-grid{ display:grid; grid-template-columns:1fr 1fr; gap:11px }
 .nftm-card{ background:var(--card); border:1px solid var(--stroke); border-radius:20px;
   padding:9px 9px 11px; text-align:left; min-width:0 }
@@ -4325,62 +4317,25 @@ function nftHistRows(){
     </div>`;
   }).join('');
 }
-/* Savdodagi NFT lar — tg-tools.shop dan VPS orqali o'qiladi.
-   Kalit VPS da turadi, bu yerda yo'q. Hech narsa sotib olinmaydi. */
-let nftCol = null, nftCols = null, nftItems = null, nftBusy = false, nftErr = '';
+/* Savdodagi NFT lar. Bo'sh bo'lsa "Hozircha bo'sh" chiqadi.
+   Qo'shish uchun namuna:
+   { id:'snoop', name:'Snoop Dogg', num:'517686', price:120000, img:'/snoop.png', glyph:'🐶' } */
+const NFT_ITEMS = [];
 
-function nftDone(){ nftBusy = false; if(view === 'nft_market') renderNftMarket(); }
-function nftLoadCols(){
-  if(nftCols || nftBusy) return;
-  nftBusy = true; nftErr = '';
-  fetch(VBASE + '/nft/collections?limit=40')
-    .then(function(r){ return r.json(); })
-    .then(function(d){ if(d && d.ok) nftCols = d.items || []; else nftErr = (d && d.why) || 'ulanmadi'; nftDone(); })
-    .catch(function(){ nftErr = 'tarmoq xatosi'; nftDone(); });
-}
-function nftOpenCol(i){
-  const c = nftCols && nftCols[i]; if(!c) return;
-  haptic();
-  nftCol = c; nftItems = null; nftErr = ''; nftBusy = true;
-  renderNftMarket();
-  fetch(VBASE + '/nft/items?limit=30&address=' + encodeURIComponent(c.address))
-    .then(function(r){ return r.json(); })
-    .then(function(d){ if(d && d.ok) nftItems = d.items || []; else nftErr = (d && d.why) || 'ulanmadi'; nftDone(); })
-    .catch(function(){ nftErr = 'tarmoq xatosi'; nftDone(); });
-}
-function nftBackCols(){ haptic(); nftCol = null; nftItems = null; nftErr = ''; renderNftMarket(); }
-function nftBuy(){ haptic(); }
-function nftCart(){ haptic(); }
-
-function nftState(list){
-  if(nftBusy) return `<div class="empty"><div class="em">⏳</div><h3>Yuklanmoqda…</h3><p>Bir soniya.</p></div>`;
-  if(nftErr)  return `<div class="empty"><div class="em">⚠️</div><h3>Ulanmadi</h3><p>${nftErr}</p></div>`;
-  if(!list || !list.length) return `<div class="empty"><div class="em">🛍️</div><h3>Hozircha bo'sh</h3><p>Sotuvda hech narsa topilmadi.</p></div>`;
-  return null;
-}
 function nftMarketCards(){
-  if(!nftCol){
-    const st = nftState(nftCols); if(st) return st;
-    return `<div class="nftm-grid">${nftCols.map(function(c,i){
-      return `<div class="nftm-card" onclick="nftOpenCol(${i})">
-        <div class="nftm-pic">${c.img ? `<img src="${c.img}" alt="" loading="lazy">` : `<span class="gl">🎁</span>`}</div>
-        <div class="nm">${c.name || 'Kolleksiya'}</div>
-        <div class="no">${c.supply ? fmt(c.supply) + ' dona' : '—'}</div>
-      </div>`;
-    }).join('')}</div>`;
+  if(!NFT_ITEMS.length){
+    return `<div class="empty"><div class="em">🛍️</div><h3>Hozircha bo'sh</h3><p>Savdoga qo'yilgan NFT lar shu yerda ko'rinadi.</p></div>`;
   }
-  const st = nftState(nftItems); if(st) return st;
-  return `<div class="nftm-grid">${nftItems.map(function(n){
-    const pic = n.img || nftCol.img || '';
+  return `<div class="nftm-grid">${NFT_ITEMS.map(function(n){
     return `<div class="nftm-card">
       <div class="nftm-pic">
-        ${pic ? `<img src="${pic}" alt="" loading="lazy">` : `<span class="gl">🎁</span>`}
+        ${n.img ? `<img src="${n.img}" alt="" loading="lazy">` : `<span class="gl">${n.glyph||'🎁'}</span>`}
         <span class="nftm-badges"><span>💳</span><span>🍀</span></span>
       </div>
-      <div class="nm">${n.name || 'NFT'}</div>
-      <div class="no">${n.ton ? n.ton + ' TON' : '—'}</div>
+      <div class="nm">${n.name||'NFT'}</div>
+      <div class="no">#${n.num||'—'}</div>
       <div class="nftm-buy">
-        <button class="pr" onclick="nftBuy()">${n.som ? fmt(n.som) + " so'm" : '—'}</button>
+        <button class="pr" onclick="nftBuy()">${n.price ? money(n.price, true) : '—'}</button>
         <button class="cart" onclick="nftCart()">
           <svg viewBox="0 0 24 24"><path d="M3 9h18l-1.5 9.3a2 2 0 0 1-2 1.7H6.5a2 2 0 0 1-2-1.7L3 9zM8.5 9L11 4M15.5 9L13 4"/></svg>
         </button>
@@ -4388,6 +4343,8 @@ function nftMarketCards(){
     </div>`;
   }).join('')}</div>`;
 }
+function nftBuy(){ haptic(); }
+function nftCart(){ haptic(); }
 
 /* ===== Mening sovg'alarim ===== */
 let mgTab = 'gifts';   /* gifts | offers | history */
@@ -4490,11 +4447,7 @@ function renderNftGifts(){
 }
 
 function renderNftMarket(){
-  nftLoadCols();
-  const back = nftCol ? `<button class="nftm-back" onclick="nftBackCols()">
-    <svg viewBox="0 0 24 24"><path d="M14.5 6l-6 6 6 6"/></svg>${nftCol.name || 'Orqaga'}
-  </button>` : '';
-  app.innerHTML = `<div class="page-title">Market</div>${back}
+  app.innerHTML = `<div class="page-title">Market</div>
   <div class="nftm-top">
     <label class="nftm-search">
       <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6"/></svg>
