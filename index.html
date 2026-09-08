@@ -685,6 +685,10 @@ body.light .toast.t-err{ color:#cc2a30 !important }
 .refresh-btn.tapped, .chips .c.tapped, .seg button.tapped{ transform: scale(.975) !important }
 .order.tapped{ transform: scale(.99) !important }
 .sheet .sh-close.tapped{ transform: scale(.99) !important }
+/* Nusxalash / Ulashish / Qo'llanma / Tekshirish tugmalari ham bosilganda kirsin */
+.rlk-b, .guide-btn, .check-btn{ transition: transform .13s cubic-bezier(.2,.85,.3,1) !important }
+.rlk-b.tapped, .guide-btn.tapped{ transform: scale(.965) !important }
+.check-btn.tapped{ transform: scale(.982) !important }
 
 /* ===== Buyurtma tafsilotlari (pastdan chiquvchi oyna) ===== */
 .sheet-bg{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(3px);
@@ -3127,6 +3131,7 @@ const fmt = n => n.toLocaleString('ru-RU').replace(/,/g,' ');
 
 function go(v){
   view = v; window.scrollTo(0,0);
+  setTimeout(function(){ try{ bindHistTaps(); }catch(e){} }, 0);
   const sub = (v==='game' || v==='topup' || v==='spam' || v==='chat' || v==='lang');
   if(tg&&tg.BackButton){ sub ? tg.BackButton.show() : tg.BackButton.hide(); }
   document.querySelector('.nav').style.display = (v==='game'||v==='chat') ? 'none' : 'flex';
@@ -5253,7 +5258,7 @@ function sndTap(){ /* bosilganda tovush yo'q \u2014 faqat tebranish */ }
 /* Har bir bosilishda yengil tebranish */
 
 let _hapT = 0;
-const TAP_SEL = '.refresh-btn, .chips .c, .seg button, .order[onclick], .sh-close';
+const TAP_SEL = '.refresh-btn, .chips .c, .seg button, .order[onclick], .sh-close, .rlk-b, .guide-btn, .check-btn';
 let _tapEl = null, _tapT = 0, _tapY = 0, _tapX = 0;
 function tapDown(e){
   const p = (e.touches && e.touches[0]) || e;
