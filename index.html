@@ -714,6 +714,15 @@ body.light .toast.t-err{ color:#cc2a30 !important }
   padding:15px;font-weight:600;font-size:15px;color:var(--text)}
 body.light .sheet-bg{background:rgba(0,0,0,.35)}
 
+/* ===== Yorug' rejim: rasm ustidagi matn ham o'qilsin ===== */
+body.light .gd-head.haspop:after{
+  background:linear-gradient(90deg,rgba(11,17,32,.66),rgba(11,17,32,.30) 40%,rgba(11,17,32,0) 68%) !important }
+body.light .gd-head.haspop .nm,
+body.light .gd-head.haspop .cur,
+body.light .gd-head.haspop .sub{
+  color:#fff !important;
+  text-shadow:0 1px 2px rgba(0,0,0,.95), 0 2px 10px rgba(0,0,0,.8) !important }
+
 /* ===== O'yin sahifasi: tepadagi rasm ham xuddi shunday ===== */
 .gd-head .ic{ border-radius:15px !important;
   box-shadow:0 0 0 1.5px var(--card), 0 0 0 2.5px rgba(255,255,255,.12) !important }
@@ -4099,7 +4108,7 @@ function chatHtml(msgs){
     const mine = m.who === 'user';
     const t = new Date(m.at).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
     return `<div style="display:flex;justify-content:${mine?'flex-end':'flex-start'};margin-bottom:8px">
-      <div style="max-width:78%;background:${mine?'var(--blue)':'var(--card)'};border:1px solid ${mine?'transparent':'var(--stroke)'};border-radius:14px;padding:9px 12px;font-size:14px;line-height:1.4;word-break:break-word">
+      <div style="max-width:78%;background:${mine?'var(--blue)':'var(--card)'};color:${mine?'#fff':'var(--text)'};border:1px solid ${mine?'transparent':'var(--stroke)'};border-radius:14px;padding:9px 12px;font-size:14px;line-height:1.4;word-break:break-word">
         ${esc(m.text)}
         <div style="font-size:10.5px;opacity:.65;margin-top:4px;text-align:right">${t}</div>
       </div></div>`;
