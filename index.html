@@ -5170,6 +5170,7 @@ var _sfx = null, _sfxReady = false;
         var pr = q.play();
         if(pr && pr.catch) pr.catch(function(){});
       }catch(e){}
+      try{ _sfx.load(); _sfxReady = true; }catch(e){}   /* faylni yuklatamiz va tayyor deb belgilaymiz */
       document.removeEventListener('touchstart', unlock);
       document.removeEventListener('click', unlock);
     };
@@ -5179,7 +5180,7 @@ var _sfx = null, _sfxReady = false;
 })();
 function playSfx(fallback){
   if(!sndOn) return false;
-  if(!_sfx || !_sfxReady) return false;
+  if(!_sfx) return false;
   try{
     _sfx.currentTime = 0;
     var pr = _sfx.play();
@@ -5198,9 +5199,19 @@ function sndOk(){
   _okTones();
 }
 /* Sirg'anish \u2014 pastga tushuvchi ohang (xato) */
+function _errTone(){
+  const c = _ctx(); if(!c) return;
+  try{
+    const t = c.currentTime;
+    const o = c.createOscillator(), g = c.createGain();
+    o.type='sine'; o.frequency.setValueAtTime(520,t); o.frequency.exponentialRampToValueAtTime(300,t+0.18);
+    g.gain.setValueAtTime(0.05,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.2);
+    o.connect(g); g.connect(c.destination); o.start(t); o.stop(t+0.22);
+  }catch(e){}
+}
 function sndErr(){
   if(!sndOn) return;
-  if(playSfx()) return;          /* fayl ishladi */
+  if(playSfx(_errTone)) return;
   const c = _ctx(); if(!c) return;
   try{
     const t = c.currentTime;
