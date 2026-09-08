@@ -687,7 +687,7 @@ body.light .toast.t-err{ color:#cc2a30 !important }
 .sheet .sh-close.tapped{ transform: scale(.99) !important }
 /* Nusxalash / Ulashish / Qo'llanma / Tekshirish tugmalari ham bosilganda kirsin */
 .rlk-b, .guide-btn, .check-btn{ transition: transform .13s cubic-bezier(.2,.85,.3,1) !important }
-.rlk-b.tapped, .guide-btn.tapped{ transform: scale(.965) !important }
+.rlk-b.tapped, .guide-btn.tapped{ transform: scale(.978) !important }
 .check-btn.tapped{ transform: scale(.982) !important }
 
 /* ===== Buyurtma tafsilotlari (pastdan chiquvchi oyna) ===== */
@@ -4437,6 +4437,7 @@ function invite(){
     <p>Do'stlaringizni taklif qiling va har bir to'lovdan 1% bonus oling</p>
   </div>`;
   loadRefs();
+  try{ bindHistTaps(); }catch(e){}
 }
 /* Telegram havoladagi startapp qiymatini serverga yuboramiz.
    Server kim kimni taklif qilganini yozib qo'yadi (bonus berilmaydi). */
