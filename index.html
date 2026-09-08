@@ -462,9 +462,12 @@ body.light .gd-head.haspop .nm,body.light .gd-head.haspop .cur{
 /* Rejim almashganda silliq o'tish. .theming faqat almashish paytida turadi,
    shuning uchun qolgan animatsiyalarga xalaqit bermaydi. */
 body.theming, body.theming *{
-  transition: background-color .4s ease, color .13s ease,
-              border-color .28s ease, fill .13s ease, box-shadow .4s ease !important;
+  /* matn va ikonka rangi DARROV almashadi (0s) — kulrang oraliq bosqichlar bo'lmaydi.
+     Fon va soya esa avvalgidek silliq o'tadi. */
+  transition: background-color .4s ease, color 0s, fill 0s,
+              border-color .28s ease, box-shadow .4s ease !important;
 }
+body.theming, body.theming *{ text-shadow:none !important }
 body.reduce-motion.theming, body.reduce-motion.theming *{ transition:none !important; }
 /* === Yorug' rejim === */
 body.light{
