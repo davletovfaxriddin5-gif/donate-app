@@ -5161,15 +5161,15 @@ var _sfx = null, _sfxReady = false;
     _sfx.preload = 'auto';
     _sfx.volume  = 0.55;
     _sfx.addEventListener('canplaythrough', function(){ _sfxReady = true; });
-    /* iOS birinchi teginishgacha ovoz chiqarishga ruxsat bermaydi \u2014 shu yerda ochamiz */
+    /* iOS ruxsatini OCHISH: sizning faylingiz emas, 0.05 soniyalik JIMLIK chalinadi.
+       Shuning uchun ilova ochilganda hech qanday ovoz eshitilmaydi. */
     var unlock = function(){
       try{
-        _sfx.muted = true;                 /* ochish paytida ovoz eshitilmasin */
-        var done = function(){ try{ _sfx.pause(); _sfx.currentTime = 0; }catch(e){} _sfx.muted = false; };
-        var pr = _sfx.play();
-        if(pr && pr.then) pr.then(done).catch(function(){ _sfx.muted = false; });
-        else done();
-      }catch(e){ try{ _sfx.muted = false; }catch(e2){} }
+        var q = new Audio('data:audio/wav;base64,UklGRkQDAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YSADAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==');
+        q.volume = 0; q.muted = true;
+        var pr = q.play();
+        if(pr && pr.catch) pr.catch(function(){});
+      }catch(e){}
       document.removeEventListener('touchstart', unlock);
       document.removeEventListener('click', unlock);
     };
@@ -5177,18 +5177,25 @@ var _sfx = null, _sfxReady = false;
     document.addEventListener('click', unlock, { once:true });
   }catch(e){}
 })();
-function playSfx(){
+function playSfx(fallback){
   if(!sndOn) return false;
   if(!_sfx || !_sfxReady) return false;
-  try{ _sfx.currentTime = 0; var pr = _sfx.play(); if(pr) pr.catch(function(){}); return true; }
-  catch(e){ return false; }
+  try{
+    _sfx.currentTime = 0;
+    var pr = _sfx.play();
+    if(pr && pr.catch) pr.catch(function(){ if(fallback) fallback(); });  /* bloklansa eski ohang */
+    return true;
+  }catch(e){ return false; }
 }
-function sndOk(){
-  if(!sndOn) return;
-  if(playSfx()) return;          /* fayl ishladi \u2014 eski ohang kerak emas */
+function _okTones(){
   tone(523.25, 0.55, 0.050, 0);
   tone(659.25, 0.55, 0.042, 0.035);
   tone(783.99, 0.60, 0.038, 0.070);
+}
+function sndOk(){
+  if(!sndOn) return;
+  if(playSfx(_okTones)) return;
+  _okTones();
 }
 /* Sirg'anish \u2014 pastga tushuvchi ohang (xato) */
 function sndErr(){
