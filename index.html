@@ -1053,6 +1053,35 @@ body.nft-mode .nav-inner{ flex:1 1 auto; width:auto }
   stroke-linecap:round; stroke-linejoin:round }
 .nftm-buy button:active{ transform:scale(.95) }
 
+/* === Profil ekrani === */
+.profile .who{ cursor:pointer; transition:opacity .14s }
+.profile .who:active{ opacity:.6 }
+.pf-card{ background:var(--card); border:1px solid var(--stroke); border-radius:var(--radius);
+  padding:16px; margin-bottom:6px }
+.pf-who{ display:flex; align-items:center; gap:14px; margin-bottom:15px }
+.pf-av{ width:62px; height:62px; border-radius:50%; flex-shrink:0; overflow:hidden; position:relative;
+  display:grid; place-items:center; background:var(--blue-grad);
+  font-size:23px; font-weight:700; color:#fff }
+.pf-av img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover }
+.pf-who .tx{ min-width:0 }
+.pf-who .nm{ font-size:19px; font-weight:600; letter-spacing:-.4px; color:var(--text);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+.pf-who .un{ font-size:13px; color:var(--faint); margin-top:1px }
+.pf-badge{ display:inline-block; margin-top:8px; padding:3px 11px; border-radius:999px;
+  background:rgba(240,169,60,.16); color:var(--gold); font-size:11.5px; font-weight:600 }
+body.light .pf-badge{ color:#B8791A }
+.pf-stats{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px }
+.pf-stats .st{ background:var(--bg-2); border:1px solid var(--stroke); border-radius:14px;
+  padding:11px 8px; min-width:0; text-align:center }
+.pf-stats .st .v{ font-size:15px; font-weight:600; letter-spacing:-.3px; color:var(--text);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+.pf-stats .st .v small{ font-size:10.5px; font-weight:500; color:var(--dim); margin-left:3px }
+.pf-stats .st .k{ font-size:10px; font-weight:500; color:var(--faint); margin-top:4px; line-height:1.3 }
+.pf-sec{ font-size:11px; font-weight:600; letter-spacing:1.1px; text-transform:uppercase;
+  color:var(--faint); margin:20px 4px 9px }
+.pf-list{ background:var(--card); border:1px solid var(--stroke);
+  border-radius:var(--radius); overflow:hidden }
+
 .nft-maint{ text-align:center; padding:110px 26px 40px; color:var(--dim) }
 .nft-maint .em{ font-size:52px; margin-bottom:18px }
 .nft-maint h3{ font-weight:600; font-size:26px; letter-spacing:-.5px; color:var(--text); margin:0 0 12px }
@@ -3308,7 +3337,7 @@ const fmt = n => n.toLocaleString('ru-RU').replace(/,/g,' ');
 function go(v){
   view = v; window.scrollTo(0,0);
   setTimeout(function(){ try{ bindHistTaps(); }catch(e){} }, 0);
-  const sub = (v==='game' || v==='topup' || v==='spam' || v==='chat' || v==='lang' || isNftView(v));
+  const sub = (v==='game' || v==='topup' || v==='spam' || v==='chat' || v==='lang' || v==='profile' || isNftView(v));
   if(tg&&tg.BackButton){ sub ? tg.BackButton.show() : tg.BackButton.hide(); }
   document.querySelector('.nav').style.display = (v==='game'||v==='chat') ? 'none' : 'flex';
   document.body.classList.toggle('nft-mode', isNftView(v));
@@ -3322,8 +3351,9 @@ function go(v){
   else if(v==='lang') renderLang();
   else if(v==='spam') renderSpam();
   else if(v==='chat') renderChat();
+  else if(v==='profile'){ pfLoaded = false; renderProfile(); }
   else if(isNftView(v)) renderNft(v);
-  if(v==='home'||v==='settings'||v==='nft_gifts') loadBalance();
+  if(v==='home'||v==='settings'||v==='nft_gifts'||v==='profile') loadBalance();
   syncNavPill(true);
 }
 function onBack(){ haptic(); if(view==='chat') go('spam'); else if(view==='spam'||view==='lang') go('settings'); else go('home'); }
@@ -3561,7 +3591,7 @@ function profileRow(){
   const initial = name.charAt(0).toUpperCase();
   const photo = tgUser && tgUser.photo_url ? `<img src="${tgUser.photo_url}" alt="">` : initial;
   return `<div class="profile">
-    <div class="who">
+    <div class="who" onclick="go('profile')">
       <div class="avatar">${photo}</div>
       <div><div class="nm">${name}</div><div class="un">${un}</div></div>
     </div>
@@ -4287,6 +4317,100 @@ function openOrderSheet(id){
 
 let chatTimer = null, chatLast = 0;
 
+/* ===== Profil ekrani — bosh sahifadagi ism ustidan bosilganda ochiladi ===== */
+function pfStats(){
+  const tp = getTopups() || [], od = getOrders() || [];
+  let inSum = 0, outSum = 0, cnt = 0, first = 0;
+  function seen(ts){ if(ts && (!first || ts < first)) first = ts; }
+  tp.forEach(function(t){
+    seen(Date.parse(t.at || '') || 0);
+    if(t.status === 'done') inSum += Number(t.amount) || 0;
+  });
+  od.forEach(function(o){
+    seen(Date.parse(o.createdAt || o.at || '') || 0);
+    if(o.status === 'cancel' || o.status === 'refund') return;
+    outSum += Number(o.price) || 0; cnt++;
+  });
+  return { inSum:inSum, outSum:outSum, cnt:cnt, first:first };
+}
+function pfSince(ts){
+  if(!ts) return 'Yangi foydalanuvchi';
+  const d = Math.floor((Date.now() - ts) / 86400000);
+  if(d < 1)  return "Bugun qo'shildi";
+  if(d < 30) return d + ' kundan beri';
+  const m = Math.floor(d / 30);
+  if(m < 12) return m + ' oydan beri';
+  const y = Math.floor(m / 12), rm = m % 12;
+  return y + ' yil' + (rm ? ' ' + rm + ' oy' : '') + 'dan beri';
+}
+function pfNum(v){
+  const t = money(Number(v) || 0, false);
+  const i = t.lastIndexOf(' ');
+  return i > 0 ? t.slice(0, i) + '<small>' + t.slice(i + 1) + '</small>' : t;
+}
+function pfSoon(){ haptic(); toast('Tez orada 🔒'); }
+
+let pfLoaded = false;
+function renderProfile(){
+  if(!pfLoaded){
+    pfLoaded = true;
+    loadOrders(function(){ if(view === 'profile') renderProfile(); });
+  }
+  const s = pfStats();
+  const name = tgUser ? (tgUser.first_name || 'Foydalanuvchi') : 'Foydalanuvchi';
+  const un   = tgUser && tgUser.username ? '@' + tgUser.username : '@user';
+  const photo = tgUser && tgUser.photo_url
+    ? `<img src="${tgUser.photo_url}" alt="">`
+    : name.charAt(0).toUpperCase();
+
+  app.innerHTML = `
+  <div class="mg-bal"><span class="chip">
+    <svg viewBox="0 0 24 24"><path d="M6.6 3h10.8l4.1 6L12 21.4 2.5 9l4.1-6z"/></svg>
+    ${money(balance, false)}
+  </span></div>
+
+  <div class="pf-card">
+    <div class="pf-who">
+      <div class="pf-av">${photo}</div>
+      <div class="tx">
+        <div class="nm">${name}</div>
+        <div class="un">${un}</div>
+        <span class="pf-badge">${pfSince(s.first)}</span>
+      </div>
+    </div>
+    <div class="pf-stats">
+      <div class="st"><div class="v">${pfNum(s.inSum)}</div><div class="k">Jami to'ldirgan</div></div>
+      <div class="st"><div class="v">${s.cnt}</div><div class="k">Buyurtmalar</div></div>
+      <div class="st"><div class="v">${pfNum(s.outSum)}</div><div class="k">Jami sarflagan</div></div>
+    </div>
+  </div>
+
+  <div class="pf-sec">Xavfsizlik</div>
+  <div class="pf-list">
+    <button class="svc" onclick="pfSoon()">
+      <span class="ic" style="background:#EA4335">
+        <svg viewBox="0 0 24 24"><path d="M21 12.2c0-.7-.06-1.2-.2-1.8H12v3.4h5.2a4.4 4.4 0 0 1-1.9 2.9v2.4h3.1c1.8-1.7 2.6-4.1 2.6-6.9z"/><path d="M12 21c2.5 0 4.6-.8 6.1-2.2l-3-2.3a5.6 5.6 0 0 1-8.3-2.9H3.7v2.4A9 9 0 0 0 12 21z"/><path d="M6.8 13.6a5.4 5.4 0 0 1 0-3.4V7.8H3.7a9 9 0 0 0 0 8.1l3.1-2.3z"/><path d="M12 6.6c1.4 0 2.6.5 3.6 1.4l2.7-2.7A9 9 0 0 0 3.7 7.8l3.1 2.4A5.4 5.4 0 0 1 12 6.6z"/></svg>
+      </span>
+      <span class="txt"><div class="t">Google</div><div class="s">Hisobni Google bilan bog'lash</div></span>
+      <span class="arw">›</span>
+    </button>
+    <button class="svc" onclick="pfSoon()">
+      <span class="ic" style="background:#2F9E62">
+        <svg viewBox="0 0 24 24"><path d="M4 8.5V6a2 2 0 0 1 2-2h2.5M20 8.5V6a2 2 0 0 0-2-2h-2.5M4 15.5V18a2 2 0 0 0 2 2h2.5M20 15.5V18a2 2 0 0 1-2 2h-2.5M9 9.5v1.5M15 9.5v1.5M9 15c1.7 1.3 4.3 1.3 6 0"/></svg>
+      </span>
+      <span class="txt"><div class="t">Face ID</div><div class="s">Yuz bilan kirishni yoqish</div></span>
+      <span class="arw">›</span>
+    </button>
+    <button class="svc" onclick="pfSoon()">
+      <span class="ic" style="background:#3B4DF0">
+        <svg viewBox="0 0 24 24"><rect x="4.5" y="10.5" width="15" height="10" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3M12 14.5v2"/></svg>
+      </span>
+      <span class="txt"><div class="t">Parol</div><div class="s">Ilovaga kirish uchun parol qo'yish</div></span>
+      <span class="arw">›</span>
+    </button>
+  </div>`;
+}
+
 /* ===== NFT bo'limi — donat xizmatining ikkinchi ekrani =====
    Oddiy foydalanuvchiga "Texnik xizmat" ko'rinadi.
    MAINT_OK ro'yxatidagi ID (admin) uchun bo'lim ochiq. */
@@ -4739,6 +4863,7 @@ function loadBalance(){
       if(view === 'home') renderHome();
       else if(view === 'settings'){ renderSettings(); loadPhone(); }
       else if(view === 'nft_gifts') renderNftGifts();
+      else if(view === 'profile') renderProfile();
     }
   }).catch(function(){});
 }
