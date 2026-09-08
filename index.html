@@ -906,6 +906,18 @@ body.light .sheet .sh-row + .sh-row{ border-top-color:rgba(16,24,40,.07) !import
         border-color:rgba(255,255,255,.10) !important }
 body.light .sheet .sh-close{ background:rgba(16,24,40,.04) !important;
         border-color:rgba(16,24,40,.10) !important }
+
+/* === Pastki panel: ixcham kapsula (chap va o'ng tomondan joy ochiladi) ===
+   --nav-w        : kapsulaning eni. Kichraytirsang chap/o'ng bo'shliq kattayadi.
+   --nav-pill-grow: ko'k kapsula tugmadan har tomonga necha px kengroq turishi. */
+:root{
+  --nav-w:68%;
+  --nav-pill-grow:5px;
+}
+.nav{ justify-content:center }
+.nav-inner{ flex:0 0 auto; width:var(--nav-w); max-width:100% }
+.nav-item{ white-space:nowrap }
+.nav-pill, .nav-goo i{ margin-left:calc((var(--nav-pill-grow) + 1px) * -1) }
 </style>
 </head>
 <body>
@@ -3158,6 +3170,7 @@ const NAV = (function(){
   const goo=inner.querySelector('.nav-goo');
   const blob=inner.querySelector('.nav-blob');
   const tail=inner.querySelector('.nav-tail');
+  const pillGrow = function(){ return parseFloat(getComputedStyle(inner).getPropertyValue('--nav-pill-grow')) || 0; };
   const rim=inner.querySelector('.nav-pill');
   const items=[].slice.call(inner.querySelectorAll('.nav-item'));
   if(!goo||!blob||!tail||!rim||!items.length) return { sync:function(){} };
@@ -3174,14 +3187,15 @@ const NAV = (function(){
     const r0=items[0].getBoundingClientRect(), rl=items[items.length-1].getBoundingClientRect();
     if(!r0.width) return false;
     w=r0.width; minX=r0.left-ir.left; maxX=rl.left-ir.left;
-    blob.style.width=w+'px'; tail.style.width=w+'px'; rim.style.width=w+'px';
+    const pw=w+pillGrow()*2;
+    blob.style.width=pw+'px'; tail.style.width=pw+'px'; rim.style.width=pw+'px';
     return true;
   }
   function xOf(el){ return el.getBoundingClientRect().left-ir.left; }
   function clamp(px){ return Math.max(minX, Math.min(maxX, px)); }
   function paint(){
     const d=x-tx, st=Math.min(Math.abs(d)/Math.max(w,1), 1);
-    const tf='translateX('+x.toFixed(1)+'px) scaleX('+(1+st*0.24).toFixed(3)+') scaleY('+(1-st*0.13).toFixed(3)+')';
+    const tf='translateX('+x.toFixed(1)+'px) scaleX('+(1+st*0.14).toFixed(3)+') scaleY('+(1-st*0.08).toFixed(3)+')';
     blob.style.transform=tf;
     rim.style.transform=tf;
     rim.style.backgroundPosition=(50-d*1.8).toFixed(1)+'% 0%';
