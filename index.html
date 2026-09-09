@@ -1175,6 +1175,14 @@ const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : 
 let tgUser = null;
 if(tg){
   tg.ready(); tg.expand();
+  /* Biometriyani darrov tayyorlab qo'yamiz. Telegram requestAccess ni faqat
+     bosish paytida qabul qiladi — tugma bosilganda init kutib turmasligi kerak. */
+  try{
+    if(tg.BiometricManager && tg.BiometricManager.init) tg.BiometricManager.init();
+    tg.onEvent('biometricManagerUpdated', function(){
+      if(typeof view !== 'undefined' && view === 'profile') renderProfile();
+    });
+  }catch(e){}
   [0,60,200,500,900,1500,2500].forEach(function(ms){ setTimeout(function(){ try{ tg.expand(); }catch(e){} }, ms); });
   try{ tg.setHeaderColor && tg.setHeaderColor('#0B1120'); tg.setBackgroundColor && tg.setBackgroundColor('#0B1120'); }catch(e){}
   tgUser = tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user : null;
@@ -4374,17 +4382,23 @@ function bioToggle(){
   const b = bioMgr();
   if(!b){ toastErr("Telegram versiyangiz buni qo'llab-quvvatlamaydi"); return; }
   if(bioOn()){ bioSet(false); renderProfile(); toastOk("O'chirildi"); return; }
-  bioInit(function(ok){
-    if(!ok || !b.isBiometricAvailable){ toastErr('Bu qurilmada biometriya mavjud emas'); return; }
-    if(b.isAccessGranted){ bioSet(true); renderProfile(); toastOk(bioName() + ' yoqildi'); return; }
-    b.requestAccess({ reason: "Buyurtmalarni himoyalash uchun" }, function(granted){
-      if(!granted){
-        toastErr('Ruxsat berilmadi');
-        if(b.isAccessRequested && b.openSettings){ try{ b.openSettings(); }catch(e){} }
-        return;
-      }
-      bioSet(true); renderProfile(); toastOk(bioName() + ' yoqildi');
-    });
+  if(!b.isInited){
+    try{ b.init(); }catch(e){}
+    toastErr('Bir soniyadan keyin qayta bosing');
+    return;
+  }
+  if(!b.isBiometricAvailable){ toastErr('Bu qurilmada biometriya mavjud emas'); return; }
+  if(b.isAccessGranted){ bioSet(true); renderProfile(); toastOk(bioName() + ' yoqildi'); return; }
+  if(b.isAccessRequested){
+    /* avval so'ralgan va rad etilgan — faqat Telegram sozlamasidan yoqiladi */
+    toast("Telegram sozlamasida biometriyani yoqing");
+    if(b.openSettings){ try{ b.openSettings(); }catch(e){} }
+    return;
+  }
+  /* bosish ichida chaqiriladi — Telegram shuni talab qiladi */
+  b.requestAccess({ reason: "Buyurtma berishda hisobingizni himoyalash uchun" }, function(granted){
+    if(granted){ bioSet(true); renderProfile(); toastOk(bioName() + ' yoqildi'); return; }
+    toastErr('Ruxsat berilmadi');
   });
 }
 /* Buyurtma berishdan oldin chaqiriladi */
