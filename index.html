@@ -977,7 +977,8 @@ body.light .seg button.on .n{ background:rgba(255,255,255,.26) }
   stroke-linecap:round; stroke-linejoin:round }
 .mg-acts button:active{ transform:scale(.93) }
 
-.mg-empty{ text-align:center; padding:30px 20px 16px }
+.mg-empty{ text-align:center; padding:0 20px 36px; min-height:30vh;
+  display:flex; flex-direction:column; justify-content:flex-end }
 .mg-empty h3{ font-size:15.5px; font-weight:600; letter-spacing:-.3px; color:var(--text); margin:0 0 5px }
 .mg-empty p{ font-size:12.5px; color:var(--faint); margin:0 0 14px }
 .mg-empty .cta{ display:inline-flex; align-items:center; justify-content:center; height:40px; padding:0 22px;
@@ -1097,6 +1098,9 @@ body.light .pf-av{ box-shadow:0 0 0 2px var(--card), 0 0 0 3px rgba(16,24,40,.13
 body.light .svc .st-off{ background:rgba(16,24,40,.06) }
 
 /* === Parol qulfi === */
+/* Klaviatura ochilganda pastki panel yuqoriga ko'tarilmasin */
+body.kb-open .nav{ display:none !important }
+
 .pw-lock{ position:fixed; inset:0; z-index:400; display:none; place-items:center;
   background:var(--bg); padding:24px }
 .pw-lock.on{ display:grid }
@@ -6174,6 +6178,20 @@ document.addEventListener('click', function(e){
   _hapT = now;
   haptic('light');
 }, true);
+
+/* Klaviatura ochilib-yopilganini kuzatamiz */
+(function(){
+  const isField = function(el){ return el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA'); };
+  document.addEventListener('focusin', function(e){
+    if(isField(e.target)) document.body.classList.add('kb-open');
+  });
+  document.addEventListener('focusout', function(e){
+    if(!isField(e.target)) return;
+    setTimeout(function(){
+      if(!isField(document.activeElement)) document.body.classList.remove('kb-open');
+    }, 80);
+  });
+})();
 
 go('home');
 syncNavPill(false);
