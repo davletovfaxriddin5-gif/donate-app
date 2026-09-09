@@ -1088,6 +1088,28 @@ body.light .pf-av{ box-shadow:0 0 0 2px var(--card), 0 0 0 3px rgba(16,24,40,.13
 .svc .st-off{ background:rgba(255,255,255,.07); color:var(--faint) }
 body.light .svc .st-off{ background:rgba(16,24,40,.06) }
 
+/* === Parol qulfi === */
+.pw-lock{ position:fixed; inset:0; z-index:400; display:none; place-items:center;
+  background:var(--bg); padding:24px }
+.pw-lock.on{ display:grid }
+.pw-lock .box{ width:100%; max-width:320px; text-align:center }
+.pw-lock .ic{ font-size:46px; margin-bottom:16px }
+.pw-lock h3{ font-size:22px; font-weight:600; letter-spacing:-.4px; color:var(--text); margin:0 0 8px }
+.pw-lock p{ font-size:14px; color:var(--faint); margin:0 0 22px; line-height:1.45 }
+.pw-lock input{ width:100%; height:52px; padding:0 18px; margin-bottom:10px;
+  background:var(--card-2); border:1px solid var(--stroke-2); border-radius:16px;
+  color:var(--text); font-size:16px; font-family:inherit; outline:none; text-align:center }
+.pw-lock input::placeholder{ color:var(--faint) }
+.pw-lock input.err{ border-color:#FF6B6B }
+.pw-lock .go{ width:100%; height:52px; margin-top:6px; border-radius:16px;
+  background:var(--blue); color:#fff; font-size:16px; font-weight:600; transition:.14s }
+.pw-lock .go:active{ transform:scale(.97) }
+.pw-lock .go:disabled{ opacity:.5 }
+.pw-lock .lnk{ margin-top:16px; background:none; color:var(--dim); font-size:13.5px; font-weight:500 }
+.pw-shake{ animation:pwshake .34s }
+@keyframes pwshake{ 0%,100%{transform:translateX(0)} 20%{transform:translateX(-7px)}
+  50%{transform:translateX(6px)} 80%{transform:translateX(-3px)} }
+
 .nft-maint{ text-align:center; padding:110px 26px 40px; color:var(--dim) }
 .nft-maint .em{ font-size:52px; margin-bottom:18px }
 .nft-maint h3{ font-weight:600; font-size:26px; letter-spacing:-.5px; color:var(--text); margin:0 0 12px }
@@ -1113,6 +1135,18 @@ body.light .svc .st-off{ background:rgba(16,24,40,.06) }
   <div class="sp-bar"><i></i></div>
 </div>
 <div class="wrap"><div id="app"></div></div>
+
+<div class="pw-lock" id="pwLock">
+  <div class="box">
+    <div class="ic">🔒</div>
+    <h3 id="pwTitle">Parol</h3>
+    <p id="pwHint">Davom etish uchun parolni kiriting</p>
+    <input type="password" id="pwIn1" autocomplete="off" placeholder="Parol">
+    <input type="password" id="pwIn2" autocomplete="off" placeholder="Parolni takrorlang">
+    <button class="go" id="pwGo" onclick="pwSubmit()">Kirish</button>
+    <button class="lnk" id="pwLnk" onclick="pwForgot()">Parolni unutdingizmi?</button>
+  </div>
+</div>
 
 <nav class="nav">
   <button class="nav-nft" id="navNft" onclick="toggleNft()">
@@ -4396,7 +4430,13 @@ function gTap(){
 }
 /* Brauzerdan qaytganda holat yangilanadi */
 document.addEventListener('visibilitychange', function(){
-  if(!document.hidden && typeof view !== 'undefined' && view === 'profile') gLoad();
+  if(document.hidden) return;
+  const locked = document.getElementById('pwLock');
+  if(locked && locked.classList.contains('on')){
+    pwLoad().then(function(d){ if(d && d.ok && d.resetOk) pwShow('reset'); });
+    return;
+  }
+  if(typeof view !== 'undefined' && view === 'profile'){ gLoad(); pwLoad(); }
 });
 
 /* ---- Face ID / barmoq izi — Telegram BiometricManager orqali ---- */
@@ -4469,11 +4509,124 @@ function bioAsk(next){
   bioScan("Buyurtmani tasdiqlash", next);
 }
 
+/* ---- Parol ---- */
+let pwInfo = null;          /* { has, google, resetOk } */
+let pwMode = 'unlock';      /* unlock | set | change | off | reset */
+function pwCached(){ try{ return localStorage.getItem('mt_pw') === '1'; }catch(e){ return false; } }
+function pwCache(v){ try{ localStorage.setItem('mt_pw', v ? '1' : '0'); }catch(e){} }
+function pwPost(path, extra){
+  const body = Object.assign({ initData: (tg && tg.initData) || '' }, extra || {});
+  return fetch(VBASE + path, {
+    method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify(body)
+  }).then(function(r){ return r.json(); });
+}
+function pwLoad(){
+  return pwPost('/pw/status').then(function(d){
+    if(d && d.ok){
+      pwInfo = d; pwCache(d.has);
+      if(!d.has) pwHide();
+      if(view === 'profile') renderProfile();
+    }
+    return d;
+  }).catch(function(){ return null; });
+}
+function pwEl(id){ return document.getElementById(id); }
+function pwHide(){ const l = pwEl('pwLock'); if(l) l.classList.remove('on'); }
+function pwShow(mode){
+  pwMode = mode;
+  const l = pwEl('pwLock'); if(!l) return;
+  const i1 = pwEl('pwIn1'), i2 = pwEl('pwIn2');
+  const t = { unlock:['Parol','Davom etish uchun parolni kiriting','Kirish'],
+              set:['Parol qo\'yish','Kamida 4 ta belgi','Saqlash'],
+              change:['Parolni o\'zgartirish','Avval joriy parolni kiriting','Saqlash'],
+              off:['Parolni o\'chirish','Joriy parolni kiriting','O\'chirish'],
+              reset:['Yangi parol','Google tasdiqladi. Yangi parol qo\'ying','Saqlash'] }[mode];
+  pwEl('pwTitle').textContent = t[0];
+  pwEl('pwHint').textContent  = t[1];
+  pwEl('pwGo').textContent    = t[2];
+  i1.value = ''; i2.value = '';
+  i1.placeholder = (mode === 'change') ? 'Joriy parol' : (mode === 'off' ? 'Joriy parol' : 'Parol');
+  i2.style.display = (mode === 'set' || mode === 'reset' || mode === 'change') ? '' : 'none';
+  i2.placeholder = (mode === 'change') ? 'Yangi parol' : 'Parolni takrorlang';
+  pwEl('pwLnk').style.display = (mode === 'unlock' || mode === 'change') ? '' : 'none';
+  l.classList.add('on');
+  setTimeout(function(){ try{ i1.focus(); }catch(e){} }, 250);
+}
+function pwBad(msg){
+  notify('error'); toastErr(msg);
+  const b = document.querySelector('.pw-lock .box');
+  if(b){ b.classList.add('pw-shake'); setTimeout(function(){ b.classList.remove('pw-shake'); }, 400); }
+}
+function pwSubmit(){
+  haptic();
+  const a = (pwEl('pwIn1').value || '').trim();
+  const b = (pwEl('pwIn2').value || '').trim();
+  const go = pwEl('pwGo');
+  const busy = function(v){ go.disabled = v; };
+
+  if(pwMode === 'unlock'){
+    if(!a) return pwBad('Parolni kiriting');
+    busy(true);
+    pwPost('/pw/check', { pass:a }).then(function(d){
+      busy(false);
+      if(d && d.ok){ pwHide(); notify('success'); return; }
+      if(d && d.why === 'wait') return pwBad('Kuting: ' + d.wait + ' soniya');
+      pwBad('Parol noto\'g\'ri');
+    }).catch(function(){ busy(false); pwBad('Tarmoq xatosi'); });
+    return;
+  }
+  if(pwMode === 'off'){
+    if(!a) return pwBad('Parolni kiriting');
+    busy(true);
+    pwPost('/pw/off', { pass:a }).then(function(d){
+      busy(false);
+      if(d && d.ok){ pwHide(); pwCache(false); if(pwInfo) pwInfo.has = false;
+                     renderProfile(); toastOk('Parol o\'chirildi'); return; }
+      if(d && d.why === 'wait') return pwBad('Kuting: ' + d.wait + ' soniya');
+      pwBad('Parol noto\'g\'ri');
+    }).catch(function(){ busy(false); pwBad('Tarmoq xatosi'); });
+    return;
+  }
+  /* set | reset | change */
+  const neu = (pwMode === 'change') ? b : a;
+  const rep = (pwMode === 'change') ? b : b;
+  if(pwMode === 'change' && !a) return pwBad('Joriy parolni kiriting');
+  if(neu.length < 4) return pwBad('Kamida 4 ta belgi');
+  if(pwMode !== 'change' && neu !== rep) return pwBad('Parollar mos kelmadi');
+  busy(true);
+  pwPost('/pw/set', { pass:neu, old:(pwMode === 'change' ? a : '') }).then(function(d){
+    busy(false);
+    if(d && d.ok){ pwHide(); pwCache(true); if(pwInfo){ pwInfo.has = true; pwInfo.resetOk = false; }
+                   renderProfile(); toastOk('Parol saqlandi'); notify('success'); return; }
+    if(d && d.why === 'nogoogle') return pwBad('Avval Google ni ulang');
+    if(d && d.why === 'short')    return pwBad('Kamida 4 ta belgi');
+    if(d && d.why === 'wait')     return pwBad('Kuting: ' + d.wait + ' soniya');
+    pwBad('Joriy parol noto\'g\'ri');
+  }).catch(function(){ busy(false); pwBad('Tarmoq xatosi'); });
+}
+function pwForgot(){
+  haptic();
+  toast('Brauzer ochilmoqda…');
+  pwPost('/google/start', { mode:'reset' }).then(function(d){
+    if(d && d.ok && d.url){ try{ tg.openLink(d.url); }catch(e){ location.href = d.url; } }
+    else toastErr('Google ulanmagan');
+  }).catch(function(){ toastErr('Tarmoq xatosi'); });
+}
+/* Profildagi Parol tugmasi */
+function pwTap(){
+  haptic();
+  if(!pwInfo){ toastErr('Bir soniyadan keyin qayta bosing'); pwLoad(); return; }
+  if(!pwInfo.google){ toastErr('Avval Google ni ulang'); return; }
+  if(!pwInfo.has){ pwShow('set'); return; }
+  if(confirm('Parolni o\'zgartirasizmi?\n\nBekor qilsangiz o\'chirish taklif qilinadi.')) pwShow('change');
+  else pwShow('off');
+}
+
 let pfLoaded = false;
 function renderProfile(){
   if(!pfLoaded){
     pfLoaded = true;
-    gLoad();
+    gLoad(); pwLoad();
     loadOrders(function(){ if(view === 'profile') renderProfile(); });
   }
   const s = pfStats();
@@ -4516,12 +4669,13 @@ function renderProfile(){
       <span class="txt"><div class="t">${bioName()}</div><div class="s">Buyurtma berishda tasdiqlash</div></span>
       <span class="${bioOn() ? 'st-on' : 'st-off'}">${bioOn() ? 'Yoqilgan' : "O'chiq"}</span>
     </button>
-    <button class="svc" onclick="pfSoon()">
+    <button class="svc" onclick="pwTap()">
       <span class="ic" style="background:#3B4DF0">
         <svg viewBox="0 0 24 24"><rect x="4.5" y="10.5" width="15" height="10" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3M12 14.5v2"/></svg>
       </span>
-      <span class="txt"><div class="t">Parol</div><div class="s">Ilovaga kirish uchun parol qo'yish</div></span>
-      <span class="arw">›</span>
+      <span class="txt"><div class="t">Parol</div>
+        <div class="s">${pwInfo && pwInfo.has ? "Ilova ochilganda so'raladi" : "Ilovaga kirish uchun parol qo'yish"}</div></span>
+      ${pwInfo && pwInfo.has ? '<span class="st-on">Yoqilgan</span>' : '<span class="arw">›</span>'}
     </button>
   </div>`;
 }
@@ -5934,6 +6088,14 @@ document.addEventListener('click', function(e){
 }, true);
 
 go('home');
+/* Parol qo'yilgan bo'lsa ilova ochilishi bilan qulf ko'rsatiladi */
+try{
+  if(pwCached()) pwShow('unlock');
+  pwLoad().then(function(d){
+    const l = document.getElementById('pwLock');
+    if(d && d.ok && d.has && l && !l.classList.contains('on')) pwShow('unlock');
+  });
+}catch(e){}
 syncNavPill(false);
 initFx();
 try{ if(localStorage.getItem('mt_theme')==='light') document.body.classList.add('light'); }catch(e){}
