@@ -938,6 +938,10 @@ body.light .nav-nft{ background:rgba(255,255,255,.92) }
 body.nft-mode .nav-item[data-grp="main"]{ display:none }
 body.nft-mode .nav-item[data-grp="nft"]{ display:flex }
 body.nft-mode .nav-item{ font-size:9px }
+/* NFT bo'limi ichida tepadagi NFT tugmasi kerak emas — qaytish uchun
+   pastda "Bosh sahifa" turibdi. Panel balandligi ham qisqaradi. */
+body.nft-mode{ --nav-h:74px }
+body.nft-mode .nav-nft{ display:none }
 
 /* === Mening sovg'alarim === */
 .mg-bal{ display:flex; justify-content:flex-end; margin:0 0 12px }
@@ -4728,24 +4732,6 @@ function getNftOrders(){ try{ return JSON.parse(localStorage.getItem('mt_nft_ord
 function addNftOrder(o){
   try{ const a=getNftOrders(); a.unshift(o); localStorage.setItem('mt_nft_orders', JSON.stringify(a.slice(0,200))); }catch(e){}
 }
-function nftHistRows(){
-  const rows = getNftOrders();
-  if(!rows.length) return `<div class="empty"><div class="em">🧾</div><h3>Hozircha bo'sh</h3><p>Sotib olgan giftlaringiz shu yerda ko'rinadi.</p></div>`;
-  return rows.map(function(o){
-    const date = new Date(o.at||Date.now()).toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
-    const st = o.status==='done' ? ['done','Yuborildi'] : o.status==='cancel' ? ['wait','Bekor qilingan'] : ['wait','Kutilmoqda'];
-    return `<div class="order">
-      <div class="top">
-        <div class="g"><div class="ic">🎁</div><div><div class="nm">${o.item||'NFT'}</div><div class="sub">№ ${o.id||'—'}</div></div></div>
-        ${o.price ? `<div class="price">${fmt(o.price)}<small>so'm</small></div>` : ''}
-      </div>
-      <div class="sep"></div>
-      <div class="kv"><span class="k">Kimga</span><span class="v">${o.to||'—'}</span></div>
-      <div class="kv"><span class="k">Holat</span><span class="badge-st ${st[0]}">${st[1]}</span></div>
-      <div class="date">${date}</div>
-    </div>`;
-  }).join('');
-}
 /* Savdodagi NFT lar. Bo'sh bo'lsa "Hozircha bo'sh" chiqadi.
    Qo'shish uchun namuna:
    { id:'snoop', name:'Snoop Dogg', num:'517686', price:120000, img:'/snoop.png', glyph:'🐶' } */
@@ -4893,6 +4879,57 @@ function renderNftMarket(){
   ${nftMarketCards()}`;
 }
 
+/* NFT bo'limining pastki Tarix tugmasi — kirim va yechimlar */
+let nftHTab = 'in';   /* in = Kirimlar, out = Yechimlar */
+function setNftHTab(t){ haptic(); nftHTab = t; renderNft('nft_hist'); }
+function getPayouts(){ try{ return JSON.parse(localStorage.getItem('mt_payouts')||'[]'); }catch(e){ return []; } }
+function addPayout(o){
+  try{ const a = getPayouts(); a.unshift(o); localStorage.setItem('mt_payouts', JSON.stringify(a.slice(0,200))); }catch(e){}
+}
+function nftMoneyRows(){
+  const dt = function(v){ return new Date(v||Date.now()).toLocaleString('ru-RU',
+    {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}); };
+
+  if(nftHTab === 'in'){
+    const rows = getTopups() || [];
+    if(!rows.length) return `<div class="empty"><div class="em">💳</div><h3>Hozircha bo'sh</h3><p>Karta orqali to'ldirganlaringiz shu yerda ko'rinadi.</p></div>`;
+    return rows.map(function(t){
+      const ok  = t.status === 'done';
+      const bad = (t.status === 'cancel' || t.status === 'expired');
+      const lbl = ok ? 'Tasdiqlandi' : bad ? 'Bekor qilingan' : 'Kutilmoqda';
+      const style = bad ? ' style="color:#FF6B6B;background:rgba(255,107,107,.14)"' : '';
+      const ic = String(t.method||'').toLowerCase().indexOf('sber') > -1 ? '🏦' : '💳';
+      return `<div class="order">
+        <div class="top">
+          <div class="g"><div class="ic">${ic}</div><div><div class="nm">${t.method||'Karta'}</div><div class="sub">Hisob to'ldirish</div></div></div>
+          <div class="price"${ok?' style="color:#4FE0A0"':''}>+${fmt(t.amount)}<small>so'm</small></div>
+        </div>
+        <div class="sep"></div>
+        <div class="kv"><span class="k">Holat</span><span class="badge-st ${ok?'done':'wait'}"${style}>${lbl}</span></div>
+        <div class="date">${dt(t.at)}</div>
+      </div>`;
+    }).join('');
+  }
+
+  const rows = getPayouts();
+  if(!rows.length) return `<div class="empty"><div class="em">🏧</div><h3>Hozircha bo'sh</h3><p>Sovg'a sotib, kartangizga yechib olganlaringiz shu yerda ko'rinadi.</p></div>`;
+  return rows.map(function(p){
+    const ok  = p.status === 'done';
+    const bad = p.status === 'cancel';
+    const lbl = ok ? 'Yechib olindi' : bad ? 'Bekor qilingan' : 'Kutilmoqda';
+    const style = bad ? ' style="color:#FF6B6B;background:rgba(255,107,107,.14)"' : '';
+    return `<div class="order">
+      <div class="top">
+        <div class="g"><div class="ic">🏧</div><div><div class="nm">${p.card||'Karta'}</div><div class="sub">Kartaga yechish</div></div></div>
+        <div class="price">-${fmt(p.amount||0)}<small>so'm</small></div>
+      </div>
+      <div class="sep"></div>
+      <div class="kv"><span class="k">Holat</span><span class="badge-st ${ok?'done':'wait'}"${style}>${lbl}</span></div>
+      <div class="date">${dt(p.at)}</div>
+    </div>`;
+  }).join('');
+}
+
 function renderNft(v){
   if(!nftAdmin()){
     app.innerHTML = `<div class="nft-maint">
@@ -4907,7 +4944,13 @@ function renderNft(v){
   } else if(v==='nft_market'){
     renderNftMarket();
   } else {
-    app.innerHTML = `<div class="page-title">Tarix</div><div id="nftList">${nftHistRows()}</div>`;
+    app.innerHTML = `<div class="page-title">Tarix</div>
+    <div class="seg">
+      <button class="${nftHTab==='in'?'on':''}" onclick="setNftHTab('in')">Kirimlar</button>
+      <button class="${nftHTab==='out'?'on':''}" onclick="setNftHTab('out')">Yechimlar</button>
+    </div>
+    <button class="refresh-btn" onclick="refreshStatus()"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.6-6.4M21 4v5h-5"/></svg>Statusni yangilash</button>
+    <div id="nftList">${nftMoneyRows()}</div>`;
   }
 }
 
