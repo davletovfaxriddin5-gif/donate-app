@@ -2919,4 +2919,106 @@ function send(chatId, text, markup){
   }).catch(function(e){ console.log("SEND xato:", e.message); });
 }
 
+/* ---------- Google bog'lash (parolni tiklash uchun) ----------
+   Kalitlar .env dagi GOOGLE_ID va GOOGLE_SECRET da turadi.
+   Bu blok faqat hisobga gmail bog'laydi, boshqa hech narsaga tegmaydi. */
+const G_ID     = process.env.GOOGLE_ID || "";
+const G_SECRET = process.env.GOOGLE_SECRET || "";
+const G_REDIR  = "https://api.minatoh.uz/google/callback";
+const gStates  = new Map();   /* state -> { id, at } */
+
+function gClean(){
+  const lim = Date.now() - 10*60*1000;
+  gStates.forEach(function(v,k){ if(v.at < lim) gStates.delete(k); });
+}
+function gPage(title, text){
+  return `<!doctype html><html><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${title}</title></head>
+<body style="margin:0;min-height:100vh;display:grid;place-items:center;background:#0B0F17;
+color:#EEF2FB;font-family:-apple-system,system-ui,sans-serif;text-align:center;padding:24px">
+<div><div style="font-size:52px;margin-bottom:16px">${title === 'Xatolik' ? '⚠️' : '✅'}</div>
+<h2 style="margin:0 0 10px;font-weight:600">${title}</h2>
+<p style="margin:0;color:#8B94AC;line-height:1.5;max-width:300px">${text}</p></div></body></html>`;
+}
+
+/* 1-qadam: Mini App shu yerdan Google havolasini oladi */
+app.post("/google/start", (req,res)=>{
+  if(!G_ID || !G_SECRET) return res.json({ ok:false, why:"sozlanmagan" });
+  const who = checkInit((req.body||{}).initData);
+  if(!who) return res.json({ ok:false, why:"auth" });
+  gClean();
+  const state = crypto.randomBytes(24).toString("hex");
+  gStates.set(state, { id: who.id, at: Date.now() });
+  const url = "https://accounts.google.com/o/oauth2/v2/auth"
+    + "?client_id=" + encodeURIComponent(G_ID)
+    + "&redirect_uri=" + encodeURIComponent(G_REDIR)
+    + "&response_type=code"
+    + "&scope=" + encodeURIComponent("openid email profile")
+    + "&state=" + state
+    + "&access_type=online&prompt=select_account";
+  res.json({ ok:true, url:url });
+});
+
+/* 2-qadam: Google shu yerga qaytaradi */
+app.get("/google/callback", async (req,res)=>{
+  res.set("Content-Type","text/html; charset=utf-8");
+  try{
+    const code  = String(req.query.code || "");
+    const state = String(req.query.state || "");
+    const st = gStates.get(state);
+    if(!code || !st) return res.send(gPage("Xatolik","Havola eskirgan. Ilovadan qaytadan urinib ko'ring."));
+    gStates.delete(state);
+
+    const body = new URLSearchParams({
+      code: code, client_id: G_ID, client_secret: G_SECRET,
+      redirect_uri: G_REDIR, grant_type: "authorization_code"
+    });
+    const ac = new AbortController();
+    const tm = setTimeout(function(){ ac.abort(); }, 15000);
+    const r = await fetch("https://oauth2.googleapis.com/token", {
+      method:"POST",
+      headers:{ "Content-Type":"application/x-www-form-urlencoded" },
+      body: body.toString(), signal: ac.signal
+    });
+    clearTimeout(tm);
+    const j = await r.json().catch(function(){ return null; });
+    if(!j || !j.id_token) return res.send(gPage("Xatolik","Google javob bermadi. Qaytadan urinib ko'ring."));
+
+    /* id_token ni ochamiz — Google dan to'g'ridan-to'g'ri kelgani uchun ishonchli */
+    const part = String(j.id_token).split(".")[1] || "";
+    const info = JSON.parse(Buffer.from(part.replace(/-/g,"+").replace(/_/g,"/"), "base64").toString("utf8"));
+    const email = String(info.email || "");
+    if(!email) return res.send(gPage("Xatolik","Gmail manzili olinmadi."));
+
+    const db = load();
+    const u  = urec(db, st.id);
+    u.google = { email: email, sub: String(info.sub||""), at: new Date().toISOString() };
+    save(db);
+    res.send(gPage("Bog'landi", email + "<br><br>Endi Telegramga qaytishingiz mumkin."));
+  }catch(e){
+    res.send(gPage("Xatolik","Nimadir noto'g'ri ketdi. Qaytadan urinib ko'ring."));
+  }
+});
+
+/* 3-qadam: Mini App holatni so'raydi */
+app.post("/google/status", (req,res)=>{
+  const who = checkInit((req.body||{}).initData);
+  if(!who) return res.json({ ok:false, why:"auth" });
+  const db = load();
+  const u  = db[who.id];
+  res.json({ ok:true, ready: !!(G_ID && G_SECRET), email:(u && u.google && u.google.email) || null });
+});
+
+/* Uzish */
+app.post("/google/unlink", (req,res)=>{
+  const who = checkInit((req.body||{}).initData);
+  if(!who) return res.json({ ok:false, why:"auth" });
+  const db = load();
+  const u  = urec(db, who.id);
+  delete u.google;
+  save(db);
+  res.json({ ok:true });
+});
+
 app.listen(3001,"0.0.0.0",()=>console.log("API 3001-portda ishlayapti"));
