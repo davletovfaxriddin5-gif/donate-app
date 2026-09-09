@@ -4880,9 +4880,26 @@ const BANNER_BASE = '';
 const BANNERS = ['banner-x1.webp','banner-x2.webp','banner-x3.webp','banner-x4.webp'];
 let mktTab = 'all';        /* all | cols | stars */
 const MKT_GAP  = 10;       /* rasmlar orasidagi bo'shliq, CSS bilan bir xil */
-const MKT_MS   = 900;      /* bir rasmdan ikkinchisiga o'tish davomiyligi */
+const MKT_MS   = 1150;     /* bir rasmdan ikkinchisiga o'tish davomiyligi */
 const MKT_WAIT = 3000;     /* rasm qancha turadi */
-let mktBanT = null, mktBanHold = 0, mktBusy = false;
+let mktBanT = null, mktBanHold = 0, mktBusy = false, mktTouch = false, mktSettle = null;
+
+function mktStepPx(r){
+  const f = r.querySelector('img'); if(!f) return 0;
+  return f.getBoundingClientRect().width + MKT_GAP;
+}
+/* Tasma: [oxirgi klon][1][2][3][4][birinchi klon].
+   Chetdagi klonga kelib qolsa, ko'z ilg'amasdan asl juftiga ko'chiriladi —
+   shu bilan qo'l bilan surganda ham aylanish uzilmaydi. */
+function mktFix(){
+  const r = document.getElementById('mktRail');
+  if(!r || mktBusy || mktTouch) return;
+  const step = mktStepPx(r); if(!step) return;
+  const n = BANNERS.length;
+  const i = Math.round(r.scrollLeft / step);
+  if(i <= 0) r.scrollLeft = n * step;
+  else if(i >= n + 1) r.scrollLeft = step;
+}
 
 function setMktTab(t){ haptic(); mktTab = t; renderNftMarket(); }
 function mktBanFail(){
@@ -4910,21 +4927,20 @@ function mktAnim(r, to, done){
   };
   requestAnimationFrame(tick);
 }
-/* Bir qadam oldinga. Oxirgisidan keyin sezdirmasdan boshiga qaytadi. */
+/* Bir qadam oldinga — har doim o'ngdan chapga. */
 function mktBanStep(){
   const r = document.getElementById('mktRail');
   if(!r){ clearInterval(mktBanT); mktBanT = null; return; }
-  if(mktBusy || Date.now() < mktBanHold) return;
-  const first = r.querySelector('img'); if(!first) return;
-  const step = first.getBoundingClientRect().width + MKT_GAP;
-  if(!step) return;
+  if(mktBusy || mktTouch || Date.now() < mktBanHold) return;
+  const step = mktStepPx(r); if(!step) return;
+  const n = BANNERS.length;
   let i = Math.round(r.scrollLeft / step);
-  if(i >= BANNERS.length){ r.scrollLeft = 0; i = 0; }   /* klonda qolgan bo'lsa */
+  if(i <= 0){ r.scrollLeft = n * step; i = n; }
+  if(i >= n + 1){ r.scrollLeft = step; i = 1; }
   const next = i + 1;
-  const wrap = (next >= BANNERS.length);                /* klonga boryapmiz */
   mktBusy = true;
   mktAnim(r, next * step, function(){
-    if(wrap) r.scrollLeft = 0;                          /* klon = 1-rasm, sezilmaydi */
+    if(next >= n + 1) r.scrollLeft = step;   /* klon = 1-rasm, sezilmaydi */
     mktBusy = false;
   });
 }
@@ -4932,16 +4948,22 @@ function mktBanStart(){
   clearInterval(mktBanT); mktBanT = null;
   const r = document.getElementById('mktRail');
   if(!r || BANNERS.length < 2) return;
-  mktBanHold = 0; mktBusy = false; r.scrollLeft = 0;
-  /* barmoq tekkanda to'xtaydi, ko'targandan 3 soniya keyin davom etadi */
-  r.addEventListener('touchstart', function(){ mktBanHold = Date.now() + 6e5; }, {passive:true});
-  r.addEventListener('touchend',   function(){ mktBanHold = Date.now() + MKT_WAIT; }, {passive:true});
-  r.addEventListener('touchcancel',function(){ mktBanHold = Date.now() + MKT_WAIT; }, {passive:true});
+  mktBanHold = 0; mktBusy = false; mktTouch = false;
+  /* boshlanish o'rni — birinchi asl rasm (0-chi klondan keyin) */
+  const put = function(){ const s = mktStepPx(r); if(s && r.scrollLeft < 1) r.scrollLeft = s; };
+  put(); setTimeout(put, 80); setTimeout(put, 400);
+  const settle = function(){ clearTimeout(mktSettle); mktSettle = setTimeout(mktFix, 130); };
+  r.addEventListener('touchstart', function(){ mktTouch = true; mktBanHold = Date.now() + 6e5; }, {passive:true});
+  const off = function(){ mktTouch = false; mktBanHold = Date.now() + MKT_WAIT; settle(); };
+  r.addEventListener('touchend', off, {passive:true});
+  r.addEventListener('touchcancel', off, {passive:true});
+  r.addEventListener('scroll', function(){ if(!mktBusy && !mktTouch) settle(); }, {passive:true});
   mktBanT = setInterval(mktBanStep, MKT_WAIT + MKT_MS);
 }
 function mktBanner(){
-  /* oxiriga birinchi rasmning nusxasi qo'shiladi — aylanish uzilmasligi uchun */
-  const slides = BANNERS.concat(BANNERS[0]).map(function(f){
+  /* ikkala chetga klon qo'yiladi — qo'lda surganda ham uzilmasin */
+  const list = [BANNERS[BANNERS.length - 1]].concat(BANNERS, [BANNERS[0]]);
+  const slides = list.map(function(f){
     return `<img src="${BANNER_BASE}${f}" alt="" onerror="mktBanFail()">`;
   }).join('');
   return `<div class="mkt-ban" id="mktBan"><div class="rail" id="mktRail">${slides}</div></div>`;
