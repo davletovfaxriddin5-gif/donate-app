@@ -4674,7 +4674,7 @@ function renderProfile(){
         <svg viewBox="0 0 24 24"><rect x="4.5" y="10.5" width="15" height="10" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3M12 14.5v2"/></svg>
       </span>
       <span class="txt"><div class="t">Parol</div>
-        <div class="s">${pwInfo && pwInfo.has ? "Ilova ochilganda so'raladi" : "Ilovaga kirish uchun parol qo'yish"}</div></span>
+        <div class="s">${pwInfo && pwInfo.has ? "Parol qo'yilgan" : "Parol qo'yish"}</div></span>
       ${pwInfo && pwInfo.has ? '<span class="st-on">Yoqilgan</span>' : '<span class="arw">›</span>'}
     </button>
   </div>`;
@@ -6088,14 +6088,6 @@ document.addEventListener('click', function(e){
 }, true);
 
 go('home');
-/* Parol qo'yilgan bo'lsa ilova ochilishi bilan qulf ko'rsatiladi */
-try{
-  if(pwCached()) pwShow('unlock');
-  pwLoad().then(function(d){
-    const l = document.getElementById('pwLock');
-    if(d && d.ok && d.has && l && !l.classList.contains('on')) pwShow('unlock');
-  });
-}catch(e){}
 syncNavPill(false);
 initFx();
 try{ if(localStorage.getItem('mt_theme')==='light') document.body.classList.add('light'); }catch(e){}
