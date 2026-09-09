@@ -4361,6 +4361,44 @@ function pfNum(v){
 }
 function pfSoon(){ haptic(); toast('Tez orada 🔒'); }
 
+/* ---- Google bog'lash (parolni tiklash uchun) ---- */
+let gInfo = null;   /* { ready, email } */
+function gLoad(){
+  fetch(VBASE + '/google/status', {
+    method:'POST', headers:{ 'Content-Type':'application/json' },
+    body: JSON.stringify({ initData: (tg && tg.initData) || '' })
+  }).then(function(r){ return r.json(); }).then(function(d){
+    if(d && d.ok){ gInfo = d; if(view === 'profile') renderProfile(); }
+  }).catch(function(){});
+}
+function gTap(){
+  haptic();
+  if(gInfo && gInfo.ready === false){ toastErr('Hali sozlanmagan'); return; }
+  if(gInfo && gInfo.email){
+    if(!confirm(gInfo.email + '\n\nUzilsinmi?')) return;
+    fetch(VBASE + '/google/unlink', {
+      method:'POST', headers:{ 'Content-Type':'application/json' },
+      body: JSON.stringify({ initData: (tg && tg.initData) || '' })
+    }).then(function(r){ return r.json(); }).then(function(d){
+      if(d && d.ok){ gInfo.email = null; renderProfile(); toastOk('Uzildi'); }
+      else toastErr('Uzilmadi');
+    }).catch(function(){ toastErr('Tarmoq xatosi'); });
+    return;
+  }
+  toast('Brauzer ochilmoqda…');
+  fetch(VBASE + '/google/start', {
+    method:'POST', headers:{ 'Content-Type':'application/json' },
+    body: JSON.stringify({ initData: (tg && tg.initData) || '' })
+  }).then(function(r){ return r.json(); }).then(function(d){
+    if(d && d.ok && d.url){ try{ tg.openLink(d.url); }catch(e){ location.href = d.url; } }
+    else toastErr(d && d.why === 'sozlanmagan' ? 'Hali sozlanmagan' : 'Ochilmadi');
+  }).catch(function(){ toastErr('Tarmoq xatosi'); });
+}
+/* Brauzerdan qaytganda holat yangilanadi */
+document.addEventListener('visibilitychange', function(){
+  if(!document.hidden && typeof view !== 'undefined' && view === 'profile') gLoad();
+});
+
 /* ---- Face ID / barmoq izi — Telegram BiometricManager orqali ---- */
 function bioMgr(){ return (tg && tg.BiometricManager) ? tg.BiometricManager : null; }
 function bioOn(){ try{ return localStorage.getItem('mt_bio') === '1'; }catch(e){ return false; } }
@@ -4435,6 +4473,7 @@ let pfLoaded = false;
 function renderProfile(){
   if(!pfLoaded){
     pfLoaded = true;
+    gLoad();
     loadOrders(function(){ if(view === 'profile') renderProfile(); });
   }
   const s = pfStats();
@@ -4462,12 +4501,13 @@ function renderProfile(){
 
   <div class="pf-sec">Xavfsizlik</div>
   <div class="pf-list">
-    <button class="svc" onclick="pfSoon()">
+    <button class="svc" onclick="gTap()">
       <span class="ic" style="background:#EA4335">
         <svg viewBox="0 0 24 24"><path d="M21 12.2c0-.7-.06-1.2-.2-1.8H12v3.4h5.2a4.4 4.4 0 0 1-1.9 2.9v2.4h3.1c1.8-1.7 2.6-4.1 2.6-6.9z"/><path d="M12 21c2.5 0 4.6-.8 6.1-2.2l-3-2.3a5.6 5.6 0 0 1-8.3-2.9H3.7v2.4A9 9 0 0 0 12 21z"/><path d="M6.8 13.6a5.4 5.4 0 0 1 0-3.4V7.8H3.7a9 9 0 0 0 0 8.1l3.1-2.3z"/><path d="M12 6.6c1.4 0 2.6.5 3.6 1.4l2.7-2.7A9 9 0 0 0 3.7 7.8l3.1 2.4A5.4 5.4 0 0 1 12 6.6z"/></svg>
       </span>
-      <span class="txt"><div class="t">Google</div><div class="s">Parolni tiklash uchun bog'lash</div></span>
-      <span class="arw">›</span>
+      <span class="txt"><div class="t">Google</div>
+        <div class="s">${gInfo && gInfo.email ? gInfo.email : "Parolni tiklash uchun bog'lash"}</div></span>
+      ${gInfo && gInfo.email ? '<span class="st-on">Ulangan</span>' : '<span class="arw">›</span>'}
     </button>
     <button class="svc" onclick="bioToggle()">
       <span class="ic" style="background:#2F9E62">
