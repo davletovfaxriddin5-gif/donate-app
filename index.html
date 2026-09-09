@@ -943,41 +943,45 @@ body.nft-mode .nav-item{ font-size:9px }
 body.nft-mode{ --nav-h:74px }
 body.nft-mode .nav-nft{ display:none }
 
-/* === Mening sovg'alarim === */
-.mg-bal{ display:flex; justify-content:flex-end; margin:0 0 12px }
-.mg-bal .chip{ display:flex; align-items:center; gap:9px; height:44px; padding:0 18px; border-radius:999px;
+/* === Sovg'alarim === */
+.mg-bal{ display:flex; justify-content:flex-end; margin:0 0 7px }
+.mg-bal .chip{ display:inline-flex; align-items:center; height:34px; padding:0 15px; border-radius:999px;
   background:var(--card-2); border:1px solid var(--stroke-2); color:var(--text);
-  font-size:16px; font-weight:700; letter-spacing:-.3px; white-space:nowrap }
-.mg-bal .chip svg{ width:19px; height:19px; fill:#5B8CFF; stroke:none; flex-shrink:0 }
+  font-size:13.5px; font-weight:600; letter-spacing:-.2px; white-space:nowrap }
 
-.mg-tabs{ display:flex; gap:17px; overflow-x:auto; scrollbar-width:none;
-  margin:0 0 15px; padding:0 2px 3px }
+.mg-tabs{ display:flex; gap:14px; overflow-x:auto; scrollbar-width:none;
+  margin:0 0 11px; padding:0 2px 2px }
 .mg-tabs::-webkit-scrollbar{ display:none }
 .mg-tabs button{ flex:0 0 auto; background:transparent; border:0; padding:0;
-  font-size:24px; font-weight:700; letter-spacing:-.7px; color:var(--faint); transition:color .2s }
+  font-size:19px; font-weight:700; letter-spacing:-.5px; color:var(--faint); transition:color .2s }
 .mg-tabs button.on{ color:var(--text) }
 
-.seg button .n{ display:inline-grid; place-items:center; min-width:21px; height:21px; padding:0 6px;
-  margin-left:7px; border-radius:999px; background:rgba(255,255,255,.15);
-  font-size:11.5px; font-weight:600; vertical-align:middle }
+/* NFT bo'limida barcha elementlar ixchamroq */
+body.nft-mode .seg{ border-radius:13px; padding:4px; margin-bottom:11px }
+body.nft-mode .seg button{ padding:8px; border-radius:10px; font-size:12.5px }
+body.nft-mode .refresh-btn{ padding:10px; font-size:13px; border-radius:12px; margin-bottom:13px }
+
+.seg button .n{ display:inline-grid; place-items:center; min-width:18px; height:18px; padding:0 5px;
+  margin-left:6px; border-radius:999px; background:rgba(255,255,255,.15);
+  font-size:10.5px; font-weight:600; vertical-align:middle }
 .seg button.on .n{ background:rgba(255,255,255,.24) }
 body.light .seg button .n{ background:rgba(16,24,40,.10) }
 body.light .seg button.on .n{ background:rgba(255,255,255,.26) }
 
 .mg-acts{ display:flex; background:var(--card-2); border:1px solid var(--stroke-2);
-  border-radius:20px; padding:13px 4px; margin-bottom:15px }
-.mg-acts button{ flex:1; min-width:0; display:flex; flex-direction:column; align-items:center; gap:9px;
-  background:transparent; border:0; color:var(--text); font-size:12.5px; font-weight:500;
+  border-radius:16px; padding:9px 4px; margin-bottom:11px }
+.mg-acts button{ flex:1; min-width:0; display:flex; flex-direction:column; align-items:center; gap:6px;
+  background:transparent; border:0; color:var(--text); font-size:11px; font-weight:500;
   white-space:nowrap; transition:.14s }
-.mg-acts button svg{ width:22px; height:22px; stroke:currentColor; fill:none; stroke-width:1.9;
+.mg-acts button svg{ width:19px; height:19px; stroke:currentColor; fill:none; stroke-width:1.9;
   stroke-linecap:round; stroke-linejoin:round }
 .mg-acts button:active{ transform:scale(.93) }
 
-.mg-empty{ text-align:center; padding:56px 20px 30px }
-.mg-empty h3{ font-size:19px; font-weight:600; letter-spacing:-.4px; color:var(--text); margin:0 0 8px }
-.mg-empty p{ font-size:14px; color:var(--faint); margin:0 0 22px }
-.mg-empty .cta{ display:inline-flex; align-items:center; justify-content:center; height:48px; padding:0 28px;
-  border-radius:999px; background:#fff; color:#0F1626; font-size:15px; font-weight:600; transition:.14s }
+.mg-empty{ text-align:center; padding:30px 20px 16px }
+.mg-empty h3{ font-size:15.5px; font-weight:600; letter-spacing:-.3px; color:var(--text); margin:0 0 5px }
+.mg-empty p{ font-size:12.5px; color:var(--faint); margin:0 0 14px }
+.mg-empty .cta{ display:inline-flex; align-items:center; justify-content:center; height:40px; padding:0 22px;
+  border-radius:999px; background:#fff; color:#0F1626; font-size:13.5px; font-weight:600; transition:.14s }
 body.light .mg-empty .cta{ background:#0F1626; color:#fff }
 .mg-empty .cta:active{ transform:scale(.96) }
 
@@ -1011,26 +1015,26 @@ body.nft-mode .nav-back{ display:flex }
 body.nft-mode .nav-inner{ flex:1 1 auto; width:auto }
 
 /* === NFT Market === */
-.nftm-top{ display:flex; align-items:center; gap:9px; margin-bottom:11px }
-.nftm-search{ flex:1; min-width:0; display:flex; align-items:center; gap:9px; height:44px; padding:0 15px;
+.nftm-top{ display:flex; align-items:center; gap:8px; margin-bottom:9px }
+.nftm-search{ flex:1; min-width:0; display:flex; align-items:center; gap:8px; height:37px; padding:0 13px;
   background:var(--card-2); border:1px solid var(--stroke-2); border-radius:999px }
-.nftm-search > svg{ width:18px; height:18px; stroke:var(--faint); fill:none; stroke-width:2;
+.nftm-search > svg{ width:16px; height:16px; stroke:var(--faint); fill:none; stroke-width:2;
   stroke-linecap:round; flex-shrink:0 }
 .nftm-search input{ flex:1; min-width:0; background:transparent; border:0; outline:none; padding:0;
-  color:var(--text); font-size:14px; font-weight:500; font-family:inherit }
+  color:var(--text); font-size:13px; font-weight:500; font-family:inherit }
 .nftm-search input::placeholder{ color:var(--faint) }
-.nftm-rb{ width:44px; height:44px; border-radius:50%; flex-shrink:0; display:grid; place-items:center;
+.nftm-rb{ width:37px; height:37px; border-radius:50%; flex-shrink:0; display:grid; place-items:center;
   background:var(--card-2); border:1px solid var(--stroke-2); color:var(--dim); transition:.14s }
-.nftm-rb svg{ width:19px; height:19px; stroke:currentColor; fill:none; stroke-width:2.1; stroke-linecap:round; stroke-linejoin:round }
+.nftm-rb svg{ width:17px; height:17px; stroke:currentColor; fill:none; stroke-width:2.1; stroke-linecap:round; stroke-linejoin:round }
 .nftm-rb:active{ transform:scale(.92) }
 
-.nftm-fil{ display:flex; gap:9px; overflow-x:auto; -webkit-overflow-scrolling:touch;
-  padding:1px 0 3px; margin-bottom:15px; scrollbar-width:none }
+.nftm-fil{ display:flex; gap:8px; overflow-x:auto; -webkit-overflow-scrolling:touch;
+  padding:1px 0 2px; margin-bottom:11px; scrollbar-width:none }
 .nftm-fil::-webkit-scrollbar{ display:none }
-.nftm-fil button{ flex:0 0 auto; display:flex; align-items:center; gap:8px; height:42px; padding:0 18px;
+.nftm-fil button{ flex:0 0 auto; display:flex; align-items:center; gap:6px; height:33px; padding:0 14px;
   border-radius:999px; background:var(--card-2); border:1px solid var(--stroke-2);
-  color:var(--text); font-size:13.5px; font-weight:500; transition:.14s }
-.nftm-fil button svg{ width:15px; height:15px; stroke:var(--faint); fill:none; stroke-width:2.3;
+  color:var(--text); font-size:12.5px; font-weight:500; transition:.14s }
+.nftm-fil button svg{ width:13px; height:13px; stroke:var(--faint); fill:none; stroke-width:2.3;
   stroke-linecap:round; stroke-linejoin:round; flex-shrink:0 }
 .nftm-fil button:active{ transform:scale(.96) }
 
@@ -1188,7 +1192,7 @@ body.light .svc .st-off{ background:rgba(16,24,40,.06) }
     </button>
     <button class="nav-item" data-grp="nft" data-tab="nft_gifts">
       <svg viewBox="0 0 24 24"><path d="M4 11h16v8.5a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 19.5V11zM3 7.6h18V11H3zM12 7.6v13.4M12 7.6S10.6 3 8.2 3a2.3 2.3 0 0 0 0 4.6zM12 7.6S13.4 3 15.8 3a2.3 2.3 0 0 1 0 4.6z"/></svg>
-      <span class="lb">Mening sovg'alarim</span>
+      <span class="lb">Sovg'alarim</span>
     </button>
     <button class="nav-item" data-grp="nft" data-tab="nft_market">
       <svg viewBox="0 0 24 24"><path d="M5 8h14l-1 12a2 2 0 0 1-2 1.8H8A2 2 0 0 1 6 20L5 8zM9 8V6a3 3 0 0 1 6 0v2"/></svg>
@@ -4839,7 +4843,6 @@ function renderNftGifts(){
       <button>Kolleksiya${MG_CV}</button>
       <button>Model${MG_CV}</button>
       <button>Fon${MG_CV}</button>
-      <button>Simvol${MG_CV}</button>
     </div>
     <div class="mg-empty">
       <h3>Telegramda sovg'alaringiz bormi?</h3>
@@ -4849,10 +4852,7 @@ function renderNftGifts(){
   }
 
   app.innerHTML = `
-  <div class="mg-bal"><span class="chip">
-    <svg viewBox="0 0 24 24"><path d="M6.6 3h10.8l4.1 6L12 21.4 2.5 9l4.1-6z"/></svg>
-    ${money(balance, false)}
-  </span></div>
+  <div class="mg-bal"><span class="chip">${money(balance, false)}</span></div>
   <div class="mg-tabs">
     <button class="${mgTab==='gifts'?'on':''}" onclick="setMgTab('gifts')">Gift</button>
     <button class="${mgTab==='offers'?'on':''}" onclick="setMgTab('offers')">Takliflar</button>
