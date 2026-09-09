@@ -977,12 +977,13 @@ body.light .seg button.on .n{ background:rgba(255,255,255,.26) }
   stroke-linecap:round; stroke-linejoin:round }
 .mg-acts button:active{ transform:scale(.93) }
 
-.mg-empty{ text-align:center; padding:0 20px 36px; min-height:30vh;
+.mg-empty{ text-align:center; padding:0 20px 18px; min-height:34vh;
   display:flex; flex-direction:column; justify-content:flex-end }
 .mg-empty h3{ font-size:15.5px; font-weight:600; letter-spacing:-.3px; color:var(--text); margin:0 0 5px }
 .mg-empty p{ font-size:12.5px; color:var(--faint); margin:0 0 14px }
-.mg-empty .cta{ display:inline-flex; align-items:center; justify-content:center; height:40px; padding:0 22px;
-  border-radius:999px; background:#fff; color:#0F1626; font-size:13.5px; font-weight:600; transition:.14s }
+.mg-empty .cta{ display:inline-flex; align-items:center; justify-content:center; align-self:center;
+  height:33px; padding:0 15px; border-radius:999px;
+  background:#fff; color:#0F1626; font-size:12.5px; font-weight:600; transition:.14s }
 body.light .mg-empty .cta{ background:#0F1626; color:#fff }
 .mg-empty .cta:active{ transform:scale(.96) }
 
@@ -1100,6 +1101,7 @@ body.light .svc .st-off{ background:rgba(16,24,40,.06) }
 /* === Parol qulfi === */
 /* Klaviatura ochilganda pastki panel yuqoriga ko'tarilmasin */
 body.kb-open .nav{ display:none !important }
+body.kb-open .mg-empty{ display:none }
 
 .pw-lock{ position:fixed; inset:0; z-index:400; display:none; place-items:center;
   background:var(--bg); padding:24px }
