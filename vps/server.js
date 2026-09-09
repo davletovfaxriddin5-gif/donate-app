@@ -2949,7 +2949,7 @@ app.post("/google/start", (req,res)=>{
   if(!who) return res.json({ ok:false, why:"auth" });
   gClean();
   const state = crypto.randomBytes(24).toString("hex");
-  gStates.set(state, { id: who.id, at: Date.now() });
+  gStates.set(state, { id: who.id, at: Date.now(), mode: (req.body||{}).mode === "reset" ? "reset" : "link" });
   const url = "https://accounts.google.com/o/oauth2/v2/auth"
     + "?client_id=" + encodeURIComponent(G_ID)
     + "&redirect_uri=" + encodeURIComponent(G_REDIR)
@@ -2993,6 +2993,14 @@ app.get("/google/callback", async (req,res)=>{
 
     const db = load();
     const u  = urec(db, st.id);
+    if(st.mode === "reset"){
+      if(!(u.google && u.google.email === email)){
+        return res.send(gPage("Xatolik","Bu hisobga bog'langan Google emas."));
+      }
+      u.pwReset = Date.now();
+      save(db);
+      return res.send(gPage("Tasdiqlandi","Telegramga qayting va yangi parol qo'ying."));
+    }
     u.google = { email: email, sub: String(info.sub||""), at: new Date().toISOString() };
     save(db);
     res.send(gPage("Bog'landi", email + "<br><br>Endi Telegramga qaytishingiz mumkin."));
@@ -3017,6 +3025,102 @@ app.post("/google/unlink", (req,res)=>{
   const db = load();
   const u  = urec(db, who.id);
   delete u.google;
+  save(db);
+  res.json({ ok:true });
+});
+
+/* ---------- Parol ----------
+   Parol ochiq saqlanmaydi — scrypt bilan tuz qo'shib xeshlanadi.
+   Tiklash faqat bog'langan Google orqali, kod yuborilmaydi. */
+const pwFail = new Map();   /* id -> { n, at } */
+
+function pwHash(pass, salt){ return crypto.scryptSync(String(pass), salt, 32).toString("hex"); }
+function pwMake(pass){
+  const salt = crypto.randomBytes(16).toString("hex");
+  return { salt:salt, hash:pwHash(pass, salt), at:new Date().toISOString() };
+}
+function pwOk(rec, pass){
+  if(!rec || !rec.salt || !rec.hash) return false;
+  try{
+    const a = Buffer.from(rec.hash, "hex");
+    const b = Buffer.from(pwHash(pass, rec.salt), "hex");
+    return a.length === b.length && crypto.timingSafeEqual(a, b);
+  }catch(e){ return false; }
+}
+function pwBlocked(id){
+  const f = pwFail.get(id);
+  if(!f) return 0;
+  if(f.n < 5) return 0;
+  const left = 5*60*1000 - (Date.now() - f.at);
+  if(left <= 0){ pwFail.delete(id); return 0; }
+  return Math.ceil(left/1000);
+}
+function pwMiss(id){
+  const f = pwFail.get(id) || { n:0, at:0 };
+  f.n++; f.at = Date.now();
+  pwFail.set(id, f);
+}
+function pwResetOk(u){ return !!(u && u.pwReset && (Date.now() - u.pwReset) < 10*60*1000); }
+
+app.post("/pw/status", (req,res)=>{
+  const who = checkInit((req.body||{}).initData);
+  if(!who) return res.json({ ok:false, why:"auth" });
+  const db = load();
+  const u  = db[who.id];
+  res.json({ ok:true, has: !!(u && u.pw), google: !!(u && u.google && u.google.email),
+             resetOk: pwResetOk(u), wait: pwBlocked(who.id) });
+});
+
+app.post("/pw/check", (req,res)=>{
+  const b = req.body || {};
+  const who = checkInit(b.initData);
+  if(!who) return res.json({ ok:false, why:"auth" });
+  const wait = pwBlocked(who.id);
+  if(wait) return res.json({ ok:false, why:"wait", wait:wait });
+  const db = load();
+  const u  = db[who.id];
+  if(!u || !u.pw) return res.json({ ok:true });          /* parol yo'q — ochiq */
+  if(pwOk(u.pw, b.pass)){ pwFail.delete(who.id); return res.json({ ok:true }); }
+  pwMiss(who.id);
+  res.json({ ok:false, why:"bad", wait: pwBlocked(who.id) });
+});
+
+app.post("/pw/set", (req,res)=>{
+  const b = req.body || {};
+  const who = checkInit(b.initData);
+  if(!who) return res.json({ ok:false, why:"auth" });
+  const pass = String(b.pass || "");
+  if(pass.length < 4) return res.json({ ok:false, why:"short" });
+  const db = load();
+  const u  = urec(db, who.id);
+  if(!(u.google && u.google.email)) return res.json({ ok:false, why:"nogoogle" });
+  if(u.pw){
+    /* o'zgartirish: eski parol yoki Google orqali tiklash kerak */
+    if(!pwResetOk(u)){
+      const wait = pwBlocked(who.id);
+      if(wait) return res.json({ ok:false, why:"wait", wait:wait });
+      if(!pwOk(u.pw, b.old)){ pwMiss(who.id); return res.json({ ok:false, why:"bad" }); }
+    }
+  }
+  u.pw = pwMake(pass);
+  delete u.pwReset;
+  pwFail.delete(who.id);
+  save(db);
+  res.json({ ok:true });
+});
+
+app.post("/pw/off", (req,res)=>{
+  const b = req.body || {};
+  const who = checkInit(b.initData);
+  if(!who) return res.json({ ok:false, why:"auth" });
+  const wait = pwBlocked(who.id);
+  if(wait) return res.json({ ok:false, why:"wait", wait:wait });
+  const db = load();
+  const u  = urec(db, who.id);
+  if(!u.pw) return res.json({ ok:true });
+  if(!pwResetOk(u) && !pwOk(u.pw, b.pass)){ pwMiss(who.id); return res.json({ ok:false, why:"bad" }); }
+  delete u.pw; delete u.pwReset;
+  pwFail.delete(who.id);
   save(db);
   res.json({ ok:true });
 });
