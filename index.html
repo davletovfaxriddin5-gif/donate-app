@@ -4369,26 +4369,46 @@ function bioName(){
   const b = bioMgr();
   return (b && b.biometricType === 'finger') ? 'Barmoq izi' : 'Face ID';
 }
-function bioInit(cb){
+/* Haqiqiy skanerlash — Face ID / barmoq izi oynasi shu yerda chiqadi */
+function bioScan(reason, ok){
   const b = bioMgr();
-  if(!b){ cb(false); return; }
-  if(b.isInited){ cb(true); return; }
-  let done = false;
-  const fin = function(){ if(!done){ done = true; cb(true); } };
-  try{ b.init(fin); setTimeout(fin, 2500); }catch(e){ cb(false); }
+  if(!b){ ok(); return; }
+  try{
+    b.authenticate({ reason: reason }, function(success, token){
+      if(!success){ notify('error'); toastErr('Tasdiqlanmadi'); return; }
+      /* birinchi safar xotirada token bo'lmasligi mumkin — yozib qo'yamiz */
+      if(!token && b.updateBiometricToken){
+        try{ b.updateBiometricToken('mt-' + Date.now(), function(){}); }catch(e){}
+      }
+      ok();
+    });
+  }catch(e){ ok(); }
 }
 function bioToggle(){
   haptic();
   const b = bioMgr();
   if(!b){ toastErr("Telegram versiyangiz buni qo'llab-quvvatlamaydi"); return; }
-  if(bioOn()){ bioSet(false); renderProfile(); toastOk("O'chirildi"); return; }
   if(!b.isInited){
     try{ b.init(); }catch(e){}
     toastErr('Bir soniyadan keyin qayta bosing');
     return;
   }
   if(!b.isBiometricAvailable){ toastErr('Bu qurilmada biometriya mavjud emas'); return; }
-  if(b.isAccessGranted){ bioSet(true); renderProfile(); toastOk(bioName() + ' yoqildi'); return; }
+
+  /* O'chirish uchun ham tasdiq so'raladi. Aks holda telefonni olgan odam
+     shunchaki o'chirib qo'yib buyurtma bera oladi — himoya ma'nosini yo'qotadi. */
+  if(bioOn()){
+    bioScan("Himoyani o'chirish", function(){
+      bioSet(false); renderProfile(); toastOk("O'chirildi");
+    });
+    return;
+  }
+  const turnOn = function(){
+    bioScan(bioName() + ' ni yoqish', function(){
+      bioSet(true); renderProfile(); toastOk(bioName() + ' yoqildi');
+    });
+  };
+  if(b.isAccessGranted){ turnOn(); return; }
   if(b.isAccessRequested){
     /* avval so'ralgan va rad etilgan — faqat Telegram sozlamasidan yoqiladi */
     toast("Telegram sozlamasida biometriyani yoqing");
@@ -4397,28 +4417,18 @@ function bioToggle(){
   }
   /* bosish ichida chaqiriladi — Telegram shuni talab qiladi */
   b.requestAccess({ reason: "Buyurtma berishda hisobingizni himoyalash uchun" }, function(granted){
-    if(granted){ bioSet(true); renderProfile(); toastOk(bioName() + ' yoqildi'); return; }
-    toastErr('Ruxsat berilmadi');
+    if(!granted){ toastErr('Ruxsat berilmadi'); return; }
+    turnOn();
   });
 }
 /* Buyurtma berishdan oldin chaqiriladi */
 function bioAsk(next){
   if(!bioOn()){ next(); return; }
   const b = bioMgr();
-  if(!b){ next(); return; }
-  bioInit(function(ok){
-    if(!ok || !b.isBiometricAvailable){ next(); return; }   /* qurilma qo'llamasa to'sib qo'ymaymiz */
-    const run = function(){
-      b.authenticate({ reason: "Buyurtmani tasdiqlash" }, function(success){
-        if(success) next();
-        else { notify('error'); toastErr('Tasdiqlanmadi'); }
-      });
-    };
-    if(b.isAccessGranted) run();
-    else b.requestAccess({ reason: "Buyurtmani tasdiqlash" }, function(g){
-      if(g) run(); else { notify('error'); toastErr('Ruxsat berilmadi'); }
-    });
-  });
+  /* qurilma yoki ruxsat yo'q bo'lsa to'sib qo'ymaymiz — odam ilovadan
+     butunlay foydalana olmay qolmasin */
+  if(!b || !b.isInited || !b.isBiometricAvailable || !b.isAccessGranted){ next(); return; }
+  bioScan("Buyurtmani tasdiqlash", next);
 }
 
 let pfLoaded = false;
