@@ -1017,6 +1017,11 @@ body.nft-mode .nav-back{ display:flex }
 body.nft-mode .nav-inner{ flex:1 1 auto; width:auto }
 
 /* === NFT Market === */
+.mkt-ban{ overflow:hidden; border-radius:16px; margin:0 0 12px; background:var(--card-2) }
+.mkt-ban .track{ display:flex; transition:transform .55s cubic-bezier(.4,0,.2,1) }
+.mkt-ban .track.jump{ transition:none }
+.mkt-ban img{ flex:0 0 100%; width:100%; aspect-ratio:36/10; object-fit:cover; display:block }
+
 .nftm-top{ display:flex; align-items:center; gap:8px; margin-bottom:9px }
 .nftm-search{ flex:1; min-width:0; display:flex; align-items:center; gap:8px; height:37px; padding:0 13px;
   background:var(--card-2); border:1px solid var(--stroke-2); border-radius:999px }
@@ -4867,8 +4872,58 @@ function renderNftGifts(){
   ${body}`;
 }
 
+/* Yuqoridagi aylanma bannerlar.
+   Rasmlar boshqa papkada tursa faqat BANNER_BASE ni o'zgartiring. */
+const BANNER_BASE = '';
+const BANNERS = ['banner-x1.webp','banner-x2.webp','banner-x3.webp','banner-x4.webp'];
+let mktTab = 'all';        /* all | cols | stars */
+let mktBanI = 0, mktBanT = null;
+
+function setMktTab(t){ haptic(); mktTab = t; renderNftMarket(); }
+function mktBanFail(){
+  const b = document.getElementById('mktBan');
+  if(b) b.style.display = 'none';
+  clearInterval(mktBanT);
+}
+function mktBanStart(){
+  clearInterval(mktBanT);
+  const tr = document.getElementById('mktTrack');
+  if(!tr || BANNERS.length < 2) return;
+  mktBanI = 0;
+  mktBanT = setInterval(function(){
+    const t = document.getElementById('mktTrack');
+    if(!t){ clearInterval(mktBanT); return; }
+    mktBanI++;
+    t.style.transform = 'translateX(-' + (mktBanI * 100) + '%)';
+    if(mktBanI >= BANNERS.length){
+      /* oxirgisidan keyin sezdirmasdan boshiga qaytamiz */
+      setTimeout(function(){
+        t.classList.add('jump');
+        mktBanI = 0;
+        t.style.transform = 'translateX(0)';
+        requestAnimationFrame(function(){
+          requestAnimationFrame(function(){ t.classList.remove('jump'); });
+        });
+      }, 580);
+    }
+  }, 3000);
+}
+function mktBanner(){
+  const slides = BANNERS.concat(BANNERS[0]).map(function(f){
+    return `<img src="${BANNER_BASE}${f}" alt="" onerror="mktBanFail()">`;
+  }).join('');
+  return `<div class="mkt-ban" id="mktBan"><div class="track" id="mktTrack">${slides}</div></div>`;
+}
+
 function renderNftMarket(){
-  app.innerHTML = `<div class="page-title">Market</div>
+  app.innerHTML = `
+  <div class="mg-bal"><span class="chip">${money(balance, false)}</span></div>
+  ${mktBanner()}
+  <div class="mg-tabs">
+    <button class="${mktTab==='all'?'on':''}" onclick="setMktTab('all')">Barcha giftlar</button>
+    <button class="${mktTab==='cols'?'on':''}" onclick="setMktTab('cols')">Kolleksiyalar</button>
+    <button class="${mktTab==='stars'?'on':''}" onclick="setMktTab('stars')">Yulduzlar</button>
+  </div>
   <div class="nftm-top">
     <label class="nftm-search">
       <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6"/></svg>
@@ -4883,6 +4938,7 @@ function renderNftMarket(){
     <button>Fon<svg viewBox="0 0 24 24"><path d="M6 9.5l6 6 6-6"/></svg></button>
   </div>
   ${nftMarketCards()}`;
+  setTimeout(mktBanStart, 0);
 }
 
 /* NFT bo'limining pastki Tarix tugmasi — faqat shu bo'limning puli.
