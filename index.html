@@ -1056,31 +1056,37 @@ body.nft-mode .nav-inner{ flex:1 1 auto; width:auto }
 /* === Profil ekrani === */
 .profile .who{ cursor:pointer; transition:opacity .14s }
 .profile .who:active{ opacity:.6 }
+.profile .who-arw{ color:var(--faint); font-size:19px; line-height:1; margin-left:1px; flex-shrink:0 }
 .pf-card{ background:var(--card); border:1px solid var(--stroke); border-radius:var(--radius);
-  padding:16px; margin-bottom:6px }
-.pf-who{ display:flex; align-items:center; gap:14px; margin-bottom:15px }
-.pf-av{ width:62px; height:62px; border-radius:50%; flex-shrink:0; overflow:hidden; position:relative;
+  padding:14px; margin-bottom:6px }
+.pf-who{ display:flex; align-items:center; gap:13px; margin-bottom:13px }
+.pf-av{ width:58px; height:58px; border-radius:50%; flex-shrink:0; overflow:hidden; position:relative;
   display:grid; place-items:center; background:var(--blue-grad);
-  font-size:23px; font-weight:700; color:#fff }
+  font-size:22px; font-weight:700; color:#fff;
+  /* rasm atrofida nozik ikki qatlam halqa — sozlamalardagidek */
+  box-shadow:0 0 0 2px var(--card), 0 0 0 3px rgba(255,255,255,.13) }
+body.light .pf-av{ box-shadow:0 0 0 2px var(--card), 0 0 0 3px rgba(16,24,40,.13) }
 .pf-av img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover }
 .pf-who .tx{ min-width:0 }
-.pf-who .nm{ font-size:19px; font-weight:600; letter-spacing:-.4px; color:var(--text);
+.pf-who .nm{ font-size:18px; font-weight:600; letter-spacing:-.4px; color:var(--text);
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
-.pf-who .un{ font-size:13px; color:var(--faint); margin-top:1px }
-.pf-badge{ display:inline-block; margin-top:8px; padding:3px 11px; border-radius:999px;
-  background:rgba(240,169,60,.16); color:var(--gold); font-size:11.5px; font-weight:600 }
-body.light .pf-badge{ color:#B8791A }
-.pf-stats{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px }
-.pf-stats .st{ background:var(--bg-2); border:1px solid var(--stroke); border-radius:14px;
-  padding:11px 8px; min-width:0; text-align:center }
-.pf-stats .st .v{ font-size:15px; font-weight:600; letter-spacing:-.3px; color:var(--text);
+.pf-who .un{ font-size:13px; color:var(--faint); margin-top:2px }
+.pf-stats{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:7px }
+.pf-stats .st{ background:var(--bg-2); border:1px solid var(--stroke); border-radius:13px;
+  padding:9px 6px; min-width:0; text-align:center }
+.pf-stats .st .v{ font-size:14.5px; font-weight:600; letter-spacing:-.3px; color:var(--text);
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
-.pf-stats .st .v small{ font-size:10.5px; font-weight:500; color:var(--dim); margin-left:3px }
-.pf-stats .st .k{ font-size:10px; font-weight:500; color:var(--faint); margin-top:4px; line-height:1.3 }
+.pf-stats .st .v small{ font-size:10px; font-weight:500; color:var(--dim); margin-left:2px }
+.pf-stats .st .k{ font-size:9.5px; font-weight:500; color:var(--faint); margin-top:3px; line-height:1.25 }
 .pf-sec{ font-size:11px; font-weight:600; letter-spacing:1.1px; text-transform:uppercase;
   color:var(--faint); margin:20px 4px 9px }
 .pf-list{ background:var(--card); border:1px solid var(--stroke);
   border-radius:var(--radius); overflow:hidden }
+.svc .st-on,.svc .st-off{ margin-left:auto; flex-shrink:0; font-size:12px; font-weight:600;
+  padding:4px 11px; border-radius:999px; white-space:nowrap }
+.svc .st-on{ background:rgba(47,181,116,.16); color:#2FB574 }
+.svc .st-off{ background:rgba(255,255,255,.07); color:var(--faint) }
+body.light .svc .st-off{ background:rgba(16,24,40,.06) }
 
 .nft-maint{ text-align:center; padding:110px 26px 40px; color:var(--dim) }
 .nft-maint .em{ font-size:52px; margin-bottom:18px }
@@ -3594,6 +3600,7 @@ function profileRow(){
     <div class="who" onclick="go('profile')">
       <div class="avatar">${photo}</div>
       <div><div class="nm">${name}</div><div class="un">${un}</div></div>
+      <span class="who-arw">›</span>
     </div>
     <button class="coin" onclick="openLink('https://t.me/mlbb_otzivv')">💬 Fikrlar</button>
   </div>`;
@@ -4059,7 +4066,13 @@ async function checkId(){
   return idOk;
 }
 var buyBusy = false;
+var buyAuthed = false;
 function buy(){
+  if(bioOn() && !buyAuthed){
+    bioAsk(function(){ buyAuthed = true; buy(); });
+    return;
+  }
+  buyAuthed = false;
   const g=curGame;
   const custom = g && g.custom === 'stars';
   if(custom){
@@ -4333,22 +4346,66 @@ function pfStats(){
   });
   return { inSum:inSum, outSum:outSum, cnt:cnt, first:first };
 }
-function pfSince(ts){
-  if(!ts) return 'Yangi foydalanuvchi';
-  const d = Math.floor((Date.now() - ts) / 86400000);
-  if(d < 1)  return "Bugun qo'shildi";
-  if(d < 30) return d + ' kundan beri';
-  const m = Math.floor(d / 30);
-  if(m < 12) return m + ' oydan beri';
-  const y = Math.floor(m / 12), rm = m % 12;
-  return y + ' yil' + (rm ? ' ' + rm + ' oy' : '') + 'dan beri';
-}
 function pfNum(v){
   const t = money(Number(v) || 0, false);
   const i = t.lastIndexOf(' ');
   return i > 0 ? t.slice(0, i) + '<small>' + t.slice(i + 1) + '</small>' : t;
 }
 function pfSoon(){ haptic(); toast('Tez orada 🔒'); }
+
+/* ---- Face ID / barmoq izi — Telegram BiometricManager orqali ---- */
+function bioMgr(){ return (tg && tg.BiometricManager) ? tg.BiometricManager : null; }
+function bioOn(){ try{ return localStorage.getItem('mt_bio') === '1'; }catch(e){ return false; } }
+function bioSet(v){ try{ localStorage.setItem('mt_bio', v ? '1' : '0'); }catch(e){} }
+function bioName(){
+  const b = bioMgr();
+  return (b && b.biometricType === 'finger') ? 'Barmoq izi' : 'Face ID';
+}
+function bioInit(cb){
+  const b = bioMgr();
+  if(!b){ cb(false); return; }
+  if(b.isInited){ cb(true); return; }
+  let done = false;
+  const fin = function(){ if(!done){ done = true; cb(true); } };
+  try{ b.init(fin); setTimeout(fin, 2500); }catch(e){ cb(false); }
+}
+function bioToggle(){
+  haptic();
+  const b = bioMgr();
+  if(!b){ toastErr("Telegram versiyangiz buni qo'llab-quvvatlamaydi"); return; }
+  if(bioOn()){ bioSet(false); renderProfile(); toastOk("O'chirildi"); return; }
+  bioInit(function(ok){
+    if(!ok || !b.isBiometricAvailable){ toastErr('Bu qurilmada biometriya mavjud emas'); return; }
+    if(b.isAccessGranted){ bioSet(true); renderProfile(); toastOk(bioName() + ' yoqildi'); return; }
+    b.requestAccess({ reason: "Buyurtmalarni himoyalash uchun" }, function(granted){
+      if(!granted){
+        toastErr('Ruxsat berilmadi');
+        if(b.isAccessRequested && b.openSettings){ try{ b.openSettings(); }catch(e){} }
+        return;
+      }
+      bioSet(true); renderProfile(); toastOk(bioName() + ' yoqildi');
+    });
+  });
+}
+/* Buyurtma berishdan oldin chaqiriladi */
+function bioAsk(next){
+  if(!bioOn()){ next(); return; }
+  const b = bioMgr();
+  if(!b){ next(); return; }
+  bioInit(function(ok){
+    if(!ok || !b.isBiometricAvailable){ next(); return; }   /* qurilma qo'llamasa to'sib qo'ymaymiz */
+    const run = function(){
+      b.authenticate({ reason: "Buyurtmani tasdiqlash" }, function(success){
+        if(success) next();
+        else { notify('error'); toastErr('Tasdiqlanmadi'); }
+      });
+    };
+    if(b.isAccessGranted) run();
+    else b.requestAccess({ reason: "Buyurtmani tasdiqlash" }, function(g){
+      if(g) run(); else { notify('error'); toastErr('Ruxsat berilmadi'); }
+    });
+  });
+}
 
 let pfLoaded = false;
 function renderProfile(){
@@ -4364,22 +4421,16 @@ function renderProfile(){
     : name.charAt(0).toUpperCase();
 
   app.innerHTML = `
-  <div class="mg-bal"><span class="chip">
-    <svg viewBox="0 0 24 24"><path d="M6.6 3h10.8l4.1 6L12 21.4 2.5 9l4.1-6z"/></svg>
-    ${money(balance, false)}
-  </span></div>
-
   <div class="pf-card">
     <div class="pf-who">
       <div class="pf-av">${photo}</div>
       <div class="tx">
         <div class="nm">${name}</div>
         <div class="un">${un}</div>
-        <span class="pf-badge">${pfSince(s.first)}</span>
       </div>
     </div>
     <div class="pf-stats">
-      <div class="st"><div class="v">${pfNum(s.inSum)}</div><div class="k">Jami to'ldirgan</div></div>
+      <div class="st"><div class="v">${pfNum(balance)}</div><div class="k">Balans</div></div>
       <div class="st"><div class="v">${s.cnt}</div><div class="k">Buyurtmalar</div></div>
       <div class="st"><div class="v">${pfNum(s.outSum)}</div><div class="k">Jami sarflagan</div></div>
     </div>
@@ -4391,15 +4442,15 @@ function renderProfile(){
       <span class="ic" style="background:#EA4335">
         <svg viewBox="0 0 24 24"><path d="M21 12.2c0-.7-.06-1.2-.2-1.8H12v3.4h5.2a4.4 4.4 0 0 1-1.9 2.9v2.4h3.1c1.8-1.7 2.6-4.1 2.6-6.9z"/><path d="M12 21c2.5 0 4.6-.8 6.1-2.2l-3-2.3a5.6 5.6 0 0 1-8.3-2.9H3.7v2.4A9 9 0 0 0 12 21z"/><path d="M6.8 13.6a5.4 5.4 0 0 1 0-3.4V7.8H3.7a9 9 0 0 0 0 8.1l3.1-2.3z"/><path d="M12 6.6c1.4 0 2.6.5 3.6 1.4l2.7-2.7A9 9 0 0 0 3.7 7.8l3.1 2.4A5.4 5.4 0 0 1 12 6.6z"/></svg>
       </span>
-      <span class="txt"><div class="t">Google</div><div class="s">Hisobni Google bilan bog'lash</div></span>
+      <span class="txt"><div class="t">Google</div><div class="s">Parolni tiklash uchun bog'lash</div></span>
       <span class="arw">›</span>
     </button>
-    <button class="svc" onclick="pfSoon()">
+    <button class="svc" onclick="bioToggle()">
       <span class="ic" style="background:#2F9E62">
         <svg viewBox="0 0 24 24"><path d="M4 8.5V6a2 2 0 0 1 2-2h2.5M20 8.5V6a2 2 0 0 0-2-2h-2.5M4 15.5V18a2 2 0 0 0 2 2h2.5M20 15.5V18a2 2 0 0 1-2 2h-2.5M9 9.5v1.5M15 9.5v1.5M9 15c1.7 1.3 4.3 1.3 6 0"/></svg>
       </span>
-      <span class="txt"><div class="t">Face ID</div><div class="s">Yuz bilan kirishni yoqish</div></span>
-      <span class="arw">›</span>
+      <span class="txt"><div class="t">${bioName()}</div><div class="s">Buyurtma berishda tasdiqlash</div></span>
+      <span class="${bioOn() ? 'st-on' : 'st-off'}">${bioOn() ? 'Yoqilgan' : "O'chiq"}</span>
     </button>
     <button class="svc" onclick="pfSoon()">
       <span class="ic" style="background:#3B4DF0">
