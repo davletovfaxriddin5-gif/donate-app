@@ -1092,6 +1092,11 @@ body.light .svc .st-off{ background:rgba(16,24,40,.06) }
 .pw-lock{ position:fixed; inset:0; z-index:400; display:none; place-items:center;
   background:var(--bg); padding:24px }
 .pw-lock.on{ display:grid }
+.pw-lock .x{ position:absolute; top:calc(env(safe-area-inset-top) + 12px); left:14px;
+  width:40px; height:40px; border-radius:50%; display:grid; place-items:center;
+  background:var(--card-2); border:1px solid var(--stroke-2); color:var(--text);
+  font-size:15px; line-height:1; transition:.14s }
+.pw-lock .x:active{ transform:scale(.92) }
 .pw-lock .box{ width:100%; max-width:320px; text-align:center }
 .pw-lock .ic{ font-size:46px; margin-bottom:16px }
 .pw-lock h3{ font-size:22px; font-weight:600; letter-spacing:-.4px; color:var(--text); margin:0 0 8px }
@@ -1137,6 +1142,7 @@ body.light .svc .st-off{ background:rgba(16,24,40,.06) }
 <div class="wrap"><div id="app"></div></div>
 
 <div class="pw-lock" id="pwLock">
+  <button class="x" onclick="pwClose()">✕</button>
   <div class="box">
     <div class="ic">🔒</div>
     <h3 id="pwTitle">Parol</h3>
@@ -3404,7 +3410,11 @@ function go(v){
   if(v==='home'||v==='settings'||v==='nft_gifts'||v==='profile') loadBalance();
   syncNavPill(true);
 }
-function onBack(){ haptic(); if(view==='chat') go('spam'); else if(view==='spam'||view==='lang') go('settings'); else go('home'); }
+function onBack(){
+  const l = document.getElementById('pwLock');
+  if(l && l.classList.contains('on')){ pwClose(); return; }
+  haptic(); if(view==='chat') go('spam'); else if(view==='spam'||view==='lang') go('settings'); else go('home');
+}
 let navDragged = false;
 document.querySelectorAll('.nav-item').forEach(n=> n.addEventListener('click', ()=>{ if(navDragged) return; haptic(); go(n.dataset.tab); }));
 
@@ -4531,7 +4541,12 @@ function pwLoad(){
   }).catch(function(){ return null; });
 }
 function pwEl(id){ return document.getElementById(id); }
-function pwHide(){ const l = pwEl('pwLock'); if(l) l.classList.remove('on'); }
+function pwHide(){
+  const l = pwEl('pwLock'); if(l) l.classList.remove('on');
+  if(tg && tg.BackButton){
+    try{ (typeof view !== 'undefined' && view === 'profile') ? tg.BackButton.show() : tg.BackButton.hide(); }catch(e){}
+  }
+}
 function pwShow(mode){
   pwMode = mode;
   const l = pwEl('pwLock'); if(!l) return;
@@ -4550,6 +4565,7 @@ function pwShow(mode){
   i2.placeholder = (mode === 'change') ? 'Yangi parol' : 'Parolni takrorlang';
   pwEl('pwLnk').style.display = (mode === 'unlock' || mode === 'change') ? '' : 'none';
   l.classList.add('on');
+  if(tg && tg.BackButton){ try{ tg.BackButton.show(); }catch(e){} }
   setTimeout(function(){ try{ i1.focus(); }catch(e){} }, 250);
 }
 function pwBad(msg){
@@ -4612,13 +4628,33 @@ function pwForgot(){
     else toastErr('Google ulanmagan');
   }).catch(function(){ toastErr('Tarmoq xatosi'); });
 }
+function pwClose(){ haptic(); pwHide(); }
 /* Profildagi Parol tugmasi */
 function pwTap(){
   haptic();
   if(!pwInfo){ toastErr('Bir soniyadan keyin qayta bosing'); pwLoad(); return; }
   if(!pwInfo.google){ toastErr('Avval Google ni ulang'); return; }
   if(!pwInfo.has){ pwShow('set'); return; }
-  if(confirm('Parolni o\'zgartirasizmi?\n\nBekor qilsangiz o\'chirish taklif qilinadi.')) pwShow('change');
+  const opts = {
+    title: 'Parol',
+    message: "Nima qilmoqchisiz?",
+    buttons: [
+      { id:'ch',  type:'default',     text:"O'zgartirish" },
+      { id:'off', type:'destructive', text:"Parolni o'chirish" },
+      { id:'no',  type:'cancel' }
+    ]
+  };
+  if(tg && tg.showPopup){
+    try{
+      tg.showPopup(opts, function(id){
+        if(id === 'ch') pwShow('change');
+        else if(id === 'off') pwShow('off');
+      });
+      return;
+    }catch(e){}
+  }
+  /* eski Telegram uchun zaxira yo'l */
+  if(confirm("Parolni O'ZGARTIRISH uchun OK bosing.\nO'CHIRISH uchun Bekor bosing.")) pwShow('change');
   else pwShow('off');
 }
 
