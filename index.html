@@ -1018,6 +1018,11 @@ body.nft-mode .nav-back{ display:flex }
 body.nft-mode .nav-inner{ flex:1 1 auto; width:auto }
 
 /* === Market filtrlari === */
+.sheet-bg.dim{ background:rgba(0,0,0,.72) !important;
+  backdrop-filter:blur(14px) !important; -webkit-backdrop-filter:blur(14px) !important }
+.sheet.fs{ height:86vh; max-height:86vh; display:flex; flex-direction:column; overflow:hidden }
+.sheet.fs .fs-list{ flex:1; max-height:none }
+.sheet.fs .fs-btns{ flex-shrink:0 }
 .fs-head{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:13px }
 .fs-head h3{ font-size:24px; font-weight:700; letter-spacing:-.7px; color:var(--text); margin:0 }
 .fs-head .x{ width:38px; height:38px; border-radius:50%; flex-shrink:0; display:grid; place-items:center;
@@ -4996,20 +5001,24 @@ function mktFiltered(){
   });
 }
 function mktRefresh(){
+  if(view === 'nft_gifts'){ renderNftGifts(); return; }
   const box = document.getElementById('mktBody');
   if(box) box.innerHTML = nftMarketCards(); else renderNftMarket();
   const f = document.getElementById('mktFil');
   if(f) f.innerHTML = mktChips();
 }
 function mktSearch(el){ mktQ = el.value; mktRefresh(); }
+/* Sovg'alarim bo'limi ham shu filtrlardan foydalanadi */
+function mgSearch(el){ mktQ = el.value; renderNftGifts(); }
+function mgViewToggle(){ haptic(); mktView = (mktView === 'list') ? 'grid' : 'list'; renderNftGifts(); }
 
 /* --- Filtr oynasi --- */
 let fsField = 'collection', fsTmp = [], fsQ = '';
 function mktOpen(field){
   haptic();
   fsField = field; fsTmp = mktSel[field].slice(); fsQ = '';
-  const bg = document.createElement('div'); bg.className='sheet-bg'; bg.id='shBg'; bg.onclick=closeSheet;
-  const sh = document.createElement('div'); sh.className='sheet'; sh.id='shBox';
+  const bg = document.createElement('div'); bg.className='sheet-bg dim'; bg.id='shBg'; bg.onclick=closeSheet;
+  const sh = document.createElement('div'); sh.className='sheet fs'; sh.id='shBox';
   sh.innerHTML = `<div class="grab"></div>
     <div class="fs-head">
       <h3>${MKT_FIELDS[field].title}</h3>
@@ -5025,7 +5034,7 @@ function mktOpen(field){
     <div class="fs-list" id="fsList">${fsRows()}</div>
     <div class="fs-btns">
       <button class="re" onclick="fsReset()">Tozalash</button>
-      <button class="ap" id="fsAp" onclick="fsApply()">Qo'llash</button>
+      <button class="ap" id="fsAp" disabled onclick="fsApply()">Qo'llash</button>
     </div>`;
   document.body.appendChild(bg); document.body.appendChild(sh);
   requestAnimationFrame(function(){ bg.classList.add('on'); sh.classList.add('on'); });
@@ -5049,7 +5058,17 @@ function fsRows(){
     </button>`;
   }).join('');
 }
-function fsRedraw(){ const l = document.getElementById('fsList'); if(l) l.innerHTML = fsRows(); }
+/* Qo'llash faqat tanlov o'zgargandagina yonadi.
+   Bo'sh holatda ham yonadi, agar avval tanlangan narsa olib tashlangan bo'lsa. */
+function fsDirty(){
+  const a = fsTmp.slice().sort().join('|');
+  const b = mktSel[fsField].slice().sort().join('|');
+  return fsTmp.length > 0 || a !== b;
+}
+function fsRedraw(){
+  const l = document.getElementById('fsList'); if(l) l.innerHTML = fsRows();
+  const ap = document.getElementById('fsAp'); if(ap) ap.disabled = !fsDirty();
+}
 function fsSearch(el){ fsQ = el.value; fsRedraw(); }
 function fsPick(k){
   haptic();
@@ -5164,14 +5183,16 @@ function renderNftGifts(){
       </button>
     </div>
     <div class="nftm-top">
-      ${MG_SEARCH}
-      <button class="nftm-rb"><svg viewBox="0 0 24 24"><path d="M5 9.5h14M5 14.5h14"/></svg></button>
+      <label class="nftm-search">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6"/></svg>
+        <input type="text" placeholder="Tezkor qidiruv" autocomplete="off" value="${mktQ}" oninput="mgSearch(this)">
+      </label>
+      <button class="nftm-rb ${mktView==='list'?'on':''}" onclick="mgViewToggle()">${
+        mktView === 'list'
+          ? '<svg viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.6"/><rect x="13" y="4" width="7" height="7" rx="1.6"/><rect x="4" y="13" width="7" height="7" rx="1.6"/><rect x="13" y="13" width="7" height="7" rx="1.6"/></svg>'
+          : '<svg viewBox="0 0 24 24"><path d="M5 9.5h14M5 14.5h14"/></svg>'}</button>
     </div>
-    <div class="nftm-fil">
-      <button>Kolleksiya${MG_CV}</button>
-      <button>Model${MG_CV}</button>
-      <button>Fon${MG_CV}</button>
-    </div>
+    <div class="nftm-fil" id="mgFil">${mktChips()}</div>
     <div class="mg-empty">
       <h3>Telegramda sovg'alaringiz bormi?</h3>
       <p>Ularni botimiz orqali qo'shing</p>
