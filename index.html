@@ -944,7 +944,8 @@ body.nft-mode{ --nav-h:74px }
 body.nft-mode .nav-nft{ display:none }
 
 /* === Sovg'alarim === */
-.mg-bal{ display:flex; justify-content:flex-end; margin:0 0 7px }
+.mg-bal{ display:flex; justify-content:flex-end; gap:8px; margin:0 0 7px }
+.mg-bal .chip small{ font-size:11.5px; font-weight:600; color:var(--faint); margin-left:5px }
 .mg-bal .chip{ display:inline-flex; align-items:center; height:34px; padding:0 15px; border-radius:999px;
   background:var(--card-2); border:1px solid var(--stroke-2); color:var(--text);
   font-size:13.5px; font-weight:600; letter-spacing:-.2px; white-space:nowrap }
@@ -1015,6 +1016,34 @@ body.light .mg-empty .cta{ background:#0F1626; color:#fff }
 body.light .nav-back{ background:rgba(255,255,255,.92) }
 body.nft-mode .nav-back{ display:flex }
 body.nft-mode .nav-inner{ flex:1 1 auto; width:auto }
+
+/* === GRAM to'ldirish ekrani === */
+.gr-card{ background:var(--card); border:1px solid var(--stroke); border-radius:20px;
+  padding:18px 16px 16px; text-align:center }
+.gr-card .lb{ font-size:12.5px; color:var(--faint) }
+.gr-wal{ display:inline-flex; align-items:center; gap:8px; height:36px; padding:0 15px; margin-top:9px;
+  border-radius:999px; background:var(--card-2); border:1px solid var(--stroke-2);
+  color:var(--text); font-size:13.5px; font-weight:500; transition:.14s }
+.gr-wal svg{ width:18px; height:18px; stroke:#5B8CFF; fill:none; stroke-width:1.8;
+  stroke-linecap:round; stroke-linejoin:round }
+.gr-wal:active{ transform:scale(.96) }
+.gr-amt{ display:flex; align-items:baseline; justify-content:center; gap:9px; margin:26px 0 20px }
+.gr-amt input{ background:transparent; border:0; outline:none; padding:0; min-width:1ch;
+  color:var(--text); font-size:44px; font-weight:700; letter-spacing:-1.5px;
+  font-family:inherit; text-align:right }
+.gr-amt .u{ font-size:31px; font-weight:700; color:var(--faint); letter-spacing:-1px }
+.gr-quick{ display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:16px }
+.gr-quick button{ display:flex; align-items:center; gap:7px; height:38px; padding:0 15px;
+  border-radius:999px; background:var(--card-2); border:1px solid var(--stroke-2);
+  color:var(--text); font-size:13.5px; font-weight:600; transition:.14s }
+.gr-quick button .d{ width:21px; height:21px; border-radius:50%; background:var(--blue);
+  display:grid; place-items:center; flex-shrink:0 }
+.gr-quick button .d svg{ width:11px; height:11px; fill:#fff; stroke:none }
+.gr-quick button:active{ transform:scale(.95) }
+.gr-go{ width:100%; height:50px; border-radius:16px; background:var(--blue); color:#fff;
+  font-size:15.5px; font-weight:600; transition:.14s }
+.gr-go:disabled{ opacity:.42 }
+.gr-go:active{ transform:scale(.98) }
 
 /* === Hamyon ekrani (balans tugmasi bosilganda) === */
 .wl-top{ display:flex; align-items:center; gap:10px; width:100%; padding:11px 14px; margin-bottom:10px;
@@ -3451,6 +3480,7 @@ function go(v){
   else if(v==='chat') renderChat();
   else if(v==='profile'){ pfLoaded = false; renderProfile(); }
   else if(v==='nft_wallet') renderWallet();
+  else if(v==='nft_gram') renderGram();
   else if(isNftView(v)) renderNft(v);
   if(v==='home'||v==='settings'||v==='nft_gifts'||v==='profile') loadBalance();
   syncNavPill(true);
@@ -3459,6 +3489,7 @@ function onBack(){
   const l = document.getElementById('pwLock');
   if(l && l.classList.contains('on')){ pwClose(); return; }
   if(view==='nft_wallet'){ haptic(); go(walletFrom); return; }
+  if(view==='nft_gram'){ haptic(); go(gramFrom); return; }
   haptic(); if(view==='chat') go('spam'); else if(view==='spam'||view==='lang') go('settings'); else go('home');
 }
 let navDragged = false;
@@ -4765,7 +4796,7 @@ function renderProfile(){
 /* ===== NFT bo'limi — donat xizmatining ikkinchi ekrani =====
    Oddiy foydalanuvchiga "Texnik xizmat" ko'rinadi.
    MAINT_OK ro'yxatidagi ID (admin) uchun bo'lim ochiq. */
-function isNftView(v){ return v==='nft_gifts' || v==='nft_market' || v==='nft_hist' || v==='nft_wallet'; }
+function isNftView(v){ return v==='nft_gifts' || v==='nft_market' || v==='nft_hist' || v==='nft_wallet' || v==='nft_gram'; }
 function nftAdmin(){ return !!(tgUser && MAINT_OK.indexOf(tgUser.id) > -1); }
 function toggleNft(){ haptic(); if(isNftView(view)) go('home'); else go('nft_gifts'); }
 
@@ -4890,7 +4921,10 @@ function renderNftGifts(){
   }
 
   app.innerHTML = `
-  <div class="mg-bal"><button class="chip" onclick="openWallet()">${money(balance, false)}</button></div>
+  <div class="mg-bal">
+    <button class="chip" onclick="openGram()">${fmtGram(getGram())}<small>GRAM</small></button>
+    <button class="chip" onclick="openWallet()">${money(balance, false)}</button>
+  </div>
   <div class="mg-tabs">
     <button class="${mgTab==='gifts'?'on':''}" onclick="setMgTab('gifts')">Gift</button>
     <button class="${mgTab==='offers'?'on':''}" onclick="setMgTab('offers')">Takliflar</button>
@@ -5009,7 +5043,10 @@ function mktBanner(){
 
 function renderNftMarket(){
   app.innerHTML = `
-  <div class="mg-bal"><button class="chip" onclick="openWallet()">${money(balance, false)}</button></div>
+  <div class="mg-bal">
+    <button class="chip" onclick="openGram()">${fmtGram(getGram())}<small>GRAM</small></button>
+    <button class="chip" onclick="openWallet()">${money(balance, false)}</button>
+  </div>
   ${mktBanner()}
   <div class="mg-tabs" id="mktTabs">
     <button data-t="all"   class="${mktTab==='all'?'on':''}"   onclick="setMktTab('all')">Barcha sovg'a</button>
@@ -5091,6 +5128,67 @@ function nftMoneyRows(){
       <div class="date">${dt(p.at)}</div>
     </div>`;
   }).join('');
+}
+
+/* ===== GRAM hamyoni — so'm hamyonidan BUTUNLAY alohida =====
+   So'm karta orqali to'ldiriladi, GRAM esa ulangan kripto hamyon orqali.
+   Ikkalasi bir-biriga aylanmaydi, hech qanday bog'liqligi yo'q. */
+const GRAM_ICON = '<svg viewBox="0 0 24 24"><path d="M12 2.5 21 9l-9 12.5L3 9z"/></svg>';
+let gramFrom = 'nft_market';
+function getGram(){ const v = Number(localStorage.getItem('mt_gram')); return isFinite(v) ? v : 0; }
+function setGram(v){ try{ localStorage.setItem('mt_gram', String(v)); }catch(e){} }
+function fmtGram(v){
+  const n = Number(v) || 0;
+  return n % 1 === 0 ? String(n) : n.toFixed(2).replace(/0+$/,'').replace(/\.$/,'');
+}
+function openGram(){
+  haptic();
+  gramFrom = isNftView(view) ? view : 'nft_market';
+  go('nft_gram');
+}
+function grSize(el){
+  const n = Math.max(1, String(el.value || '0').length);
+  el.style.width = n + 'ch';
+}
+function grIn(el){
+  /* faqat raqam va bitta nuqta */
+  let s = String(el.value).replace(/[^0-9.]/g,'');
+  const i = s.indexOf('.');
+  if(i > -1) s = s.slice(0, i + 1) + s.slice(i + 1).replace(/\./g,'');
+  if(s.length > 1 && s[0] === '0' && s[1] !== '.') s = s.replace(/^0+/,'') || '0';
+  el.value = s;
+  grSize(el);
+  const go = document.getElementById('grGo');
+  if(go) go.disabled = !(parseFloat(s) > 0);
+}
+function grSet(v){
+  haptic();
+  const el = document.getElementById('grAmt'); if(!el) return;
+  el.value = fmtGram(v);
+  grIn(el);
+}
+function renderGram(){
+  const bal = getGram();
+  app.innerHTML = `<div class="page-title">To'ldirish</div>
+  <div class="gr-card">
+    <div class="lb">Ulangan hamyon</div>
+    <button class="gr-wal" onclick="wlSoon()">
+      <svg viewBox="0 0 24 24"><path d="M3.5 8A2.5 2.5 0 0 1 6 5.5h10.5A2.5 2.5 0 0 1 19 8"/><rect x="3.5" y="8" width="17" height="10.5" rx="2.5"/><path d="M20.5 11.6h-3a1.9 1.9 0 0 0 0 3.8h3"/></svg>
+      Hamyonni ulash
+    </button>
+    <div class="gr-amt">
+      <input id="grAmt" type="text" inputmode="decimal" value="0" oninput="grIn(this)" onfocus="this.select()">
+      <span class="u">GRAM</span>
+    </div>
+    <div class="gr-quick">
+      <button onclick="grSet(10)"><span class="d">${GRAM_ICON}</span>10</button>
+      <button onclick="grSet(50)"><span class="d">${GRAM_ICON}</span>50</button>
+      <button onclick="grSet(100)"><span class="d">${GRAM_ICON}</span>100</button>
+      <button onclick="grSet(${bal})"><span class="d">${GRAM_ICON}</span>Hammasi</button>
+    </div>
+    <button class="gr-go" id="grGo" disabled onclick="wlSoon()">To'ldirish</button>
+  </div>`;
+  setTimeout(function(){ const el = document.getElementById('grAmt'); if(el) grSize(el); }, 0);
 }
 
 /* ===== Hamyon ekrani — Sovg'alarim va Marketdagi balans tugmasi bosilganda =====
