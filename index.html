@@ -1017,10 +1017,12 @@ body.nft-mode .nav-back{ display:flex }
 body.nft-mode .nav-inner{ flex:1 1 auto; width:auto }
 
 /* === NFT Market === */
-.mkt-ban{ margin:0 0 12px; overflow:hidden; touch-action:pan-y }
-.mkt-ban .rail{ position:relative; width:100%; aspect-ratio:36/13 }
-.mkt-ban img{ position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover;
-  border-radius:18px; display:block; background:var(--card-2); will-change:transform }
+.mkt-ban{ margin:0 0 12px }
+.mkt-ban .rail{ display:flex; gap:10px; overflow-x:auto; scroll-snap-type:x mandatory;
+  -webkit-overflow-scrolling:touch; scrollbar-width:none; overscroll-behavior-x:contain }
+.mkt-ban .rail::-webkit-scrollbar{ display:none }
+.mkt-ban img{ flex:0 0 100%; width:100%; aspect-ratio:36/13; object-fit:cover;
+  border-radius:18px; scroll-snap-align:start; display:block; background:var(--card-2) }
 
 .nftm-top{ display:flex; align-items:center; gap:8px; margin-bottom:9px }
 .nftm-search{ flex:1; min-width:0; display:flex; align-items:center; gap:8px; height:37px; padding:0 13px;
@@ -4877,14 +4879,12 @@ function renderNftGifts(){
 const BANNER_BASE = '';
 const BANNERS = ['banner-x1.webp','banner-x2.webp','banner-x3.webp','banner-x4.webp'];
 let mktTab = 'all';        /* all | cols | stars */
-const MKT_GAP  = 10;       /* rasmlar orasidagi bo'shliq */
+const MKT_GAP  = 10;       /* rasmlar orasidagi bo'shliq, CSS bilan bir xil */
 const MKT_MS   = 1150;     /* avtomatik o'tish davomiyligi */
 const MKT_WAIT = 3000;     /* rasm qancha turadi */
-/* Bu karusel brauzerning surilishidan foydalanmaydi. Har bir rasmning o'rni
-   qoldiqli bo'lish (modulo) bilan hisoblanadi, shuning uchun chekka degan narsa
-   yo'q — ikkala tomonga ham cheksiz suriladi. */
-let mktX = 0, mktStepW = 0, mktRaf = 0, mktBanT = null, mktHold = 0, mktDrag = false;
-let mktResizeOn = false;
+const MKT_REP  = 9;        /* to'plam necha marta takrorlanadi */
+const MKT_MID  = 4;        /* qaysi nusxa "markaz" hisoblanadi */
+let mktBanT = null, mktBanHold = 0, mktBusy = false, mktTouch = false, mktSettle = null;
 
 function setMktTab(t){ haptic(); mktTab = t; renderNftMarket(); }
 function mktBanFail(){
@@ -4892,84 +4892,80 @@ function mktBanFail(){
   if(b) b.style.display = 'none';
   clearInterval(mktBanT); mktBanT = null;
 }
-function mktLay(){
-  const r = document.getElementById('mktRail'); if(!r) return;
-  const im = r.querySelectorAll('img'); if(!im.length) return;
-  const step = r.clientWidth + MKT_GAP; if(!step) return;
-  mktStepW = step;
-  const n = im.length, total = n * step;
-  for(let j = 0; j < n; j++){
-    let pos = (j * step - mktX) % total;
-    if(pos < 0) pos += total;
-    if(pos > total - step) pos -= total;      /* chapga chiqqanini orqaga o'tkazamiz */
-    im[j].style.transform = 'translate3d(' + pos.toFixed(2) + 'px,0,0)';
-  }
+function mktStepPx(r){
+  const f = r.querySelector('img'); if(!f) return 0;
+  return f.getBoundingClientRect().width + MKT_GAP;
 }
-function mktStop(){ if(mktRaf){ cancelAnimationFrame(mktRaf); mktRaf = 0; } }
-function mktGlide(to, ms, done){
-  mktStop();
-  const from = mktX, d = to - from;
-  if(Math.abs(d) < .5){ mktX = to; mktLay(); if(done) done(); return; }
+/* Ko'rinayotgan rasmni saqlagan holda tasmani markazga qaytaradi.
+   Kasr qismi ham saqlanadi, shuning uchun harakat o'rtasida chaqirilsa ham
+   ko'zga hech narsa sezilmaydi — o'sha o'rinda aynan o'sha rasm turadi. */
+function mktFixNow(r){
+  if(mktBusy) return;
+  const step = mktStepPx(r); if(!step) return;
+  const n = BANNERS.length;
+  const f = r.scrollLeft / step;
+  const i = Math.floor(f), frac = f - i;
+  const cur = ((i % n) + n) % n;
+  const want = MKT_MID * n + cur;
+  if(i !== want) r.scrollLeft = (want + frac) * step;
+}
+function mktFix(){
+  const r = document.getElementById('mktRail');
+  if(!r || mktBusy || mktTouch) return;
+  mktFixNow(r);
+}
+/* Avtomatik o'tish — brauzerning "smooth" i keskin to'xtagani uchun o'zimiz yuritamiz */
+function mktAnim(r, to, done){
+  const from = r.scrollLeft, d = to - from;
+  if(Math.abs(d) < 1){ r.scrollLeft = to; if(done) done(); return; }
   const t0 = performance.now();
+  r.style.scrollSnapType = 'none';
   const tick = function(now){
-    const p = Math.min((now - t0) / ms, 1);
+    const p = Math.min((now - t0) / MKT_MS, 1);
     const e = p < .5 ? 4*p*p*p : 1 - Math.pow(-2*p + 2, 3) / 2;
-    mktX = from + d * e;
-    mktLay();
-    if(p < 1) mktRaf = requestAnimationFrame(tick);
-    else { mktX = to; mktLay(); mktRaf = 0; if(done) done(); }
+    r.scrollLeft = from + d * e;
+    if(p < 1) requestAnimationFrame(tick);
+    else { r.scrollLeft = to; if(done) done(); r.style.scrollSnapType = ''; }
   };
-  mktRaf = requestAnimationFrame(tick);
+  requestAnimationFrame(tick);
 }
 function mktBanStep(){
   const r = document.getElementById('mktRail');
   if(!r){ clearInterval(mktBanT); mktBanT = null; return; }
-  if(mktDrag || mktRaf || Date.now() < mktHold) return;
-  const step = r.clientWidth + MKT_GAP; if(!step) return;
-  mktStepW = step;
-  mktGlide((Math.round(mktX / step) + 1) * step, MKT_MS);
+  if(mktBusy || mktTouch || Date.now() < mktBanHold) return;
+  const step = mktStepPx(r); if(!step) return;
+  const i = Math.round(r.scrollLeft / step);
+  mktBusy = true;
+  mktAnim(r, (i + 1) * step, function(){ mktBusy = false; mktFix(); });
 }
 function mktBanStart(){
-  clearInterval(mktBanT); mktBanT = null; mktStop();
+  clearInterval(mktBanT); mktBanT = null;
   const r = document.getElementById('mktRail');
   if(!r || BANNERS.length < 2) return;
-  mktX = 0; mktDrag = false; mktHold = 0;
-  mktLay(); setTimeout(mktLay, 80); setTimeout(mktLay, 400);
+  mktBanHold = 0; mktBusy = false; mktTouch = false;
+  const home = MKT_MID * BANNERS.length;
+  const put = function(){ const s = mktStepPx(r); if(s && r.scrollLeft < 1) r.scrollLeft = home * s; };
+  put(); setTimeout(put, 80); setTimeout(put, 400);
 
-  let sX = 0, x0 = 0, lastX = 0, lastT = 0, vel = 0;
-  r.addEventListener('touchstart', function(ev){
-    mktDrag = true; mktStop(); mktHold = Date.now() + 6e5;
-    sX = ev.touches[0].clientX; x0 = mktX;
-    lastX = sX; lastT = performance.now(); vel = 0;
+  const settle = function(){ clearTimeout(mktSettle); mktSettle = setTimeout(mktFix, 130); };
+  /* Barmoq tekkan lahzada markazga qaytaramiz. Bu paytda inersiya baribir
+     to'xtaydi, shuning uchun hech narsa yo'qotilmaydi — har yangi surishda
+     ikkala tomonga to'liq zaxira bo'ladi. */
+  r.addEventListener('touchstart', function(){
+    mktFixNow(r);
+    mktTouch = true;
+    mktBanHold = Date.now() + 6e5;
   }, {passive:true});
-  r.addEventListener('touchmove', function(ev){
-    if(!mktDrag) return;
-    const cx = ev.touches[0].clientX;
-    mktX = x0 - (cx - sX);
-    const now = performance.now(), dt = now - lastT;
-    if(dt > 8){ vel = (lastX - cx) / dt; lastX = cx; lastT = now; }
-    mktLay();
-  }, {passive:true});
-  const end = function(){
-    if(!mktDrag) return;
-    mktDrag = false; mktHold = Date.now() + MKT_WAIT;
-    const step = mktStepW || 1;
-    let t = mktX / step;
-    if(vel > 0.3) t = Math.ceil(t);
-    else if(vel < -0.3) t = Math.floor(t);
-    else t = Math.round(t);
-    const to = t * step;
-    const ms = Math.max(340, Math.min(MKT_MS, Math.abs(to - mktX) / step * 850 + 280));
-    mktGlide(to, ms);
-  };
-  r.addEventListener('touchend', end, {passive:true});
-  r.addEventListener('touchcancel', end, {passive:true});
-
-  if(!mktResizeOn){ mktResizeOn = true; window.addEventListener('resize', function(){ mktLay(); }); }
+  const off = function(){ mktTouch = false; mktBanHold = Date.now() + MKT_WAIT; settle(); };
+  r.addEventListener('touchend', off, {passive:true});
+  r.addEventListener('touchcancel', off, {passive:true});
+  r.addEventListener('scroll', function(){ if(!mktBusy && !mktTouch) settle(); }, {passive:true});
   mktBanT = setInterval(mktBanStep, MKT_WAIT + MKT_MS);
 }
 function mktBanner(){
-  const slides = BANNERS.map(function(f){
+  let list = [];
+  for(let k = 0; k < MKT_REP; k++) list = list.concat(BANNERS);
+  const slides = list.map(function(f){
     return `<img src="${BANNER_BASE}${f}" alt="" decoding="async" onerror="mktBanFail()">`;
   }).join('');
   return `<div class="mkt-ban" id="mktBan"><div class="rail" id="mktRail">${slides}</div></div>`;
