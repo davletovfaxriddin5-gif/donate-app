@@ -3583,6 +3583,7 @@ function go(v){
   else if(v==='profile'){ pfLoaded = false; renderProfile(); }
   else if(v==='nft_wallet') renderWallet();
   else if(v==='nft_gram') renderGram();
+  else if(v==='nft_top') renderNftTopup();
   else if(v==='nft_out') renderOut();
   else if(v==='nft_out_wallet') renderOutWallet();
   else if(v==='nft_out_stars') renderOutStars();
@@ -3596,6 +3597,7 @@ function onBack(){
   if(l && l.classList.contains('on')){ pwClose(); return; }
   if(view==='nft_wallet'){ haptic(); go(walletFrom); return; }
   if(view==='nft_gram'){ haptic(); go(gramFrom); return; }
+  if(view==='nft_top'){ haptic(); go('nft_wallet'); return; }
   if(view==='nft_out'){ haptic(); go('nft_wallet'); return; }
   if(view==='nft_out_card' && ocStep === 2){ haptic(); ocStep = 1; renderOutCard(); return; }
   if(view==='nft_out_wallet' || view==='nft_out_stars' || view==='nft_out_card'){ haptic(); go('nft_out'); return; }
@@ -4906,7 +4908,8 @@ function renderProfile(){
    Oddiy foydalanuvchiga "Texnik xizmat" ko'rinadi.
    MAINT_OK ro'yxatidagi ID (admin) uchun bo'lim ochiq. */
 function isNftView(v){ return v==='nft_gifts' || v==='nft_market' || v==='nft_hist' || v==='nft_wallet'
-  || v==='nft_gram' || v==='nft_out' || v==='nft_out_wallet' || v==='nft_out_stars' || v==='nft_out_card'; }
+  || v==='nft_gram' || v==='nft_top' || v==='nft_out' || v==='nft_out_wallet'
+  || v==='nft_out_stars' || v==='nft_out_card'; }
 function nftAdmin(){ return !!(tgUser && MAINT_OK.indexOf(tgUser.id) > -1); }
 function toggleNft(){ haptic(); if(isNftView(view)) go('home'); else go('nft_gifts'); }
 
@@ -5413,6 +5416,31 @@ function nftMoneyRows(){
   }).join('');
 }
 
+/* ===== NFT bo'limining so'm hisobini to'ldirish =====
+   Ko'rinishi bosh sahifadagi kabi, lekin butunlay alohida:
+   bu yerdan to'ldirilgan pul faqat NFT bo'limining hisobiga tushadi va
+   faqat shu yerdan chiqarib olinadi. Bosh sahifadagi balansga tegmaydi. */
+function renderNftTopup(){
+  app.innerHTML = `
+  <div class="page-title">Hisobni to'ldirish</div>
+  <p style="color:var(--dim);font-size:13.5px;margin:-6px 2px 6px">To'lov usulini tanlang</p>
+  <div class="ot-hint" style="margin:0 2px 16px">Bu pul NFT bo'limi hisobiga tushadi va shu yerdan chiqariladi.</div>
+  <div class="pay-grid">
+    ${Object.keys(CARDS).map(function(k){
+      const c = CARDS[k];
+      const ic = c.icon.indexOf('/') === 0
+        ? `<img src="${c.icon}" style="width:100%;height:46px;object-fit:contain">` : c.icon;
+      return `<button class="pay" onclick="nftPick('${k}')"><span class="box" style="background:${c.bg};font-size:20px;width:100%;height:46px">${ic}</span><span class="nm">${c.bank}</span></button>`;
+    }).join('')}
+    <button class="pay" onclick="nftPick('stars')"><span class="box" style="font-size:30px;width:100%;height:46px">⭐</span><span class="nm">Telegram Stars</span></button>
+    <button class="pay" onclick="nftPick('usdt')"><span class="box" style="font-size:27px;width:100%;height:46px"><img src="/ton-x1.webp" style="width:100%;height:46px;object-fit:contain" onerror="this.replaceWith(document.createTextNode('💵'))"></span><span class="nm">USDT (TON)</span></button>
+  </div>
+  <button class="guide-btn" style="margin-top:16px" onclick="openLink('${GUIDE_URL}')">
+    <span class="ic">📖</span><span class="t">Qo'llanma</span><span class="r">Kanal</span>
+  </button>`;
+}
+function nftPick(k){ haptic(); toast('Tez orada'); }
+
 /* ===== Yechib olish ekranlari =====
    Hammasi NFT bo'limining o'z hamyonlariga tegishli.
    Tugmalar hozircha faqat joyini ko'rsatadi, vazifalari keyin ulanadi. */
@@ -5688,7 +5716,7 @@ function renderWallet(){
     <div class="amt">${big}</div>
     ${cur.c !== 'UZS' ? `<div class="sub">${som}</div>` : ''}
     <div class="btns">
-      <button class="b1" onclick="wlSoon()"><svg viewBox="0 0 24 24"><path d="M12 5.5v13M5.5 12h13"/></svg>To'ldirish</button>
+      <button class="b1" onclick="go('nft_top')"><svg viewBox="0 0 24 24"><path d="M12 5.5v13M5.5 12h13"/></svg>To'ldirish</button>
       <button class="b2" onclick="go('nft_out')"><svg viewBox="0 0 24 24"><path d="M12 19V5.5M6 11l6-6 6 6"/></svg>Yechish</button>
     </div>
   </div>
