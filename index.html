@@ -1017,6 +1017,39 @@ body.light .nav-back{ background:rgba(255,255,255,.92) }
 body.nft-mode .nav-back{ display:flex }
 body.nft-mode .nav-inner{ flex:1 1 auto; width:auto }
 
+/* === Stars / Premium bo'limi === */
+.sp-seg{ display:flex; background:var(--card-2); border:1px solid var(--stroke-2);
+  border-radius:999px; padding:4px; margin-bottom:2px }
+.sp-seg button{ flex:1; height:40px; border-radius:999px; font-size:14px; font-weight:600;
+  color:var(--faint); transition:.16s }
+.sp-seg button.on{ background:#fff; color:#0F1626 }
+body.light .sp-seg button.on{ background:#0F1626; color:#fff }
+.sp-hero{ position:relative; margin:0 -14px; height:205px; overflow:hidden }
+.sp-hero img{ width:100%; height:100%; object-fit:cover; object-position:center; display:block }
+.sp-hero:after{ content:''; position:absolute; left:0; right:0; bottom:0; height:52%;
+  background:linear-gradient(180deg, rgba(0,0,0,0), var(--bg)) }
+.sp-card{ position:relative; z-index:1; margin-top:-30px;
+  background:var(--card); border:1px solid var(--stroke); border-radius:20px; padding:16px }
+.sp-card h3{ font-size:19px; font-weight:700; letter-spacing:-.4px; color:var(--text);
+  text-align:center; margin:0 0 4px }
+.sp-card .sub{ font-size:13px; color:var(--faint); text-align:center; margin:0 0 16px }
+.sp-pay{ display:flex; gap:10px; margin-bottom:13px }
+.sp-pay button{ flex:1; display:flex; align-items:center; gap:9px; padding:10px 12px;
+  border-radius:14px; background:var(--card-2); border:1px solid var(--stroke-2);
+  color:var(--text); font-size:14px; font-weight:600; transition:.14s }
+.sp-rd{ width:19px; height:19px; border-radius:50%; flex-shrink:0;
+  border:2px solid var(--stroke-2); display:grid; place-items:center; transition:.14s }
+.sp-rd i{ width:9px; height:9px; border-radius:50%; background:var(--blue); opacity:0; transition:.14s }
+.on > .sp-rd, .on .sp-rd{ border-color:var(--blue) }
+.on > .sp-rd i, .on .sp-rd i{ opacity:1 }
+.sp-err{ color:#FF6B6B; font-size:12.5px; margin:-6px 4px 11px; line-height:1.4 }
+.sp-prem{ display:flex; gap:9px; margin-bottom:14px }
+.sp-prem button{ flex:1; min-width:0; padding:12px 10px; border-radius:15px; text-align:left;
+  background:var(--card-2); border:1px solid var(--stroke-2); transition:.14s }
+.sp-prem button.on{ border-color:var(--blue); background:var(--blue-soft) }
+.sp-prem .m{ font-size:13.5px; font-weight:600; color:var(--text); margin-top:9px; white-space:nowrap }
+.sp-prem .p{ font-size:12.5px; color:#7C8CFF; margin-top:3px; white-space:nowrap }
+
 /* === Market filtrlari === */
 .sheet-bg.dim{ background:rgba(0,0,0,.72) !important;
   backdrop-filter:blur(14px) !important; -webkit-backdrop-filter:blur(14px) !important }
@@ -1088,6 +1121,7 @@ body.nft-mode .nav-inner{ flex:1 1 auto; width:auto }
 .ot-in input{ flex:1; min-width:0; background:transparent; border:0; outline:none; padding:0;
   color:var(--text); font-size:14.5px; font-family:inherit }
 .ot-in input::placeholder{ color:var(--faint) }
+.ot-in:has(input.err){ border-color:#FF6B6B }
 .ot-in .act{ padding:0 10px; height:34px; border-radius:10px; background:transparent;
   color:#7C8CFF; font-size:13.5px; font-weight:600; flex-shrink:0 }
 .ot-in .qr{ width:34px; height:34px; border-radius:10px; display:grid; place-items:center; flex-shrink:0 }
@@ -5003,10 +5037,16 @@ function mktFiltered(){
     return true;
   });
 }
+function mktContent(){ return (mktTab === 'stars') ? spPanel() : nftMarketCards(); }
+function mktBodyDraw(){
+  const box = document.getElementById('mktBody');
+  if(box) box.innerHTML = mktContent(); else renderNftMarket();
+  const tools = document.getElementById('mktTools');
+  if(tools) tools.style.display = (mktTab === 'stars') ? 'none' : '';
+}
 function mktRefresh(){
   if(view === 'nft_gifts'){ renderNftGifts(); return; }
-  const box = document.getElementById('mktBody');
-  if(box) box.innerHTML = nftMarketCards(); else renderNftMarket();
+  mktBodyDraw();
   const f = document.getElementById('mktFil');
   if(f) f.innerHTML = mktChips();
 }
@@ -5093,6 +5133,106 @@ function mktChips(){
       n ? `<span class="cnt">${n}</span>` : ''}<svg viewBox="0 0 24 24"><path d="M6 9.5l6 6 6-6"/></svg></button>`;
   }).join('');
 }
+
+/* --- Stars / Premium --- */
+let spTab = 'stars';      /* stars | premium */
+let spGram = false;       /* false = so'm, true = GRAM */
+let spMonths = 12;
+const SP_QUICK = [50, 100, 250, 500, 1000, 2500];
+/* Premium narxlari keyin to'ldiriladi */
+const SP_PREM = [ {m:3, t:'3 oy', som:0, gram:0}, {m:6, t:'6 oy', som:0, gram:0}, {m:12, t:'1 yil', som:0, gram:0} ];
+const SP_MIN = 50;
+
+function spSetTab(t){ haptic(); spTab = t; mktBodyDraw(); }
+function spSetPay(g){ haptic(); spGram = g; mktBodyDraw(); }
+function spSetPrem(m){ haptic(); spMonths = m; mktBodyDraw(); }
+function spMe(){
+  haptic();
+  const el = document.getElementById('spUser'); if(!el) return;
+  el.value = (tgUser && tgUser.username) ? '@' + tgUser.username : '';
+  spCheck();
+}
+function spAmt(v){
+  haptic();
+  const el = document.getElementById('spAmt'); if(!el) return;
+  el.value = String(v); spCheck();
+}
+function spIn(el){ el.value = String(el.value).replace(/[^0-9]/g,''); spCheck(); }
+function spCheck(){
+  const a  = document.getElementById('spAmt');
+  const u  = document.getElementById('spUser');
+  const er = document.getElementById('spErr');
+  const go = document.getElementById('spGo');
+  const n  = a ? (parseInt(a.value, 10) || 0) : 0;
+  const bad = (a && a.value !== '' && n < SP_MIN);
+  if(er){
+    er.textContent = bad ? ('Eng kami ' + SP_MIN + ' Stars. Bundan kam sotib bo\'lmaydi.') : '';
+    er.style.display = bad ? '' : 'none';
+  }
+  if(a) a.classList.toggle('err', !!bad);
+  const okUser = !!(u && u.value.trim().replace('@','').length >= 4);
+  if(go) go.disabled = !(okUser && n >= SP_MIN);
+}
+function spPremCheck(){
+  const u  = document.getElementById('spUser');
+  const go = document.getElementById('spGo');
+  const okUser = !!(u && u.value.trim().replace('@','').length >= 4);
+  if(go) go.disabled = !okUser;
+}
+function spUserIn(){ (spTab === 'stars') ? spCheck() : spPremCheck(); }
+
+function spPanel(){
+  const img  = BANNER_BASE + (spTab === 'stars' ? 'stars-x2.webp' : 'premium-x2.webp');
+  const unit = spGram ? 'GRAM' : "so'm";
+  const head = `
+  <div class="sp-seg">
+    <button class="${spTab==='stars'?'on':''}"   onclick="spSetTab('stars')">Stars</button>
+    <button class="${spTab==='premium'?'on':''}" onclick="spSetTab('premium')">Premium</button>
+  </div>
+  <div class="sp-hero"><img src="${img}" alt="" onerror="this.closest('.sp-hero').style.display='none'"></div>`;
+
+  const pay = `
+    <div class="sp-pay">
+      <button class="${!spGram?'on':''}" onclick="spSetPay(false)"><span class="sp-rd"><i></i></span>So'm</button>
+      <button class="${spGram?'on':''}"  onclick="spSetPay(true)"><span class="sp-rd"><i></i></span>GRAM</button>
+    </div>
+    <div class="ot-in">
+      <input id="spUser" type="text" placeholder="@ Telegram username" autocomplete="off" spellcheck="false" oninput="spUserIn()">
+      <button class="act" onclick="spMe()">O'zimga</button>
+    </div>`;
+
+  if(spTab === 'premium'){
+    return head + `<div class="sp-card">
+      <h3>Telegram Premium sotib olish</h3>
+      <div class="sub">O'zingizga yoki do'stlaringizga</div>
+      ${pay}
+      <div class="sp-prem">
+        ${SP_PREM.map(function(o){
+          const pr = spGram ? (o.gram ? fmtGram(o.gram) + ' GRAM' : '—') : (o.som ? fmt(o.som) + " so'm" : '—');
+          return `<button class="${spMonths===o.m?'on':''}" onclick="spSetPrem(${o.m})">
+            <span class="sp-rd"><i></i></span>
+            <div class="m">${o.t}</div><div class="p">${pr}</div></button>`;
+        }).join('')}
+      </div>
+      <button class="gr-go" id="spGo" disabled onclick="spBuy()">Premium sotib olish</button>
+    </div>`;
+  }
+
+  return head + `<div class="sp-card">
+    <h3>Telegram Stars sotib olish</h3>
+    <div class="sub">O'zingizga yoki do'stlaringizga</div>
+    ${pay}
+    <div class="ot-in">
+      <input id="spAmt" type="text" inputmode="numeric" placeholder="Stars miqdori (${SP_MIN} dan boshlab)" autocomplete="off" oninput="spIn(this)">
+    </div>
+    <div class="sp-err" id="spErr" style="display:none"></div>
+    <div class="gr-quick scroll">
+      ${SP_QUICK.map(function(v){ return `<button onclick="spAmt(${v})">⭐️ ${fmt(v)}</button>`; }).join('')}
+    </div>
+    <button class="gr-go" id="spGo" disabled onclick="spBuy()">Stars sotib olish</button>
+  </div>`;
+}
+function spBuy(){ haptic(); bioAsk(function(){ toast('Tez orada'); }); }
 
 /* --- Narx chizg'ichi --- */
 function mktRangeToggle(){
@@ -5238,7 +5378,7 @@ function setMktTab(t){
   [].slice.call(tabs.querySelectorAll('button')).forEach(function(b){
     b.classList.toggle('on', b.dataset.t === t);
   });
-  box.innerHTML = nftMarketCards();
+  mktBodyDraw();
 }
 function mktBanFail(){
   const b = document.getElementById('mktBan');
@@ -5336,6 +5476,7 @@ function renderNftMarket(){
     <button data-t="cols"  class="${mktTab==='cols'?'on':''}"  onclick="setMktTab('cols')">Kolleksiyalar</button>
     <button data-t="stars" class="${mktTab==='stars'?'on':''}" onclick="setMktTab('stars')">Stars</button>
   </div>
+  <div id="mktTools" style="${mktTab==='stars'?'display:none':''}">
   <div class="nftm-top">
     <label class="nftm-search">
       <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6"/></svg>
@@ -5352,7 +5493,8 @@ function renderNftMarket(){
       <div class="v" id="mktRangeV"><div class="a">${fmtGram(mktMax)} GRAM</div><div class="b">${mktFiltered().length} ta</div></div>
     </div>` : ''}
   <div class="nftm-fil" id="mktFil">${mktChips()}</div>
-  <div id="mktBody">${nftMarketCards()}</div>`;
+  </div>
+  <div id="mktBody">${mktContent()}</div>`;
   setTimeout(mktBanStart, 0);
 }
 
