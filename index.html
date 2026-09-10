@@ -1017,6 +1017,39 @@ body.light .nav-back{ background:rgba(255,255,255,.92) }
 body.nft-mode .nav-back{ display:flex }
 body.nft-mode .nav-inner{ flex:1 1 auto; width:auto }
 
+/* === Yechib olish ekranlari === */
+.ot-in{ display:flex; align-items:center; gap:9px; padding:0 6px 0 14px; height:48px; margin-bottom:12px;
+  background:var(--card-2); border:1px solid var(--stroke-2); border-radius:15px }
+.ot-in input{ flex:1; min-width:0; background:transparent; border:0; outline:none; padding:0;
+  color:var(--text); font-size:14.5px; font-family:inherit }
+.ot-in input::placeholder{ color:var(--faint) }
+.ot-in .act{ padding:0 10px; height:34px; border-radius:10px; background:transparent;
+  color:#7C8CFF; font-size:13.5px; font-weight:600; flex-shrink:0 }
+.ot-in .qr{ width:34px; height:34px; border-radius:10px; display:grid; place-items:center; flex-shrink:0 }
+.ot-in .qr svg{ width:19px; height:19px; stroke:#7C8CFF; fill:none; stroke-width:1.9;
+  stroke-linecap:round; stroke-linejoin:round }
+.ot-row{ display:flex; gap:10px }
+.ot-row .ot-in{ flex:1 }
+.ot-hint{ font-size:12.5px; color:var(--faint); margin:-4px 4px 14px }
+
+.st-to{ display:flex; align-items:center; gap:11px; padding:11px 13px;
+  border-bottom:1px solid var(--stroke) }
+.st-to .av{ width:34px; height:34px; border-radius:50%; overflow:hidden; position:relative;
+  display:grid; place-items:center; background:var(--blue-grad); color:#fff;
+  font-size:14px; font-weight:700; flex-shrink:0 }
+.st-to .av img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover }
+.st-to .nm{ flex:1; min-width:0; font-size:15px; font-weight:600; color:var(--text);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+.st-to .x{ width:26px; height:26px; border-radius:50%; display:grid; place-items:center;
+  background:var(--card-2); color:var(--faint); font-size:12px; flex-shrink:0 }
+.st-amt{ display:flex; align-items:center; gap:11px; padding:13px }
+.st-amt .ic{ font-size:20px }
+.st-amt input{ flex:1; min-width:0; background:transparent; border:0; outline:none; padding:0;
+  color:var(--text); font-size:16px; font-weight:600; font-family:inherit }
+.st-amt input::placeholder{ color:var(--faint); font-weight:500 }
+.st-box{ background:var(--card); border:1px solid var(--stroke); border-radius:18px; overflow:hidden }
+.st-bal{ font-size:12.5px; color:var(--faint); margin:9px 4px 14px }
+
 /* === GRAM to'ldirish ekrani === */
 .gr-card{ background:var(--card); border:1px solid var(--stroke); border-radius:20px;
   padding:18px 16px 16px; text-align:center }
@@ -1033,6 +1066,10 @@ body.nft-mode .nav-inner{ flex:1 1 auto; width:auto }
   font-family:inherit; text-align:right }
 .gr-amt .u{ font-size:31px; font-weight:700; color:var(--faint); letter-spacing:-1px }
 .gr-quick{ display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:16px }
+.gr-quick.scroll{ flex-wrap:nowrap; justify-content:flex-start; overflow-x:auto;
+  scrollbar-width:none; padding-bottom:2px }
+.gr-quick.scroll::-webkit-scrollbar{ display:none }
+.gr-quick.scroll button{ flex:0 0 auto }
 .gr-quick button{ display:flex; align-items:center; gap:7px; height:38px; padding:0 15px;
   border-radius:999px; background:var(--card-2); border:1px solid var(--stroke-2);
   color:var(--text); font-size:13.5px; font-weight:600; transition:.14s }
@@ -3481,6 +3518,10 @@ function go(v){
   else if(v==='profile'){ pfLoaded = false; renderProfile(); }
   else if(v==='nft_wallet') renderWallet();
   else if(v==='nft_gram') renderGram();
+  else if(v==='nft_out') renderOut();
+  else if(v==='nft_out_wallet') renderOutWallet();
+  else if(v==='nft_out_stars') renderOutStars();
+  else if(v==='nft_out_card'){ renderOutCard(); }
   else if(isNftView(v)) renderNft(v);
   if(v==='home'||v==='settings'||v==='nft_gifts'||v==='profile') loadBalance();
   syncNavPill(true);
@@ -3490,6 +3531,9 @@ function onBack(){
   if(l && l.classList.contains('on')){ pwClose(); return; }
   if(view==='nft_wallet'){ haptic(); go(walletFrom); return; }
   if(view==='nft_gram'){ haptic(); go(gramFrom); return; }
+  if(view==='nft_out'){ haptic(); go('nft_wallet'); return; }
+  if(view==='nft_out_card' && ocStep === 2){ haptic(); ocStep = 1; renderOutCard(); return; }
+  if(view==='nft_out_wallet' || view==='nft_out_stars' || view==='nft_out_card'){ haptic(); go('nft_out'); return; }
   haptic(); if(view==='chat') go('spam'); else if(view==='spam'||view==='lang') go('settings'); else go('home');
 }
 let navDragged = false;
@@ -4796,7 +4840,8 @@ function renderProfile(){
 /* ===== NFT bo'limi — donat xizmatining ikkinchi ekrani =====
    Oddiy foydalanuvchiga "Texnik xizmat" ko'rinadi.
    MAINT_OK ro'yxatidagi ID (admin) uchun bo'lim ochiq. */
-function isNftView(v){ return v==='nft_gifts' || v==='nft_market' || v==='nft_hist' || v==='nft_wallet' || v==='nft_gram'; }
+function isNftView(v){ return v==='nft_gifts' || v==='nft_market' || v==='nft_hist' || v==='nft_wallet'
+  || v==='nft_gram' || v==='nft_out' || v==='nft_out_wallet' || v==='nft_out_stars' || v==='nft_out_card'; }
 function nftAdmin(){ return !!(tgUser && MAINT_OK.indexOf(tgUser.id) > -1); }
 function toggleNft(){ haptic(); if(isNftView(view)) go('home'); else go('nft_gifts'); }
 
@@ -4831,7 +4876,7 @@ function nftMarketCards(){
     </div>`;
   }).join('')}</div>`;
 }
-function nftBuy(){ haptic(); }
+function nftBuy(){ haptic(); bioAsk(function(){ toast('Tez orada'); }); }
 function nftCart(){ haptic(); }
 
 /* ===== Mening sovg'alarim ===== */
@@ -4923,7 +4968,7 @@ function renderNftGifts(){
   app.innerHTML = `
   <div class="mg-bal">
     <button class="chip" onclick="openGram()">${fmtGram(getGram())}<small>GRAM</small></button>
-    <button class="chip" onclick="openWallet()">${money(balance, false)}</button>
+    <button class="chip" onclick="openWallet()">${money(getNftSom(), false)}</button>
   </div>
   <div class="mg-tabs">
     <button class="${mgTab==='gifts'?'on':''}" onclick="setMgTab('gifts')">Gift</button>
@@ -5045,7 +5090,7 @@ function renderNftMarket(){
   app.innerHTML = `
   <div class="mg-bal">
     <button class="chip" onclick="openGram()">${fmtGram(getGram())}<small>GRAM</small></button>
-    <button class="chip" onclick="openWallet()">${money(balance, false)}</button>
+    <button class="chip" onclick="openWallet()">${money(getNftSom(), false)}</button>
   </div>
   ${mktBanner()}
   <div class="mg-tabs" id="mktTabs">
@@ -5130,12 +5175,148 @@ function nftMoneyRows(){
   }).join('');
 }
 
+/* ===== Yechib olish ekranlari =====
+   Hammasi NFT bo'limining o'z hamyonlariga tegishli.
+   Tugmalar hozircha faqat joyini ko'rsatadi, vazifalari keyin ulanadi. */
+let ocStep = 1;
+function renderOut(){
+  app.innerHTML = `<div class="page-title">Yechib olish</div>
+  <div class="pf-sec">Kripto</div>
+  <div class="pf-list">
+    <button class="svc" onclick="go('nft_out_wallet')">
+      <span class="ic" style="background:#2D9CDB">
+        <svg viewBox="0 0 24 24"><path d="M3.5 8A2.5 2.5 0 0 1 6 5.5h10.5A2.5 2.5 0 0 1 19 8"/><rect x="3.5" y="8" width="17" height="10.5" rx="2.5"/><path d="M20.5 11.6h-3a1.9 1.9 0 0 0 0 3.8h3"/></svg>
+      </span>
+      <span class="txt"><div class="t">Tashqi hamyon yoki birja</div><div class="s">Manzilga yuborish</div></span>
+      <span class="arw">›</span>
+    </button>
+  </div>
+  <div class="pf-sec">Telegramda sarflash</div>
+  <div class="pf-list">
+    <button class="svc" onclick="go('nft_out_stars')">
+      <span class="ic" style="background:#F0A93C">
+        <svg viewBox="0 0 24 24"><path d="M12 3.2l2.7 5.6 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1L3.2 9.7l6.1-.9z"/></svg>
+      </span>
+      <span class="txt"><div class="t">Telegram Stars</div><div class="s">Sovg'a va mini ilovalar uchun</div></span>
+      <span class="arw">›</span>
+    </button>
+  </div>
+  <div class="pf-sec">So'm</div>
+  <div class="pf-list">
+    <button class="svc" onclick="ocStep=1; go('nft_out_card')">
+      <span class="ic" style="background:#2FB574">
+        <svg viewBox="0 0 24 24"><rect x="3" y="5.5" width="18" height="13" rx="2.5"/><path d="M3 10h18M6.5 15h3"/></svg>
+      </span>
+      <span class="txt"><div class="t">Kartaga chiqarish</div><div class="s">O'z kartangizga o'tkazish</div></span>
+      <span class="arw">›</span>
+    </button>
+  </div>`;
+}
+
+function renderOutWallet(){
+  app.innerHTML = `<div class="page-title">Tashqi hamyon</div>
+  <div class="ot-in">
+    <input id="otAddr" type="text" placeholder="TON manzili" autocomplete="off" spellcheck="false">
+    <button class="act" onclick="wlSoon()">Qo'yish</button>
+    <button class="qr" onclick="wlSoon()"><svg viewBox="0 0 24 24"><path d="M4 8.5V6a2 2 0 0 1 2-2h2.5M20 8.5V6a2 2 0 0 0-2-2h-2.5M4 15.5V18a2 2 0 0 0 2 2h2.5M20 15.5V18a2 2 0 0 1-2 2h-2.5M6.5 12h11"/></svg></button>
+  </div>
+  <div class="ot-hint">GRAM faqat TON tarmog'idagi manzilga yuboriladi.</div>
+  <div class="pf-sec">Oxirgilari</div>
+  <div class="empty"><div class="em">🕓</div><h3>Hozircha bo'sh</h3><p>Yuborilgan manzillar shu yerda saqlanadi.</p></div>`;
+}
+
+function renderOutStars(){
+  const name  = tgUser ? (tgUser.first_name || 'Foydalanuvchi') : 'Foydalanuvchi';
+  const photo = tgUser && tgUser.photo_url ? `<img src="${tgUser.photo_url}" alt="">` : name.charAt(0).toUpperCase();
+  const q = [100, 250, 500, 1000, 2500];
+  app.innerHTML = `<div class="page-title">Telegram Stars</div>
+  <div class="ot-hint">O'zingizga yoki istalgan foydalanuvchiga sotib oling.</div>
+  <div class="st-box">
+    <div class="st-to">
+      <div class="av">${photo}</div>
+      <div class="nm">${name}</div>
+      <button class="x" onclick="wlSoon()">✕</button>
+    </div>
+    <div class="st-amt">
+      <span class="ic">⭐️</span>
+      <input id="stAmt" type="text" inputmode="numeric" placeholder="Miqdorni kiriting" oninput="stIn(this)">
+    </div>
+  </div>
+  <div class="st-bal">Mavjud balans: ${fmtGram(getGram())} GRAM</div>
+  <div class="gr-quick scroll">
+    ${q.map(function(v){ return `<button onclick="stSet(${v})">${fmt(v)} ⭐️</button>`; }).join('')}
+  </div>
+  <button class="gr-go" id="stGo" disabled onclick="wlGuard()">Davom etish</button>`;
+}
+function stIn(el){
+  el.value = String(el.value).replace(/[^0-9]/g,'');
+  const g = document.getElementById('stGo');
+  if(g) g.disabled = !(parseInt(el.value,10) > 0);
+}
+function stSet(v){
+  haptic();
+  const el = document.getElementById('stAmt'); if(!el) return;
+  el.value = String(v); stIn(el);
+}
+
+function renderOutCard(){
+  const bal = getNftSom();
+  if(ocStep === 1){
+    app.innerHTML = `<div class="page-title">Kartaga chiqarish</div>
+    <div class="ot-in">
+      <input id="ocNum" type="text" inputmode="numeric" placeholder="Karta raqami" autocomplete="off" oninput="ocNum(this)">
+    </div>
+    <div class="ot-row">
+      <div class="ot-in"><input id="ocExp" type="text" inputmode="numeric" placeholder="OO/YY" autocomplete="off" oninput="ocExp(this)"></div>
+    </div>
+    <div class="ot-hint">Karta o'zingizning nomingizda bo'lishi kerak.</div>
+    <button class="gr-go" id="ocGo" disabled onclick="ocNext()">Davom etish</button>`;
+    return;
+  }
+  app.innerHTML = `<div class="page-title">Qancha chiqaramiz?</div>
+  <div class="ot-in">
+    <input id="ocSum" type="text" inputmode="numeric" placeholder="Summa" autocomplete="off" oninput="ocSum(this)">
+    <button class="act" onclick="ocAll()">Hammasi</button>
+  </div>
+  <div class="ot-hint">Mavjud: ${fmt(bal)} so'm</div>
+  <button class="gr-go" id="ocGo2" disabled onclick="wlGuard()">Chiqarib olish</button>`;
+}
+function ocFmt(s){ return s.replace(/\D/g,'').slice(0,16).replace(/(.{4})/g,'$1 ').trim(); }
+function ocNum(el){ el.value = ocFmt(el.value); ocCheck(); }
+function ocExp(el){
+  let s = String(el.value).replace(/\D/g,'').slice(0,4);
+  if(s.length > 2) s = s.slice(0,2) + '/' + s.slice(2);
+  el.value = s; ocCheck();
+}
+function ocCheck(){
+  const n = (document.getElementById('ocNum')||{}).value || '';
+  const e = (document.getElementById('ocExp')||{}).value || '';
+  const g = document.getElementById('ocGo');
+  if(g) g.disabled = !(n.replace(/\s/g,'').length >= 16 && e.length === 5);
+}
+function ocNext(){ haptic(); ocStep = 2; renderOutCard(); }
+function ocSum(el){
+  el.value = String(el.value).replace(/[^0-9]/g,'');
+  const g = document.getElementById('ocGo2');
+  const v = parseInt(el.value,10) || 0;
+  if(g) g.disabled = !(v > 0 && v <= getNftSom());
+}
+function ocAll(){
+  haptic();
+  const el = document.getElementById('ocSum'); if(!el) return;
+  el.value = String(getNftSom()); ocSum(el);
+}
+
 /* ===== GRAM hamyoni — so'm hamyonidan BUTUNLAY alohida =====
    So'm karta orqali to'ldiriladi, GRAM esa ulangan kripto hamyon orqali.
    Ikkalasi bir-biriga aylanmaydi, hech qanday bog'liqligi yo'q. */
 const GRAM_ICON = '<svg viewBox="0 0 24 24"><path d="M12 2.5 21 9l-9 12.5L3 9z"/></svg>';
 let gramFrom = 'nft_market';
 function getGram(){ const v = Number(localStorage.getItem('mt_gram')); return isFinite(v) ? v : 0; }
+/* NFT bo'limining o'z so'm hamyoni. Bosh sahifadagi balans bilan HECH QANDAY
+   aloqasi yo'q — u yerdagi pul u yerda qoladi va chiqarib bo'lmaydi. */
+function getNftSom(){ const v = Number(localStorage.getItem('mt_nft_som')); return isFinite(v) ? v : 0; }
+function setNftSom(v){ try{ localStorage.setItem('mt_nft_som', String(v)); }catch(e){} }
 function setGram(v){ try{ localStorage.setItem('mt_gram', String(v)); }catch(e){} }
 function fmtGram(v){
   const n = Number(v) || 0;
@@ -5208,6 +5389,9 @@ function setWlTab(t){
   bx.innerHTML = walletRows();
 }
 function wlSoon(){ haptic(); toast('Tez orada'); }
+/* Pul yoki qiymat harakatlanadigan amallar — avval Face ID / barmoq izi.
+   bioAsk qurilmada biometriya bo'lmasa yoki o'chirilgan bo'lsa to'sib qo'ymaydi. */
+function wlGuard(){ haptic(); bioAsk(function(){ toast('Tez orada'); }); }
 
 /* Shu bo'limning o'z yozuvlari — barchasi alohida saqlanadi */
 function getNftTop(){ try{ return JSON.parse(localStorage.getItem('mt_nft_top')||'[]'); }catch(e){ return []; } }
@@ -5249,8 +5433,9 @@ function walletRows(){
 }
 function renderWallet(){
   const cur  = curNow();
-  const main = money(balance, false);
-  const som  = fmt(Math.round(balance)) + " so'm";
+  const bal  = getNftSom();
+  const main = money(bal, false);
+  const som  = fmt(Math.round(bal)) + " so'm";
   const i = main.lastIndexOf(' ');
   const big = i > 0 ? main.slice(0, i) + '<small>' + main.slice(i + 1) + '</small>' : main;
   app.innerHTML = `
@@ -5266,7 +5451,7 @@ function renderWallet(){
     ${cur.c !== 'UZS' ? `<div class="sub">${som}</div>` : ''}
     <div class="btns">
       <button class="b1" onclick="wlSoon()"><svg viewBox="0 0 24 24"><path d="M12 5.5v13M5.5 12h13"/></svg>To'ldirish</button>
-      <button class="b2" onclick="wlSoon()"><svg viewBox="0 0 24 24"><path d="M12 19V5.5M6 11l6-6 6 6"/></svg>Yechish</button>
+      <button class="b2" onclick="go('nft_out')"><svg viewBox="0 0 24 24"><path d="M12 19V5.5M6 11l6-6 6 6"/></svg>Yechish</button>
     </div>
   </div>
 
