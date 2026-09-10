@@ -4886,7 +4886,18 @@ const MKT_REP  = 9;        /* to'plam necha marta takrorlanadi */
 const MKT_MID  = 4;        /* qaysi nusxa "markaz" hisoblanadi */
 let mktBanT = null, mktBanHold = 0, mktBusy = false, mktTouch = false, mktSettle = null;
 
-function setMktTab(t){ haptic(); mktTab = t; renderNftMarket(); }
+function setMktTab(t){
+  haptic();
+  mktTab = t;
+  const tabs = document.getElementById('mktTabs');
+  const box  = document.getElementById('mktBody');
+  if(!tabs || !box){ renderNftMarket(); return; }
+  /* bannerga tegmaymiz — u o'z ishini davom ettiraveradi */
+  [].slice.call(tabs.querySelectorAll('button')).forEach(function(b){
+    b.classList.toggle('on', b.dataset.t === t);
+  });
+  box.innerHTML = nftMarketCards();
+}
 function mktBanFail(){
   const b = document.getElementById('mktBan');
   if(b) b.style.display = 'none';
@@ -4975,10 +4986,10 @@ function renderNftMarket(){
   app.innerHTML = `
   <div class="mg-bal"><span class="chip">${money(balance, false)}</span></div>
   ${mktBanner()}
-  <div class="mg-tabs">
-    <button class="${mktTab==='all'?'on':''}" onclick="setMktTab('all')">Barcha giftlar</button>
-    <button class="${mktTab==='cols'?'on':''}" onclick="setMktTab('cols')">Kolleksiyalar</button>
-    <button class="${mktTab==='stars'?'on':''}" onclick="setMktTab('stars')">Yulduzlar</button>
+  <div class="mg-tabs" id="mktTabs">
+    <button data-t="all"   class="${mktTab==='all'?'on':''}"   onclick="setMktTab('all')">Barcha sovg'a</button>
+    <button data-t="cols"  class="${mktTab==='cols'?'on':''}"  onclick="setMktTab('cols')">Kolleksiyalar</button>
+    <button data-t="stars" class="${mktTab==='stars'?'on':''}" onclick="setMktTab('stars')">Stars</button>
   </div>
   <div class="nftm-top">
     <label class="nftm-search">
@@ -4993,7 +5004,7 @@ function renderNftMarket(){
     <button>Model<svg viewBox="0 0 24 24"><path d="M6 9.5l6 6 6-6"/></svg></button>
     <button>Fon<svg viewBox="0 0 24 24"><path d="M6 9.5l6 6 6-6"/></svg></button>
   </div>
-  ${nftMarketCards()}`;
+  <div id="mktBody">${nftMarketCards()}</div>`;
   setTimeout(mktBanStart, 0);
 }
 
