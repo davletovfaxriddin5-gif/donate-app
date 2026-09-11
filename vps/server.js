@@ -1063,6 +1063,9 @@ const ID_CLUSTER  = 3e6;    /* id lar shu oraliqda bo'lsa — bir vaqtda ochilga
 const ID_NEAR_MIN = 5;      /* shuncha id yonma-yon tursa — to'da */
 const ID_NEAR_PCT = 0.6;    /* referallarning shuncha ulushi yonma-yon bo'lishi SHART */
 const REF_AGE_H   = 24;     /* jonsizlikni baholashdan oldin shuncha soat kutamiz */
+/* .env da BAN_DRY=1 bo'lsa — hech narsa o'zgartirilmaydi, faqat xabar yuboriladi.
+   Avval kuzatib turish uchun. Ishonch hosil qilgach o'sha qatorni olib tashlaysiz. */
+const BAN_DRY = String(process.env.BAN_DRY || "") === "1";
 
 function refAlive(u){
   if(!u) return false;
@@ -1121,6 +1124,14 @@ function refSweep(){
        Shu belgi bo'lmasa — hech kim bloklanmaydi. */
     if(bad.length < REF_MIN || pct < REF_BAD_PCT || near_pct < ID_NEAR_PCT) return;
 
+    if(BAN_DRY){
+      if(ADMIN_ID) tgCall("sendMessage", { chat_id: ADMIN_ID,
+        text: "\uD83D\uDC41 KUZATUV (hech narsa o'zgartirilmadi)\n\n" +
+              (inv.nm || "-") + (inv.un ? " (@" + inv.un + ")" : "") + "\nid: " + id + "\n\n" +
+              "Shubhali: " + bad.length + " / " + inv.refs.length + " ta\n" +
+              "  bot username: " + nName + " | id yonma-yon: " + nNear + " | jonsiz: " + nDead });
+      return;
+    }
     /* Soxta aloqalarni uzamiz. Hech narsa o'chirilmaydi — hammasi
        chetga yozib qo'yiladi, /qoshish bilan to'liq qaytariladi. */
     if(!Array.isArray(inv.refsCut)) inv.refsCut = [];
