@@ -1021,6 +1021,125 @@ async function fzrStatus(id){
 const crypto = require("crypto");
 const ADMIN_ID = String(process.env.ADMIN_ID || "");
 
+/* ---------- Bloklangan foydalanuvchilar ----------
+   .env da vergul bilan, id yoki username bo'lishi mumkin:
+   BANNED=123456789,@garantch1k
+   Bloklangan odam botga ham, Mini Appga ham kira olmaydi va uning
+   referal havolasi orqali hech kim hisoblanmaydi. */
+const _bannedRaw  = String(process.env.BANNED || "").split(",").map(function(s){ return s.trim(); }).filter(Boolean);
+const BAN_IDS     = _bannedRaw.filter(function(s){ return /^\d+$/.test(s); });
+const BAN_NAMES   = _bannedRaw.filter(function(s){ return !/^\d+$/.test(s); })
+                              .map(function(s){ return s.replace("@","").toLowerCase(); });
+const BANSET = new Set(BAN_IDS);
+function isBanned(id){ return BANSET.has(String(id)); }
+/* username bo'yicha yozilganlarni va avval avtomatik bloklanganlarni topamiz */
+function banSync(db){
+  Object.keys(db).forEach(function(id){
+    const u = db[id]; if(!u) return;
+    if(u.banned) BANSET.add(String(id));
+    if(u.un && BAN_NAMES.indexOf(String(u.un).toLowerCase()) > -1) BANSET.add(String(id));
+  });
+}
+function banUser(db, id, why){
+  const u = urec(db, String(id));
+  u.banned = true; u.banWhy = why || ""; u.banAt = new Date().toISOString();
+  BANSET.add(String(id));
+}
+try{ banSync(load()); }catch(e){}
+if(BANSET.size) console.log("Bloklangan: " + BANSET.size + " ta");
+
+/* ---------- Nakrutkaga qarshi avtomatik tekshiruv ----------
+   Soatiga bir marta ishlaydi. Faqat aybdor bloklanadi, butun bazaga tegilmaydi.
+
+   MUHIM: bitta belgi bilan hech kim bloklanmaydi. Chin odam ham bir soatda
+   20 ta do'stini chaqirishi mumkin, chin do'stlar esa hech nima buyurtma
+   qilmasdan shunchaki kuzatib yurishi mumkin. Shuning uchun har bir hisob
+   bir necha belgi bo'yicha baholanadi va faqat ball yig'ilgani shubhali
+   hisoblanadi. */
+const REF_MIN     = 10;     /* shundan kam referali bo'lsa umuman tekshirilmaydi */
+const REF_BAD_PCT = 0.8;    /* referallarning shuncha ulushi shubhali bo'lsa — nakrutka */
+const REF_SCORE   = 3;      /* bitta hisob shubhali deb topilishi uchun kerakli ball */
+const ID_CLUSTER  = 3e6;    /* id lar shu oraliqda bo'lsa — bir vaqtda ochilgan */
+const ID_NEAR_MIN = 5;      /* shuncha id yonma-yon tursa — to'da */
+const REF_AGE_H   = 24;     /* jonsizlikni baholashdan oldin shuncha soat kutamiz */
+
+function refAlive(u){
+  if(!u) return false;
+  return !!((u.orders||[]).length || (u.topups||[]).length || (u.balance||0) > 0 || u.phone || u.greeted);
+}
+/* @KevinCarpe499018, @MelissaSeamo26923 — ism va ketidan 5-6 raqam, ajratuvchisiz.
+   Ommaviy ochilgan hisoblarning odatiy shakli. Chin odamda bunday kam uchraydi:
+   tug'ilgan yil qo'shganlar odatda 4 raqam yozadi, shuning uchun 5 dan boshlaymiz. */
+function botName(un){
+  return /^[A-Za-z]{4,}\d{5,}$/.test(String(un||""));
+}
+function refSweep(){
+  let db; try{ db = load(); }catch(e){ return; }
+  const now = Date.now();
+  let changed = false;
+
+  Object.keys(db).forEach(function(id){
+    const inv = db[id];
+    if(!inv || !Array.isArray(inv.refs) || inv.refs.length < REF_MIN) return;
+    if(isBanned(id) || String(id) === ADMIN_ID) return;
+
+    /* id lar bir-biriga qanchalik yaqin — ommaviy ochilgan hisoblar
+       ro'yxatdan o'tish raqamlari bo'yicha yonma-yon turadi */
+    const nums = inv.refs.map(Number).filter(function(n){ return n > 0; });
+    const near = {};
+    nums.forEach(function(n){
+      let c = 0;
+      nums.forEach(function(m){ if(Math.abs(m - n) <= ID_CLUSTER) c++; });
+      near[n] = c;
+    });
+
+    const bad = [];
+    let nName = 0, nDead = 0, nNear = 0;
+    inv.refs.forEach(function(rid){
+      const r  = db[String(rid)];
+      const t  = r && r.refAt ? Date.parse(r.refAt) : 0;
+      const un = r && r.un ? String(r.un) : "";
+      const oldEnough = t ? (now - t) > REF_AGE_H*3600e3 : true;
+      const cl = (near[Number(rid)] || 0) >= ID_NEAR_MIN;
+
+      let sc = 0;
+      if(botName(un)){ sc += 2; nName++; }
+      else if(!un) sc += 1;
+      if(oldEnough && !refAlive(r)){ sc += 1; nDead++; }
+      if(cl){ sc += 1; nNear++; }
+      if(sc >= REF_SCORE) bad.push(String(rid));
+    });
+
+    const pct = inv.refs.length ? bad.length / inv.refs.length : 0;
+    if(bad.length < REF_MIN || pct < REF_BAD_PCT) return;
+
+    /* soxta aloqalarni uzamiz — o'sha hisoblar o'chirilmaydi */
+    bad.forEach(function(rid){
+      const r = db[String(rid)];
+      if(r){ delete r.refBy; delete r.refAt; }
+    });
+    inv.refs = inv.refs.filter(function(rid){ return bad.indexOf(String(rid)) < 0; });
+
+    const why = "shubhali " + bad.length + " ta (" + Math.round(pct*100) + "%)";
+    banUser(db, id, why);
+    changed = true;
+
+    if(ADMIN_ID) tgCall("sendMessage", { chat_id: ADMIN_ID,
+      text: "\uD83D\uDEAB AVTO TASDIQ \u2014 NAKRUTKA\n\n" +
+            (inv.nm || "\u2014") + (inv.un ? " (@" + inv.un + ")" : "") + "\nid: " + id + "\n\n" +
+            "Uzilgan soxta referallar: " + bad.length + " ta\n" +
+            "Belgilar bo'yicha:\n" +
+            "  \u2022 bot ko'rinishidagi username: " + nName + " ta\n" +
+            "  \u2022 id lari yonma-yon: " + nNear + " ta\n" +
+            "  \u2022 24 soatdan beri jonsiz: " + nDead + " ta\n\n" +
+            "Bu odam botdan chiqarildi. Endi unga botga kirish taqiqlangan." });
+  });
+
+  if(changed){ try{ save(db); }catch(e){} }
+}
+setTimeout(refSweep, 60e3);
+setInterval(refSweep, 3600e3);
+
 /* ---------- To'lov kurslari ----------
    RATES faqat MIJOZ QANCHA TO'LASHINI belgilaydi (Sberbank rublda, Visa dollarda).
    Paket narxlariga TA'SIR QILMAYDI — ular so'mda, CATALOG da.
@@ -1098,6 +1217,7 @@ function checkInit(initData){
     if(!ad || (Date.now()/1000 - ad) > 86400) return null;
     const u = JSON.parse(p.get("user")||"null");
     if(!u || !u.id) return null;
+    if(isBanned(u.id)) return null;          /* bloklangan — hech qanday amal bajarilmaydi */
     return { id:String(u.id), name:String(u.first_name||""), username:String(u.username||"") };
   }catch(e){ return null; }
 }
@@ -1944,7 +2064,7 @@ app.post("/ref", (req,res)=>{
                    (u.balance||0) > 0 || !!u.phone;
     const fresh  = ageMin <= 30 && !used && !u.greeted;
 
-    if(by && by !== uid && !u.refBy && fresh){
+    if(by && by !== uid && !u.refBy && fresh && !isBanned(by)){
       const inv = urec(db, by);
       u.refBy = by;
       u.refAt = new Date().toISOString();
@@ -2538,7 +2658,10 @@ app.post("/webhook", (req,res)=>{
   if(SECRET && hdr !== SECRET) return;
   try{
     const cq = req.body && req.body.callback_query;
-    if(cq){ handleCb(cq); return; }
+    if(cq){
+      if(isBanned((cq.from && cq.from.id) || "")) return;
+      handleCb(cq); return;
+    }
 
     /* Stars to'lovi: 10 soniya ichida javob berish SHART, aks holda bekor bo'ladi */
     const pcq = req.body && req.body.pre_checkout_query;
@@ -2553,6 +2676,7 @@ app.post("/webhook", (req,res)=>{
     if(!msg) return;
     const fromId = String((msg.from && msg.from.id) || "");
     if(!fromId) return;
+    if(isBanned(fromId)) return;             /* bloklangan — javob berilmaydi */
 
     /* Username va ismni yozib boramiz \u2014 /toldirish shu orqali odamni topadi.
        Telegram bot API'sida username -> id qidiruvi YO'Q, shuning uchun
@@ -2855,7 +2979,7 @@ app.post("/webhook", (req,res)=>{
          Botga avval o'zi kirgan odam keyin havola bossa — hisoblanmaydi. */
       const usedG = (ug.orders||[]).length > 0 || (ug.topups||[]).length > 0 ||
                     (ug.balance||0) > 0 || !!ug.phone;
-      if(rid && rid !== fromId && !ug.refBy && first && !usedG){
+      if(rid && rid !== fromId && !ug.refBy && first && !usedG && !isBanned(rid)){
         const inv = urec(dbg, rid);
         ug.refBy = rid;
         ug.refAt = new Date().toISOString();
