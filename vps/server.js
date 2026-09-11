@@ -2850,6 +2850,30 @@ app.post("/webhook", (req,res)=>{
     }
     /* /tekshir \u2014 referal ro'yxatidagilarni tekshirish (kim chiqib ketgan) */
     /* /qoshish - bloklangan odamni qaytarish. Hamma ma'lumoti joyida qoladi. */
+    /* /fayl - bitta faylni Telegramga yuborish (games.json, data.json va h.k.) */
+    if(text.indexOf("/fayl") === 0){
+      if(ADMIN_ID && fromId !== ADMIN_ID) return;
+      const nm = text.replace("/fayl", "").trim() || "games.json";
+      if(nm.indexOf("/") > -1 || nm.indexOf("..") > -1){
+        send(fromId, "\u274C Faqat fayl nomi: /fayl games.json");
+        return;
+      }
+      (async function(){
+        try{
+          const full = "/root/donate-app/" + nm;
+          if(!fs.existsSync(full)){ send(fromId, "\u274C Topilmadi: " + nm); return; }
+          const buf = fs.readFileSync(full);
+          const fd = new FormData();
+          fd.append("chat_id", ADMIN_ID);
+          fd.append("caption", nm + "\nHajmi: " + buf.length + " bayt");
+          fd.append("document", new Blob([buf], { type:"application/json" }), nm);
+          const r = await fetch("https://api.telegram.org/bot"+TOKEN+"/sendDocument",
+                                { method:"POST", body: fd });
+          if(!r.ok) send(fromId, "\u274C Yuborilmadi: " + r.status);
+        }catch(e){ send(fromId, "\u274C Xato: " + e.message); }
+      })();
+      return;
+    }
     if(text.indexOf("/qoshish") === 0){
       if(ADMIN_ID && fromId !== ADMIN_ID) return;
       const arg = text.replace("/qoshish", "").trim();
