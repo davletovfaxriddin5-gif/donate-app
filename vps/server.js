@@ -1061,17 +1061,21 @@ const REF_BAD_PCT = 0.8;    /* referallarning shuncha ulushi shubhali bo'lsa —
 const REF_SCORE   = 3;      /* bitta hisob shubhali deb topilishi uchun kerakli ball */
 const ID_CLUSTER  = 3e6;    /* id lar shu oraliqda bo'lsa — bir vaqtda ochilgan */
 const ID_NEAR_MIN = 5;      /* shuncha id yonma-yon tursa — to'da */
+const ID_NEAR_PCT = 0.6;    /* referallarning shuncha ulushi yonma-yon bo'lishi SHART */
 const REF_AGE_H   = 24;     /* jonsizlikni baholashdan oldin shuncha soat kutamiz */
 
 function refAlive(u){
   if(!u) return false;
   return !!((u.orders||[]).length || (u.topups||[]).length || (u.balance||0) > 0 || u.phone || u.greeted);
 }
-/* @KevinCarpe499018, @MelissaSeamo26923 — ism va ketidan 5-6 raqam, ajratuvchisiz.
-   Ommaviy ochilgan hisoblarning odatiy shakli. Chin odamda bunday kam uchraydi:
-   tug'ilgan yil qo'shganlar odatda 4 raqam yozadi, shuning uchun 5 dan boshlaymiz. */
+/* @KevinCarpe499018, @MelissaSeamo26923 — uzun ism va ketidan 5+ raqam,
+   ajratuvchi belgisiz. Ommaviy ochilgan hisoblarning odatiy shakli.
+   Chin odamlarni chetlab o'tish uchun uchta shart: harf qismi kamida 6 ta,
+   ichida _ yoki . bo'lmasin, raqam kamida 5 ta (tug'ilgan yil 4 ta bo'ladi). */
 function botName(un){
-  return /^[A-Za-z]{4,}\d{5,}$/.test(String(un||""));
+  const s = String(un||"").toLowerCase();
+  if(s.indexOf("_") > -1 || s.indexOf(".") > -1) return false;
+  return /^[a-z]{6,}\d{5,}$/.test(s);
 }
 function refSweep(){
   let db; try{ db = load(); }catch(e){ return; }
@@ -1110,13 +1114,20 @@ function refSweep(){
       if(sc >= REF_SCORE) bad.push(String(rid));
     });
 
-    const pct = inv.refs.length ? bad.length / inv.refs.length : 0;
-    if(bad.length < REF_MIN || pct < REF_BAD_PCT) return;
+    const pct  = inv.refs.length ? bad.length / inv.refs.length : 0;
+    const near_pct = inv.refs.length ? nNear / inv.refs.length : 0;
+    /* Eng ishonchli himoya: chin do'stlarning Telegram id lari yillar bo'ylab
+       tarqoq bo'ladi. Ommaviy ochilgan hisoblar esa yonma-yon turadi.
+       Shu belgi bo'lmasa — hech kim bloklanmaydi. */
+    if(bad.length < REF_MIN || pct < REF_BAD_PCT || near_pct < ID_NEAR_PCT) return;
 
-    /* soxta aloqalarni uzamiz — o'sha hisoblar o'chirilmaydi */
+    /* Soxta aloqalarni uzamiz. Hech narsa o'chirilmaydi — hammasi
+       chetga yozib qo'yiladi, /qoshish bilan to'liq qaytariladi. */
+    if(!Array.isArray(inv.refsCut)) inv.refsCut = [];
     bad.forEach(function(rid){
       const r = db[String(rid)];
-      if(r){ delete r.refBy; delete r.refAt; }
+      if(r){ r.refByCut = r.refBy; r.refAtCut = r.refAt; delete r.refBy; delete r.refAt; }
+      if(inv.refsCut.indexOf(String(rid)) < 0) inv.refsCut.push(String(rid));
     });
     inv.refs = inv.refs.filter(function(rid){ return bad.indexOf(String(rid)) < 0; });
 
@@ -1137,8 +1148,37 @@ function refSweep(){
 
   if(changed){ try{ save(db); }catch(e){} }
 }
+/* Har 10 daqiqada tekshiriladi. Bot to'dasi username va id belgilari bilan
+   darrov aniqlanadi — 24 soat kutish faqat "jonsiz" belgisi uchun kerak. */
 setTimeout(refSweep, 60e3);
-setInterval(refSweep, 3600e3);
+setInterval(refSweep, 600e3);
+
+/* Bloklangan odamni qaytarish — hamma ma'lumoti joyida qoladi */
+function unbanUser(db, id){
+  const u = db[String(id)]; if(!u) return null;
+  delete u.banned; delete u.banWhy; delete u.banAt;
+  BANSET.delete(String(id));
+  let back = 0;
+  if(Array.isArray(u.refsCut)){
+    u.refsCut.forEach(function(rid){
+      const r = db[String(rid)];
+      if(r && r.refByCut){ r.refBy = r.refByCut; r.refAt = r.refAtCut; delete r.refByCut; delete r.refAtCut; }
+      if(!Array.isArray(u.refs)) u.refs = [];
+      if(u.refs.indexOf(String(rid)) < 0){ u.refs.push(String(rid)); back++; }
+    });
+    delete u.refsCut;
+  }
+  return { back: back, u: u };
+}
+function findUser(db, q){
+  const s = String(q||"").replace("@","").trim().toLowerCase();
+  if(!s) return "";
+  if(/^\d+$/.test(s)) return db[s] ? s : s;         /* id bo'lsa to'g'ridan-to'g'ri */
+  const hit = Object.keys(db).filter(function(id){
+    return db[id] && String(db[id].un||"").toLowerCase() === s;
+  });
+  return hit[0] || "";
+}
 
 /* ---------- To'lov kurslari ----------
    RATES faqat MIJOZ QANCHA TO'LASHINI belgilaydi (Sberbank rublda, Visa dollarda).
@@ -2798,6 +2838,39 @@ app.post("/webhook", (req,res)=>{
       }
     }
     /* /tekshir \u2014 referal ro'yxatidagilarni tekshirish (kim chiqib ketgan) */
+    /* /qoshish - bloklangan odamni qaytarish. Hamma ma'lumoti joyida qoladi. */
+    if(text.indexOf("/qoshish") === 0){
+      if(ADMIN_ID && fromId !== ADMIN_ID) return;
+      const arg = text.replace("/qoshish", "").trim();
+      if(!arg){
+        send(fromId, "\uD83D\uDD13 Bloklangan odamni qaytarish\n\n" +
+          "@username yoki ID terib yuboring:\n" +
+          "/qoshish @username\n/qoshish 123456789\n\n" +
+          "Hisobidagi pul, buyurtmalari va referallari to'liq qaytariladi.");
+        return;
+      }
+      const dbq  = load();
+      const uid2 = findUser(dbq, arg);
+      if(!uid2 || !dbq[uid2]){
+        send(fromId, "\u274C Topilmadi: " + arg + "\nUsername bazada bo'lmasa ID bilan urinib ko'ring.");
+        return;
+      }
+      const wasBanned = !!dbq[uid2].banned || BANSET.has(String(uid2));
+      const r2 = unbanUser(dbq, uid2);
+      const inEnv = BAN_IDS.indexOf(String(uid2)) > -1 ||
+                    BAN_NAMES.indexOf(String(dbq[uid2].un||"").toLowerCase()) > -1;
+      save(dbq);
+      const u2 = dbq[uid2];
+      send(fromId, (wasBanned ? "\u2705 Qaytarildi" : "\u2139\uFE0F Bu odam bloklanmagan edi") + "\n\n" +
+        (u2.nm || "-") + (u2.un ? " (@" + u2.un + ")" : "") + "\nid: " + uid2 + "\n\n" +
+        "Balans: " + (u2.balance || 0) + " so'm\n" +
+        "Buyurtmalar: " + ((u2.orders||[]).length) + " ta\n" +
+        "To'ldirishlar: " + ((u2.topups||[]).length) + " ta\n" +
+        "Referallar: " + ((u2.refs||[]).length) + " ta" +
+        (r2 && r2.back ? " (" + r2.back + " tasi qaytarildi)" : "") +
+        (inEnv ? "\n\n\u26A0\uFE0F Bu id .env dagi BANNED ro'yxatida ham bor. To'liq ochilishi uchun uni o'sha yerdan ham olib tashlang." : ""));
+      return;
+    }
     if(text.indexOf("/tekshir") === 0){
       if(ADMIN_ID && fromId !== ADMIN_ID) return;
       refScan(fromId);
