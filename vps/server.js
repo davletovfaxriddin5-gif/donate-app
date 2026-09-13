@@ -3199,9 +3199,17 @@ app.post("/webhook", (req,res)=>{
     /* /yechish @username - balansdan pul yechish (xato to'ldirishni qaytarish) */
     if(text.indexOf("/yechish") === 0){
       if(ADMIN_ID && fromId !== ADMIN_ID) return;
-      const q3 = text.replace("/yechish", "").trim().replace(/^@/, "").toLowerCase();
+      const raw3 = text.replace("/yechish", "").trim();
+      /* Oxiridagi raqam yoki "hammasi" bo'lsa — bir qadamda bajaramiz */
+      const mSum = raw3.match(/\s+(\d+|hammasi)\s*$/i);
+      const inline = mSum ? mSum[1] : "";
+      const q3 = (mSum ? raw3.slice(0, mSum.index) : raw3).trim().replace(/^@/, "").toLowerCase();
       if(!q3){
-        send(fromId, "Ishlatilishi:\n/yechish @username\nyoki\n/yechish 123456789");
+        send(fromId, "Ishlatilishi:\n" +
+                     "/yechish @username\n" +
+                     "/yechish @username 10000\n" +
+                     "/yechish @username hammasi\n" +
+                     "/yechish 123456789 5000");
         return;
       }
       const db3 = load();
@@ -3213,6 +3221,17 @@ app.post("/webhook", (req,res)=>{
       });
       if(!hit3){ send(fromId, "\u274C \"" + q3 + "\" topilmadi."); return; }
       const u3 = urec(db3, hit3);
+      if(inline){
+        const eski3 = Number(u3.balance) || 0;
+        let sum3 = /^hammasi$/i.test(inline) ? eski3 : Number(inline);
+        if(sum3 > eski3) sum3 = eski3;
+        u3.balance = eski3 - sum3;
+        save(db3);
+        send(fromId, "\u2705 " + (u3.nm || hit3) + (u3.un ? " (@" + u3.un + ")" : "") + "\n" +
+                     "Yechildi: " + sum3 + " so'm\n" + eski3 + " \u2192 " + u3.balance + " so'm");
+        if(sum3 > 0) send(hit3, "\u2139\uFE0F Balansingiz to'g'irlandi.\nJoriy balans: " + u3.balance + " so'm", null, true);
+        return;
+      }
       pendCut[fromId] = hit3;
       save(db3);
       send(fromId, "\uD83D\uDCB8 " + (u3.nm || hit3) + (u3.un ? " (@" + u3.un + ")" : "") +
@@ -3281,7 +3300,7 @@ app.post("/webhook", (req,res)=>{
       u.balance += Number(text.trim());
       save(db);
       send(fromId, "\u2705 " + (u.nm || target) + "\n" + eski + " \u2192 " + u.balance + " so'm");
-      send(target, topupNote(u.balance), OTZIV_KB);
+      send(target, topupNote(u.balance), OTZIV_KB, true);
       return;
     }
     /* /balans <uid> <summa>  \u2014 balansni QO'LDA o'rnatish (faqat admin).
@@ -3419,7 +3438,7 @@ app.post("/webhook", (req,res)=>{
   }catch(e){ console.log("WH XATO:", e.message); }
 });
 
-function send(chatId, text, markup){
+function send(chatId, text, markup, tellAdmin){
   if(!TOKEN || !chatId) return;
   const body = { chat_id: chatId, text: text };
   if(markup) body.reply_markup = markup;
@@ -3427,6 +3446,19 @@ function send(chatId, text, markup){
     method:"POST",
     headers:{"Content-Type":"application/json"},
     body: JSON.stringify(body)
+  }).then(function(r){ return r.json(); }).then(function(j){
+    if(j && j.ok === false){
+      console.log("SEND rad etildi:", chatId, j.description);
+      /* Telegram botga Start bosmagan odamga xabar yuborishga ruxsat bermaydi.
+         Admin buni bilishi kerak, aks holda xabar jimgina yo'qoladi. */
+      if(tellAdmin && ADMIN_ID && String(chatId) !== String(ADMIN_ID)){
+        send(ADMIN_ID, "\u26A0\uFE0F Xabar yetkazilmadi\n\nid: " + chatId + "\n" +
+             "Sabab: " + (j.description || "noma'lum") + "\n\n" +
+             "Odatda bu odam botga Start bosmagani bildiradi \u2014 " +
+             "faqat Mini App'dan kirgan bo'lsa shunday bo'ladi. " +
+             "Unga botni ochib Start bosishini ayting.");
+      }
+    }
   }).catch(function(e){ console.log("SEND xato:", e.message); });
 }
 
