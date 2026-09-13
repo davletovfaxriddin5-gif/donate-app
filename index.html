@@ -1173,34 +1173,39 @@ body.light .sp-card .sub{ text-shadow:none; color:var(--faint) }
 .st-bal{ font-size:12.5px; color:var(--faint); margin:9px 4px 14px }
 
 /* === GRAM to'ldirish ekrani === */
+/* Raqam va tugmalar uchun tizim shrifti — iPhone'da SF Pro, Android'da Roboto.
+   Ikkalasida ham tabiiy va tiniq chiqadi. */
+:root{ --sys:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Roboto,system-ui,sans-serif }
 .gr-card{ background:var(--card); border:1px solid var(--stroke); border-radius:20px;
-  padding:18px 16px 16px; text-align:center }
-.gr-card .lb{ font-size:12.5px; color:var(--faint) }
-.gr-wal{ display:inline-flex; align-items:center; gap:8px; height:36px; padding:0 15px; margin-top:9px;
+  padding:15px 14px 14px; text-align:center }
+.gr-card .lb{ font-size:12px; color:var(--faint); font-family:var(--sys); letter-spacing:.1px }
+.gr-wal{ display:inline-flex; align-items:center; gap:7px; height:31px; padding:0 13px; margin-top:7px;
   border-radius:999px; background:var(--card-2); border:1px solid var(--stroke-2);
-  color:var(--text); font-size:13.5px; font-weight:500; transition:.14s }
-.gr-wal svg{ width:18px; height:18px; stroke:#5B8CFF; fill:none; stroke-width:1.8;
+  color:var(--text); font-size:12.5px; font-weight:500; font-family:var(--sys); transition:.14s }
+.gr-wal svg{ width:16px; height:16px; stroke:#5B8CFF; fill:none; stroke-width:1.8;
   stroke-linecap:round; stroke-linejoin:round }
 .gr-wal:active{ transform:scale(.96) }
-.gr-amt{ display:flex; align-items:baseline; justify-content:center; gap:9px; margin:26px 0 20px }
+.gr-amt{ display:flex; align-items:baseline; justify-content:center; gap:8px; margin:18px 0 15px }
 .gr-amt input{ background:transparent; border:0; outline:none; padding:0; min-width:1ch;
-  color:var(--text); font-size:44px; font-weight:700; letter-spacing:-1.5px;
-  font-family:inherit; text-align:right }
-.gr-amt .u{ font-size:31px; font-weight:700; color:var(--faint); letter-spacing:-1px }
-.gr-quick{ display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:16px }
+  color:var(--text); font-size:38px; font-weight:700; letter-spacing:-1.2px;
+  font-family:var(--sys); text-align:right }
+.gr-amt .u{ font-size:26px; font-weight:700; color:var(--faint); letter-spacing:-.8px;
+  font-family:var(--sys) }
+.gr-quick{ display:flex; gap:7px; justify-content:center; flex-wrap:wrap; margin-bottom:12px }
 .gr-quick.scroll{ flex-wrap:nowrap; justify-content:flex-start; overflow-x:auto;
   scrollbar-width:none; padding-bottom:2px }
 .gr-quick.scroll::-webkit-scrollbar{ display:none }
 .gr-quick.scroll button{ flex:0 0 auto }
-.gr-quick button{ display:flex; align-items:center; gap:7px; height:38px; padding:0 15px;
+.gr-quick button{ display:flex; align-items:center; gap:6px; height:33px; padding:0 12px;
+  font-family:var(--sys); font-size:13px;
   border-radius:999px; background:var(--card-2); border:1px solid var(--stroke-2);
   color:var(--text); font-size:13.5px; font-weight:600; transition:.14s }
-.gr-quick button .d{ width:21px; height:21px; border-radius:50%; background:var(--blue);
+.gr-quick button .d{ width:18px; height:18px; border-radius:50%; background:var(--blue);
   display:grid; place-items:center; flex-shrink:0 }
-.gr-quick button .d svg{ width:11px; height:11px; fill:#fff; stroke:none }
+.gr-quick button .d svg{ width:9px; height:9px; fill:#fff; stroke:none }
 .gr-quick button:active{ transform:scale(.95) }
-.gr-go{ width:100%; height:50px; border-radius:16px; background:var(--blue); color:#fff;
-  font-size:15.5px; font-weight:600; transition:.14s }
+.gr-go{ width:100%; height:44px; border-radius:14px; background:var(--blue); color:#fff;
+  font-size:14.5px; font-weight:600; font-family:var(--sys); letter-spacing:.1px; transition:.14s }
 .gr-go:disabled{ opacity:.42 }
 .gr-go:active{ transform:scale(.98) }
 
