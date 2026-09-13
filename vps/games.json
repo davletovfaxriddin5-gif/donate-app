@@ -1,0 +1,8076 @@
+{
+ "rate": 12300,
+ "at": "2026-08-26T11:43:33.269Z",
+ "games": [
+  {
+   "id": "arenabreakout",
+   "name": "Arena Breakout",
+   "cats": [
+    {
+     "cat": "arena_breakout",
+     "label": "Global",
+     "fields": [
+      {
+       "key": "player_id",
+       "label": "Player ID",
+       "type": "text"
+      }
+     ],
+     "offers": [
+      {
+       "oid": "66_bonds",
+       "name": "66 Bonds",
+       "usd": 0.775,
+       "cost": 9533,
+       "price": 15000,
+       "off": false,
+       "grp": "Bonds",
+       "im": "/arenabreak-x5.png"
+      },
+      {
+       "oid": "335_bonds",
+       "name": "335 Bonds",
+       "usd": 3.947,
+       "cost": 48548,
+       "price": 64000,
+       "off": false,
+       "grp": "Bonds",
+       "im": "/arenabreak-x4.png"
+      },
+      {
+       "oid": "675_bonds",
+       "name": "675 Bonds",
+       "usd": 7.915,
+       "cost": 97355,
+       "price": 112500,
+       "off": false,
+       "grp": "Bonds",
+       "im": "/arenabreak-x8.png"
+      },
+      {
+       "oid": "1690_bonds",
+       "name": "1690 Bonds",
+       "usd": 19.788,
+       "cost": 243392,
+       "price": 273000,
+       "off": false,
+       "grp": "Bonds",
+       "im": "/arenabreak-x11.png"
+      },
+      {
+       "oid": "3400_bonds",
+       "name": "3400 Bonds",
+       "usd": 39.627,
+       "cost": 487412,
+       "price": 546000,
+       "off": false,
+       "grp": "Bonds",
+       "im": "/arenabreak-x14.png"
+      },
+      {
+       "oid": "6820_bonds",
+       "name": "6820 Bonds",
+       "usd": 79.121,
+       "cost": 973188,
+       "price": 1090000,
+       "off": false,
+       "grp": "Bonds",
+       "im": "/arenabreak-x3.png"
+      },
+      {
+       "oid": "monthly_advanced_battle_pass_activation_pass",
+       "name": "Monthly Advanced Battle Pass Activation Pass",
+       "usd": 0.867,
+       "cost": 10664,
+       "price": 16000,
+       "off": false,
+       "grp": "Battle Pass",
+       "im": "/arenabreak-x7.png"
+      },
+      {
+       "oid": "monthly_premium_battle_pass_activation_pass",
+       "name": "Monthly Premium Battle Pass Activation Pass",
+       "usd": 3.509,
+       "cost": 43161,
+       "price": 58500,
+       "off": false,
+       "grp": "Battle Pass",
+       "im": "/arenabreak-x2.png"
+      },
+      {
+       "oid": "quarterly_premium_battle_pass_bundle_activation_pass_bundle",
+       "name": "Quarterly Premium Battle Pass Bundle Activation Pass Bundle",
+       "usd": 10.557,
+       "cost": 129851,
+       "price": 145500,
+       "off": false,
+       "grp": "Battle Pass",
+       "im": "/arenabreak-x12.png"
+      },
+      {
+       "oid": "bulletproof_case_privileges",
+       "name": "Bulletproof Case Privileges",
+       "usd": 2.2,
+       "cost": 27060,
+       "price": 37500,
+       "off": false,
+       "grp": "Case",
+       "im": "/arenabreak-x6.png"
+      },
+      {
+       "oid": "bulletproof_case_30d",
+       "name": "Bulletproof Case (30d)",
+       "usd": 2.152,
+       "cost": 26470,
+       "price": 36500,
+       "off": false,
+       "grp": "Case",
+       "im": "/arenabreak-x15.png"
+      },
+      {
+       "oid": "composite_case_privileges",
+       "name": "Composite Case Privileges",
+       "usd": 6.63,
+       "cost": 81549,
+       "price": 97000,
+       "off": false,
+       "grp": "Case",
+       "im": "/arenabreak-x1.png"
+      },
+      {
+       "oid": "composition_case_30d",
+       "name": "Composition Case (30d)",
+       "usd": 6.477,
+       "cost": 79667,
+       "price": 95000,
+       "off": false,
+       "grp": "Case",
+       "im": "/arenabreak-x16.png"
+      },
+      {
+       "oid": "beginner_select",
+       "name": "Beginner Select",
+       "usd": 0.714,
+       "cost": 8782,
+       "price": 14000,
+       "off": false,
+       "grp": "Maxsus takliflar",
+       "im": "/arenabreak-x9.png"
+      }
+     ]
+    },
+    {
+     "cat": "arena_breakout_infinite",
+     "label": "Infinite",
+     "fields": [
+      {
+       "key": "player_id",
+       "label": "Player ID",
+       "type": "text"
+      }
+     ],
+     "offers": [
+      {
+       "oid": "100_bonds",
+       "name": "100 Bonds",
+       "usd": 0.95,
+       "cost": 11685,
+       "price": 17000,
+       "off": false,
+       "grp": "Bonds",
+       "im": "/arenabreak-x17.png"
+      },
+      {
+       "oid": "500_bonds",
+       "name": "500 Bonds",
+       "usd": 4.76,
+       "cost": 58548,
+       "price": 74000,
+       "off": false,
+       "grp": "Bonds",
+       "im": "/arenabreak-x10.png"
+      },
+      {
+       "oid": "1000_bonds",
+       "name": "1000 Bonds",
+       "usd": 9.51,
+       "cost": 116973,
+       "price": 131500,
+       "off": false,
+       "grp": "Bonds",
+       "im": "/arenabreak-x18.png"
+      },
+      {
+       "oid": "2500_bonds",
+       "name": "2500 Bonds",
+       "usd": 23.76,
+       "cost": 292248,
+       "price": 327500,
+       "off": false,
+       "grp": "Bonds",
+       "im": "/arenabreak-x19.png"
+      },
+      {
+       "oid": "5000_bonds",
+       "name": "5000 Bonds",
+       "usd": 47.52,
+       "cost": 584496,
+       "price": 655000,
+       "off": false,
+       "grp": "Bonds",
+       "im": "/arenabreak-x20.png"
+      },
+      {
+       "oid": "10000_bonds",
+       "name": "10000 Bonds",
+       "usd": 95.03,
+       "cost": 1168869,
+       "price": 1309500,
+       "off": false,
+       "grp": "Bonds",
+       "im": "/arenabreak-x21.png"
+      },
+      {
+       "oid": "advanced_battle_pass_activation_card",
+       "name": "Advanced Battle Pass Activation Card",
+       "usd": 4.998,
+       "cost": 61475,
+       "price": 76500,
+       "off": true,
+       "grp": "Battle Pass"
+      },
+      {
+       "oid": "premium_battle_pass_activation_card",
+       "name": "Premium Battle Pass Activation Card",
+       "usd": 15.004,
+       "cost": 184549,
+       "price": 207000,
+       "off": false,
+       "grp": "Battle Pass",
+       "im": "/arenabreak-x23.png"
+      },
+      {
+       "oid": "classic_craftsmanship_skin_bundle_i",
+       "name": "Classic Craftsmanship Skin Bundle I",
+       "usd": 4.998,
+       "cost": 61475,
+       "price": 76500,
+       "off": true
+      },
+      {
+       "oid": "classic_craftsmanship_skin_bundle_ii",
+       "name": "Classic Craftsmanship Skin Bundle II",
+       "usd": 4.998,
+       "cost": 61475,
+       "price": 76500,
+       "off": true
+      },
+      {
+       "oid": "copper_works_skin_bundle_i",
+       "name": "Copper Works Skin Bundle I",
+       "usd": 4.998,
+       "cost": 61475,
+       "price": 76500,
+       "off": false,
+       "grp": "Maxsus takliflar",
+       "im": "/arenabreak-x22.png"
+      },
+      {
+       "oid": "copper_works_skin_bundle_ii",
+       "name": "Copper Works Skin Bundle II",
+       "usd": 4.998,
+       "cost": 61475,
+       "price": 76500,
+       "off": false,
+       "grp": "Maxsus takliflar",
+       "im": "/arenabreak-x22.png"
+      }
+     ]
+    }
+   ],
+   "img": "/arenabreak-x13.jpeg"
+  },
+  {
+   "id": "bloodstrike",
+   "name": "Blood Strike",
+   "cats": [
+    {
+     "cat": "blood_strike",
+     "label": "Global",
+     "fields": [
+      {
+       "key": "player_id",
+       "label": "Player ID",
+       "type": "text"
+      }
+     ],
+     "offers": [
+      {
+       "oid": "51_bc",
+       "name": "51 Blood Coins",
+       "usd": 0.4155,
+       "cost": 5111,
+       "price": 8000,
+       "off": false,
+       "im": "/bc-x2.png",
+       "grp": "Gold"
+      },
+      {
+       "oid": "105_bc",
+       "name": "105 Blood Coins",
+       "usd": 0.74,
+       "cost": 9102,
+       "price": 14500,
+       "off": false,
+       "im": "/bc-x3.png",
+       "grp": "Gold"
+      },
+      {
+       "oid": "320_bc",
+       "name": "320 Blood Coins",
+       "usd": 2.23,
+       "cost": 27429,
+       "price": 37500,
+       "off": false,
+       "im": "/bc-x4.png",
+       "grp": "Gold"
+      },
+      {
+       "oid": "540_bc",
+       "name": "540 Blood Coins",
+       "usd": 3.72,
+       "cost": 45756,
+       "price": 61000,
+       "off": false,
+       "im": "/bc-x5.png",
+       "grp": "Gold"
+      },
+      {
+       "oid": "1100_bc",
+       "name": "1100 Blood Coins",
+       "usd": 7.45,
+       "cost": 91635,
+       "price": 107000,
+       "off": false,
+       "im": "/bc-x6.png",
+       "grp": "Gold"
+      },
+      {
+       "oid": "2260_bc",
+       "name": "2260 Blood Coins",
+       "usd": 14.89,
+       "cost": 183147,
+       "price": 205500,
+       "off": false,
+       "im": "/bc-x7.png",
+       "grp": "Gold"
+      },
+      {
+       "oid": "5800_bc",
+       "name": "5800 Blood Coins",
+       "usd": 37.14,
+       "cost": 456822,
+       "price": 512000,
+       "off": false,
+       "im": "/bc-x1.png",
+       "grp": "Gold"
+      },
+      {
+       "oid": "0_99_deal",
+       "name": "0.99 Deal",
+       "usd": 0.815,
+       "cost": 10025,
+       "price": 15500,
+       "off": false,
+       "im": "/deal-x1.png",
+       "grp": "Deal"
+      },
+      {
+       "oid": "0_49_deal",
+       "name": "0.49 Deal",
+       "usd": 0.408,
+       "cost": 5018,
+       "price": 8000,
+       "off": true,
+       "grp": "Deal"
+      },
+      {
+       "oid": "1_99_deal",
+       "name": "1.99 Deal",
+       "usd": 1.642,
+       "cost": 20197,
+       "price": 30500,
+       "off": false,
+       "im": "/deal-x2.png",
+       "grp": "Deal"
+      },
+      {
+       "oid": "2_99_deal",
+       "name": "2.99 Deal",
+       "usd": 2.458,
+       "cost": 30233,
+       "price": 40500,
+       "off": false,
+       "im": "/deal-x3.png",
+       "grp": "Deal"
+      },
+      {
+       "oid": "3_99_deal",
+       "name": "3.99 Deal",
+       "usd": 3.274,
+       "cost": 40270,
+       "price": 55500,
+       "off": false,
+       "im": "/deal-x4.png",
+       "grp": "Deal"
+      },
+      {
+       "oid": "4_99_deal",
+       "name": "4.99 Deal",
+       "usd": 4.1,
+       "cost": 50430,
+       "price": 65500,
+       "off": false,
+       "im": "/deal-x5.png",
+       "grp": "Deal"
+      },
+      {
+       "oid": "6_99_deal",
+       "name": "6.99 Deal",
+       "usd": 5.722,
+       "cost": 70381,
+       "price": 85500,
+       "off": false,
+       "im": "/deal-x7.png",
+       "grp": "Deal"
+      },
+      {
+       "oid": "5_99_deal",
+       "name": "5.99 Deal",
+       "usd": 4.916,
+       "cost": 60467,
+       "price": 75500,
+       "off": false,
+       "im": "/deal-x6.png",
+       "grp": "Deal"
+      },
+      {
+       "oid": "7_99_deal",
+       "name": "7.99 Deal",
+       "usd": 6.548,
+       "cost": 80540,
+       "price": 96000,
+       "off": false,
+       "im": "/deal-x8.png",
+       "grp": "Deal"
+      },
+      {
+       "oid": "8_99_deal",
+       "name": "8.99 Deal",
+       "usd": 7.364,
+       "cost": 90577,
+       "price": 106000,
+       "off": false,
+       "im": "/deal-x9.png",
+       "grp": "Deal"
+      },
+      {
+       "oid": "9_99_deal",
+       "name": "9.99 Deal",
+       "usd": 8.18,
+       "cost": 100614,
+       "price": 113000,
+       "off": false,
+       "im": "/deal-x10.png",
+       "grp": "Deal"
+      },
+      {
+       "oid": "ultra_skin_lucky_chest",
+       "name": "Ultra Skin Lucky Chest",
+       "usd": 0.4075,
+       "cost": 5012,
+       "price": 8000,
+       "off": true,
+       "grp": "Obunalar kartasi"
+      },
+      {
+       "oid": "season_pass",
+       "name": "Season Pass",
+       "usd": 0.775,
+       "cost": 9533,
+       "price": 15000,
+       "off": false,
+       "im": "/g-blood-x2.png",
+       "grp": "Obunalar kartasi"
+      },
+      {
+       "oid": "lucky_bag_week",
+       "name": "Lucky Bag Week",
+       "usd": 0.815,
+       "cost": 10025,
+       "price": 15500,
+       "off": false,
+       "im": "/g-blood-x1.png",
+       "grp": "Obunalar kartasi"
+      },
+      {
+       "oid": "level_up_pass",
+       "name": "Level Up Pass",
+       "usd": 1.63,
+       "cost": 20049,
+       "price": 30500,
+       "off": true,
+       "grp": "Obunalar kartasi"
+      },
+      {
+       "oid": "enable_cornucopia",
+       "name": "Enable Cornucopia",
+       "usd": 1.642,
+       "cost": 20197,
+       "price": 30500,
+       "off": true,
+       "grp": "Obunalar kartasi"
+      },
+      {
+       "oid": "strike_pass_elite",
+       "name": "Strike Pass Elite",
+       "usd": 3.2599,
+       "cost": 40097,
+       "price": 55500,
+       "off": false,
+       "im": "/g-blood-x3.png",
+       "grp": "Obunalar kartasi"
+      },
+      {
+       "oid": "strike_pass_premium",
+       "name": "Strike Pass Premium",
+       "usd": 7.3348,
+       "cost": 90218,
+       "price": 105500,
+       "off": false,
+       "im": "/g-blood-x4.png",
+       "grp": "Obunalar kartasi"
+      },
+      {
+       "oid": "bloodstrike_pre_order_item",
+       "name": "Bloodstrike Pre-order Item",
+       "usd": 1.5501,
+       "cost": 19066,
+       "price": 29500,
+       "off": true,
+       "grp": "Obunalar kartasi"
+      }
+     ]
+    },
+    {
+     "cat": "blood_strike_mena",
+     "label": "Mena",
+     "fields": [
+      {
+       "key": "player_id",
+       "label": "Player ID",
+       "type": "text"
+      }
+     ],
+     "offers": [
+      {
+       "oid": "51_gold",
+       "name": "51 Gold",
+       "usd": 0.439,
+       "cost": 5400,
+       "price": 8000,
+       "off": false,
+       "im": "/g-bloodstrike-x1.png",
+       "grp": "Gold"
+      },
+      {
+       "oid": "105_gold",
+       "name": "105 Gold",
+       "usd": 0.74,
+       "cost": 9102,
+       "price": 14500,
+       "off": false,
+       "im": "/g-bloodstrike-x2.png",
+       "grp": "Gold"
+      },
+      {
+       "oid": "320_gold",
+       "name": "320 Gold",
+       "usd": 2.23,
+       "cost": 27429,
+       "price": 37500,
+       "off": false,
+       "im": "/g-bloodstrike-x3.png",
+       "grp": "Gold"
+      },
+      {
+       "oid": "540_gold",
+       "name": "540 Gold",
+       "usd": 4.457,
+       "cost": 54821,
+       "price": 70000,
+       "off": false,
+       "im": "/g-bloodstrike-x8.png",
+       "grp": "Gold"
+      },
+      {
+       "oid": "1100_gold",
+       "name": "1100 Gold",
+       "usd": 8.905,
+       "cost": 109531,
+       "price": 123000,
+       "off": false,
+       "im": "/g-bloodstrike-x4.png",
+       "grp": "Gold"
+      },
+      {
+       "oid": "2260_gold",
+       "name": "2260 Gold",
+       "usd": 14.89,
+       "cost": 183147,
+       "price": 205500,
+       "off": false,
+       "im": "/g-bloodstrike-x9.png",
+       "grp": "Gold"
+      },
+      {
+       "oid": "5800_gold",
+       "name": "5800 Gold",
+       "usd": 37.24,
+       "cost": 458052,
+       "price": 513500,
+       "off": false,
+       "im": "/g-bloodstrike-x5.png",
+       "grp": "Gold"
+      },
+      {
+       "oid": "0_99_deal",
+       "name": "0.99 Deal",
+       "usd": 0.867,
+       "cost": 10664,
+       "price": 16000,
+       "off": false,
+       "im": "/deal-x11.png",
+       "grp": "Deal"
+      },
+      {
+       "oid": "0_49_deal",
+       "name": "0.49 Deal",
+       "usd": 0.439,
+       "cost": 5400,
+       "price": 8000,
+       "off": true,
+       "grp": "Deal"
+      },
+      {
+       "oid": "1_99_deal",
+       "name": "1.99 Deal",
+       "usd": 1.754,
+       "cost": 21574,
+       "price": 32000,
+       "off": false,
+       "im": "/deal-x12.png",
+       "grp": "Deal"
+      },
+      {
+       "oid": "2_99_deal",
+       "name": "2.99 Deal",
+       "usd": 2.672,
+       "cost": 32866,
+       "price": 43000,
+       "off": false,
+       "im": "/deal-x13.png",
+       "grp": "Deal"
+      },
+      {
+       "oid": "3_99_deal",
+       "name": "3.99 Deal",
+       "usd": 3.57,
+       "cost": 43911,
+       "price": 59000,
+       "off": false,
+       "im": "/deal-x14.png",
+       "grp": "Deal"
+      },
+      {
+       "oid": "4_99_deal",
+       "name": "4.99 Deal",
+       "usd": 4.457,
+       "cost": 54821,
+       "price": 70000,
+       "off": false,
+       "im": "/deal-x15.png",
+       "grp": "Deal"
+      },
+      {
+       "oid": "5_99_deal",
+       "name": "5.99 Deal",
+       "usd": 5.345,
+       "cost": 65744,
+       "price": 81000,
+       "off": false,
+       "im": "/deal-x16.png",
+       "grp": "Deal"
+      },
+      {
+       "oid": "6_99_deal",
+       "name": "6.99 Deal",
+       "usd": 6.14,
+       "cost": 75522,
+       "price": 91000,
+       "off": false,
+       "im": "/deal-x17.png",
+       "grp": "Deal"
+      },
+      {
+       "oid": "7_99_deal",
+       "name": "7.99 Deal",
+       "usd": 7.13,
+       "cost": 87699,
+       "price": 103000,
+       "off": false,
+       "im": "/deal-x18.png",
+       "grp": "Deal"
+      },
+      {
+       "oid": "8_99_deal",
+       "name": "8.99 Deal",
+       "usd": 7.915,
+       "cost": 97355,
+       "price": 112500,
+       "off": false,
+       "im": "/deal-x19.png",
+       "grp": "Deal"
+      },
+      {
+       "oid": "9_99_deal",
+       "name": "9.99 Deal",
+       "usd": 8.905,
+       "cost": 109531,
+       "price": 123000,
+       "off": false,
+       "im": "/deal-x20.png",
+       "grp": "Deal"
+      },
+      {
+       "oid": "lucky_bag_week",
+       "name": "Lucky Bag Week",
+       "usd": 0.867,
+       "cost": 10664,
+       "price": 16000,
+       "off": false,
+       "im": "/g-blood-x1.png",
+       "grp": "Obunalar kartasi"
+      },
+      {
+       "oid": "ultra_skin_lucky_chest",
+       "name": "Ultra Skin Lucky Chest",
+       "usd": 0.439,
+       "cost": 5400,
+       "price": 8000,
+       "off": true,
+       "grp": "Obunalar kartasi"
+      },
+      {
+       "oid": "level_up_pass",
+       "name": "Level Up Pass",
+       "usd": 1.754,
+       "cost": 21574,
+       "price": 32000,
+       "off": true,
+       "grp": "Obunalar kartasi"
+      },
+      {
+       "oid": "enable_cornucopia",
+       "name": "Enable Cornucopia",
+       "usd": 1.754,
+       "cost": 21574,
+       "price": 32000,
+       "off": true,
+       "grp": "Obunalar kartasi"
+      },
+      {
+       "oid": "strike_pass_elite",
+       "name": "Strike Pass Elite",
+       "usd": 3.57,
+       "cost": 43911,
+       "price": 59000,
+       "off": false,
+       "im": "/g-blood-x3.png",
+       "grp": "Obunalar kartasi"
+      },
+      {
+       "oid": "strike_pass_premium",
+       "name": "Strike Pass Premium",
+       "usd": 7.915,
+       "cost": 97355,
+       "price": 112500,
+       "off": false,
+       "im": "/g-blood-x4.png",
+       "grp": "Obunalar kartasi"
+      },
+      {
+       "oid": "bloodstrike_pre_order_item",
+       "name": "Bloodstrike Pre-order Item",
+       "usd": 2,
+       "cost": 24600,
+       "price": 35000,
+       "off": true,
+       "grp": "Obunalar kartasi"
+      }
+     ]
+    }
+   ],
+   "img": "/g-bloodstrike-x7.png"
+  },
+  {
+   "id": "callofdutymobile",
+   "name": "Call of Duty Mobile",
+   "cats": [
+    {
+     "cat": "codm_activision_ca",
+     "label": "Activision CA",
+     "fields": [
+      {
+       "key": "user_id",
+       "label": "User ID",
+       "type": "text"
+      }
+     ],
+     "offers": [
+      {
+       "oid": "88_cp",
+       "name": "80 + 8 CP",
+       "usd": 0.72,
+       "cost": 8856,
+       "price": 14000,
+       "off": false,
+       "im": "/call-of-x3.png"
+      },
+      {
+       "oid": "460_cp",
+       "name": "400 + 60 CP",
+       "usd": 3.3,
+       "cost": 40590,
+       "price": 56000,
+       "off": false,
+       "im": "/call-of-x1.png"
+      },
+      {
+       "oid": "960_cp",
+       "name": "800 + 160 CP",
+       "usd": 6.13,
+       "cost": 75399,
+       "price": 90500,
+       "off": false,
+       "im": "/call-of-x4.png"
+      },
+      {
+       "oid": "2600_cp",
+       "name": "2000 + 600 CP",
+       "usd": 16.52,
+       "cost": 203196,
+       "price": 228000,
+       "off": false,
+       "im": "/call-of-x5.png"
+      },
+      {
+       "oid": "5400_cp",
+       "name": "4000 + 1400 CP",
+       "usd": 33.04,
+       "cost": 406392,
+       "price": 455500,
+       "off": false,
+       "im": "/call-of-x7.png"
+      },
+      {
+       "oid": "11200_cp",
+       "name": "8000 + 3200 CP",
+       "usd": 94.43,
+       "cost": 1161489,
+       "price": 1301000,
+       "off": false,
+       "im": "/call-of-x2.png"
+      },
+      {
+       "oid": "22400_cp",
+       "name": "16000 + 6400 CP",
+       "usd": 188.86,
+       "cost": 2322978,
+       "price": 2602000,
+       "off": true
+      },
+      {
+       "oid": "33600_cp",
+       "name": "24000 + 9600 CP",
+       "usd": 283.3,
+       "cost": 3484590,
+       "price": 3903000,
+       "off": true
+      },
+      {
+       "oid": "56000_cp",
+       "name": "40000 + 16000 CP",
+       "usd": 472.17,
+       "cost": 5807691,
+       "price": 6505000,
+       "off": true
+      }
+     ]
+    },
+    {
+     "cat": "codm_activision_in",
+     "label": "Activision IN",
+     "fields": [
+      {
+       "key": "user_id",
+       "label": "User ID",
+       "type": "text"
+      }
+     ],
+     "offers": [
+      {
+       "oid": "88_cp",
+       "name": "80 + 8 CP",
+       "usd": 0.98,
+       "cost": 12054,
+       "price": 17500,
+       "off": false,
+       "im": "/call-of-x9.png"
+      },
+      {
+       "oid": "460_cp",
+       "name": "400 + 60 CP",
+       "usd": 4.96,
+       "cost": 61008,
+       "price": 76500,
+       "off": false,
+       "im": "/call-of-x10.png"
+      },
+      {
+       "oid": "960_cp",
+       "name": "800 + 160 CP",
+       "usd": 9.92,
+       "cost": 122016,
+       "price": 137000,
+       "off": false,
+       "im": "/call-of-x11.png"
+      },
+      {
+       "oid": "2600_cp",
+       "name": "2000 + 600 CP",
+       "usd": 24.83,
+       "cost": 305409,
+       "price": 342500,
+       "off": false,
+       "im": "/call-of-x12.png"
+      },
+      {
+       "oid": "5400_cp",
+       "name": "4000 + 1400 CP",
+       "usd": 49.66,
+       "cost": 610818,
+       "price": 684500,
+       "off": false,
+       "im": "/call-of-x13.png"
+      },
+      {
+       "oid": "11200_cp",
+       "name": "8000 + 3200 CP",
+       "usd": 98.35,
+       "cost": 1209705,
+       "price": 1355000,
+       "off": false,
+       "im": "/call-of-x14.png"
+      },
+      {
+       "oid": "22400_cp",
+       "name": "16000 + 6400 CP",
+       "usd": 198.68,
+       "cost": 2443764,
+       "price": 2737500,
+       "off": true
+      },
+      {
+       "oid": "33600_cp",
+       "name": "24000 + 9600 CP",
+       "usd": 298.02,
+       "cost": 3665646,
+       "price": 4106000,
+       "off": true
+      },
+      {
+       "oid": "56000_cp",
+       "name": "40000 + 16000 CP",
+       "usd": 496.71,
+       "cost": 6109533,
+       "price": 6843000,
+       "off": true
+      }
+     ]
+    },
+    {
+     "cat": "codm_activision_kz",
+     "label": "Activision KZ",
+     "fields": [
+      {
+       "key": "user_id",
+       "label": "User ID",
+       "type": "text"
+      }
+     ],
+     "offers": [
+      {
+       "oid": "88_cp",
+       "name": "80 + 8 CP",
+       "usd": 1.08,
+       "cost": 13284,
+       "price": 18500,
+       "off": false,
+       "im": "/call-of-x15.png"
+      },
+      {
+       "oid": "460_cp",
+       "name": "400 + 60 CP",
+       "usd": 5.37,
+       "cost": 66051,
+       "price": 81500,
+       "off": false,
+       "im": "/call-of-x16.png"
+      },
+      {
+       "oid": "960_cp",
+       "name": "800 + 160 CP",
+       "usd": 10.76,
+       "cost": 132348,
+       "price": 148500,
+       "off": false,
+       "im": "/call-of-x17.png"
+      },
+      {
+       "oid": "2600_cp",
+       "name": "2000 + 600 CP",
+       "usd": 28.02,
+       "cost": 344646,
+       "price": 386500,
+       "off": false,
+       "im": "/call-of-x18.png"
+      },
+      {
+       "oid": "5400_cp",
+       "name": "4000 + 1400 CP",
+       "usd": 53.91,
+       "cost": 663093,
+       "price": 743000,
+       "off": false,
+       "im": "/call-of-x19.png"
+      },
+      {
+       "oid": "11600_cp",
+       "name": "8000 + 3600 CP",
+       "usd": 107.83,
+       "cost": 1326309,
+       "price": 1485500,
+       "off": false,
+       "im": "/call-of-x20.png"
+      },
+      {
+       "oid": "23200_cp",
+       "name": "16000 + 7200 CP",
+       "usd": 215.67,
+       "cost": 2652741,
+       "price": 2971500,
+       "off": true
+      },
+      {
+       "oid": "34800_cp",
+       "name": "24000 + 10800 CP",
+       "usd": 323.5,
+       "cost": 3979050,
+       "price": 4457000,
+       "off": true
+      },
+      {
+       "oid": "58000_cp",
+       "name": "40000 + 18000 CP",
+       "usd": 539.17,
+       "cost": 6631791,
+       "price": 7428000,
+       "off": true
+      }
+     ]
+    },
+    {
+     "cat": "codm_activision_sa",
+     "label": "Activision SA",
+     "fields": [
+      {
+       "key": "user_id",
+       "label": "User ID",
+       "type": "text"
+      }
+     ],
+     "offers": [
+      {
+       "oid": "88_cp",
+       "name": "80 + 8 CP",
+       "usd": 0.98,
+       "cost": 12054,
+       "price": 17500,
+       "off": false,
+       "im": "/call-of-x21.png"
+      },
+      {
+       "oid": "460_cp",
+       "name": "400 + 60 CP",
+       "usd": 4.79,
+       "cost": 58917,
+       "price": 74000,
+       "off": false,
+       "im": "/call-of-x22.png"
+      },
+      {
+       "oid": "960_cp",
+       "name": "800 + 160 CP",
+       "usd": 9.85,
+       "cost": 121155,
+       "price": 136000,
+       "off": false,
+       "im": "/call-of-x23.png"
+      },
+      {
+       "oid": "2600_cp",
+       "name": "2000 + 600 CP",
+       "usd": 23.96,
+       "cost": 294708,
+       "price": 330500,
+       "off": false,
+       "im": "/call-of-x24.png"
+      },
+      {
+       "oid": "5400_cp",
+       "name": "4000 + 1400 CP",
+       "usd": 49.25,
+       "cost": 605775,
+       "price": 678500,
+       "off": false,
+       "im": "/call-of-x25.png"
+      },
+      {
+       "oid": "11600_cp",
+       "name": "8000 + 3600 CP",
+       "usd": 98.51,
+       "cost": 1211673,
+       "price": 1357500,
+       "off": false,
+       "im": "/call-of-x26.png"
+      },
+      {
+       "oid": "23200_cp",
+       "name": "16000 + 7200 CP",
+       "usd": 193.56,
+       "cost": 2380788,
+       "price": 2666500,
+       "off": true
+      },
+      {
+       "oid": "34800_cp",
+       "name": "24000 + 10800 CP",
+       "usd": 285.68,
+       "cost": 3513864,
+       "price": 3936000,
+       "off": true
+      },
+      {
+       "oid": "58000_cp",
+       "name": "40000 + 18000 CP",
+       "usd": 463,
+       "cost": 5694900,
+       "price": 6378500,
+       "off": true
+      }
+     ]
+    },
+    {
+     "cat": "codm_activision_us",
+     "label": "Activision US",
+     "fields": [
+      {
+       "key": "user_id",
+       "label": "User ID",
+       "type": "text"
+      }
+     ],
+     "offers": [
+      {
+       "oid": "88_cp",
+       "name": "80 + 8 CP",
+       "usd": 0.99,
+       "cost": 12177,
+       "price": 17500,
+       "off": false,
+       "im": "/call-of-x27.png"
+      },
+      {
+       "oid": "460_cp",
+       "name": "400 + 60 CP",
+       "usd": 4.99,
+       "cost": 61377,
+       "price": 76500,
+       "off": false,
+       "im": "/call-of-x28.png"
+      },
+      {
+       "oid": "960_cp",
+       "name": "800 + 160 CP",
+       "usd": 9.99,
+       "cost": 122877,
+       "price": 138000,
+       "off": false,
+       "im": "/call-of-x29.png"
+      },
+      {
+       "oid": "2600_cp",
+       "name": "2000 + 600 CP",
+       "usd": 24.99,
+       "cost": 307377,
+       "price": 344500,
+       "off": false,
+       "im": "/call-of-x30.png"
+      },
+      {
+       "oid": "5400_cp",
+       "name": "4000 + 1400 CP",
+       "usd": 49.99,
+       "cost": 614877,
+       "price": 689000,
+       "off": false,
+       "im": "/call-of-x31.png"
+      },
+      {
+       "oid": "11600_cp",
+       "name": "8000 + 3600 CP",
+       "usd": 99.99,
+       "cost": 1229877,
+       "price": 1377500,
+       "off": false,
+       "im": "/call-of-x32.png"
+      },
+      {
+       "oid": "23200_cp",
+       "name": "16000 + 7200 CP",
+       "usd": 199.99,
+       "cost": 2459877,
+       "price": 2755500,
+       "off": true
+      },
+      {
+       "oid": "34800_cp",
+       "name": "24000 + 10800 CP",
+       "usd": 299.99,
+       "cost": 3689877,
+       "price": 4133000,
+       "off": true
+      },
+      {
+       "oid": "58000_cp",
+       "name": "40000 + 18000 CP",
+       "usd": 499.99,
+       "cost": 6149877,
+       "price": 6888000,
+       "off": true
+      }
+     ]
+    },
+    {
+     "cat": "codm_garena_sgmy",
+     "label": "Garena SG/MY",
+     "fields": [
+      {
+       "key": "player_id",
+       "label": "Player ID",
+       "type": "text"
+      }
+     ],
+     "offers": [
+      {
+       "oid": "114_cp",
+       "name": "114 CP",
+       "usd": 1.2,
+       "cost": 14760,
+       "price": 20000,
+       "off": false,
+       "im": "/call-of-x33.png"
+      },
+      {
+       "oid": "115_cp",
+       "name": "115 CP",
+       "usd": 1.132,
+       "cost": 13924,
+       "price": 19000,
+       "off": true
+      },
+      {
+       "oid": "253_cp",
+       "name": "253 CP",
+       "usd": 2.254,
+       "cost": 27724,
+       "price": 38000,
+       "off": false,
+       "im": "/call-of-x34.png"
+      },
+      {
+       "oid": "529_cp",
+       "name": "529 CP",
+       "usd": 4.519,
+       "cost": 55584,
+       "price": 71000,
+       "off": false,
+       "im": "/call-of-x35.png"
+      },
+      {
+       "oid": "794_cp",
+       "name": "794 CP",
+       "usd": 6.773,
+       "cost": 83308,
+       "price": 98500,
+       "off": false,
+       "im": "/call-of-x36.png"
+      },
+      {
+       "oid": "1053_cp",
+       "name": "1053 CP",
+       "usd": 9.027,
+       "cost": 111032,
+       "price": 124500,
+       "off": false,
+       "im": "/call-of-x37.png"
+      },
+      {
+       "oid": "1323_cp",
+       "name": "1323 CP",
+       "usd": 11.281,
+       "cost": 138756,
+       "price": 155500,
+       "off": true
+      },
+      {
+       "oid": "2760_cp",
+       "name": "2760 CP",
+       "usd": 22.573,
+       "cost": 277648,
+       "price": 311000,
+       "off": false,
+       "im": "/call-of-x38.png"
+      },
+      {
+       "oid": "6440_cp",
+       "name": "6440 CP",
+       "usd": 45.145,
+       "cost": 555284,
+       "price": 622000,
+       "off": false,
+       "im": "/call-of-x39.png"
+      },
+      {
+       "oid": "9200_cp",
+       "name": "9200 CP",
+       "usd": 67.718,
+       "cost": 832931,
+       "price": 933000,
+       "off": false,
+       "im": "/call-of-x40.png"
+      },
+      {
+       "oid": "9602_cp",
+       "name": "6858 + 2744 CP",
+       "usd": 72.2,
+       "cost": 888060,
+       "price": 995000,
+       "off": true
+      },
+      {
+       "oid": "12880_cp",
+       "name": "12880 CP",
+       "usd": 90.301,
+       "cost": 1110702,
+       "price": 1244000,
+       "off": true
+      },
+      {
+       "oid": "15640_cp",
+       "name": "15640 CP",
+       "usd": 112.863,
+       "cost": 1388215,
+       "price": 1555000,
+       "off": true
+      },
+      {
+       "oid": "16001_cp",
+       "name": "11429 + 4572 CP",
+       "usd": 120.33,
+       "cost": 1480059,
+       "price": 1658000,
+       "off": true
+      },
+      {
+       "oid": "19320_cp",
+       "name": "19320 CP",
+       "usd": 135.436,
+       "cost": 1665863,
+       "price": 1866000,
+       "off": true
+      }
+     ]
+    }
+   ],
+   "img": "/call-of-x8.jpeg"
+  },
+  {
+   "id": "deltaforce",
+   "name": "Delta Force",
+   "cats": [
+    {
+     "cat": "delta_force",
+     "label": "Global",
+     "fields": [
+      {
+       "key": "player_id",
+       "label": "Player ID",
+       "type": "text"
+      }
+     ],
+     "offers": [
+      {
+       "oid": "18_delta_coins",
+       "name": "18 Delta Coins",
+       "usd": 0.22,
+       "cost": 2706,
+       "price": 5500,
+       "off": true,
+       "grp": "Delta Coins"
+      },
+      {
+       "oid": "30_delta_coins",
+       "name": "30 Delta Coins",
+       "usd": 0.37,
+       "cost": 4551,
+       "price": 7500,
+       "off": false,
+       "grp": "Delta Coins",
+       "im": "/delta-x1.png"
+      },
+      {
+       "oid": "60_delta_coins",
+       "name": "60 Delta Coins",
+       "usd": 0.75,
+       "cost": 9225,
+       "price": 14500,
+       "off": false,
+       "grp": "Delta Coins",
+       "im": "/delta-x9.png"
+      },
+      {
+       "oid": "320_delta_coins",
+       "name": "320 Delta Coins",
+       "usd": 3.75,
+       "cost": 46125,
+       "price": 61500,
+       "off": false,
+       "grp": "Delta Coins",
+       "im": "/delta-x2.png"
+      },
+      {
+       "oid": "460_delta_coins",
+       "name": "460 Delta Coins",
+       "usd": 5.43,
+       "cost": 66789,
+       "price": 82000,
+       "off": false,
+       "grp": "Delta Coins",
+       "im": "/delta-x10.png"
+      },
+      {
+       "oid": "750_delta_coins",
+       "name": "750 Delta Coins",
+       "usd": 7.49,
+       "cost": 92127,
+       "price": 107500,
+       "off": false,
+       "grp": "Delta Coins",
+       "im": "/delta-x8.png"
+      },
+      {
+       "oid": "1480_delta_coins",
+       "name": "1480 Delta Coins",
+       "usd": 14.98,
+       "cost": 184254,
+       "price": 206500,
+       "off": false,
+       "grp": "Delta Coins",
+       "im": "/delta-x11.png"
+      },
+      {
+       "oid": "1980_delta_coins",
+       "name": "1980 Delta Coins",
+       "usd": 18.72,
+       "cost": 230256,
+       "price": 258000,
+       "off": false,
+       "grp": "Delta Coins",
+       "im": "/delta-x3.png"
+      },
+      {
+       "oid": "3950_delta_coins",
+       "name": "3950 Delta Coins",
+       "usd": 37.44,
+       "cost": 460512,
+       "price": 516000,
+       "off": false,
+       "grp": "Delta Coins",
+       "im": "/delta-x5.png"
+      },
+      {
+       "oid": "8100_delta_coins",
+       "name": "8100 Delta Coins",
+       "usd": 74.88,
+       "cost": 921024,
+       "price": 1032000,
+       "off": false,
+       "grp": "Delta Coins",
+       "im": "/delta-x6.png"
+      },
+      {
+       "oid": "16200_delta_coins",
+       "name": "16200 Delta Coins",
+       "usd": 156.376,
+       "cost": 1923425,
+       "price": 2154500,
+       "off": true,
+       "grp": "Delta Coins"
+      },
+      {
+       "oid": "24300_delta_coins",
+       "name": "24300 Delta Coins",
+       "usd": 234.559,
+       "cost": 2885076,
+       "price": 3231500,
+       "off": true,
+       "grp": "Delta Coins"
+      },
+      {
+       "oid": "season_pass_operations_special",
+       "name": "Season Pass Operations Special",
+       "usd": 4.233,
+       "cost": 52066,
+       "price": 67500,
+       "off": false,
+       "grp": "Season Pass",
+       "im": "/delta-x12.png"
+      },
+      {
+       "oid": "season_pass_warfare_special",
+       "name": "Season Pass Warfare Special",
+       "usd": 4.233,
+       "cost": 52066,
+       "price": 67500,
+       "off": false,
+       "grp": "Season Pass",
+       "im": "/delta-x13.png"
+      },
+      {
+       "oid": "season_pass_delta_force_deluxe",
+       "name": "Season Pass Delta Force Deluxe",
+       "usd": 5.865,
+       "cost": 72140,
+       "price": 87500,
+       "off": false,
+       "grp": "Season Pass",
+       "im": "/delta-x14.png"
+      }
+     ]
+    },
+    {
+     "cat": "garena_delta_force_indonesia",
+     "label": "Garena Delta Force Indonesia",
+     "fields": [
+      {
+       "key": "player_id",
+       "label": "Player ID",
+       "type": "text"
+      }
+     ],
+     "offers": [
+      {
+       "oid": "19_delta_coins",
+       "name": "19 Delta Coins",
+       "usd": 0.28,
+       "cost": 3444,
+       "price": 6000,
+       "off": true,
+       "grp": "Delta Coins"
+      },
+      {
+       "oid": "32_delta_coins",
+       "name": "32 Delta Coins",
+       "usd": 0.42,
+       "cost": 5166,
+       "price": 8000,
+       "off": false,
+       "grp": "Delta Coins",
+       "im": "/delta-x15.png"
+      },
+      {
+       "oid": "63_delta_coins",
+       "name": "63 Delta Coins",
+       "usd": 0.83,
+       "cost": 10209,
+       "price": 15500,
+       "off": false,
+       "grp": "Delta Coins",
+       "im": "/delta-x16.png"
+      },
+      {
+       "oid": "336_delta_coins",
+       "name": "336 Delta Coins",
+       "usd": 4.14,
+       "cost": 50922,
+       "price": 66000,
+       "off": false,
+       "grp": "Delta Coins",
+       "im": "/delta-x17.png"
+      },
+      {
+       "oid": "482_delta_coins",
+       "name": "482 Delta Coins",
+       "usd": 5.69,
+       "cost": 69987,
+       "price": 85000,
+       "off": false,
+       "grp": "Delta Coins",
+       "im": "/delta-x18.png"
+      },
+      {
+       "oid": "785_delta_coins",
+       "name": "785 Delta Coins",
+       "usd": 7.98,
+       "cost": 98154,
+       "price": 113500,
+       "off": false,
+       "grp": "Delta Coins",
+       "im": "/delta-x19.png"
+      },
+      {
+       "oid": "1544_delta_coins",
+       "name": "1544 Delta Coins",
+       "usd": 15.94,
+       "cost": 196062,
+       "price": 220000,
+       "off": false,
+       "grp": "Delta Coins",
+       "im": "/delta-x20.png"
+      },
+      {
+       "oid": "2065_delta_coins",
+       "name": "2065 Delta Coins",
+       "usd": 19.93,
+       "cost": 245139,
+       "price": 275000,
+       "off": false,
+       "grp": "Delta Coins",
+       "im": "/delta-x21.png"
+      },
+      {
+       "oid": "4114_delta_coins",
+       "name": "4114 Delta Coins",
+       "usd": 39.84,
+       "cost": 490032,
+       "price": 549000,
+       "off": false,
+       "grp": "Delta Coins",
+       "im": "/delta-x22.png"
+      },
+      {
+       "oid": "8424_delta_coins",
+       "name": "8424 Delta Coins",
+       "usd": 79.67,
+       "cost": 979941,
+       "price": 1098000,
+       "off": false,
+       "grp": "Delta Coins",
+       "im": "/delta-x23.png"
+      },
+      {
+       "oid": "16848_delta_coins",
+       "name": "16848 Delta Coins",
+       "usd": 159.34,
+       "cost": 1959882,
+       "price": 2195500,
+       "off": true,
+       "grp": "Delta Coins"
+      },
+      {
+       "oid": "25272_delta_coins",
+       "name": "25272 Delta Coins",
+       "usd": 239.01,
+       "cost": 2939823,
+       "price": 3293000,
+       "off": true,
+       "grp": "Delta Coins"
+      },
+      {
+       "oid": "blaze_supplies",
+       "name": "Blaze Supplies",
+       "usd": 0.48,
+       "cost": 5904,
+       "price": 8500,
+       "off": true,
+       "grp": "Maxsus takliflar"
+      },
+      {
+       "oid": "blaze_supplies_advanced",
+       "name": "Blaze Supplies - Advanced",
+       "usd": 1.37,
+       "cost": 16851,
+       "price": 27000,
+       "off": true,
+       "grp": "Maxsus takliflar"
+      }
+     ]
+    },
+    {
+     "cat": "garena_delta_force_my",
+     "label": "Garena Delta Force MY",
+     "fields": [
+      {
+       "key": "player_id",
+       "label": "Player ID",
+       "type": "text"
+      }
+     ],
+     "offers": [
+      {
+       "oid": "19_delta_coins",
+       "name": "19 Delta Coins",
+       "usd": 0.265,
+       "cost": 3260,
+       "price": 6000,
+       "off": true,
+       "grp": "Delta Coins"
+      },
+      {
+       "oid": "32_delta_coins",
+       "name": "32 Delta Coins",
+       "usd": 0.459,
+       "cost": 5646,
+       "price": 8500,
+       "off": false,
+       "grp": "Delta Coins",
+       "im": "/delta-x24.png"
+      },
+      {
+       "oid": "63_delta_coins",
+       "name": "63 Delta Coins",
+       "usd": 0.928,
+       "cost": 11414,
+       "price": 16500,
+       "off": false,
+       "grp": "Delta Coins",
+       "im": "/delta-x25.png"
+      },
+      {
+       "oid": "336_delta_coins",
+       "name": "336 Delta Coins",
+       "usd": 4.641,
+       "cost": 57084,
+       "price": 72500,
+       "off": false,
+       "grp": "Delta Coins",
+       "im": "/delta-x26.png"
+      },
+      {
+       "oid": "482_delta_coins",
+       "name": "482 Delta Coins",
+       "usd": 6.508,
+       "cost": 80048,
+       "price": 95500,
+       "off": false,
+       "grp": "Delta Coins",
+       "im": "/delta-x28.png"
+      },
+      {
+       "oid": "785_delta_coins",
+       "name": "785 Delta Coins",
+       "usd": 9.272,
+       "cost": 114046,
+       "price": 128000,
+       "off": false,
+       "grp": "Delta Coins",
+       "im": "/delta-x27.png"
+      },
+      {
+       "oid": "1544_delta_coins",
+       "name": "1544 Delta Coins",
+       "usd": 18.35,
+       "cost": 225705,
+       "price": 253000,
+       "off": false,
+       "grp": "Delta Coins",
+       "im": "/delta-x29.png"
+      },
+      {
+       "oid": "2065_delta_coins",
+       "name": "2065 Delta Coins",
+       "usd": 23.103,
+       "cost": 284167,
+       "price": 318500,
+       "off": false,
+       "grp": "Delta Coins",
+       "im": "/delta-x30.png"
+      },
+      {
+       "oid": "4114_delta_coins",
+       "name": "4114 Delta Coins",
+       "usd": 46.43,
+       "cost": 571089,
+       "price": 640000,
+       "off": false,
+       "grp": "Delta Coins",
+       "im": "/delta-x31.png"
+      },
+      {
+       "oid": "8424_delta_coins",
+       "name": "8424 Delta Coins",
+       "usd": 92.891,
+       "cost": 1142559,
+       "price": 1280000,
+       "off": false,
+       "grp": "Delta Coins",
+       "im": "/delta-x32.png"
+      },
+      {
+       "oid": "16848_delta_coins",
+       "name": "16848 Delta Coins",
+       "usd": 185.803,
+       "cost": 2285377,
+       "price": 2560000,
+       "off": true,
+       "grp": "Delta Coins"
+      },
+      {
+       "oid": "25272_delta_coins",
+       "name": "25272 Delta Coins",
+       "usd": 278.705,
+       "cost": 3428072,
+       "price": 3839500,
+       "off": true,
+       "grp": "Delta Coins"
+      },
+      {
+       "oid": "silent_sentinel_supplies",
+       "name": "Silent Sentinel Supplies",
+       "usd": 0.928,
+       "cost": 11414,
+       "price": 16500,
+       "off": false,
+       "grp": "Maxsus takliflar",
+       "im": "/delta-x36.png"
+      },
+      {
+       "oid": "black_hawk_down_genesis",
+       "name": "Black Hawk Down - Genesis",
+       "usd": 0.928,
+       "cost": 11414,
+       "price": 16500,
+       "off": false,
+       "grp": "Maxsus takliflar",
+       "im": "/delta-x34.png"
+      },
+      {
+       "oid": "black_hawk_down_reshape",
+       "name": "Black Hawk Down - Reshape",
+       "usd": 2.785,
+       "cost": 34256,
+       "price": 44500,
+       "off": false,
+       "grp": "Maxsus takliflar",
+       "im": "/delta-x35.png"
+      },
+      {
+       "oid": "silent_sentinel_supplies_advanced",
+       "name": "Silent Sentinel Supplies - Advanced",
+       "usd": 2.785,
+       "cost": 34256,
+       "price": 44500,
+       "off": false,
+       "grp": "Maxsus takliflar",
+       "im": "/delta-x33.png"
+      }
+     ]
+    }
+   ],
+   "img": "/delta-x7.jpeg"
+  },
+  {
+   "id": "eafcmobile",
+   "name": "EAFC Mobile",
+   "cats": [
+    {
+     "cat": "eafc_mobile_id",
+     "label": "ID",
+     "fields": [
+      {
+       "key": "player_id",
+       "label": "Player ID",
+       "type": "text"
+      }
+     ],
+     "offers": [
+      {
+       "oid": "40_fc_points",
+       "name": "40 FC Points",
+       "usd": 0.35,
+       "cost": 4305,
+       "price": 7000,
+       "off": false,
+       "grp": "FC Points",
+       "im": "/mobile-x1.png"
+      },
+      {
+       "oid": "100_fc_points",
+       "name": "100 FC Points",
+       "usd": 0.85,
+       "cost": 10455,
+       "price": 15500,
+       "off": false,
+       "grp": "FC Points",
+       "im": "/mobile-x2.png"
+      },
+      {
+       "oid": "520_fc_points",
+       "name": "520 FC Points",
+       "usd": 4.21,
+       "cost": 51783,
+       "price": 67000,
+       "off": false,
+       "grp": "FC Points",
+       "im": "/mobile-x4.png"
+      },
+      {
+       "oid": "1070_fc_points",
+       "name": "1070 FC Points",
+       "usd": 8.48,
+       "cost": 104304,
+       "price": 117000,
+       "off": false,
+       "grp": "FC Points",
+       "im": "/mobile-x9.png"
+      },
+      {
+       "oid": "2200_fc_points",
+       "name": "2200 FC Points",
+       "usd": 17.55,
+       "cost": 215865,
+       "price": 242000,
+       "off": false,
+       "grp": "FC Points",
+       "im": "/mobile-x7.png"
+      },
+      {
+       "oid": "5750_fc_points",
+       "name": "5750 FC Points",
+       "usd": 42.63,
+       "cost": 524349,
+       "price": 587500,
+       "off": false,
+       "grp": "FC Points",
+       "im": "/mobile-x8.png"
+      },
+      {
+       "oid": "12000_fc_points",
+       "name": "12000 FC Points",
+       "usd": 85.31,
+       "cost": 1049313,
+       "price": 1175500,
+       "off": true
+      },
+      {
+       "oid": "39_silver",
+       "name": "39 Silver",
+       "usd": 0.35,
+       "cost": 4305,
+       "price": 7000,
+       "off": false,
+       "grp": "Silver",
+       "im": "/silver-x1.png"
+      },
+      {
+       "oid": "99_silver",
+       "name": "99 Silver",
+       "usd": 0.85,
+       "cost": 10455,
+       "price": 15500,
+       "off": false,
+       "grp": "Silver",
+       "im": "/silver-x7.png"
+      },
+      {
+       "oid": "499_silver",
+       "name": "499 Silver",
+       "usd": 4.21,
+       "cost": 51783,
+       "price": 67000,
+       "off": false,
+       "grp": "Silver",
+       "im": "/silver-x2.png"
+      },
+      {
+       "oid": "999_silver",
+       "name": "999 Silver",
+       "usd": 8.48,
+       "cost": 104304,
+       "price": 117000,
+       "off": false,
+       "grp": "Silver",
+       "im": "/silver-x3.png"
+      },
+      {
+       "oid": "1999_silver",
+       "name": "1999 Silver",
+       "usd": 17.55,
+       "cost": 215865,
+       "price": 242000,
+       "off": false,
+       "grp": "Silver",
+       "im": "/silver-x5.png"
+      },
+      {
+       "oid": "4999_silver",
+       "name": "4999 Silver",
+       "usd": 42.63,
+       "cost": 524349,
+       "price": 587500,
+       "off": false,
+       "grp": "Silver",
+       "im": "/silver-x6.png"
+      },
+      {
+       "oid": "9999_silver",
+       "name": "9999 Silver",
+       "usd": 85.31,
+       "cost": 1049313,
+       "price": 1175500,
+       "off": true
+      }
+     ]
+    },
+    {
+     "cat": "eafc_mobile_kh",
+     "label": "KH",
+     "fields": [
+      {
+       "key": "player_id",
+       "label": "Player ID",
+       "type": "text"
+      }
+     ],
+     "offers": [
+      {
+       "oid": "40_fc_points",
+       "name": "40 FC Points",
+       "usd": 0.377,
+       "cost": 4637,
+       "price": 7500,
+       "off": false,
+       "grp": "FC Points",
+       "im": "/mobile-x10.png"
+      },
+      {
+       "oid": "100_fc_points",
+       "name": "100 FC Points",
+       "usd": 0.959,
+       "cost": 11796,
+       "price": 17000,
+       "off": false,
+       "grp": "FC Points",
+       "im": "/mobile-x11.png"
+      },
+      {
+       "oid": "520_fc_points",
+       "name": "520 FC Points",
+       "usd": 4.835,
+       "cost": 59471,
+       "price": 74500,
+       "off": false,
+       "grp": "FC Points",
+       "im": "/mobile-x12.png"
+      },
+      {
+       "oid": "1070_fc_points",
+       "name": "1070 FC Points",
+       "usd": 9.67,
+       "cost": 118941,
+       "price": 133500,
+       "off": false,
+       "grp": "FC Points",
+       "im": "/mobile-x13.png"
+      },
+      {
+       "oid": "2200_fc_points",
+       "name": "2200 FC Points",
+       "usd": 19.36,
+       "cost": 238128,
+       "price": 267000,
+       "off": false,
+       "grp": "FC Points",
+       "im": "/mobile-x14.png"
+      },
+      {
+       "oid": "5750_fc_points",
+       "name": "5750 FC Points",
+       "usd": 48.409,
+       "cost": 595431,
+       "price": 667000,
+       "off": false,
+       "grp": "FC Points",
+       "im": "/mobile-x15.png"
+      },
+      {
+       "oid": "12000_fc_points",
+       "name": "12000 FC Points",
+       "usd": 96.829,
+       "cost": 1190997,
+       "price": 1334000,
+       "off": true
+      },
+      {
+       "oid": "39_silver",
+       "name": "39 Silver",
+       "usd": 0.377,
+       "cost": 4637,
+       "price": 7500,
+       "off": false,
+       "grp": "Silver",
+       "im": "/silver-x8.png"
+      },
+      {
+       "oid": "99_silver",
+       "name": "99 Silver",
+       "usd": 0.959,
+       "cost": 11796,
+       "price": 17000,
+       "off": false,
+       "grp": "Silver",
+       "im": "/silver-x9.png"
+      },
+      {
+       "oid": "499_silver",
+       "name": "499 Silver",
+       "usd": 4.835,
+       "cost": 59471,
+       "price": 74500,
+       "off": false,
+       "grp": "Silver",
+       "im": "/silver-x10.png"
+      },
+      {
+       "oid": "999_silver",
+       "name": "999 Silver",
+       "usd": 9.67,
+       "cost": 118941,
+       "price": 133500,
+       "off": false,
+       "grp": "Silver",
+       "im": "/silver-x11.png"
+      },
+      {
+       "oid": "1999_silver",
+       "name": "1999 Silver",
+       "usd": 19.36,
+       "cost": 238128,
+       "price": 267000,
+       "off": false,
+       "grp": "Silver",
+       "im": "/silver-x12.png"
+      },
+      {
+       "oid": "4999_silver",
+       "name": "4999 Silver",
+       "usd": 48.409,
+       "cost": 595431,
+       "price": 667000,
+       "off": false,
+       "grp": "Silver",
+       "im": "/silver-x13.png"
+      },
+      {
+       "oid": "9999_silver",
+       "name": "9999 Silver",
+       "usd": 96.829,
+       "cost": 1190997,
+       "price": 1334000,
+       "off": true
+      }
+     ]
+    },
+    {
+     "cat": "eafc_mobile_my",
+     "label": "MY",
+     "fields": [
+      {
+       "key": "player_id",
+       "label": "Player ID",
+       "type": "text"
+      }
+     ],
+     "offers": [
+      {
+       "oid": "40_fc_points",
+       "name": "40 FC Points",
+       "usd": 0.469,
+       "cost": 5769,
+       "price": 8500,
+       "off": false,
+       "grp": "FC Points",
+       "im": "/mobile-x16.png"
+      },
+      {
+       "oid": "100_fc_points",
+       "name": "100 FC Points",
+       "usd": 1.173,
+       "cost": 14428,
+       "price": 19500,
+       "off": false,
+       "grp": "FC Points",
+       "im": "/mobile-x17.png"
+      },
+      {
+       "oid": "520_fc_points",
+       "name": "520 FC Points",
+       "usd": 5.722,
+       "cost": 70381,
+       "price": 85500,
+       "off": false,
+       "grp": "FC Points",
+       "im": "/mobile-x18.png"
+      },
+      {
+       "oid": "1070_fc_points",
+       "name": "1070 FC Points",
+       "usd": 10.751,
+       "cost": 132237,
+       "price": 148500,
+       "off": false,
+       "grp": "FC Points",
+       "im": "/mobile-x19.png"
+      },
+      {
+       "oid": "2200_fc_points",
+       "name": "2200 FC Points",
+       "usd": 22.736,
+       "cost": 279653,
+       "price": 313500,
+       "off": false,
+       "grp": "FC Points",
+       "im": "/mobile-x20.png"
+      },
+      {
+       "oid": "5750_fc_points",
+       "name": "5750 FC Points",
+       "usd": 57.477,
+       "cost": 706967,
+       "price": 792000,
+       "off": false,
+       "grp": "FC Points",
+       "im": "/mobile-x21.png"
+      },
+      {
+       "oid": "12000_fc_points",
+       "name": "12000 FC Points",
+       "usd": 114.985,
+       "cost": 1414316,
+       "price": 1584500,
+       "off": true
+      },
+      {
+       "oid": "39_silver",
+       "name": "39 Silver",
+       "usd": 0.469,
+       "cost": 5769,
+       "price": 8500,
+       "off": false,
+       "grp": "Silver",
+       "im": "/silver-x14.png"
+      },
+      {
+       "oid": "99_silver",
+       "name": "99 Silver",
+       "usd": 1.173,
+       "cost": 14428,
+       "price": 19500,
+       "off": false,
+       "grp": "Silver",
+       "im": "/silver-x15.png"
+      },
+      {
+       "oid": "499_silver",
+       "name": "499 Silver",
+       "usd": 5.722,
+       "cost": 70381,
+       "price": 85500,
+       "off": false,
+       "grp": "Silver",
+       "im": "/silver-x16.png"
+      },
+      {
+       "oid": "999_silver",
+       "name": "999 Silver",
+       "usd": 10.751,
+       "cost": 132237,
+       "price": 148500,
+       "off": false,
+       "grp": "Silver",
+       "im": "/silver-x17.png"
+      },
+      {
+       "oid": "1999_silver",
+       "name": "1999 Silver",
+       "usd": 22.736,
+       "cost": 279653,
+       "price": 313500,
+       "off": false,
+       "grp": "Silver",
+       "im": "/silver-x18.png"
+      },
+      {
+       "oid": "4999_silver",
+       "name": "4999 Silver",
+       "usd": 57.477,
+       "cost": 706967,
+       "price": 792000,
+       "off": false,
+       "grp": "Silver",
+       "im": "/silver-x19.png"
+      },
+      {
+       "oid": "9999_silver",
+       "name": "9999 Silver",
+       "usd": 114.985,
+       "cost": 1414316,
+       "price": 1584500,
+       "off": true
+      }
+     ]
+    },
+    {
+     "cat": "eafc_mobile_sg",
+     "label": "SG",
+     "fields": [
+      {
+       "key": "player_id",
+       "label": "Player ID",
+       "type": "text"
+      }
+     ],
+     "offers": [
+      {
+       "oid": "40_fc_points",
+       "name": "40 FC Points",
+       "usd": 0.449,
+       "cost": 5523,
+       "price": 8500,
+       "off": false,
+       "grp": "FC Points",
+       "im": "/mobile-x22.png"
+      },
+      {
+       "oid": "100_fc_points",
+       "name": "100 FC Points",
+       "usd": 1.122,
+       "cost": 13801,
+       "price": 19000,
+       "off": false,
+       "grp": "FC Points",
+       "im": "/mobile-x23.png"
+      },
+      {
+       "oid": "520_fc_points",
+       "name": "520 FC Points",
+       "usd": 5.324,
+       "cost": 65485,
+       "price": 80500,
+       "off": false,
+       "grp": "FC Points",
+       "im": "/mobile-x24.png"
+      },
+      {
+       "oid": "1070_fc_points",
+       "name": "1070 FC Points",
+       "usd": 11.424,
+       "cost": 140515,
+       "price": 157500,
+       "off": false,
+       "grp": "FC Points",
+       "im": "/mobile-x25.png"
+      },
+      {
+       "oid": "2200_fc_points",
+       "name": "2200 FC Points",
+       "usd": 22.093,
+       "cost": 271744,
+       "price": 304500,
+       "off": false,
+       "grp": "FC Points",
+       "im": "/mobile-x26.png"
+      },
+      {
+       "oid": "5750_fc_points",
+       "name": "5750 FC Points",
+       "usd": 52.601,
+       "cost": 646992,
+       "price": 725000,
+       "off": false,
+       "grp": "FC Points",
+       "im": "/mobile-x27.png"
+      },
+      {
+       "oid": "12000_fc_points",
+       "name": "12000 FC Points",
+       "usd": 113.608,
+       "cost": 1397378,
+       "price": 1565500,
+       "off": true
+      },
+      {
+       "oid": "39_silver",
+       "name": "39 Silver",
+       "usd": 0.449,
+       "cost": 5523,
+       "price": 8500,
+       "off": false,
+       "grp": "Silver",
+       "im": "/silver-x20.png"
+      },
+      {
+       "oid": "99_silver",
+       "name": "99 Silver",
+       "usd": 1.122,
+       "cost": 13801,
+       "price": 19000,
+       "off": false,
+       "grp": "Silver",
+       "im": "/silver-x21.png"
+      },
+      {
+       "oid": "499_silver",
+       "name": "499 Silver",
+       "usd": 5.324,
+       "cost": 65485,
+       "price": 80500,
+       "off": false,
+       "grp": "Silver",
+       "im": "/silver-x22.png"
+      },
+      {
+       "oid": "999_silver",
+       "name": "999 Silver",
+       "usd": 11.424,
+       "cost": 140515,
+       "price": 157500,
+       "off": false,
+       "grp": "Silver",
+       "im": "/silver-x23.png"
+      },
+      {
+       "oid": "1999_silver",
+       "name": "1999 Silver",
+       "usd": 22.093,
+       "cost": 271744,
+       "price": 304500,
+       "off": false,
+       "grp": "Silver",
+       "im": "/silver-x24.png"
+      },
+      {
+       "oid": "4999_silver",
+       "name": "4999 Silver",
+       "usd": 52.601,
+       "cost": 646992,
+       "price": 725000,
+       "off": false,
+       "grp": "Silver",
+       "im": "/silver-x25.png"
+      },
+      {
+       "oid": "9999_silver",
+       "name": "9999 Silver",
+       "usd": 113.608,
+       "cost": 1397378,
+       "price": 1565500,
+       "off": true
+      }
+     ]
+    }
+   ],
+   "img": "/mobile-x28.jpg"
+  },
+  {
+   "id": "undawn",
+   "name": "Undawn",
+   "cats": [
+    {
+     "cat": "undawn_garena_global",
+     "label": "Garena Undawn Global",
+     "fields": [
+      {
+       "key": "user_id",
+       "label": "User ID",
+       "type": "text"
+      }
+     ],
+     "offers": [
+      {
+       "oid": "101_rc",
+       "name": "101 RC",
+       "usd": 1.22,
+       "cost": 15006,
+       "price": 25500,
+       "off": false,
+       "grp": "RC",
+       "im": "/undawn-x1.webp"
+      },
+      {
+       "oid": "141_rc",
+       "name": "141 RC",
+       "usd": 1.7,
+       "cost": 20910,
+       "price": 31000,
+       "off": false,
+       "grp": "RC",
+       "im": "/undawn-x14.webp"
+      },
+      {
+       "oid": "203_rc",
+       "name": "203 RC",
+       "usd": 2.43,
+       "cost": 29889,
+       "price": 40000,
+       "off": false,
+       "grp": "RC",
+       "im": "/undawn-x2.webp"
+      },
+      {
+       "oid": "410_rc",
+       "name": "410 RC",
+       "usd": 4.86,
+       "cost": 59778,
+       "price": 75000,
+       "off": false,
+       "grp": "RC",
+       "im": "/undawn-x3.webp"
+      },
+      {
+       "oid": "615_rc",
+       "name": "615 RC",
+       "usd": 7.29,
+       "cost": 89667,
+       "price": 105000,
+       "off": false,
+       "grp": "RC",
+       "im": "/undawn-x15.webp"
+      },
+      {
+       "oid": "720_rc",
+       "name": "720 RC",
+       "usd": 8.51,
+       "cost": 104673,
+       "price": 117500,
+       "off": false,
+       "grp": "RC",
+       "im": "/undawn-x16.webp"
+      },
+      {
+       "oid": "825_rc",
+       "name": "825 RC",
+       "usd": 9.73,
+       "cost": 119679,
+       "price": 134500,
+       "off": false,
+       "grp": "RC",
+       "im": "/undawn-x11.webp"
+      },
+      {
+       "oid": "1040_rc",
+       "name": "1040 RC",
+       "usd": 12.16,
+       "cost": 149568,
+       "price": 168000,
+       "off": false,
+       "grp": "RC",
+       "im": "/undawn-x17.webp"
+      },
+      {
+       "oid": "1465_rc",
+       "name": "1465 RC",
+       "usd": 17.02,
+       "cost": 209346,
+       "price": 234500,
+       "off": false,
+       "grp": "RC",
+       "im": "/undawn-x4.webp"
+      },
+      {
+       "oid": "2095_rc",
+       "name": "2095 RC",
+       "usd": 24.31,
+       "cost": 299013,
+       "price": 335000,
+       "off": false,
+       "grp": "RC",
+       "im": "/undawn-x18.webp"
+      },
+      {
+       "oid": "2950_rc",
+       "name": "2950 RC",
+       "usd": 34.03,
+       "cost": 418569,
+       "price": 469000,
+       "off": false,
+       "grp": "RC",
+       "im": "/undawn-x13.webp"
+      },
+      {
+       "oid": "3175_rc",
+       "name": "3175 RC",
+       "usd": 36.47,
+       "cost": 448581,
+       "price": 502500,
+       "off": true
+      },
+      {
+       "oid": "4240_rc",
+       "name": "4240 RC",
+       "usd": 48.62,
+       "cost": 598026,
+       "price": 670000,
+       "off": false,
+       "grp": "RC",
+       "im": "/undawn-x19.webp"
+      },
+      {
+       "oid": "4250_rc",
+       "name": "4250 RC",
+       "usd": 50.612,
+       "cost": 622528,
+       "price": 697500,
+       "off": true
+      },
+      {
+       "oid": "6480_rc",
+       "name": "6480 RC",
+       "usd": 72.93,
+       "cost": 897039,
+       "price": 1005000,
+       "off": false,
+       "grp": "RC",
+       "im": "/undawn-x6.webp"
+      },
+      {
+       "oid": "8710_rc",
+       "name": "8710 RC",
+       "usd": 96.26,
+       "cost": 1183998,
+       "price": 1326500,
+       "off": false,
+       "grp": "RC",
+       "im": "/undawn-x20.webp"
+      },
+      {
+       "oid": "10890_rc",
+       "name": "10890 RC",
+       "usd": 121.55,
+       "cost": 1495065,
+       "price": 1674500,
+       "off": true
+      },
+      {
+       "oid": "21960_rc",
+       "name": "21960 RC",
+       "usd": 243.09,
+       "cost": 2990007,
+       "price": 3349000,
+       "off": true,
+       "grp": "RC"
+      },
+      {
+       "oid": "44280_rc",
+       "name": "44280 RC",
+       "usd": 481.32,
+       "cost": 5920236,
+       "price": 6631000,
+       "off": true,
+       "grp": "RC"
+      },
+      {
+       "oid": "90000_rc",
+       "name": "90000 RC",
+       "usd": 962.64,
+       "cost": 11840472,
+       "price": 13261500,
+       "off": true,
+       "grp": "RC"
+      },
+      {
+       "oid": "weekly_card",
+       "name": "Weekly Card",
+       "usd": 3.14,
+       "cost": 38622,
+       "price": 49000,
+       "off": false,
+       "grp": "Obunalar kartasi",
+       "im": "/undawn-x7.webp"
+      },
+      {
+       "oid": "monthly_card",
+       "name": "Monthly Card",
+       "usd": 4.84,
+       "cost": 59532,
+       "price": 75000,
+       "off": false,
+       "grp": "Obunalar kartasi",
+       "im": "/undawn-x9.webp"
+      },
+      {
+       "oid": "growth_fund",
+       "name": "Growth Fund",
+       "usd": 9.7,
+       "cost": 119310,
+       "price": 134000,
+       "off": false,
+       "grp": "Fondlar",
+       "im": "/undawn-x10.webp"
+      },
+      {
+       "oid": "ace_fund",
+       "name": "Ace Fund",
+       "usd": 13.83,
+       "cost": 170109,
+       "price": 191000,
+       "off": false,
+       "grp": "Fondlar",
+       "im": "/undawn-x12.webp"
+      },
+      {
+       "oid": "elite_fund",
+       "name": "Elite Fund",
+       "usd": 13.83,
+       "cost": 170109,
+       "price": 191000,
+       "off": false,
+       "grp": "Fondlar",
+       "im": "/undawn-x8.webp"
+      },
+      {
+       "oid": "glory_pass_premium",
+       "name": "Glory Pass Premium",
+       "usd": 14.56,
+       "cost": 179088,
+       "price": 201000,
+       "off": true,
+       "grp": "Maxsus takliflar"
+      }
+     ]
+    },
+    {
+     "cat": "undawn_garena_id",
+     "label": "Garena Undawn Indonesia",
+     "fields": [
+      {
+       "key": "player_id",
+       "label": "Player ID",
+       "type": "text"
+      }
+     ],
+     "offers": [
+      {
+       "oid": "80_rc",
+       "name": "80 RC",
+       "usd": 1.04,
+       "cost": 12792,
+       "price": 18000,
+       "off": false,
+       "grp": "RC",
+       "im": "/undawn-x21.webp"
+      },
+      {
+       "oid": "250_rc",
+       "name": "250 RC",
+       "usd": 3.12,
+       "cost": 38376,
+       "price": 48500,
+       "off": false,
+       "grp": "RC",
+       "im": "/undawn-x22.webp"
+      },
+      {
+       "oid": "450_rc",
+       "name": "450 RC",
+       "usd": 5.2,
+       "cost": 63960,
+       "price": 79000,
+       "off": false,
+       "grp": "RC",
+       "im": "/undawn-x23.webp"
+      },
+      {
+       "oid": "920_rc",
+       "name": "920 RC",
+       "usd": 10.33,
+       "cost": 127059,
+       "price": 142500,
+       "off": false,
+       "grp": "RC",
+       "im": "/undawn-x25.webp"
+      },
+      {
+       "oid": "1_850_rc",
+       "name": "1,850 RC",
+       "usd": 20.74,
+       "cost": 255102,
+       "price": 286000,
+       "off": false,
+       "grp": "RC",
+       "im": "/undawn-x26.webp"
+      },
+      {
+       "oid": "2_800_rc",
+       "name": "2,800 RC",
+       "usd": 31.14,
+       "cost": 383022,
+       "price": 429000,
+       "off": false,
+       "grp": "RC",
+       "im": "/undawn-x27.webp"
+      },
+      {
+       "oid": "4_750_rc",
+       "name": "4,750 RC",
+       "usd": 51.94,
+       "cost": 638862,
+       "price": 716000,
+       "off": false,
+       "grp": "RC",
+       "im": "/undawn-x28.webp"
+      },
+      {
+       "oid": "9_600_rc",
+       "name": "9,600 RC",
+       "usd": 103.96,
+       "cost": 1278708,
+       "price": 1432500,
+       "off": false,
+       "grp": "RC",
+       "im": "/undawn-x29.webp"
+      },
+      {
+       "oid": "33_000_rc",
+       "name": "33,000 RC",
+       "usd": 346.76,
+       "cost": 4265148,
+       "price": 4777000,
+       "off": true,
+       "grp": "RC"
+      },
+      {
+       "oid": "66_500_rc",
+       "name": "66,500 RC",
+       "usd": 693.52,
+       "cost": 8530296,
+       "price": 9554000,
+       "off": true,
+       "grp": "RC"
+      },
+      {
+       "oid": "growth_fund",
+       "name": "Growth Fund",
+       "usd": 6.69,
+       "cost": 82287,
+       "price": 97500,
+       "off": false,
+       "grp": "Fondlar",
+       "im": "/undawn-x24.webp"
+      },
+      {
+       "oid": "kartu_mingguan",
+       "name": "Kartu Mingguan",
+       "usd": 2.01,
+       "cost": 24723,
+       "price": 35000,
+       "off": true,
+       "grp": "Maxsus takliflar"
+      },
+      {
+       "oid": "kartu_bulanan",
+       "name": "Kartu Bulanan",
+       "usd": 3.33,
+       "cost": 40959,
+       "price": 56000,
+       "off": true,
+       "grp": "Maxsus takliflar"
+      },
+      {
+       "oid": "glory_pass_premium_s9",
+       "name": "Glory Pass Premium S9",
+       "usd": 9.99,
+       "cost": 122877,
+       "price": 138000,
+       "off": true,
+       "grp": "Maxsus takliflar"
+      }
+     ]
+    },
+    {
+     "cat": "undawn_garena_sg",
+     "label": "Garena Undawn SG",
+     "fields": [
+      {
+       "key": "player_id",
+       "label": "Player ID",
+       "type": "text"
+      }
+     ],
+     "offers": [
+      {
+       "oid": "148_rc",
+       "name": "148 RC",
+       "usd": 2,
+       "cost": 24600,
+       "price": 35000,
+       "off": false,
+       "grp": "RC",
+       "im": "/undawn-x30.webp"
+      },
+      {
+       "oid": "208_rc",
+       "name": "208 RC",
+       "usd": 2.8,
+       "cost": 34440,
+       "price": 44500,
+       "off": false,
+       "grp": "RC",
+       "im": "/undawn-x31.webp"
+      },
+      {
+       "oid": "298_rc",
+       "name": "298 RC",
+       "usd": 4,
+       "cost": 49200,
+       "price": 64500,
+       "off": false,
+       "grp": "RC",
+       "im": "/undawn-x33.webp"
+      },
+      {
+       "oid": "445_rc",
+       "name": "445 RC",
+       "usd": 6,
+       "cost": 73800,
+       "price": 89000,
+       "off": false,
+       "grp": "RC",
+       "im": "/undawn-x34.webp"
+      },
+      {
+       "oid": "475_rc",
+       "name": "475 RC",
+       "usd": 6.4,
+       "cost": 78720,
+       "price": 94000,
+       "off": true
+      },
+      {
+       "oid": "520_rc",
+       "name": "520 RC",
+       "usd": 7,
+       "cost": 86100,
+       "price": 101500,
+       "off": true
+      },
+      {
+       "oid": "745_rc",
+       "name": "745 RC",
+       "usd": 10,
+       "cost": 123000,
+       "price": 138000,
+       "off": true
+      },
+      {
+       "oid": "1040_rc",
+       "name": "1040 RC",
+       "usd": 14,
+       "cost": 172200,
+       "price": 193000,
+       "off": false,
+       "grp": "RC",
+       "im": "/undawn-x38.webp"
+      },
+      {
+       "oid": "1425_rc",
+       "name": "1425 RC",
+       "usd": 19.2,
+       "cost": 236160,
+       "price": 264500,
+       "off": true,
+       "grp": "RC"
+      },
+      {
+       "oid": "1485_rc",
+       "name": "1485 RC",
+       "usd": 20,
+       "cost": 246000,
+       "price": 276000,
+       "off": false,
+       "grp": "RC",
+       "im": "/undawn-x40.webp"
+      },
+      {
+       "oid": "2080_rc",
+       "name": "2080 RC",
+       "usd": 28,
+       "cost": 344400,
+       "price": 386000,
+       "off": false,
+       "grp": "RC",
+       "im": "/undawn-x41.webp"
+      },
+      {
+       "oid": "2375_rc",
+       "name": "2375 RC",
+       "usd": 32,
+       "cost": 393600,
+       "price": 441000,
+       "off": false,
+       "grp": "RC",
+       "im": "/undawn-x42.webp"
+      },
+      {
+       "oid": "2970_rc",
+       "name": "2970 RC",
+       "usd": 40,
+       "cost": 492000,
+       "price": 551500,
+       "off": true
+      },
+      {
+       "oid": "4500_rc",
+       "name": "4500 RC",
+       "usd": 60,
+       "cost": 738000,
+       "price": 827000,
+       "off": false,
+       "grp": "RC",
+       "im": "/undawn-x43.webp"
+      },
+      {
+       "oid": "7500_rc",
+       "name": "7500 RC",
+       "usd": 100,
+       "cost": 1230000,
+       "price": 1378000,
+       "off": false,
+       "grp": "RC",
+       "im": "/undawn-x44.webp"
+      },
+      {
+       "oid": "38400_rc",
+       "name": "38400 RC",
+       "usd": 512,
+       "cost": 6297600,
+       "price": 7053500,
+       "off": true,
+       "grp": "RC"
+      },
+      {
+       "oid": "76800_rc",
+       "name": "76800 RC",
+       "usd": 1024,
+       "cost": 12595200,
+       "price": 14107000,
+       "off": true,
+       "grp": "RC"
+      },
+      {
+       "oid": "weekly_card",
+       "name": "Weekly Card",
+       "usd": 2.86,
+       "cost": 35178,
+       "price": 45500,
+       "off": false,
+       "grp": "Obunalar kartasi",
+       "im": "/undawn-x32.webp"
+      },
+      {
+       "oid": "monthly_card",
+       "name": "Monthly Card",
+       "usd": 4.5376,
+       "cost": 55812,
+       "price": 71000,
+       "off": false,
+       "grp": "Obunalar kartasi",
+       "im": "/undawn-x35.webp"
+      },
+      {
+       "oid": "growth_fund",
+       "name": "Growth Fund",
+       "usd": 8.94,
+       "cost": 109962,
+       "price": 123500,
+       "off": false,
+       "grp": "Fondlar",
+       "im": "/undawn-x36.webp"
+      },
+      {
+       "oid": "elite_fund",
+       "name": "Elite Fund",
+       "usd": 12.3513,
+       "cost": 151921,
+       "price": 170500,
+       "off": false,
+       "grp": "Fondlar",
+       "im": "/undawn-x37.webp"
+      },
+      {
+       "oid": "ace_fund",
+       "name": "Ace Fund",
+       "usd": 13.0025,
+       "cost": 159931,
+       "price": 179500,
+       "off": false,
+       "grp": "Fondlar",
+       "im": "/undawn-x39.webp"
+      },
+      {
+       "oid": "debate_of_flowers",
+       "name": "Debate of Flowers",
+       "usd": 4.5376,
+       "cost": 55812,
+       "price": 71000,
+       "off": true,
+       "grp": "Maxsus takliflar"
+      },
+      {
+       "oid": "dragongate_knight",
+       "name": "Dragongate Knight",
+       "usd": 7.1422,
+       "cost": 87849,
+       "price": 103000,
+       "off": false,
+       "grp": "Maxsus takliflar",
+       "im": "/undawn-x46.jpeg"
+      },
+      {
+       "oid": "battle_pass_premium",
+       "name": "Battle Pass Premium",
+       "usd": 12.78,
+       "cost": 157194,
+       "price": 176500,
+       "off": true
+      },
+      {
+       "oid": "glory_pass_premium_s9",
+       "name": "Glory Pass Premium S9",
+       "usd": 12.78,
+       "cost": 157194,
+       "price": 176500,
+       "off": true,
+       "grp": "Maxsus takliflar"
+      },
+      {
+       "oid": "glory_pass_premium_s20",
+       "name": "Glory Pass Premium S20",
+       "usd": 13.0025,
+       "cost": 159931,
+       "price": 179500,
+       "off": true,
+       "grp": "Maxsus takliflar"
+      },
+      {
+       "oid": "glory_pass_premium_s21",
+       "name": "Glory Pass Premium S21",
+       "usd": 13.0025,
+       "cost": 159931,
+       "price": 179500,
+       "off": true,
+       "grp": "Maxsus takliflar"
+      },
+      {
+       "oid": "glory_pass_premium_s21_2",
+       "name": "Glory Pass Premium S21 (2)",
+       "usd": 13.0025,
+       "cost": 159931,
+       "price": 179500,
+       "off": true,
+       "grp": "Maxsus takliflar"
+      },
+      {
+       "oid": "glory_pass_premium_s22",
+       "name": "Glory Pass Premium S22",
+       "usd": 13.0025,
+       "cost": 159931,
+       "price": 179500,
+       "off": true,
+       "grp": "Maxsus takliflar"
+      },
+      {
+       "oid": "glory_pass_premium_s23",
+       "name": "Glory Pass Premium S23",
+       "usd": 13.0025,
+       "cost": 159931,
+       "price": 179500,
+       "off": true,
+       "grp": "Maxsus takliflar"
+      }
+     ]
+    }
+   ],
+   "img": "/undawn-x45.jpeg"
+  },
+  {
+   "id": "genshinimpact",
+   "name": "Genshin Impact",
+   "cats": [
+    {
+     "cat": "genshin_impact_global",
+     "label": "Global",
+     "fields": [
+      {
+       "key": "player_id",
+       "label": "Player ID",
+       "type": "text"
+      },
+      {
+       "key": "server",
+       "label": "Server",
+       "type": "select",
+       "options": [
+        {
+         "label": "America",
+         "value": "america"
+        },
+        {
+         "label": "Asia",
+         "value": "asia"
+        },
+        {
+         "label": "Europe",
+         "value": "europe"
+        },
+        {
+         "label": "TW HK MO",
+         "value": "tw_hk_mo"
+        }
+       ]
+      }
+     ],
+     "offers": [
+      {
+       "oid": "60_genesis_crystals",
+       "name": "60 Genesis Crystals",
+       "usd": 0.9651,
+       "cost": 11871,
+       "price": 17000,
+       "off": false,
+       "im": "/genshin-x17.webp",
+       "grp": "Genesis Crystals"
+      },
+      {
+       "oid": "300_30_genesis_crystals",
+       "name": "300 + 30 Genesis Crystals",
+       "usd": 4.8783,
+       "cost": 60003,
+       "price": 75500,
+       "off": false,
+       "im": "/genshin-x2.webp",
+       "grp": "Genesis Crystals"
+      },
+      {
+       "oid": "980_110_genesis_crystals",
+       "name": "980 + 110 Genesis Crystals",
+       "usd": 14.6349,
+       "cost": 180009,
+       "price": 202000,
+       "off": false,
+       "im": "/genshin-x3.webp",
+       "grp": "Genesis Crystals"
+      },
+      {
+       "oid": "1980_260_genesis_crystals",
+       "name": "1980 + 260 Genesis Crystals",
+       "usd": 29.2698,
+       "cost": 360019,
+       "price": 403500,
+       "off": false,
+       "im": "/genshin-x5.webp",
+       "grp": "Genesis Crystals"
+      },
+      {
+       "oid": "3280_600_genesis_crystals",
+       "name": "3280 + 600 Genesis Crystals",
+       "usd": 48.783,
+       "cost": 600031,
+       "price": 672500,
+       "off": false,
+       "im": "/genshin-x6.webp",
+       "grp": "Genesis Crystals"
+      },
+      {
+       "oid": "6480_1600_genesis_crystals",
+       "name": "6480 + 1600 Genesis Crystals",
+       "usd": 97.566,
+       "cost": 1200062,
+       "price": 1344500,
+       "off": false,
+       "im": "/genshin-x13.webp",
+       "grp": "Genesis Crystals"
+      },
+      {
+       "oid": "60_chronal_nexus",
+       "name": "60 Chronal Nexus",
+       "usd": 0.9651,
+       "cost": 11871,
+       "price": 17000,
+       "off": false,
+       "im": "/genshin-x12.webp",
+       "grp": "Chronal Nexus"
+      },
+      {
+       "oid": "300_30_chronal_nexus",
+       "name": "300 + 30 Chronal Nexus",
+       "usd": 4.8783,
+       "cost": 60003,
+       "price": 75500,
+       "off": false,
+       "im": "/genshin-x14.webp",
+       "grp": "Chronal Nexus"
+      },
+      {
+       "oid": "980_110_chronal_nexus",
+       "name": "980 + 110 Chronal Nexus",
+       "usd": 14.6349,
+       "cost": 180009,
+       "price": 202000,
+       "off": false,
+       "im": "/genshin-x7.webp",
+       "grp": "Chronal Nexus"
+      },
+      {
+       "oid": "1980_260_chronal_nexus",
+       "name": "1980 + 260 Chronal Nexus",
+       "usd": 29.2698,
+       "cost": 360019,
+       "price": 403500,
+       "off": false,
+       "im": "/genshin-x10.webp",
+       "grp": "Chronal Nexus"
+      },
+      {
+       "oid": "3280_600_chronal_nexus",
+       "name": "3280 + 600 Chronal Nexus",
+       "usd": 48.783,
+       "cost": 600031,
+       "price": 672500,
+       "off": false,
+       "im": "/genshin-x8.webp",
+       "grp": "Chronal Nexus"
+      },
+      {
+       "oid": "6480_1600_chronal_nexus",
+       "name": "6480 + 1600 Chronal Nexus",
+       "usd": 97.566,
+       "cost": 1200062,
+       "price": 1344500,
+       "off": false,
+       "im": "/genshin-x9.webp",
+       "grp": "Chronal Nexus"
+      },
+      {
+       "oid": "blessing_of_the_welkin_moon",
+       "name": "Blessing of the Welkin Moon",
+       "usd": 4.8783,
+       "cost": 60003,
+       "price": 75500,
+       "off": false,
+       "im": "/genshin-x15.webp",
+       "grp": "Maxsus takliflar"
+      }
+     ]
+    }
+   ],
+   "img": "/genshin-x1.jpg",
+   "hbg": "/genshin-x16.webp"
+  },
+  {
+   "id": "honorofkings",
+   "name": "Honor of Kings",
+   "cats": [
+    {
+     "cat": "honor_of_kings",
+     "label": "Global",
+     "fields": [
+      {
+       "key": "player_id",
+       "label": "Player ID",
+       "type": "text"
+      }
+     ],
+     "offers": [
+      {
+       "oid": "16_tokens",
+       "name": "16 Tokens",
+       "usd": 0.1686,
+       "cost": 2074,
+       "price": 5000,
+       "off": true,
+       "grp": "Tokenlar"
+      },
+      {
+       "oid": "80_tokens",
+       "name": "80 Tokens",
+       "usd": 0.84,
+       "cost": 10332,
+       "price": 15500,
+       "off": false,
+       "grp": "Tokenlar",
+       "im": "/honor-x5.png"
+      },
+      {
+       "oid": "240_tokens",
+       "name": "240 Tokens",
+       "usd": 2.51,
+       "cost": 30873,
+       "price": 41000,
+       "off": false,
+       "grp": "Tokenlar",
+       "im": "/honor-x4.png"
+      },
+      {
+       "oid": "400_tokens",
+       "name": "400 Tokens",
+       "usd": 4.19,
+       "cost": 51537,
+       "price": 67000,
+       "off": false,
+       "grp": "Tokenlar",
+       "im": "/honor-x8.png"
+      },
+      {
+       "oid": "560_tokens",
+       "name": "560 Tokens",
+       "usd": 5.87,
+       "cost": 72201,
+       "price": 87500,
+       "off": false,
+       "grp": "Tokenlar",
+       "im": "/honor-x9.png"
+      },
+      {
+       "oid": "830_tokens",
+       "name": "830 Tokens",
+       "usd": 8.38,
+       "cost": 103074,
+       "price": 115500,
+       "off": false,
+       "grp": "Tokenlar",
+       "im": "/honor-x3.png"
+      },
+      {
+       "oid": "1245_tokens",
+       "name": "1245 Tokens",
+       "usd": 12.57,
+       "cost": 154611,
+       "price": 173500,
+       "off": false,
+       "grp": "Tokenlar",
+       "im": "/honor-x1.png"
+      },
+      {
+       "oid": "2508_tokens",
+       "name": "2508 Tokens",
+       "usd": 25.15,
+       "cost": 309345,
+       "price": 346500,
+       "off": false,
+       "grp": "Tokenlar",
+       "im": "/honor-x6.png"
+      },
+      {
+       "oid": "4180_tokens",
+       "name": "4180 Tokens",
+       "usd": 41.92,
+       "cost": 515616,
+       "price": 577500,
+       "off": false,
+       "grp": "Tokenlar",
+       "im": "/honor-x2.png"
+      },
+      {
+       "oid": "8360_tokens",
+       "name": "8360 Tokens",
+       "usd": 83.84,
+       "cost": 1031232,
+       "price": 1155000,
+       "off": false,
+       "grp": "Tokenlar",
+       "im": "/honor-x7.png"
+      },
+      {
+       "oid": "weekly_card",
+       "name": "Weekly Card",
+       "usd": 0.9555,
+       "cost": 11753,
+       "price": 17000,
+       "off": false,
+       "grp": "Obunalar kartasi",
+       "im": "/honor-x14.png"
+      },
+      {
+       "oid": "weekly_card_plus",
+       "name": "Weekly Card Plus",
+       "usd": 2.8183,
+       "cost": 34665,
+       "price": 45000,
+       "off": false,
+       "grp": "Obunalar kartasi",
+       "im": "/honor-x15.png"
+      },
+      {
+       "oid": "double_token_lucky_bag",
+       "name": "Lucky Bag (60-888 token)",
+       "usd": 0.265,
+       "cost": 3260,
+       "price": 6000,
+       "off": false,
+       "grp": "Maxsus takliflar",
+       "im": "/honor-x10.png"
+      },
+      {
+       "oid": "honor_point_value_pack",
+       "name": "Honor Point Value Pack",
+       "usd": 0.265,
+       "cost": 3260,
+       "price": 6000,
+       "off": false,
+       "grp": "Maxsus takliflar",
+       "im": "/honor-x12.png"
+      },
+      {
+       "oid": "standard_purchase_rebate_pack",
+       "name": "Standard Purchase Rebate Pack",
+       "usd": 0.33,
+       "cost": 4059,
+       "price": 7000,
+       "off": false,
+       "grp": "Maxsus takliflar",
+       "im": "/honor-x13.png"
+      },
+      {
+       "oid": "premium_purchase_rebate_pack",
+       "name": "Premium Purchase Rebate Pack",
+       "usd": 1.1776,
+       "cost": 14484,
+       "price": 19500,
+       "off": false,
+       "grp": "Maxsus takliflar",
+       "im": "/honor-x16.png"
+      }
+     ]
+    }
+   ],
+   "img": "/honor-x17.jpeg"
+  },
+  {
+   "id": "legendofneverland",
+   "name": "Legend of Neverland",
+   "cats": [
+    {
+     "cat": "legend_of_neverland",
+     "label": "Global",
+     "fields": [
+      {
+       "key": "player_id",
+       "label": "Player ID",
+       "type": "text"
+      }
+     ],
+     "offers": [
+      {
+       "oid": "120_cabala_crystals",
+       "name": "120 Cabala Crystals",
+       "usd": 1.765,
+       "cost": 21710,
+       "price": 32000,
+       "off": false,
+       "im": "/neverland-x2.webp",
+       "grp": "Cabala Crystals"
+      },
+      {
+       "oid": "300_cabala_crystals",
+       "name": "300 Cabala Crystals",
+       "usd": 4.417,
+       "cost": 54329,
+       "price": 69500,
+       "off": false,
+       "im": "/neverland-x9.webp",
+       "grp": "Cabala Crystals"
+      },
+      {
+       "oid": "600_cabala_crystals",
+       "name": "600 Cabala Crystals",
+       "usd": 8.854,
+       "cost": 108904,
+       "price": 122000,
+       "off": false,
+       "im": "/neverland-x3.webp",
+       "grp": "Cabala Crystals"
+      },
+      {
+       "oid": "1200_cabala_crystals",
+       "name": "1200 Cabala Crystals",
+       "usd": 17.707,
+       "cost": 217796,
+       "price": 244000,
+       "off": false,
+       "im": "/neverland-x4.webp",
+       "grp": "Cabala Crystals"
+      },
+      {
+       "oid": "3000_cabala_crystals",
+       "name": "3000 Cabala Crystals",
+       "usd": 44.288,
+       "cost": 544742,
+       "price": 610500,
+       "off": false,
+       "im": "/neverland-x10.webp",
+       "grp": "Cabala Crystals"
+      },
+      {
+       "oid": "6000_cabala_crystals",
+       "name": "6000 Cabala Crystals",
+       "usd": 88.587,
+       "cost": 1089620,
+       "price": 1220500,
+       "off": false,
+       "im": "/neverland-x5.webp",
+       "grp": "Cabala Crystals"
+      },
+      {
+       "oid": "cabala_crystal_investment_weekly_card",
+       "name": "Cabala Crystal Investment Weekly Card",
+       "usd": 1.765,
+       "cost": 21710,
+       "price": 32000,
+       "off": false,
+       "im": "/neverland-x27.webp",
+       "grp": "Obunalar kartasi"
+      },
+      {
+       "oid": "monthly_pack_ii",
+       "name": "Monthly Card Pack II",
+       "usd": 2.7213,
+       "cost": 33472,
+       "price": 43500,
+       "off": false,
+       "im": "/neverland-x12.webp",
+       "grp": "Obunalar kartasi"
+      },
+      {
+       "oid": "star_guard",
+       "name": "Star Guard",
+       "usd": 2.652,
+       "cost": 32620,
+       "price": 43000,
+       "off": false,
+       "im": "/neverland-x7.webp",
+       "grp": "Obunalar kartasi"
+      },
+      {
+       "oid": "flower_fairy_link_weekly_card",
+       "name": "Flower Fairy Summon Weekly Card",
+       "usd": 4.417,
+       "cost": 54329,
+       "price": 69500,
+       "off": false,
+       "im": "/neverland-x28.webp",
+       "grp": "Obunalar kartasi"
+      },
+      {
+       "oid": "monthly_pack_iii",
+       "name": "Monthly Card Pack III",
+       "usd": 4.5463,
+       "cost": 55919,
+       "price": 71000,
+       "off": false,
+       "im": "/neverland-x20.webp",
+       "grp": "Obunalar kartasi"
+      },
+      {
+       "oid": "moon_blessing",
+       "name": "Moon Blessing",
+       "usd": 4.417,
+       "cost": 54329,
+       "price": 69500,
+       "off": false,
+       "im": "/neverland-x6.webp",
+       "grp": "Obunalar kartasi"
+      },
+      {
+       "oid": "privilege_pack",
+       "name": "Privilege Pack",
+       "usd": 4.417,
+       "cost": 54329,
+       "price": 69500,
+       "off": false,
+       "im": "/neverland-x8.webp",
+       "grp": "Obunalar kartasi"
+      },
+      {
+       "oid": "sapphire_investment_weekly_card",
+       "name": "Sapphire Investment Weekly Card",
+       "usd": 8.854,
+       "cost": 108904,
+       "price": 122000,
+       "off": false,
+       "im": "/neverland-x29.webp",
+       "grp": "Obunalar kartasi"
+      },
+      {
+       "oid": "flower_fairy_progress_weekly_card",
+       "name": "Flower Fairy Progress Weekly Card",
+       "usd": 13.28,
+       "cost": 163344,
+       "price": 183000,
+       "off": false,
+       "im": "/neverland-x30.webp",
+       "grp": "Obunalar kartasi"
+      },
+      {
+       "oid": "path_of_fire_sword_battle_pass",
+       "name": "Path of Fire Sword Battle Pass",
+       "usd": 13.28,
+       "cost": 163344,
+       "price": 183000,
+       "off": false,
+       "im": "/neverland-x31.webp",
+       "grp": "Obunalar kartasi"
+      },
+      {
+       "oid": "candock_wish_pack",
+       "name": "Candock Wish Pack",
+       "usd": 0.877,
+       "cost": 10787,
+       "price": 16000,
+       "off": false,
+       "im": "/neverland-x16.webp",
+       "grp": "Maxsus takliflar"
+      },
+      {
+       "oid": "companion_pack",
+       "name": "Companion Pack",
+       "usd": 0.877,
+       "cost": 10787,
+       "price": 16000,
+       "off": true
+      },
+      {
+       "oid": "selection_pack",
+       "name": "Selection Pack",
+       "usd": 0.877,
+       "cost": 10787,
+       "price": 16000,
+       "off": true
+      },
+      {
+       "oid": "superb_flower_fairy_sale_pack",
+       "name": "Superb Flower Fairy Sale Pack",
+       "usd": 0.877,
+       "cost": 10787,
+       "price": 16000,
+       "off": false,
+       "im": "/neverland-x13.webp",
+       "grp": "Maxsus takliflar"
+      },
+      {
+       "oid": "growth_pack",
+       "name": "Boost Pack",
+       "usd": 1.765,
+       "cost": 21710,
+       "price": 32000,
+       "off": false,
+       "im": "/neverland-x14.webp",
+       "grp": "Maxsus takliflar"
+      },
+      {
+       "oid": "limited_time_discount_pack_i",
+       "name": "Limited-time Discount Pack I",
+       "usd": 1.8169,
+       "cost": 22348,
+       "price": 32500,
+       "off": true
+      },
+      {
+       "oid": "meteor_wish_pack",
+       "name": "Meteor Wish Pack",
+       "usd": 1.765,
+       "cost": 21710,
+       "price": 32000,
+       "off": true
+      },
+      {
+       "oid": "selection_pack_ii",
+       "name": "Selection Pack II",
+       "usd": 1.8169,
+       "cost": 22348,
+       "price": 32500,
+       "off": true
+      },
+      {
+       "oid": "special_flower_fairy_pack_ii_butterfly_orchid",
+       "name": "Special Flower Fairy Pack II (Butterfly Orchid)",
+       "usd": 1.7924,
+       "cost": 22047,
+       "price": 32500,
+       "off": true
+      },
+      {
+       "oid": "chain_pack_1",
+       "name": "Chain Pack 1",
+       "usd": 1.7924,
+       "cost": 22047,
+       "price": 32500,
+       "off": true
+      },
+      {
+       "oid": "special_flower_fairy_pack_ii_water_bundle",
+       "name": "Special Flower Fairy Pack II(Water Bundle)",
+       "usd": 1.7924,
+       "cost": 22047,
+       "price": 32500,
+       "off": true
+      },
+      {
+       "oid": "fighter_pack",
+       "name": "Warrior's Pack",
+       "usd": 2.652,
+       "cost": 32620,
+       "price": 43000,
+       "off": false,
+       "im": "/neverland-x15.webp",
+       "grp": "Maxsus takliflar"
+      },
+      {
+       "oid": "flower_fairy_wish_pack",
+       "name": "Flower Fairy Wish Pack",
+       "usd": 2.652,
+       "cost": 32620,
+       "price": 43000,
+       "off": true
+      },
+      {
+       "oid": "premium_flower_fairy_pack",
+       "name": "Super-valued Flower Fairy Box",
+       "usd": 2.652,
+       "cost": 32620,
+       "price": 43000,
+       "off": false,
+       "im": "/neverland-x17.webp",
+       "grp": "Maxsus takliflar"
+      },
+      {
+       "oid": "rename_card",
+       "name": "Change Name Card",
+       "usd": 2.652,
+       "cost": 32620,
+       "price": 43000,
+       "off": false,
+       "im": "/neverland-x23.webp",
+       "grp": "Maxsus takliflar"
+      },
+      {
+       "oid": "special_flower_fairy_pack_iv_butterfly_orchid",
+       "name": "Special Flower Fairy Pack IV (Butterfly Orchid)",
+       "usd": 2.6887,
+       "cost": 33071,
+       "price": 43500,
+       "off": true
+      },
+      {
+       "oid": "special_flower_fairy_pack_iv_water_bundle",
+       "name": "Special Flower Fairy Pack IV(Water Bundle)",
+       "usd": 2.6887,
+       "cost": 33071,
+       "price": 43500,
+       "off": true
+      },
+      {
+       "oid": "anima_progress_pack_1",
+       "name": "Anima Progress Pack 1",
+       "usd": 4.417,
+       "cost": 54329,
+       "price": 69500,
+       "off": true
+      },
+      {
+       "oid": "anima_progress_pack_2",
+       "name": "Anima Progress Pack 2",
+       "usd": 4.417,
+       "cost": 54329,
+       "price": 69500,
+       "off": true
+      },
+      {
+       "oid": "anima_progress_pack_3",
+       "name": "Anima Progress Pack 3",
+       "usd": 4.417,
+       "cost": 54329,
+       "price": 69500,
+       "off": true
+      },
+      {
+       "oid": "anima_progress_pack_4",
+       "name": "Anima Progress Pack 4",
+       "usd": 4.417,
+       "cost": 54329,
+       "price": 69500,
+       "off": true
+      },
+      {
+       "oid": "anima_progress_pack_5",
+       "name": "Anima Progress Pack 5",
+       "usd": 4.417,
+       "cost": 54329,
+       "price": 69500,
+       "off": true
+      },
+      {
+       "oid": "anima_upgrade_pack_1",
+       "name": "Anima Upgrade Pack 1",
+       "usd": 4.417,
+       "cost": 54329,
+       "price": 69500,
+       "off": true
+      },
+      {
+       "oid": "flower_fairy_accessory_pack",
+       "name": "Flower Fairy Accessory Box",
+       "usd": 4.417,
+       "cost": 54329,
+       "price": 69500,
+       "off": false,
+       "im": "/neverland-x24.webp",
+       "grp": "Maxsus takliflar"
+      },
+      {
+       "oid": "special_flower_fairy_pack_vi_butterfly_orchid",
+       "name": "Special Flower Fairy Pack VI (Butterfly Orchid)",
+       "usd": 4.4893,
+       "cost": 55218,
+       "price": 70500,
+       "off": true
+      },
+      {
+       "oid": "special_flower_fairy_pack_vi_water_bundle",
+       "name": "Special Flower Fairy Pack VI(Water Bundle)",
+       "usd": 4.4893,
+       "cost": 55218,
+       "price": 70500,
+       "off": true
+      },
+      {
+       "oid": "limited_time_discount_pack_ii",
+       "name": "Limited-time Discount Pack II",
+       "usd": 5.4588,
+       "cost": 67143,
+       "price": 82500,
+       "off": true
+      },
+      {
+       "oid": "special_flower_fairy_pack_i_butterfly_orchid",
+       "name": "Special Flower Fairy Pack I (Butterfly Orchid)",
+       "usd": 5.3936,
+       "cost": 66341,
+       "price": 81500,
+       "off": true
+      },
+      {
+       "oid": "special_flower_fairy_pack_i_water_bundle",
+       "name": "Special Flower Fairy Pack I(Water Bundle)",
+       "usd": 5.3936,
+       "cost": 66341,
+       "price": 81500,
+       "off": true
+      },
+      {
+       "oid": "special_flower_fairy_pack_v_butterfly_orchid",
+       "name": "Special Flower Fairy Pack V (Butterfly Orchid)",
+       "usd": 6.2898,
+       "cost": 77365,
+       "price": 92500,
+       "off": true
+      },
+      {
+       "oid": "special_flower_fairy_pack_v_water_bundle",
+       "name": "Special Flower Fairy Pack V(Water Bundle)",
+       "usd": 6.2898,
+       "cost": 77365,
+       "price": 92500,
+       "off": true
+      },
+      {
+       "oid": "anima_pack_1",
+       "name": "Anima Pack 1",
+       "usd": 8.854,
+       "cost": 108904,
+       "price": 122000,
+       "off": true
+      },
+      {
+       "oid": "anima_progress_pack_6",
+       "name": "Anima Progress Pack 6",
+       "usd": 8.854,
+       "cost": 108904,
+       "price": 122000,
+       "off": true
+      },
+      {
+       "oid": "anima_progress_pack_7",
+       "name": "Anima Progress Pack 7",
+       "usd": 8.854,
+       "cost": 108904,
+       "price": 122000,
+       "off": true
+      },
+      {
+       "oid": "anima_progress_pack_8",
+       "name": "Anima Progress Pack 8",
+       "usd": 8.854,
+       "cost": 108904,
+       "price": 122000,
+       "off": true
+      },
+      {
+       "oid": "anima_progress_pack_9",
+       "name": "Anima Progress Pack 9",
+       "usd": 8.854,
+       "cost": 108904,
+       "price": 122000,
+       "off": true
+      },
+      {
+       "oid": "anima_upgrade_pack_2",
+       "name": "Anima Upgrade Pack 2",
+       "usd": 8.854,
+       "cost": 108904,
+       "price": 122000,
+       "off": true
+      },
+      {
+       "oid": "anima_upgrade_pack_3",
+       "name": "Anima Upgrade Pack 3",
+       "usd": 8.854,
+       "cost": 108904,
+       "price": 122000,
+       "off": true
+      },
+      {
+       "oid": "anima_upgrade_pack_4",
+       "name": "Anima Upgrade Pack 4",
+       "usd": 8.854,
+       "cost": 108904,
+       "price": 122000,
+       "off": true
+      },
+      {
+       "oid": "anima_upgrade_pack_5",
+       "name": "Anima Upgrade Pack 5",
+       "usd": 8.854,
+       "cost": 108904,
+       "price": 122000,
+       "off": true
+      },
+      {
+       "oid": "bloom_pack_1",
+       "name": "Bloom Pack 1",
+       "usd": 8.854,
+       "cost": 108904,
+       "price": 122000,
+       "off": true
+      },
+      {
+       "oid": "crystal_battle_pass",
+       "name": "Crystal Battle Pass",
+       "usd": 8.854,
+       "cost": 108904,
+       "price": 122000,
+       "off": true
+      },
+      {
+       "oid": "flower_fairy_exp_pack",
+       "name": "Flower Fairy EXP Box",
+       "usd": 8.854,
+       "cost": 108904,
+       "price": 122000,
+       "off": false,
+       "im": "/neverland-x22.webp",
+       "grp": "Maxsus takliflar"
+      },
+      {
+       "oid": "fund_plan",
+       "name": "Fund Plan",
+       "usd": 8.854,
+       "cost": 108904,
+       "price": 122000,
+       "off": true
+      },
+      {
+       "oid": "special_flower_fairy_pack_iii_butterfly_orchid",
+       "name": "Special Flower Fairy Pack III (Butterfly Orchid)",
+       "usd": 8.9948,
+       "cost": 110636,
+       "price": 124000,
+       "off": true
+      },
+      {
+       "oid": "chain_pack_2",
+       "name": "Chain Pack 2",
+       "usd": 4.4893,
+       "cost": 55218,
+       "price": 70500,
+       "off": true
+      },
+      {
+       "oid": "special_flower_fairy_pack_iii_water_bundle",
+       "name": "Special Flower Fairy Pack III(Water Bundle)",
+       "usd": 8.9948,
+       "cost": 110636,
+       "price": 124000,
+       "off": true
+      },
+      {
+       "oid": "weekly_limited_pack",
+       "name": "Weekly Limited Pack",
+       "usd": 11.506,
+       "cost": 141524,
+       "price": 159000,
+       "off": false,
+       "im": "/neverland-x21.webp",
+       "grp": "Maxsus takliflar"
+      },
+      {
+       "oid": "fantasy_beast_cultivation_pack",
+       "name": "Fantasy Beast Cultivation Pack",
+       "usd": 13.28,
+       "cost": 163344,
+       "price": 183000,
+       "off": false,
+       "im": "/neverland-x18.webp",
+       "grp": "Maxsus takliflar"
+      },
+      {
+       "oid": "limited_time_discount_pack_iii",
+       "name": "Limited-time Discount Pack III",
+       "usd": 13.6633,
+       "cost": 168059,
+       "price": 188500,
+       "off": true
+      },
+      {
+       "oid": "monthly_limited_pack",
+       "name": "Monthly Limited Pack",
+       "usd": 13.28,
+       "cost": 163344,
+       "price": 183000,
+       "off": false,
+       "im": "/neverland-x26.webp",
+       "grp": "Maxsus takliflar"
+      },
+      {
+       "oid": "anima_upgrade_pack_6",
+       "name": "Anima Upgrade Pack 6",
+       "usd": 17.707,
+       "cost": 217796,
+       "price": 244000,
+       "off": true
+      },
+      {
+       "oid": "anima_upgrade_pack_7",
+       "name": "Anima Upgrade Pack 7",
+       "usd": 17.707,
+       "cost": 217796,
+       "price": 244000,
+       "off": true
+      },
+      {
+       "oid": "anima_upgrade_pack_8",
+       "name": "Anima Upgrade Pack 8",
+       "usd": 17.707,
+       "cost": 217796,
+       "price": 244000,
+       "off": true
+      },
+      {
+       "oid": "anima_upgrade_pack_9",
+       "name": "Anima Upgrade Pack 9",
+       "usd": 17.707,
+       "cost": 217796,
+       "price": 244000,
+       "off": true
+      },
+      {
+       "oid": "bloom_pack_2",
+       "name": "Bloom Pack 2",
+       "usd": 17.707,
+       "cost": 217796,
+       "price": 244000,
+       "off": true
+      },
+      {
+       "oid": "anima_pack_2",
+       "name": "Anima Pack 2",
+       "usd": 26.571,
+       "cost": 326823,
+       "price": 366500,
+       "off": true
+      },
+      {
+       "oid": "bloom_pack_3",
+       "name": "Bloom Pack 3",
+       "usd": 26.571,
+       "cost": 326823,
+       "price": 366500,
+       "off": true
+      },
+      {
+       "oid": "surprise_pack",
+       "name": "Surprise Pack",
+       "usd": 26.571,
+       "cost": 326823,
+       "price": 366500,
+       "off": true
+      },
+      {
+       "oid": "anima_pack_3",
+       "name": "Anima Pack 3",
+       "usd": 35.435,
+       "cost": 435851,
+       "price": 488500,
+       "off": true
+      },
+      {
+       "oid": "chain_pack_3",
+       "name": "Chain Pack 3",
+       "usd": 5.3855,
+       "cost": 66242,
+       "price": 81500,
+       "off": true
+      },
+      {
+       "oid": "sakura_pack",
+       "name": "Sakura Pack",
+       "usd": 48.725,
+       "cost": 599318,
+       "price": 671500,
+       "off": false,
+       "im": "/neverland-x19.webp",
+       "grp": "Maxsus takliflar"
+      },
+      {
+       "oid": "fantasy_beast_summoning_pack",
+       "name": "Fantasy Beast Summon Pack",
+       "usd": 91.1132,
+       "cost": 1120692,
+       "price": 1255500,
+       "off": false,
+       "im": "/neverland-x25.webp",
+       "grp": "Maxsus takliflar"
+      },
+      {
+       "oid": "luxury_pack",
+       "name": "Luxury Pack",
+       "usd": 91.1132,
+       "cost": 1120692,
+       "price": 1255500,
+       "off": true
+      },
+      {
+       "oid": "chain_pack_4",
+       "name": "Chain Pack 4",
+       "usd": 8.9867,
+       "cost": 110536,
+       "price": 124000,
+       "off": true
+      },
+      {
+       "oid": "60000_no_2x_bonus",
+       "name": "60000 (No 2x Bonus)",
+       "usd": 911.2456,
+       "cost": 11208321,
+       "price": 12553500,
+       "off": true
+      }
+     ]
+    },
+    {
+     "cat": "legend_of_neverland_naeu",
+     "label": "NAEU",
+     "fields": [
+      {
+       "key": "user_id",
+       "label": "User ID",
+       "type": "text"
+      }
+     ],
+     "offers": [
+      {
+       "oid": "120_cabala_crystals",
+       "name": "120 Cabala Crystals",
+       "usd": 1.765,
+       "cost": 21710,
+       "price": 32000,
+       "off": false,
+       "im": "/neverland-x32.webp",
+       "grp": "Cabala Crystals"
+      },
+      {
+       "oid": "300_cabala_crystals",
+       "name": "300 Cabala Crystals",
+       "usd": 4.417,
+       "cost": 54329,
+       "price": 69500,
+       "off": false,
+       "im": "/neverland-x33.webp",
+       "grp": "Cabala Crystals"
+      },
+      {
+       "oid": "600_cabala_crystals",
+       "name": "600 Cabala Crystals",
+       "usd": 8.854,
+       "cost": 108904,
+       "price": 122000,
+       "off": false,
+       "im": "/neverland-x34.webp",
+       "grp": "Cabala Crystals"
+      },
+      {
+       "oid": "1200_cabala_crystals",
+       "name": "1200 Cabala Crystals",
+       "usd": 17.707,
+       "cost": 217796,
+       "price": 244000,
+       "off": false,
+       "im": "/neverland-x35.webp",
+       "grp": "Cabala Crystals"
+      },
+      {
+       "oid": "3000_cabala_crystals",
+       "name": "3000 Cabala Crystals",
+       "usd": 44.288,
+       "cost": 544742,
+       "price": 610500,
+       "off": false,
+       "im": "/neverland-x36.webp",
+       "grp": "Cabala Crystals"
+      },
+      {
+       "oid": "6000_cabala_crystals",
+       "name": "6000 Cabala Crystals",
+       "usd": 88.587,
+       "cost": 1089620,
+       "price": 1220500,
+       "off": false,
+       "im": "/neverland-x37.webp",
+       "grp": "Cabala Crystals"
+      },
+      {
+       "oid": "cabala_crystal_investment_weekly_card",
+       "name": "Cabala Crystal Investment Weekly Card",
+       "usd": 1.765,
+       "cost": 21710,
+       "price": 32000,
+       "off": false,
+       "im": "/neverland-x57.webp",
+       "grp": "Obunalar kartasi"
+      },
+      {
+       "oid": "monthly_pack_ii",
+       "name": "Monthly Card Pack II",
+       "usd": 2.7213,
+       "cost": 33472,
+       "price": 43500,
+       "off": false,
+       "im": "/neverland-x42.webp",
+       "grp": "Obunalar kartasi"
+      },
+      {
+       "oid": "star_guard",
+       "name": "Star Guard",
+       "usd": 2.652,
+       "cost": 32620,
+       "price": 43000,
+       "off": false,
+       "im": "/neverland-x39.webp",
+       "grp": "Obunalar kartasi"
+      },
+      {
+       "oid": "flower_fairy_link_weekly_card",
+       "name": "Flower Fairy Summon Weekly Card",
+       "usd": 4.417,
+       "cost": 54329,
+       "price": 69500,
+       "off": false,
+       "im": "/neverland-x58.webp",
+       "grp": "Obunalar kartasi"
+      },
+      {
+       "oid": "monthly_pack_iii",
+       "name": "Monthly Card Pack III",
+       "usd": 4.5463,
+       "cost": 55919,
+       "price": 71000,
+       "off": false,
+       "im": "/neverland-x50.webp",
+       "grp": "Obunalar kartasi"
+      },
+      {
+       "oid": "moon_blessing",
+       "name": "Moon Blessing",
+       "usd": 4.417,
+       "cost": 54329,
+       "price": 69500,
+       "off": false,
+       "im": "/neverland-x38.webp",
+       "grp": "Obunalar kartasi"
+      },
+      {
+       "oid": "privilege_pack",
+       "name": "Privilege Pack",
+       "usd": 4.417,
+       "cost": 54329,
+       "price": 69500,
+       "off": false,
+       "im": "/neverland-x40.webp",
+       "grp": "Obunalar kartasi"
+      },
+      {
+       "oid": "sapphire_investment_weekly_card",
+       "name": "Sapphire Investment Weekly Card",
+       "usd": 8.854,
+       "cost": 108904,
+       "price": 122000,
+       "off": false,
+       "im": "/neverland-x59.webp",
+       "grp": "Obunalar kartasi"
+      },
+      {
+       "oid": "flower_fairy_progress_weekly_card",
+       "name": "Flower Fairy Progress Weekly Card",
+       "usd": 13.28,
+       "cost": 163344,
+       "price": 183000,
+       "off": false,
+       "im": "/neverland-x60.webp",
+       "grp": "Obunalar kartasi"
+      },
+      {
+       "oid": "path_of_fire_sword_battle_pass",
+       "name": "Path of Fire Sword Battle Pass",
+       "usd": 13.28,
+       "cost": 163344,
+       "price": 183000,
+       "off": false,
+       "im": "/neverland-x61.webp",
+       "grp": "Obunalar kartasi"
+      },
+      {
+       "oid": "candock_wish_pack",
+       "name": "Candock Wish Pack",
+       "usd": 0.877,
+       "cost": 10787,
+       "price": 16000,
+       "off": false,
+       "im": "/neverland-x46.webp",
+       "grp": "Maxsus takliflar"
+      },
+      {
+       "oid": "companion_pack",
+       "name": "Companion Pack",
+       "usd": 0.877,
+       "cost": 10787,
+       "price": 16000,
+       "off": true
+      },
+      {
+       "oid": "selection_pack",
+       "name": "Selection Pack",
+       "usd": 0.877,
+       "cost": 10787,
+       "price": 16000,
+       "off": true
+      },
+      {
+       "oid": "superb_flower_fairy_sale_pack",
+       "name": "Superb Flower Fairy Sale Pack",
+       "usd": 0.877,
+       "cost": 10787,
+       "price": 16000,
+       "off": false,
+       "im": "/neverland-x43.webp",
+       "grp": "Maxsus takliflar"
+      },
+      {
+       "oid": "growth_pack",
+       "name": "Boost Pack",
+       "usd": 1.765,
+       "cost": 21710,
+       "price": 32000,
+       "off": false,
+       "im": "/neverland-x44.webp",
+       "grp": "Maxsus takliflar"
+      },
+      {
+       "oid": "limited_time_discount_pack_i",
+       "name": "Limited-time Discount Pack I",
+       "usd": 1.8169,
+       "cost": 22348,
+       "price": 32500,
+       "off": true
+      },
+      {
+       "oid": "meteor_wish_pack",
+       "name": "Meteor Wish Pack",
+       "usd": 1.765,
+       "cost": 21710,
+       "price": 32000,
+       "off": true
+      },
+      {
+       "oid": "selection_pack_ii",
+       "name": "Selection Pack II",
+       "usd": 1.8169,
+       "cost": 22348,
+       "price": 32500,
+       "off": true
+      },
+      {
+       "oid": "special_flower_fairy_pack_ii_butterfly_orchid",
+       "name": "Special Flower Fairy Pack II (Butterfly Orchid)",
+       "usd": 1.7924,
+       "cost": 22047,
+       "price": 32500,
+       "off": true
+      },
+      {
+       "oid": "fighter_pack",
+       "name": "Warrior's Pack",
+       "usd": 2.652,
+       "cost": 32620,
+       "price": 43000,
+       "off": false,
+       "im": "/neverland-x45.webp",
+       "grp": "Maxsus takliflar"
+      },
+      {
+       "oid": "flower_fairy_wish_pack",
+       "name": "Flower Fairy Wish Pack",
+       "usd": 2.652,
+       "cost": 32620,
+       "price": 43000,
+       "off": true
+      },
+      {
+       "oid": "premium_flower_fairy_pack",
+       "name": "Super-valued Flower Fairy Box",
+       "usd": 2.652,
+       "cost": 32620,
+       "price": 43000,
+       "off": false,
+       "im": "/neverland-x47.webp",
+       "grp": "Maxsus takliflar"
+      },
+      {
+       "oid": "rename_card",
+       "name": "Change Name Card",
+       "usd": 2.652,
+       "cost": 32620,
+       "price": 43000,
+       "off": false,
+       "im": "/neverland-x53.webp",
+       "grp": "Maxsus takliflar"
+      },
+      {
+       "oid": "special_flower_fairy_pack_iv_butterfly_orchid",
+       "name": "Special Flower Fairy Pack IV (Butterfly Orchid)",
+       "usd": 2.6887,
+       "cost": 33071,
+       "price": 43500,
+       "off": true
+      },
+      {
+       "oid": "anima_progress_pack_1",
+       "name": "Anima Progress Pack 1",
+       "usd": 4.417,
+       "cost": 54329,
+       "price": 69500,
+       "off": true
+      },
+      {
+       "oid": "anima_progress_pack_2",
+       "name": "Anima Progress Pack 2",
+       "usd": 4.417,
+       "cost": 54329,
+       "price": 69500,
+       "off": true
+      },
+      {
+       "oid": "anima_progress_pack_3",
+       "name": "Anima Progress Pack 3",
+       "usd": 4.417,
+       "cost": 54329,
+       "price": 69500,
+       "off": true
+      },
+      {
+       "oid": "anima_progress_pack_4",
+       "name": "Anima Progress Pack 4",
+       "usd": 4.417,
+       "cost": 54329,
+       "price": 69500,
+       "off": true
+      },
+      {
+       "oid": "anima_progress_pack_5",
+       "name": "Anima Progress Pack 5",
+       "usd": 4.417,
+       "cost": 54329,
+       "price": 69500,
+       "off": true
+      },
+      {
+       "oid": "anima_upgrade_pack_1",
+       "name": "Anima Upgrade Pack 1",
+       "usd": 4.417,
+       "cost": 54329,
+       "price": 69500,
+       "off": true
+      },
+      {
+       "oid": "flower_fairy_accessory_pack",
+       "name": "Flower Fairy Accessory Box",
+       "usd": 4.417,
+       "cost": 54329,
+       "price": 69500,
+       "off": false,
+       "im": "/neverland-x54.webp",
+       "grp": "Maxsus takliflar"
+      },
+      {
+       "oid": "special_flower_fairy_pack_vi_butterfly_orchid",
+       "name": "Special Flower Fairy Pack VI (Butterfly Orchid)",
+       "usd": 4.4893,
+       "cost": 55218,
+       "price": 70500,
+       "off": true
+      },
+      {
+       "oid": "limited_time_discount_pack_ii",
+       "name": "Limited-time Discount Pack II",
+       "usd": 5.4588,
+       "cost": 67143,
+       "price": 82500,
+       "off": true
+      },
+      {
+       "oid": "special_flower_fairy_pack_i_butterfly_orchid",
+       "name": "Special Flower Fairy Pack I (Butterfly Orchid)",
+       "usd": 5.3936,
+       "cost": 66341,
+       "price": 81500,
+       "off": true
+      },
+      {
+       "oid": "special_flower_fairy_pack_v_butterfly_orchid",
+       "name": "Special Flower Fairy Pack V (Butterfly Orchid)",
+       "usd": 6.2898,
+       "cost": 77365,
+       "price": 92500,
+       "off": true
+      },
+      {
+       "oid": "anima_pack_1",
+       "name": "Anima Pack 1",
+       "usd": 8.854,
+       "cost": 108904,
+       "price": 122000,
+       "off": true
+      },
+      {
+       "oid": "anima_progress_pack_6",
+       "name": "Anima Progress Pack 6",
+       "usd": 8.854,
+       "cost": 108904,
+       "price": 122000,
+       "off": true
+      },
+      {
+       "oid": "anima_progress_pack_7",
+       "name": "Anima Progress Pack 7",
+       "usd": 8.854,
+       "cost": 108904,
+       "price": 122000,
+       "off": true
+      },
+      {
+       "oid": "anima_progress_pack_8",
+       "name": "Anima Progress Pack 8",
+       "usd": 8.854,
+       "cost": 108904,
+       "price": 122000,
+       "off": true
+      },
+      {
+       "oid": "anima_progress_pack_9",
+       "name": "Anima Progress Pack 9",
+       "usd": 8.854,
+       "cost": 108904,
+       "price": 122000,
+       "off": true
+      },
+      {
+       "oid": "anima_upgrade_pack_2",
+       "name": "Anima Upgrade Pack 2",
+       "usd": 8.854,
+       "cost": 108904,
+       "price": 122000,
+       "off": true
+      },
+      {
+       "oid": "anima_upgrade_pack_3",
+       "name": "Anima Upgrade Pack 3",
+       "usd": 8.854,
+       "cost": 108904,
+       "price": 122000,
+       "off": true
+      },
+      {
+       "oid": "anima_upgrade_pack_4",
+       "name": "Anima Upgrade Pack 4",
+       "usd": 8.854,
+       "cost": 108904,
+       "price": 122000,
+       "off": true
+      },
+      {
+       "oid": "anima_upgrade_pack_5",
+       "name": "Anima Upgrade Pack 5",
+       "usd": 8.854,
+       "cost": 108904,
+       "price": 122000,
+       "off": true
+      },
+      {
+       "oid": "bloom_pack_1",
+       "name": "Bloom Pack 1",
+       "usd": 8.854,
+       "cost": 108904,
+       "price": 122000,
+       "off": true
+      },
+      {
+       "oid": "crystal_battle_pass",
+       "name": "Crystal Battle Pass",
+       "usd": 8.854,
+       "cost": 108904,
+       "price": 122000,
+       "off": true
+      },
+      {
+       "oid": "flower_fairy_exp_pack",
+       "name": "Flower Fairy EXP Box",
+       "usd": 8.854,
+       "cost": 108904,
+       "price": 122000,
+       "off": false,
+       "im": "/neverland-x52.webp",
+       "grp": "Maxsus takliflar"
+      },
+      {
+       "oid": "fund_plan",
+       "name": "Fund Plan",
+       "usd": 8.854,
+       "cost": 108904,
+       "price": 122000,
+       "off": true
+      },
+      {
+       "oid": "special_flower_fairy_pack_iii_butterfly_orchid",
+       "name": "Special Flower Fairy Pack III (Butterfly Orchid)",
+       "usd": 8.9948,
+       "cost": 110636,
+       "price": 124000,
+       "off": true
+      },
+      {
+       "oid": "weekly_limited_pack",
+       "name": "Weekly Limited Pack",
+       "usd": 11.506,
+       "cost": 141524,
+       "price": 159000,
+       "off": false,
+       "im": "/neverland-x51.webp",
+       "grp": "Maxsus takliflar"
+      },
+      {
+       "oid": "fantasy_beast_cultivation_pack",
+       "name": "Fantasy Beast Cultivation Pack",
+       "usd": 13.28,
+       "cost": 163344,
+       "price": 183000,
+       "off": false,
+       "im": "/neverland-x48.webp",
+       "grp": "Maxsus takliflar"
+      },
+      {
+       "oid": "limited_time_discount_pack_iii",
+       "name": "Limited-time Discount Pack III",
+       "usd": 13.6633,
+       "cost": 168059,
+       "price": 188500,
+       "off": true
+      },
+      {
+       "oid": "monthly_limited_pack",
+       "name": "Monthly Limited Pack",
+       "usd": 13.28,
+       "cost": 163344,
+       "price": 183000,
+       "off": false,
+       "im": "/neverland-x56.webp",
+       "grp": "Maxsus takliflar"
+      },
+      {
+       "oid": "anima_upgrade_pack_6",
+       "name": "Anima Upgrade Pack 6",
+       "usd": 17.707,
+       "cost": 217796,
+       "price": 244000,
+       "off": true
+      },
+      {
+       "oid": "anima_upgrade_pack_7",
+       "name": "Anima Upgrade Pack 7",
+       "usd": 17.707,
+       "cost": 217796,
+       "price": 244000,
+       "off": true
+      },
+      {
+       "oid": "anima_upgrade_pack_8",
+       "name": "Anima Upgrade Pack 8",
+       "usd": 17.707,
+       "cost": 217796,
+       "price": 244000,
+       "off": true
+      },
+      {
+       "oid": "anima_upgrade_pack_9",
+       "name": "Anima Upgrade Pack 9",
+       "usd": 17.707,
+       "cost": 217796,
+       "price": 244000,
+       "off": true
+      },
+      {
+       "oid": "bloom_pack_2",
+       "name": "Bloom Pack 2",
+       "usd": 17.707,
+       "cost": 217796,
+       "price": 244000,
+       "off": true
+      },
+      {
+       "oid": "anima_pack_2",
+       "name": "Anima Pack 2",
+       "usd": 26.571,
+       "cost": 326823,
+       "price": 366500,
+       "off": true
+      },
+      {
+       "oid": "bloom_pack_3",
+       "name": "Bloom Pack 3",
+       "usd": 26.571,
+       "cost": 326823,
+       "price": 366500,
+       "off": true
+      },
+      {
+       "oid": "surprise_pack",
+       "name": "Surprise Pack",
+       "usd": 26.571,
+       "cost": 326823,
+       "price": 366500,
+       "off": true
+      },
+      {
+       "oid": "anima_pack_3",
+       "name": "Anima Pack 3",
+       "usd": 35.435,
+       "cost": 435851,
+       "price": 488500,
+       "off": true
+      },
+      {
+       "oid": "sakura_pack",
+       "name": "Sakura Pack",
+       "usd": 48.725,
+       "cost": 599318,
+       "price": 671500,
+       "off": false,
+       "im": "/neverland-x49.webp",
+       "grp": "Maxsus takliflar"
+      },
+      {
+       "oid": "fantasy_beast_summoning_pack",
+       "name": "Fantasy Beast Summon Pack",
+       "usd": 91.1132,
+       "cost": 1120692,
+       "price": 1255500,
+       "off": false,
+       "im": "/neverland-x55.webp",
+       "grp": "Maxsus takliflar"
+      },
+      {
+       "oid": "luxury_pack",
+       "name": "Luxury Pack",
+       "usd": 91.1132,
+       "cost": 1120692,
+       "price": 1255500,
+       "off": true
+      },
+      {
+       "oid": "60000_cabala_crystals_no_2x_bonus",
+       "name": "60000 Cabala Crystals (No 2x Bonus)",
+       "usd": 911.2456,
+       "cost": 11208321,
+       "price": 12553500,
+       "off": true
+      }
+     ]
+    }
+   ],
+   "img": "/neverland-x62.png",
+   "peek": "/neverland-x91.webp",
+   "hbg": "/neverland-x90.jpg"
+  },
+  {
+   "id": "magicchessgogo",
+   "name": "Magic Chess Go Go",
+   "cats": [
+    {
+     "cat": "magic_chess_gogo_global",
+     "label": "Global",
+     "fields": [
+      {
+       "key": "player_id",
+       "label": "Player ID",
+       "type": "text"
+      },
+      {
+       "key": "server_id",
+       "label": "Server ID",
+       "type": "text"
+      }
+     ],
+     "offers": [
+      {
+       "oid": "first_recharge_100_50_50_bonus",
+       "name": "50+50",
+       "usd": 0.8823,
+       "cost": 10411,
+       "price": 11400,
+       "off": false,
+       "grp": "Birinchi to'ldirish 2x",
+       "im": "/magic-x7.png"
+      },
+      {
+       "oid": "first_recharge_300_150_150_bonus",
+       "name": "150+150",
+       "usd": 2.35,
+       "cost": 27730,
+       "price": 29700,
+       "off": false,
+       "grp": "Birinchi to'ldirish 2x",
+       "im": "/magic-x5.png"
+      },
+      {
+       "oid": "first_recharge_500_250_250_bonus",
+       "name": "250+250",
+       "usd": 3.91,
+       "cost": 46138,
+       "price": 48800,
+       "off": false,
+       "grp": "Birinchi to'ldirish 2x",
+       "im": "/magic-x6.png"
+      },
+      {
+       "oid": "first_recharge_1000_500_500_bonus",
+       "name": "500+500",
+       "usd": 8.8591,
+       "cost": 104537,
+       "price": 106400,
+       "off": false,
+       "grp": "Birinchi to'ldirish 2x",
+       "im": "/magic-x18.png"
+      },
+      {
+       "oid": "5_diamonds",
+       "name": "5 Diamonds",
+       "usd": 0.09,
+       "cost": 1062,
+       "price": 4000,
+       "off": true,
+       "__i": 4,
+       "grp": "Olmoslar"
+      },
+      {
+       "oid": "11_diamonds",
+       "name": "11 Diamonds",
+       "usd": 0.1813,
+       "cost": 2139,
+       "price": 5000,
+       "off": true,
+       "__i": 5,
+       "grp": "Olmoslar"
+      },
+      {
+       "oid": "12_diamonds",
+       "name": "12 Diamonds",
+       "usd": 0.29,
+       "cost": 3422,
+       "price": 6500,
+       "off": true,
+       "__i": 6,
+       "grp": "Olmoslar"
+      },
+      {
+       "oid": "19_diamonds",
+       "name": "19 Diamonds",
+       "usd": 0.38,
+       "cost": 4484,
+       "price": 7500,
+       "off": true,
+       "__i": 7,
+       "grp": "Olmoslar"
+      },
+      {
+       "oid": "22_diamonds",
+       "name": "22 Diamonds",
+       "usd": 0.3436,
+       "cost": 4054,
+       "price": 5100,
+       "off": false,
+       "grp": "Olmoslar",
+       "im": "/magic-x19.png"
+      },
+      {
+       "oid": "28_diamonds",
+       "name": "28 Diamonds",
+       "usd": 0.56,
+       "cost": 6608,
+       "price": 12000,
+       "off": true,
+       "grp": "Olmoslar",
+       "im": "/magic-x16.png"
+      },
+      {
+       "oid": "44_diamonds",
+       "name": "44 Diamonds",
+       "usd": 0.7,
+       "cost": 8260,
+       "price": 14000,
+       "off": true,
+       "__i": 10,
+       "grp": "Olmoslar"
+      },
+      {
+       "oid": "56_diamonds",
+       "name": "56 Diamonds",
+       "usd": 0.7307,
+       "cost": 8622,
+       "price": 9600,
+       "off": false,
+       "grp": "Olmoslar",
+       "im": "/magic-x20.png"
+      },
+      {
+       "oid": "59_diamonds",
+       "name": "59 Diamonds",
+       "usd": 0.99,
+       "cost": 11682,
+       "price": 17500,
+       "off": true,
+       "__i": 12,
+       "grp": "Olmoslar"
+      },
+      {
+       "oid": "85_diamonds",
+       "name": "85 Diamonds",
+       "usd": 1.44,
+       "cost": 16992,
+       "price": 28000,
+       "off": true,
+       "grp": "Olmoslar",
+       "im": "/magic-x10.png"
+      },
+      {
+       "oid": "86_diamonds",
+       "name": "86 Diamonds",
+       "usd": 1.21,
+       "cost": 14278,
+       "price": 15300,
+       "off": false,
+       "grp": "Olmoslar"
+      },
+      {
+       "oid": "112_diamonds",
+       "name": "112 Diamonds",
+       "usd": 1.4613,
+       "cost": 17243,
+       "price": 28000,
+       "off": true,
+       "__i": 15,
+       "grp": "Olmoslar"
+      },
+      {
+       "oid": "165_diamonds",
+       "name": "165 Diamonds",
+       "usd": 2.326,
+       "cost": 27447,
+       "price": 28500,
+       "off": false,
+       "grp": "Olmoslar",
+       "im": "/magic-x11.png"
+      },
+      {
+       "oid": "170_diamonds",
+       "name": "170 Diamonds",
+       "usd": 2.78,
+       "cost": 32804,
+       "price": 44500,
+       "off": true,
+       "__i": 17,
+       "grp": "Olmoslar"
+      },
+      {
+       "oid": "172_diamonds",
+       "name": "172 Diamonds",
+       "usd": 2.417,
+       "cost": 28521,
+       "price": 40000,
+       "off": true,
+       "__i": 18,
+       "grp": "Olmoslar"
+      },
+      {
+       "oid": "223_diamonds",
+       "name": "223 Diamonds",
+       "usd": 2.9227,
+       "cost": 34488,
+       "price": 46000,
+       "off": true,
+       "__i": 19,
+       "grp": "Olmoslar"
+      },
+      {
+       "oid": "240_diamonds",
+       "name": "240 Diamonds",
+       "usd": 3.96,
+       "cost": 46728,
+       "price": 64000,
+       "off": true,
+       "__i": 20,
+       "grp": "Olmoslar"
+      },
+      {
+       "oid": "257_diamonds",
+       "name": "257 Diamonds",
+       "usd": 3.6,
+       "cost": 42480,
+       "price": 59500,
+       "off": true,
+       "__i": 21,
+       "grp": "Olmoslar"
+      },
+      {
+       "oid": "275_diamonds",
+       "name": "275 Diamonds",
+       "usd": 3.6534,
+       "cost": 43110,
+       "price": 46000,
+       "off": false,
+       "grp": "Olmoslar",
+       "im": "/magic-x13.png"
+      },
+      {
+       "oid": "296_diamonds",
+       "name": "296 Diamonds",
+       "usd": 4.85,
+       "cost": 57230,
+       "price": 75000,
+       "off": true,
+       "__i": 23,
+       "grp": "Olmoslar"
+      },
+      {
+       "oid": "336_diamonds",
+       "name": "336 Diamonds",
+       "usd": 4.384,
+       "cost": 51731,
+       "price": 54600,
+       "off": false,
+       "grp": "Olmoslar"
+      },
+      {
+       "oid": "344_diamonds",
+       "name": "344 Diamonds",
+       "usd": 4.7534,
+       "cost": 56090,
+       "price": 73500,
+       "off": true,
+       "grp": "Olmoslar",
+       "im": "/magic-x21.png"
+      },
+      {
+       "oid": "408_diamonds",
+       "name": "408 Diamonds",
+       "usd": 6.53,
+       "cost": 77054,
+       "price": 81100,
+       "off": false,
+       "grp": "Olmoslar",
+       "im": "/magic-x22.png"
+      },
+      {
+       "oid": "516_diamonds",
+       "name": "516 Diamonds",
+       "usd": 7.262,
+       "cost": 85692,
+       "price": 104500,
+       "off": true,
+       "__i": 27,
+       "grp": "Olmoslar"
+      },
+      {
+       "oid": "565_diamonds",
+       "name": "565 Diamonds",
+       "usd": 7.3067,
+       "cost": 86219,
+       "price": 90600,
+       "off": false,
+       "grp": "Olmoslar",
+       "im": "/magic-x27.png"
+      },
+      {
+       "oid": "568_diamonds",
+       "name": "568 Diamonds",
+       "usd": 8.9,
+       "cost": 105020,
+       "price": 123000,
+       "off": true,
+       "__i": 29,
+       "grp": "Olmoslar"
+      },
+      {
+       "oid": "570_diamonds",
+       "name": "570 Diamonds",
+       "usd": 7.3067,
+       "cost": 86219,
+       "price": 105000,
+       "off": true,
+       "__i": 30,
+       "grp": "Olmoslar"
+      },
+      {
+       "oid": "706_diamonds",
+       "name": "706 Diamonds",
+       "usd": 9.4988,
+       "cost": 112086,
+       "price": 116800,
+       "off": false,
+       "grp": "Olmoslar",
+       "im": "/magic-x17.png"
+      },
+      {
+       "oid": "875_diamonds",
+       "name": "875 Diamonds",
+       "usd": 13.81,
+       "cost": 162958,
+       "price": 190500,
+       "off": true,
+       "grp": "Olmoslar",
+       "im": "/magic-x23.png"
+      },
+      {
+       "oid": "1060_diamonds",
+       "name": "1060 Diamonds",
+       "usd": 14.2522,
+       "cost": 168176,
+       "price": 196500,
+       "off": true,
+       "__i": 33,
+       "grp": "Olmoslar"
+      },
+      {
+       "oid": "1163_diamonds",
+       "name": "1163 Diamonds",
+       "usd": 14.6135,
+       "cost": 172439,
+       "price": 179300,
+       "off": false,
+       "grp": "Olmoslar",
+       "im": "/magic-x24.png"
+      },
+      {
+       "oid": "1346_diamonds",
+       "name": "1346 Diamonds",
+       "usd": 17.5362,
+       "cost": 206927,
+       "price": 242000,
+       "off": true,
+       "__i": 35,
+       "grp": "Olmoslar"
+      },
+      {
+       "oid": "1825_diamonds",
+       "name": "1825 Diamonds",
+       "usd": 23.0203,
+       "cost": 271640,
+       "price": 317500,
+       "off": true,
+       "__i": 36,
+       "grp": "Olmoslar"
+      },
+      {
+       "oid": "2010_diamonds",
+       "name": "2010 Diamonds",
+       "usd": 31.15,
+       "cost": 367570,
+       "price": 429500,
+       "off": true,
+       "__i": 37,
+       "grp": "Olmoslar"
+      },
+      {
+       "oid": "2195_diamonds",
+       "name": "2195 Diamonds",
+       "usd": 27.7656,
+       "cost": 327634,
+       "price": 382500,
+       "off": true,
+       "__i": 38,
+       "grp": "Olmoslar"
+      },
+      {
+       "oid": "2398_diamonds",
+       "name": "2398 Diamonds",
+       "usd": 29.227,
+       "cost": 344879,
+       "price": 403000,
+       "off": true,
+       "__i": 39,
+       "grp": "Olmoslar"
+      },
+      {
+       "oid": "3688_diamonds",
+       "name": "3688 Diamonds",
+       "usd": 46.0325,
+       "cost": 543184,
+       "price": 634500,
+       "off": true,
+       "__i": 40,
+       "grp": "Olmoslar"
+      },
+      {
+       "oid": "4830_diamonds",
+       "name": "4830 Diamonds",
+       "usd": 72.04,
+       "cost": 850072,
+       "price": 992500,
+       "off": true,
+       "__i": 41,
+       "grp": "Olmoslar"
+      },
+      {
+       "oid": "5532_diamonds",
+       "name": "5532 Diamonds",
+       "usd": 68.6834,
+       "cost": 810464,
+       "price": 946500,
+       "off": true,
+       "__i": 42,
+       "grp": "Olmoslar"
+      },
+      {
+       "oid": "6042_diamonds",
+       "name": "6042 Diamonds",
+       "usd": 73.0675,
+       "cost": 862196,
+       "price": 1007000,
+       "off": true,
+       "__i": 43,
+       "grp": "Olmoslar"
+      },
+      {
+       "oid": "9288_diamonds",
+       "name": "9288 Diamonds",
+       "usd": 114.3546,
+       "cost": 1349384,
+       "price": 1575500,
+       "off": true,
+       "__i": 44,
+       "grp": "Olmoslar"
+      },
+      {
+       "oid": "weekly_card",
+       "name": "Weekly Card",
+       "usd": 1.8086,
+       "cost": 21341,
+       "price": 22900,
+       "off": false,
+       "grp": "Obunalar kartasi",
+       "im": "/magic-x14.png"
+      },
+      {
+       "oid": "battle_for_discounts",
+       "name": "Battle for Discounts",
+       "usd": 0.7708,
+       "cost": 9095,
+       "price": 10300,
+       "off": false,
+       "grp": "Maxsus takliflar",
+       "im": "/magic-x1.png"
+      },
+      {
+       "oid": "lukas_s_battle_bounty",
+       "name": "Lukas's Battle Bounty",
+       "usd": 0.7708,
+       "cost": 9095,
+       "price": 10100,
+       "off": false,
+       "grp": "Maxsus takliflar",
+       "im": "/magic-x3.png"
+      },
+      {
+       "oid": "lancelot_s_limited_time_gift",
+       "name": "Lancelot's Limited-Time Gift",
+       "usd": 0.8351,
+       "cost": 9854,
+       "price": 11400,
+       "off": false,
+       "grp": "Maxsus takliflar",
+       "im": "/magic-x12.png"
+      }
+     ]
+    },
+    {
+     "cat": "magic_chess_gogo_ru",
+     "label": "RU",
+     "fields": [
+      {
+       "key": "player_id",
+       "label": "Player ID",
+       "type": "text"
+      },
+      {
+       "key": "server_id",
+       "label": "Server ID",
+       "type": "text"
+      }
+     ],
+     "offers": [
+      {
+       "oid": "first_recharge_100_50_50_bonus",
+       "name": "50+50",
+       "usd": 0.9537,
+       "cost": 11254,
+       "price": 12300,
+       "off": false,
+       "grp": "Birinchi to'ldirish 2x",
+       "im": "/magic-x7.png"
+      },
+      {
+       "oid": "first_recharge_300_150_150_bonus",
+       "name": "150+150",
+       "usd": 2.8461,
+       "cost": 33584,
+       "price": 34800,
+       "off": false,
+       "grp": "Birinchi to'ldirish 2x",
+       "im": "/magic-x5.png"
+      },
+      {
+       "oid": "first_recharge_500_250_250_bonus",
+       "name": "250+250",
+       "usd": 4.734,
+       "cost": 55861,
+       "price": 56900,
+       "off": false,
+       "grp": "Birinchi to'ldirish 2x",
+       "im": "/magic-x6.png"
+      },
+      {
+       "oid": "first_recharge_1000_500_500_bonus",
+       "name": "500+500",
+       "usd": 9.538,
+       "cost": 112548,
+       "price": 113500,
+       "off": false,
+       "grp": "Birinchi to'ldirish 2x",
+       "im": "/magic-x18.png"
+      },
+      {
+       "oid": "55_diamonds",
+       "name": "55 Diamonds",
+       "usd": 0.949,
+       "cost": 11198,
+       "price": 12200,
+       "off": false,
+       "grp": "Olmoslar",
+       "im": "/magic-x26.png"
+      },
+      {
+       "oid": "165_diamonds",
+       "name": "165 Diamonds",
+       "usd": 2.825,
+       "cost": 33335,
+       "price": 34300,
+       "off": false,
+       "grp": "Olmoslar",
+       "im": "/magic-x11.png"
+      },
+      {
+       "oid": "275_diamonds",
+       "name": "275 Diamonds",
+       "usd": 4.734,
+       "cost": 55861,
+       "price": 56900,
+       "off": false,
+       "grp": "Olmoslar",
+       "im": "/magic-x13.png"
+      },
+      {
+       "oid": "565_diamonds",
+       "name": "565 Diamonds",
+       "usd": 9.4675,
+       "cost": 111716,
+       "price": 112700,
+       "off": false,
+       "grp": "Olmoslar",
+       "im": "/magic-x8.png"
+      },
+      {
+       "oid": "1060_diamonds",
+       "name": "1060 Diamonds",
+       "usd": 18.1464,
+       "cost": 214128,
+       "price": 250000,
+       "off": true,
+       "__i": 8,
+       "grp": "Olmoslar"
+      },
+      {
+       "oid": "1155_diamonds",
+       "name": "1155 Diamonds",
+       "usd": 18.9853,
+       "cost": 224027,
+       "price": 225000,
+       "off": false,
+       "grp": "Olmoslar",
+       "im": "/magic-x25.png"
+      },
+      {
+       "oid": "1765_diamonds",
+       "name": "1765 Diamonds",
+       "usd": 28.3924,
+       "cost": 335030,
+       "price": 391500,
+       "off": true,
+       "__i": 10,
+       "grp": "Olmoslar"
+      },
+      {
+       "oid": "2975_diamonds",
+       "name": "2975 Diamonds",
+       "usd": 47.3868,
+       "cost": 559164,
+       "price": 653000,
+       "off": true,
+       "__i": 11,
+       "grp": "Olmoslar"
+      },
+      {
+       "oid": "6000_diamonds",
+       "name": "6000 Diamonds",
+       "usd": 94.6526,
+       "cost": 1116901,
+       "price": 1304000,
+       "off": true,
+       "__i": 12,
+       "grp": "Olmoslar"
+      },
+      {
+       "oid": "weekly_card",
+       "name": "Weekly Card",
+       "usd": 0.96,
+       "cost": 11328,
+       "price": 12300,
+       "off": false,
+       "grp": "Obunalar kartasi",
+       "im": "/magic-x14.png"
+      },
+      {
+       "oid": "weekly_diamond_pass",
+       "name": "Weekly Diamond Pass",
+       "usd": 1.8227,
+       "cost": 21508,
+       "price": 24000,
+       "off": false,
+       "grp": "Obunalar kartasi",
+       "im": "/magic-x4.png"
+      },
+      {
+       "oid": "battle_for_discounts",
+       "name": "Battle for Discounts",
+       "usd": 0.9555,
+       "cost": 11275,
+       "price": 12300,
+       "off": false,
+       "grp": "Maxsus takliflar",
+       "im": "/magic-x1.png"
+      },
+      {
+       "oid": "lukas_s_battle_bounty",
+       "name": "Lukas's Battle Bounty",
+       "usd": 0.9555,
+       "cost": 11275,
+       "price": 12300,
+       "off": false,
+       "grp": "Maxsus takliflar",
+       "im": "/magic-x3.png"
+      }
+     ]
+    }
+   ],
+   "img": "/magic-x2.png"
+  },
+  {
+   "id": "modernstrikeonline",
+   "name": "Modern Strike Online",
+   "cats": [
+    {
+     "cat": "modern_strike_online",
+     "label": "Global",
+     "fields": [
+      {
+       "key": "player_id",
+       "label": "Player ID",
+       "type": "text"
+      }
+     ],
+     "offers": [
+      {
+       "oid": "10000_gold",
+       "name": "10000 Gold",
+       "usd": 4.886,
+       "cost": 60098,
+       "price": 75500,
+       "off": false,
+       "grp": "Gold",
+       "im": "/modern-x1.webp"
+      },
+      {
+       "oid": "16000_gold",
+       "name": "16000 Gold",
+       "usd": 7.028,
+       "cost": 86444,
+       "price": 101500,
+       "off": false,
+       "grp": "Gold",
+       "im": "/modern-x9.webp"
+      },
+      {
+       "oid": "35000_gold",
+       "name": "35000 Gold",
+       "usd": 13.148,
+       "cost": 161720,
+       "price": 181500,
+       "off": false,
+       "grp": "Gold",
+       "im": "/modern-x10.webp"
+      },
+      {
+       "oid": "60000_gold",
+       "name": "60000 Gold",
+       "usd": 20.084,
+       "cost": 247033,
+       "price": 277000,
+       "off": false,
+       "grp": "Gold",
+       "im": "/modern-x11.webp"
+      },
+      {
+       "oid": "300000_gold",
+       "name": "300000 Gold",
+       "usd": 61.169,
+       "cost": 752379,
+       "price": 843000,
+       "off": false,
+       "grp": "Gold",
+       "im": "/modern-x12.webp"
+      },
+      {
+       "oid": "10000_credits",
+       "name": "10000 Credits",
+       "usd": 3.56,
+       "cost": 43788,
+       "price": 59000,
+       "off": false,
+       "grp": "Credits",
+       "im": "/modern-x4.webp"
+      },
+      {
+       "oid": "25000_credits",
+       "name": "25000 Credits",
+       "usd": 7.028,
+       "cost": 86444,
+       "price": 101500,
+       "off": false,
+       "grp": "Credits",
+       "im": "/modern-x13.webp"
+      },
+      {
+       "oid": "55000_credits",
+       "name": "55000 Credits",
+       "usd": 11.138,
+       "cost": 136997,
+       "price": 153500,
+       "off": false,
+       "grp": "Credits",
+       "im": "/modern-x5.webp"
+      },
+      {
+       "oid": "100000_credits",
+       "name": "100000 Credits",
+       "usd": 16.075,
+       "cost": 197723,
+       "price": 221500,
+       "off": false,
+       "grp": "Credits",
+       "im": "/modern-x14.webp"
+      },
+      {
+       "oid": "vip_7_days",
+       "name": "VIP 7 Days",
+       "usd": 2.55,
+       "cost": 31365,
+       "price": 41500,
+       "off": false,
+       "grp": "Obunalar",
+       "im": "/modern-x6.webp"
+      },
+      {
+       "oid": "vip_14_days",
+       "name": "VIP 14 Days",
+       "usd": 3.968,
+       "cost": 48806,
+       "price": 64000,
+       "off": false,
+       "grp": "Obunalar",
+       "im": "/modern-x2.webp"
+      },
+      {
+       "oid": "vip_30_days",
+       "name": "VIP 30 Days",
+       "usd": 6.212,
+       "cost": 76408,
+       "price": 91500,
+       "off": false,
+       "grp": "Obunalar",
+       "im": "/modern-x3.webp"
+      },
+      {
+       "oid": "vip_60_days",
+       "name": "VIP 60 Days",
+       "usd": 8.945,
+       "cost": 110024,
+       "price": 123500,
+       "off": false,
+       "grp": "Obunalar",
+       "im": "/modern-x7.webp"
+      },
+      {
+       "oid": "battle_pass_premium",
+       "name": "Battle Pass Premium",
+       "usd": 4.886,
+       "cost": 60098,
+       "price": 75500,
+       "off": true
+      }
+     ]
+    }
+   ],
+   "img": "/modern-x8.jpg"
+  },
+  {
+   "id": "pointblank",
+   "name": "Point Blank",
+   "cats": [
+    {
+     "cat": "point_blank_id",
+     "label": "ID",
+     "fields": [
+      {
+       "key": "user_id",
+       "label": "User ID",
+       "type": "text"
+      }
+     ],
+     "offers": [
+      {
+       "oid": "1200_pb_cash",
+       "name": "1200 PB Cash",
+       "usd": 0.5,
+       "cost": 6150,
+       "price": 11500,
+       "off": false
+      },
+      {
+       "oid": "2400_pb_cash",
+       "name": "2400 PB Cash",
+       "usd": 1,
+       "cost": 12300,
+       "price": 17500,
+       "off": false
+      },
+      {
+       "oid": "6000_pb_cash",
+       "name": "6000 PB Cash",
+       "usd": 2.5,
+       "cost": 30750,
+       "price": 41000,
+       "off": false
+      },
+      {
+       "oid": "12000_pb_cash",
+       "name": "12000 PB Cash",
+       "usd": 5,
+       "cost": 61500,
+       "price": 76500,
+       "off": false
+      },
+      {
+       "oid": "24000_pb_cash",
+       "name": "24000 PB Cash",
+       "usd": 10.76,
+       "cost": 132348,
+       "price": 148500,
+       "off": false
+      },
+      {
+       "oid": "36000_pb_cash",
+       "name": "36000 PB Cash",
+       "usd": 16.14,
+       "cost": 198522,
+       "price": 222500,
+       "off": false
+      },
+      {
+       "oid": "60000_pb_cash",
+       "name": "60000 PB Cash",
+       "usd": 25.02,
+       "cost": 307746,
+       "price": 345000,
+       "off": false
+      }
+     ]
+    }
+   ],
+   "img": "/blank-x1.jpg",
+   "maint": true
+  },
+  {
+   "id": "rainbowsixmobile",
+   "name": "Rainbow Six Mobile",
+   "cats": [
+    {
+     "cat": "r6_mobile_global",
+     "label": "Global",
+     "fields": [
+      {
+       "key": "user_id",
+       "label": "User ID",
+       "type": "text"
+      }
+     ],
+     "offers": [
+      {
+       "oid": "50_platinum",
+       "name": "50 Platinum",
+       "usd": 0.683,
+       "cost": 8401,
+       "price": 13500,
+       "off": false,
+       "grp": "Platinum",
+       "im": "/rainbow-x1.webp"
+      },
+      {
+       "oid": "110_platinum",
+       "name": "110 Platinum",
+       "usd": 0.908,
+       "cost": 11168,
+       "price": 16500,
+       "off": false,
+       "grp": "Platinum",
+       "im": "/rainbow-x12.webp"
+      },
+      {
+       "oid": "300_platinum",
+       "name": "300 Platinum",
+       "usd": 2.611,
+       "cost": 32115,
+       "price": 42500,
+       "off": false,
+       "grp": "Platinum",
+       "im": "/rainbow-x13.webp"
+      },
+      {
+       "oid": "650_platinum",
+       "name": "650 Platinum",
+       "usd": 4.937,
+       "cost": 60725,
+       "price": 76000,
+       "off": false,
+       "grp": "Platinum",
+       "im": "/rainbow-x14.webp"
+      },
+      {
+       "oid": "1350_platinum",
+       "name": "1350 Platinum",
+       "usd": 9.823,
+       "cost": 120823,
+       "price": 135500,
+       "off": false,
+       "grp": "Platinum",
+       "im": "/rainbow-x5.webp"
+      },
+      {
+       "oid": "3500_platinum",
+       "name": "3500 Platinum",
+       "usd": 25.51,
+       "cost": 313773,
+       "price": 351500,
+       "off": false,
+       "grp": "Platinum",
+       "im": "/rainbow-x9.webp"
+      },
+      {
+       "oid": "7250_platinum",
+       "name": "7250 Platinum",
+       "usd": 53.111,
+       "cost": 653265,
+       "price": 732000,
+       "off": true
+      },
+      {
+       "oid": "11250_platinum",
+       "name": "11250 Platinum",
+       "usd": 78.56,
+       "cost": 966288,
+       "price": 1082500,
+       "off": true
+      },
+      {
+       "oid": "250_first_purchase_only",
+       "name": "250 (FIRST PURCHASE ONLY)",
+       "usd": 0.683,
+       "cost": 8401,
+       "price": 13500,
+       "off": true
+      },
+      {
+       "oid": "250_first_purchase",
+       "name": "250 (First Purchase)",
+       "usd": 0.6844,
+       "cost": 8418,
+       "price": 13500,
+       "off": false,
+       "grp": "Birinchi xarid",
+       "im": "/rainbow-x3.webp"
+      },
+      {
+       "oid": "600_first_purchase_only",
+       "name": "600 (FIRST PURCHASE ONLY)",
+       "usd": 3.244,
+       "cost": 39901,
+       "price": 50000,
+       "off": true
+      },
+      {
+       "oid": "600_first_purchase",
+       "name": "600 (First Purchase)",
+       "usd": 3.2834,
+       "cost": 40386,
+       "price": 55500,
+       "off": false,
+       "grp": "Birinchi xarid",
+       "im": "/rainbow-x4.webp"
+      },
+      {
+       "oid": "2700_first_purchase_only",
+       "name": "2700 (FIRST PURCHASE ONLY)",
+       "usd": 12.791,
+       "cost": 157329,
+       "price": 176500,
+       "off": true
+      },
+      {
+       "oid": "2700_first_purchase",
+       "name": "2700 (First Purchase)",
+       "usd": 12.9626,
+       "cost": 159440,
+       "price": 179000,
+       "off": false,
+       "grp": "Birinchi xarid",
+       "im": "/rainbow-x8.webp"
+      },
+      {
+       "oid": "7000_first_purchase_only",
+       "name": "7000 (FIRST PURCHASE ONLY)",
+       "usd": 31.875,
+       "cost": 392063,
+       "price": 439500,
+       "off": true
+      },
+      {
+       "oid": "7000_first_purchase",
+       "name": "7000 (First Purchase)",
+       "usd": 32.2884,
+       "cost": 397147,
+       "price": 445000,
+       "off": false,
+       "grp": "Birinchi xarid",
+       "im": "/rainbow-x11.webp"
+      }
+     ]
+    },
+    {
+     "cat": "r6_mobile_id",
+     "label": "ID",
+     "fields": [
+      {
+       "key": "user_id",
+       "label": "User ID",
+       "type": "text"
+      }
+     ],
+     "offers": [
+      {
+       "oid": "50_platinum",
+       "name": "50 Platinum",
+       "usd": 0.59,
+       "cost": 7257,
+       "price": 12500,
+       "off": false,
+       "grp": "Platinum",
+       "im": "/rainbow-x15.webp"
+      },
+      {
+       "oid": "110_platinum",
+       "name": "110 Platinum",
+       "usd": 1.16,
+       "cost": 14268,
+       "price": 19500,
+       "off": false,
+       "grp": "Platinum",
+       "im": "/rainbow-x16.webp"
+      },
+      {
+       "oid": "300_platinum",
+       "name": "300 Platinum",
+       "usd": 2.88,
+       "cost": 35424,
+       "price": 45500,
+       "off": false,
+       "grp": "Platinum",
+       "im": "/rainbow-x18.webp"
+      },
+      {
+       "oid": "650_platinum",
+       "name": "650 Platinum",
+       "usd": 5.71,
+       "cost": 70233,
+       "price": 85500,
+       "off": false,
+       "grp": "Platinum",
+       "im": "/rainbow-x20.webp"
+      },
+      {
+       "oid": "1350_platinum",
+       "name": "1350 Platinum",
+       "usd": 11.58,
+       "cost": 142434,
+       "price": 160000,
+       "off": false,
+       "grp": "Platinum",
+       "im": "/rainbow-x21.webp"
+      },
+      {
+       "oid": "3500_platinum",
+       "name": "3500 Platinum",
+       "usd": 28.78,
+       "cost": 353994,
+       "price": 396500,
+       "off": false,
+       "grp": "Platinum",
+       "im": "/rainbow-x23.webp"
+      },
+      {
+       "oid": "7250_platinum",
+       "name": "7250 Platinum",
+       "usd": 57.6,
+       "cost": 708480,
+       "price": 793500,
+       "off": true
+      },
+      {
+       "oid": "11250_platinum",
+       "name": "11250 Platinum",
+       "usd": 87.46,
+       "cost": 1075758,
+       "price": 1205000,
+       "off": true
+      },
+      {
+       "oid": "250_first_purchase_only",
+       "name": "250 (FIRST PURCHASE ONLY)",
+       "usd": 0.59,
+       "cost": 7257,
+       "price": 12500,
+       "off": false,
+       "grp": "Birinchi xarid",
+       "im": "/rainbow-x17.webp"
+      },
+      {
+       "oid": "600_first_purchase_only",
+       "name": "600 (FIRST PURCHASE ONLY)",
+       "usd": 2.88,
+       "cost": 35424,
+       "price": 45500,
+       "off": false,
+       "grp": "Birinchi xarid",
+       "im": "/rainbow-x19.webp"
+      },
+      {
+       "oid": "2700_first_purchase_only",
+       "name": "2700 (FIRST PURCHASE ONLY)",
+       "usd": 11.58,
+       "cost": 142434,
+       "price": 160000,
+       "off": false,
+       "grp": "Birinchi xarid",
+       "im": "/rainbow-x22.webp"
+      },
+      {
+       "oid": "7000_first_purchase_only",
+       "name": "7000 (FIRST PURCHASE ONLY)",
+       "usd": 28.78,
+       "cost": 353994,
+       "price": 396500,
+       "off": false,
+       "grp": "Birinchi xarid",
+       "im": "/rainbow-x24.webp"
+      }
+     ]
+    },
+    {
+     "cat": "r6_mobile_my",
+     "label": "MY",
+     "fields": [
+      {
+       "key": "user_id",
+       "label": "User ID",
+       "type": "text"
+      }
+     ],
+     "offers": [
+      {
+       "oid": "50_platinum",
+       "name": "50 Platinum",
+       "usd": 0.79,
+       "cost": 9717,
+       "price": 15000,
+       "off": false,
+       "grp": "Platinum",
+       "im": "/rainbow-x25.webp"
+      },
+      {
+       "oid": "110_platinum",
+       "name": "110 Platinum",
+       "usd": 1.55,
+       "cost": 19065,
+       "price": 29500,
+       "off": false,
+       "grp": "Platinum",
+       "im": "/rainbow-x26.webp"
+      },
+      {
+       "oid": "300_platinum",
+       "name": "300 Platinum",
+       "usd": 3.71,
+       "cost": 45633,
+       "price": 61000,
+       "off": false,
+       "grp": "Platinum",
+       "im": "/rainbow-x28.webp"
+      },
+      {
+       "oid": "650_platinum",
+       "name": "650 Platinum",
+       "usd": 7.41,
+       "cost": 91143,
+       "price": 106500,
+       "off": false,
+       "grp": "Platinum",
+       "im": "/rainbow-x30.webp"
+      },
+      {
+       "oid": "1350_platinum",
+       "name": "1350 Platinum",
+       "usd": 14.61,
+       "cost": 179703,
+       "price": 201500,
+       "off": false,
+       "grp": "Platinum",
+       "im": "/rainbow-x31.webp"
+      },
+      {
+       "oid": "3500_platinum",
+       "name": "3500 Platinum",
+       "usd": 37.12,
+       "cost": 456576,
+       "price": 511500,
+       "off": false,
+       "grp": "Platinum",
+       "im": "/rainbow-x33.webp"
+      },
+      {
+       "oid": "7250_platinum",
+       "name": "7250 Platinum",
+       "usd": 74.26,
+       "cost": 913398,
+       "price": 1023500,
+       "off": true
+      },
+      {
+       "oid": "11250_platinum",
+       "name": "11250 Platinum",
+       "usd": 112.52,
+       "cost": 1383996,
+       "price": 1550500,
+       "off": true
+      },
+      {
+       "oid": "250_first_purchase_only",
+       "name": "250 (FIRST PURCHASE ONLY)",
+       "usd": 0.79,
+       "cost": 9717,
+       "price": 15000,
+       "off": false,
+       "grp": "Birinchi xarid",
+       "im": "/rainbow-x27.webp"
+      },
+      {
+       "oid": "600_first_purchase_only",
+       "name": "600 (FIRST PURCHASE ONLY)",
+       "usd": 3.71,
+       "cost": 45633,
+       "price": 61000,
+       "off": false,
+       "grp": "Birinchi xarid",
+       "im": "/rainbow-x29.webp"
+      },
+      {
+       "oid": "2700_first_purchase_only",
+       "name": "2700 (FIRST PURCHASE ONLY)",
+       "usd": 14.61,
+       "cost": 179703,
+       "price": 201500,
+       "off": false,
+       "grp": "Birinchi xarid",
+       "im": "/rainbow-x32.webp"
+      },
+      {
+       "oid": "7000_first_purchase_only",
+       "name": "7000 (FIRST PURCHASE ONLY)",
+       "usd": 37.12,
+       "cost": 456576,
+       "price": 511500,
+       "off": false,
+       "grp": "Birinchi xarid",
+       "im": "/rainbow-x34.webp"
+      }
+     ]
+    },
+    {
+     "cat": "r6_mobile_ph",
+     "label": "PH",
+     "fields": [
+      {
+       "key": "user_id",
+       "label": "User ID",
+       "type": "text"
+      }
+     ],
+     "offers": [
+      {
+       "oid": "50_platinum",
+       "name": "50 Platinum",
+       "usd": 0.62,
+       "cost": 7626,
+       "price": 13000,
+       "off": false,
+       "grp": "Platinum",
+       "im": "/rainbow-x35.webp"
+      },
+      {
+       "oid": "110_platinum",
+       "name": "110 Platinum",
+       "usd": 1.23,
+       "cost": 15129,
+       "price": 25500,
+       "off": false,
+       "grp": "Platinum",
+       "im": "/rainbow-x36.webp"
+      },
+      {
+       "oid": "300_platinum",
+       "name": "300 Platinum",
+       "usd": 3.06,
+       "cost": 37638,
+       "price": 48000,
+       "off": false,
+       "grp": "Platinum",
+       "im": "/rainbow-x38.webp"
+      },
+      {
+       "oid": "650_platinum",
+       "name": "650 Platinum",
+       "usd": 6.14,
+       "cost": 75522,
+       "price": 91000,
+       "off": false,
+       "grp": "Platinum",
+       "im": "/rainbow-x40.webp"
+      },
+      {
+       "oid": "1350_platinum",
+       "name": "1350 Platinum",
+       "usd": 12.29,
+       "cost": 151167,
+       "price": 169500,
+       "off": false,
+       "grp": "Platinum",
+       "im": "/rainbow-x41.webp"
+      },
+      {
+       "oid": "3500_platinum",
+       "name": "3500 Platinum",
+       "usd": 30.61,
+       "cost": 376503,
+       "price": 422000,
+       "off": false,
+       "grp": "Platinum",
+       "im": "/rainbow-x43.webp"
+      },
+      {
+       "oid": "7250_platinum",
+       "name": "7250 Platinum",
+       "usd": 61.37,
+       "cost": 754851,
+       "price": 845500,
+       "off": true
+      },
+      {
+       "oid": "11250_platinum",
+       "name": "11250 Platinum",
+       "usd": 76.76,
+       "cost": 944148,
+       "price": 1057500,
+       "off": true
+      },
+      {
+       "oid": "250_first_purchase_only",
+       "name": "250 (FIRST PURCHASE ONLY)",
+       "usd": 0.62,
+       "cost": 7626,
+       "price": 13000,
+       "off": false,
+       "grp": "Birinchi xarid",
+       "im": "/rainbow-x37.webp"
+      },
+      {
+       "oid": "600_first_purchase_only",
+       "name": "600 (FIRST PURCHASE ONLY)",
+       "usd": 3.06,
+       "cost": 37638,
+       "price": 48000,
+       "off": false,
+       "grp": "Birinchi xarid",
+       "im": "/rainbow-x39.webp"
+      },
+      {
+       "oid": "2700_first_purchase_only",
+       "name": "2700 (FIRST PURCHASE ONLY)",
+       "usd": 12.29,
+       "cost": 151167,
+       "price": 169500,
+       "off": false,
+       "grp": "Birinchi xarid",
+       "im": "/rainbow-x42.webp"
+      },
+      {
+       "oid": "7000_first_purchase_only",
+       "name": "7000 (FIRST PURCHASE ONLY)",
+       "usd": 30.61,
+       "cost": 376503,
+       "price": 422000,
+       "off": false,
+       "grp": "Birinchi xarid",
+       "im": "/rainbow-x44.webp"
+      }
+     ]
+    },
+    {
+     "cat": "r6_mobile_sg",
+     "label": "SG",
+     "fields": [
+      {
+       "key": "user_id",
+       "label": "User ID",
+       "type": "text"
+      }
+     ],
+     "offers": [
+      {
+       "oid": "50_platinum",
+       "name": "50 Platinum",
+       "usd": 1.102,
+       "cost": 13555,
+       "price": 19000,
+       "off": false,
+       "grp": "Platinum",
+       "im": "/rainbow-x45.webp"
+      },
+      {
+       "oid": "110_platinum",
+       "name": "110 Platinum",
+       "usd": 2.213,
+       "cost": 27220,
+       "price": 37500,
+       "off": false,
+       "grp": "Platinum",
+       "im": "/rainbow-x46.webp"
+      },
+      {
+       "oid": "300_platinum",
+       "name": "300 Platinum",
+       "usd": 5.182,
+       "cost": 63739,
+       "price": 79000,
+       "off": false,
+       "grp": "Platinum",
+       "im": "/rainbow-x48.webp"
+      },
+      {
+       "oid": "650_platinum",
+       "name": "650 Platinum",
+       "usd": 11.128,
+       "cost": 136874,
+       "price": 153500,
+       "off": false,
+       "grp": "Platinum",
+       "im": "/rainbow-x50.webp"
+      },
+      {
+       "oid": "1350_platinum",
+       "name": "1350 Platinum",
+       "usd": 22.287,
+       "cost": 274130,
+       "price": 307500,
+       "off": false,
+       "grp": "Platinum",
+       "im": "/rainbow-x51.webp"
+      },
+      {
+       "oid": "3500_platinum",
+       "name": "3500 Platinum",
+       "usd": 54.978,
+       "cost": 676229,
+       "price": 757500,
+       "off": false,
+       "grp": "Platinum",
+       "im": "/rainbow-x53.webp"
+      },
+      {
+       "oid": "7250_platinum",
+       "name": "7250 Platinum",
+       "usd": 111.466,
+       "cost": 1371032,
+       "price": 1536000,
+       "off": true
+      },
+      {
+       "oid": "11250_platinum",
+       "name": "11250 Platinum",
+       "usd": 148.634,
+       "cost": 1828198,
+       "price": 2048000,
+       "off": true
+      },
+      {
+       "oid": "250_first_purchase_only",
+       "name": "250 (FIRST PURCHASE ONLY)",
+       "usd": 1.102,
+       "cost": 13555,
+       "price": 19000,
+       "off": true
+      },
+      {
+       "oid": "250_first_purchase",
+       "name": "250 (First Purchase)",
+       "usd": 1.1325,
+       "cost": 13930,
+       "price": 19000,
+       "off": false,
+       "grp": "Birinchi xarid",
+       "im": "/rainbow-x47.webp"
+      },
+      {
+       "oid": "600_first_purchase_only",
+       "name": "600 (FIRST PURCHASE ONLY)",
+       "usd": 5.182,
+       "cost": 63739,
+       "price": 79000,
+       "off": true
+      },
+      {
+       "oid": "600_first_purchase",
+       "name": "600 (First Purchase)",
+       "usd": 5.3447,
+       "cost": 65740,
+       "price": 81000,
+       "off": false,
+       "grp": "Birinchi xarid",
+       "im": "/rainbow-x49.webp"
+      },
+      {
+       "oid": "2700_first_purchase_only",
+       "name": "2700 (FIRST PURCHASE ONLY)",
+       "usd": 22.287,
+       "cost": 274130,
+       "price": 307500,
+       "off": true
+      },
+      {
+       "oid": "2700_first_purchase",
+       "name": "2700 (First Purchase)",
+       "usd": 22.9677,
+       "cost": 282503,
+       "price": 316500,
+       "off": false,
+       "grp": "Birinchi xarid",
+       "im": "/rainbow-x52.webp"
+      },
+      {
+       "oid": "7000_first_purchase_only",
+       "name": "7000 (FIRST PURCHASE ONLY)",
+       "usd": 54.978,
+       "cost": 676229,
+       "price": 757500,
+       "off": true
+      },
+      {
+       "oid": "7000_first_purchase",
+       "name": "7000 (First Purchase)",
+       "usd": 56.6657,
+       "cost": 696988,
+       "price": 781000,
+       "off": false,
+       "grp": "Birinchi xarid",
+       "im": "/rainbow-x54.webp"
+      }
+     ]
+    },
+    {
+     "cat": "r6_mobile_th",
+     "label": "TH",
+     "fields": [
+      {
+       "key": "user_id",
+       "label": "User ID",
+       "type": "text"
+      }
+     ],
+     "offers": [
+      {
+       "oid": "50_platinum",
+       "name": "50 Platinum",
+       "usd": 0.7,
+       "cost": 8610,
+       "price": 14000,
+       "off": false,
+       "grp": "Platinum",
+       "im": "/rainbow-x55.webp"
+      },
+      {
+       "oid": "110_platinum",
+       "name": "110 Platinum",
+       "usd": 1.39,
+       "cost": 17097,
+       "price": 27500,
+       "off": false,
+       "grp": "Platinum",
+       "im": "/rainbow-x56.webp"
+      },
+      {
+       "oid": "300_platinum",
+       "name": "300 Platinum",
+       "usd": 3.59,
+       "cost": 44157,
+       "price": 59500,
+       "off": false,
+       "grp": "Platinum",
+       "im": "/rainbow-x58.webp"
+      },
+      {
+       "oid": "650_platinum",
+       "name": "650 Platinum",
+       "usd": 6.94,
+       "cost": 85362,
+       "price": 100500,
+       "off": false,
+       "grp": "Platinum",
+       "im": "/rainbow-x60.webp"
+      },
+      {
+       "oid": "1350_platinum",
+       "name": "1350 Platinum",
+       "usd": 13.9,
+       "cost": 170970,
+       "price": 191500,
+       "off": false,
+       "grp": "Platinum",
+       "im": "/rainbow-x61.webp"
+      },
+      {
+       "oid": "3500_platinum",
+       "name": "3500 Platinum",
+       "usd": 34.82,
+       "cost": 428286,
+       "price": 480000,
+       "off": false,
+       "grp": "Platinum",
+       "im": "/rainbow-x63.webp"
+      },
+      {
+       "oid": "7250_platinum",
+       "name": "7250 Platinum",
+       "usd": 73.81,
+       "cost": 907863,
+       "price": 1017000,
+       "off": true
+      },
+      {
+       "oid": "11250_platinum",
+       "name": "11250 Platinum",
+       "usd": 111.13,
+       "cost": 1366899,
+       "price": 1531000,
+       "off": true
+      },
+      {
+       "oid": "250_first_purchase_only",
+       "name": "250 (FIRST PURCHASE ONLY)",
+       "usd": 0.7,
+       "cost": 8610,
+       "price": 14000,
+       "off": false,
+       "grp": "Birinchi xarid",
+       "im": "/rainbow-x57.webp"
+      },
+      {
+       "oid": "600_first_purchase_only",
+       "name": "600 (FIRST PURCHASE ONLY)",
+       "usd": 3.59,
+       "cost": 44157,
+       "price": 59500,
+       "off": false,
+       "grp": "Birinchi xarid",
+       "im": "/rainbow-x59.webp"
+      },
+      {
+       "oid": "2700_first_purchase_only",
+       "name": "2700 (FIRST PURCHASE ONLY)",
+       "usd": 13.9,
+       "cost": 170970,
+       "price": 191500,
+       "off": false,
+       "grp": "Birinchi xarid",
+       "im": "/rainbow-x62.webp"
+      },
+      {
+       "oid": "7000_first_purchase_only",
+       "name": "7000 (FIRST PURCHASE ONLY)",
+       "usd": 34.82,
+       "cost": 428286,
+       "price": 480000,
+       "off": false,
+       "grp": "Birinchi xarid",
+       "im": "/rainbow-x64.webp"
+      }
+     ]
+    },
+    {
+     "cat": "r6_mobile_us",
+     "label": "US",
+     "fields": [
+      {
+       "key": "user_id",
+       "label": "User ID",
+       "type": "text"
+      }
+     ],
+     "offers": [
+      {
+       "oid": "50_platinum",
+       "name": "50 Platinum",
+       "usd": 0.9,
+       "cost": 11070,
+       "price": 16500,
+       "off": false,
+       "grp": "Platinum",
+       "im": "/rainbow-x65.webp"
+      },
+      {
+       "oid": "110_platinum",
+       "name": "110 Platinum",
+       "usd": 1.81,
+       "cost": 22263,
+       "price": 32500,
+       "off": false,
+       "grp": "Platinum",
+       "im": "/rainbow-x66.webp"
+      },
+      {
+       "oid": "300_platinum",
+       "name": "300 Platinum",
+       "usd": 4.54,
+       "cost": 55842,
+       "price": 71000,
+       "off": false,
+       "grp": "Platinum",
+       "im": "/rainbow-x68.webp"
+      },
+      {
+       "oid": "650_platinum",
+       "name": "650 Platinum",
+       "usd": 9.09,
+       "cost": 111807,
+       "price": 125500,
+       "off": false,
+       "grp": "Platinum",
+       "im": "/rainbow-x70.webp"
+      },
+      {
+       "oid": "1350_platinum",
+       "name": "1350 Platinum",
+       "usd": 18.18,
+       "cost": 223614,
+       "price": 250500,
+       "off": false,
+       "grp": "Platinum",
+       "im": "/rainbow-x71.webp"
+      },
+      {
+       "oid": "3500_platinum",
+       "name": "3500 Platinum",
+       "usd": 45.45,
+       "cost": 559035,
+       "price": 626500,
+       "off": false,
+       "grp": "Platinum",
+       "im": "/rainbow-x73.webp"
+      },
+      {
+       "oid": "7250_platinum",
+       "name": "7250 Platinum",
+       "usd": 90.9,
+       "cost": 1118070,
+       "price": 1252500,
+       "off": true
+      },
+      {
+       "oid": "11250_platinum",
+       "name": "11250 Platinum",
+       "usd": 136.36,
+       "cost": 1677228,
+       "price": 1878500,
+       "off": true
+      },
+      {
+       "oid": "250_first_purchase_only",
+       "name": "250 (FIRST PURCHASE ONLY)",
+       "usd": 0.9,
+       "cost": 11070,
+       "price": 16500,
+       "off": false,
+       "grp": "Birinchi xarid",
+       "im": "/rainbow-x67.webp"
+      },
+      {
+       "oid": "600_first_purchase_only",
+       "name": "600 (FIRST PURCHASE ONLY)",
+       "usd": 4.54,
+       "cost": 55842,
+       "price": 71000,
+       "off": false,
+       "grp": "Birinchi xarid",
+       "im": "/rainbow-x69.webp"
+      },
+      {
+       "oid": "2700_first_purchase_only",
+       "name": "2700 (FIRST PURCHASE ONLY)",
+       "usd": 18.18,
+       "cost": 223614,
+       "price": 250500,
+       "off": false,
+       "grp": "Birinchi xarid",
+       "im": "/rainbow-x72.webp"
+      },
+      {
+       "oid": "7000_first_purchase_only",
+       "name": "7000 (FIRST PURCHASE ONLY)",
+       "usd": 45.45,
+       "cost": 559035,
+       "price": 626500,
+       "off": false,
+       "grp": "Birinchi xarid",
+       "im": "/rainbow-x74.webp"
+      }
+     ]
+    }
+   ],
+   "img": "/rainbow-x75.jpg"
+  },
+  {
+   "id": "swordofjustice",
+   "name": "Sword of Justice",
+   "cats": [
+    {
+     "cat": "sword_of_justice_eu",
+     "label": "EU",
+     "fields": [
+      {
+       "key": "user_id",
+       "label": "User ID",
+       "type": "text"
+      },
+      {
+       "key": "server",
+       "label": "Server",
+       "type": "select",
+       "options": [
+        {
+         "label": "Europe",
+         "value": "Europe"
+        }
+       ]
+      }
+     ],
+     "offers": [
+      {
+       "oid": "exquisite_treasure",
+       "name": "Exquisite Treasure",
+       "usd": 0.275,
+       "cost": 3383,
+       "price": 6000,
+       "off": true
+      },
+      {
+       "oid": "60_ornate_jades",
+       "name": "60 Ornate Jades",
+       "usd": 0.93,
+       "cost": 11439,
+       "price": 16500,
+       "off": false
+      },
+      {
+       "oid": "monthly_pass",
+       "name": "Monthly Pass",
+       "usd": 4.65,
+       "cost": 57195,
+       "price": 72500,
+       "off": false
+      },
+      {
+       "oid": "330_ornate_jades",
+       "name": "330 Ornate Jades",
+       "usd": 4.65,
+       "cost": 57195,
+       "price": 72500,
+       "off": false
+      },
+      {
+       "oid": "basic_battle_pass",
+       "name": "Basic Battle Pass",
+       "usd": 9.3,
+       "cost": 114390,
+       "price": 128500,
+       "off": false
+      },
+      {
+       "oid": "battle_pass_upgrade",
+       "name": "Battle Pass Upgrade",
+       "usd": 13.95,
+       "cost": 171585,
+       "price": 192500,
+       "off": false
+      },
+      {
+       "oid": "1100_ornate_jades",
+       "name": "1100 Ornate Jades",
+       "usd": 13.95,
+       "cost": 171585,
+       "price": 192500,
+       "off": false
+      },
+      {
+       "oid": "advanced_battle_pass",
+       "name": "Advanced Battle Pass",
+       "usd": 23.25,
+       "cost": 285975,
+       "price": 320500,
+       "off": false
+      },
+      {
+       "oid": "2268_ornate_jades",
+       "name": "2268 Ornate Jades",
+       "usd": 27.9,
+       "cost": 343170,
+       "price": 384500,
+       "off": false
+      },
+      {
+       "oid": "3808_ornate_jades",
+       "name": "3808 Ornate Jades",
+       "usd": 46.5,
+       "cost": 571950,
+       "price": 641000,
+       "off": false
+      },
+      {
+       "oid": "7776_ornate_jades",
+       "name": "7776 Ornate Jades",
+       "usd": 93,
+       "cost": 1143900,
+       "price": 1281500,
+       "off": false
+      }
+     ]
+    },
+    {
+     "cat": "sword_of_justice_na",
+     "label": "NA",
+     "fields": [
+      {
+       "key": "user_id",
+       "label": "User ID",
+       "type": "text"
+      },
+      {
+       "key": "server",
+       "label": "Server",
+       "type": "select",
+       "options": [
+        {
+         "label": "North America",
+         "value": "America"
+        }
+       ]
+      }
+     ],
+     "offers": [
+      {
+       "oid": "exquisite_treasure",
+       "name": "Exquisite Treasure",
+       "usd": 0.275,
+       "cost": 3383,
+       "price": 6000,
+       "off": true
+      },
+      {
+       "oid": "60_ornate_jades",
+       "name": "60 Ornate Jades",
+       "usd": 0.93,
+       "cost": 11439,
+       "price": 16500,
+       "off": false
+      },
+      {
+       "oid": "monthly_pass",
+       "name": "Monthly Pass",
+       "usd": 4.733,
+       "cost": 58216,
+       "price": 73500,
+       "off": false
+      },
+      {
+       "oid": "330_ornate_jades",
+       "name": "330 Ornate Jades",
+       "usd": 4.65,
+       "cost": 57195,
+       "price": 72500,
+       "off": false
+      },
+      {
+       "oid": "basic_battle_pass",
+       "name": "Basic Battle Pass",
+       "usd": 9.466,
+       "cost": 116432,
+       "price": 130500,
+       "off": false
+      },
+      {
+       "oid": "battle_pass_upgrade",
+       "name": "Battle Pass Upgrade",
+       "usd": 14.209,
+       "cost": 174771,
+       "price": 196000,
+       "off": false
+      },
+      {
+       "oid": "1100_ornate_jades",
+       "name": "1100 Ornate Jades",
+       "usd": 13.95,
+       "cost": 171585,
+       "price": 192500,
+       "off": false
+      },
+      {
+       "oid": "advanced_battle_pass",
+       "name": "Advanced Battle Pass",
+       "usd": 22.81,
+       "cost": 280563,
+       "price": 314500,
+       "off": false
+      },
+      {
+       "oid": "2268_ornate_jades",
+       "name": "2268 Ornate Jades",
+       "usd": 27.9,
+       "cost": 343170,
+       "price": 384500,
+       "off": false
+      },
+      {
+       "oid": "3808_ornate_jades",
+       "name": "3808 Ornate Jades",
+       "usd": 46.5,
+       "cost": 571950,
+       "price": 641000,
+       "off": false
+      },
+      {
+       "oid": "7776_ornate_jades",
+       "name": "7776 Ornate Jades",
+       "usd": 93,
+       "cost": 1143900,
+       "price": 1281500,
+       "off": false
+      }
+     ]
+    },
+    {
+     "cat": "sword_of_justice_sea",
+     "label": "SEA",
+     "fields": [
+      {
+       "key": "user_id",
+       "label": "User ID",
+       "type": "text"
+      },
+      {
+       "key": "server",
+       "label": "Server",
+       "type": "select",
+       "options": [
+        {
+         "label": "SouthEast Asia",
+         "value": "SouthEast Asia"
+        }
+       ]
+      }
+     ],
+     "offers": [
+      {
+       "oid": "exquisite_treasure",
+       "name": "Exquisite Treasure",
+       "usd": 0.24,
+       "cost": 2952,
+       "price": 5500,
+       "off": true
+      },
+      {
+       "oid": "60_ornate_jades",
+       "name": "60 Ornate Jades",
+       "usd": 0.93,
+       "cost": 11439,
+       "price": 16500,
+       "off": false
+      },
+      {
+       "oid": "monthly_pass",
+       "name": "Monthly Pass",
+       "usd": 4.17,
+       "cost": 51291,
+       "price": 66500,
+       "off": false
+      },
+      {
+       "oid": "330_ornate_jades",
+       "name": "330 Ornate Jades",
+       "usd": 4.57,
+       "cost": 56211,
+       "price": 71500,
+       "off": false
+      },
+      {
+       "oid": "basic_battle_pass",
+       "name": "Basic Battle Pass",
+       "usd": 7.9,
+       "cost": 97170,
+       "price": 112500,
+       "off": false
+      },
+      {
+       "oid": "battle_pass_upgrade",
+       "name": "Battle Pass Upgrade",
+       "usd": 12.67,
+       "cost": 155841,
+       "price": 175000,
+       "off": false
+      },
+      {
+       "oid": "1100_ornate_jades",
+       "name": "1100 Ornate Jades",
+       "usd": 14.107,
+       "cost": 173516,
+       "price": 194500,
+       "off": false
+      },
+      {
+       "oid": "advanced_battle_pass",
+       "name": "Advanced Battle Pass",
+       "usd": 19,
+       "cost": 233700,
+       "price": 262000,
+       "off": false
+      },
+      {
+       "oid": "2268_ornate_jades",
+       "name": "2268 Ornate Jades",
+       "usd": 28.213,
+       "cost": 347020,
+       "price": 389000,
+       "off": false
+      },
+      {
+       "oid": "3808_ornate_jades",
+       "name": "3808 Ornate Jades",
+       "usd": 45.686,
+       "cost": 561938,
+       "price": 629500,
+       "off": false
+      },
+      {
+       "oid": "7776_ornate_jades",
+       "name": "7776 Ornate Jades",
+       "usd": 88.169,
+       "cost": 1084479,
+       "price": 1215000,
+       "off": false
+      }
+     ]
+    }
+   ],
+   "img": "/sword-x1.jpg",
+   "maint": true
+  },
+  {
+   "id": "valorant",
+   "name": "Valorant",
+   "cats": [
+    {
+     "cat": "valorant_id",
+     "label": "ID",
+     "fields": [
+      {
+       "key": "riot_id",
+       "label": "Riot ID",
+       "type": "text"
+      }
+     ],
+     "offers": [
+      {
+       "oid": "475_vp",
+       "name": "475 VP",
+       "usd": 2.96,
+       "cost": 36408,
+       "price": 46500,
+       "off": false
+      },
+      {
+       "oid": "1000_vp",
+       "name": "1000 VP",
+       "usd": 5.91,
+       "cost": 72693,
+       "price": 88000,
+       "off": false
+      },
+      {
+       "oid": "2050_vp",
+       "name": "2050 VP",
+       "usd": 11.82,
+       "cost": 145386,
+       "price": 163000,
+       "off": false
+      },
+      {
+       "oid": "3650_vp",
+       "name": "3650 VP",
+       "usd": 20.53,
+       "cost": 252519,
+       "price": 283000,
+       "off": false
+      },
+      {
+       "oid": "5350_vp",
+       "name": "5350 VP",
+       "usd": 29.5,
+       "cost": 362850,
+       "price": 406500,
+       "off": false
+      },
+      {
+       "oid": "11000_vp",
+       "name": "11000 VP",
+       "usd": 58,
+       "cost": 713400,
+       "price": 799500,
+       "off": false
+      }
+     ]
+    },
+    {
+     "cat": "valorant_kh",
+     "label": "KH",
+     "fields": [
+      {
+       "key": "riot_id",
+       "label": "Riot ID",
+       "type": "text"
+      }
+     ],
+     "offers": [
+      {
+       "oid": "475_vp",
+       "name": "475 VP",
+       "usd": 4.64,
+       "cost": 57072,
+       "price": 72500,
+       "off": false
+      },
+      {
+       "oid": "1000_vp",
+       "name": "1000 VP",
+       "usd": 9.29,
+       "cost": 114267,
+       "price": 128000,
+       "off": false
+      },
+      {
+       "oid": "2050_vp",
+       "name": "2050 VP",
+       "usd": 18.58,
+       "cost": 228534,
+       "price": 256000,
+       "off": false
+      },
+      {
+       "oid": "3650_vp",
+       "name": "3650 VP",
+       "usd": 32.52,
+       "cost": 399996,
+       "price": 448000,
+       "off": false
+      },
+      {
+       "oid": "5350_vp",
+       "name": "5350 VP",
+       "usd": 46.46,
+       "cost": 571458,
+       "price": 640500,
+       "off": false
+      },
+      {
+       "oid": "11000_vp",
+       "name": "11000 VP",
+       "usd": 92.92,
+       "cost": 1142916,
+       "price": 1280500,
+       "off": false
+      }
+     ]
+    },
+    {
+     "cat": "valorant_my",
+     "label": "MY",
+     "fields": [
+      {
+       "key": "riot_id",
+       "label": "Riot ID",
+       "type": "text"
+      }
+     ],
+     "offers": [
+      {
+       "oid": "475_vp",
+       "name": "475 VP",
+       "usd": 3.88,
+       "cost": 47724,
+       "price": 63000,
+       "off": false
+      },
+      {
+       "oid": "1000_vp",
+       "name": "1000 VP",
+       "usd": 7.98,
+       "cost": 98154,
+       "price": 113500,
+       "off": false
+      },
+      {
+       "oid": "2050_vp",
+       "name": "2050 VP",
+       "usd": 15.48,
+       "cost": 190404,
+       "price": 213500,
+       "off": false
+      },
+      {
+       "oid": "3650_vp",
+       "name": "3650 VP",
+       "usd": 27.02,
+       "cost": 332346,
+       "price": 372500,
+       "off": false
+      },
+      {
+       "oid": "5350_vp",
+       "name": "5350 VP",
+       "usd": 38.54,
+       "cost": 474042,
+       "price": 531000,
+       "off": false
+      },
+      {
+       "oid": "11000_vp",
+       "name": "11000 VP",
+       "usd": 77.25,
+       "cost": 950175,
+       "price": 1064500,
+       "off": false
+      }
+     ]
+    },
+    {
+     "cat": "valorant_ph",
+     "label": "PH",
+     "fields": [
+      {
+       "key": "riot_id",
+       "label": "Riot ID",
+       "type": "text"
+      }
+     ],
+     "offers": [
+      {
+       "oid": "475_vp",
+       "name": "475 VP",
+       "usd": 3,
+       "cost": 36900,
+       "price": 47000,
+       "off": false
+      },
+      {
+       "oid": "1000_vp",
+       "name": "1000 VP",
+       "usd": 6.01,
+       "cost": 73923,
+       "price": 89000,
+       "off": false
+      },
+      {
+       "oid": "2050_vp",
+       "name": "2050 VP",
+       "usd": 12.03,
+       "cost": 147969,
+       "price": 166000,
+       "off": false
+      },
+      {
+       "oid": "3650_vp",
+       "name": "3650 VP",
+       "usd": 21.06,
+       "cost": 259038,
+       "price": 290500,
+       "off": false
+      },
+      {
+       "oid": "5350_vp",
+       "name": "5350 VP",
+       "usd": 30.09,
+       "cost": 370107,
+       "price": 415000,
+       "off": false
+      },
+      {
+       "oid": "11000_vp",
+       "name": "11000 VP",
+       "usd": 60.2,
+       "cost": 740460,
+       "price": 829500,
+       "off": false
+      }
+     ]
+    },
+    {
+     "cat": "valorant_sg",
+     "label": "SG",
+     "fields": [
+      {
+       "key": "riot_id",
+       "label": "Riot ID",
+       "type": "text"
+      }
+     ],
+     "offers": [
+      {
+       "oid": "475_vp",
+       "name": "475 VP",
+       "usd": 5.11,
+       "cost": 62853,
+       "price": 78000,
+       "off": false
+      },
+      {
+       "oid": "1000_vp",
+       "name": "1000 VP",
+       "usd": 10.23,
+       "cost": 125829,
+       "price": 141000,
+       "off": false
+      },
+      {
+       "oid": "2050_vp",
+       "name": "2050 VP",
+       "usd": 19.76,
+       "cost": 243048,
+       "price": 272500,
+       "off": false
+      },
+      {
+       "oid": "3650_vp",
+       "name": "3650 VP",
+       "usd": 34.4,
+       "cost": 423120,
+       "price": 474000,
+       "off": false
+      },
+      {
+       "oid": "5350_vp",
+       "name": "5350 VP",
+       "usd": 49.04,
+       "cost": 603192,
+       "price": 676000,
+       "off": false
+      },
+      {
+       "oid": "11000_vp",
+       "name": "11000 VP",
+       "usd": 98.83,
+       "cost": 1215609,
+       "price": 1361500,
+       "off": false
+      }
+     ]
+    },
+    {
+     "cat": "valorant_th",
+     "label": "TH",
+     "fields": [
+      {
+       "key": "riot_id",
+       "label": "Riot ID",
+       "type": "text"
+      }
+     ],
+     "offers": [
+      {
+       "oid": "475_vp",
+       "name": "475 VP",
+       "usd": 3.7,
+       "cost": 45510,
+       "price": 61000,
+       "off": false
+      },
+      {
+       "oid": "1000_vp",
+       "name": "1000 VP",
+       "usd": 7.4,
+       "cost": 91020,
+       "price": 106500,
+       "off": false
+      },
+      {
+       "oid": "2050_vp",
+       "name": "2050 VP",
+       "usd": 14.81,
+       "cost": 182163,
+       "price": 204500,
+       "off": false
+      },
+      {
+       "oid": "3650_vp",
+       "name": "3650 VP",
+       "usd": 26.19,
+       "cost": 322137,
+       "price": 361000,
+       "off": false
+      },
+      {
+       "oid": "5350_vp",
+       "name": "5350 VP",
+       "usd": 37.58,
+       "cost": 462234,
+       "price": 518000,
+       "off": false
+      },
+      {
+       "oid": "11000_vp",
+       "name": "11000 VP",
+       "usd": 75.17,
+       "cost": 924591,
+       "price": 1036000,
+       "off": false
+      }
+     ]
+    },
+    {
+     "cat": "valorant_vn",
+     "label": "VN",
+     "fields": [
+      {
+       "key": "riot_id",
+       "label": "Riot ID",
+       "type": "text"
+      }
+     ],
+     "offers": [
+      {
+       "oid": "50_vp",
+       "name": "50 VP",
+       "usd": 0.398,
+       "cost": 4895,
+       "price": 7500,
+       "off": true
+      },
+      {
+       "oid": "105_vp",
+       "name": "105 VP",
+       "usd": 0.806,
+       "cost": 9914,
+       "price": 15000,
+       "off": false
+      },
+      {
+       "oid": "268_vp",
+       "name": "268 VP",
+       "usd": 1.989,
+       "cost": 24465,
+       "price": 34500,
+       "off": false
+      },
+      {
+       "oid": "535_vp",
+       "name": "535 VP",
+       "usd": 3.998,
+       "cost": 49175,
+       "price": 64500,
+       "off": false
+      },
+      {
+       "oid": "1100_vp",
+       "name": "1100 VP",
+       "usd": 7.997,
+       "cost": 98363,
+       "price": 113500,
+       "off": false
+      },
+      {
+       "oid": "2895_vp",
+       "name": "2895 VP",
+       "usd": 19.972,
+       "cost": 245656,
+       "price": 275500,
+       "off": false
+      }
+     ]
+    }
+   ],
+   "img": "/valorant-x1.jpg",
+   "maint": true
+  },
+  {
+   "id": "wherewindsmeet",
+   "name": "Where Winds Meet",
+   "cats": [
+    {
+     "cat": "where_winds_meet",
+     "label": "MEET",
+     "fields": [
+      {
+       "key": "character_id",
+       "label": "Character ID",
+       "type": "text"
+      }
+     ],
+     "offers": [
+      {
+       "oid": "60_echo_beads",
+       "name": "60 Echo Beads",
+       "usd": 0.93,
+       "cost": 11439,
+       "price": 16500,
+       "off": false,
+       "im": "/where-x8.webp"
+      },
+      {
+       "oid": "180_echo_beads",
+       "name": "180 Echo Beads",
+       "usd": 2.73,
+       "cost": 33579,
+       "price": 44000,
+       "off": false,
+       "im": "/where-x1.webp"
+      },
+      {
+       "oid": "300_echo_beads",
+       "name": "300 Echo Beads",
+       "usd": 4.57,
+       "cost": 56211,
+       "price": 71500,
+       "off": false,
+       "im": "/where-x9.webp"
+      },
+      {
+       "oid": "monthly_pass",
+       "name": "Monthly Pass",
+       "usd": 4.57,
+       "cost": 56211,
+       "price": 71500,
+       "off": false,
+       "im": "/where-x6.webp"
+      },
+      {
+       "oid": "600_echo_beads",
+       "name": "600 Echo Beads",
+       "usd": 9.14,
+       "cost": 112422,
+       "price": 126000,
+       "off": false,
+       "im": "/where-x11.webp"
+      },
+      {
+       "oid": "elite_battle_pass",
+       "name": "Elite Battle Pass",
+       "usd": 9.14,
+       "cost": 112422,
+       "price": 126000,
+       "off": false,
+       "im": "/where-x10.webp"
+      },
+      {
+       "oid": "900_echo_beads",
+       "name": "900 Echo Beads",
+       "usd": 13.78,
+       "cost": 169494,
+       "price": 190000,
+       "off": false,
+       "im": "/where-x3.webp"
+      },
+      {
+       "oid": "premium_battle_pass",
+       "name": "Premium Battle Pass",
+       "usd": 18.28,
+       "cost": 224844,
+       "price": 252000,
+       "off": false,
+       "im": "/where-x7.webp"
+      },
+      {
+       "oid": "1800_echo_beads",
+       "name": "1800 Echo Beads",
+       "usd": 27.58,
+       "cost": 339234,
+       "price": 380000,
+       "off": false,
+       "im": "/where-x2.webp"
+      },
+      {
+       "oid": "3000_echo_beads",
+       "name": "3000 Echo Beads",
+       "usd": 45.7,
+       "cost": 562110,
+       "price": 630000,
+       "off": false,
+       "im": "/where-x4.webp"
+      },
+      {
+       "oid": "6000_echo_beads",
+       "name": "6000 Echo Beads",
+       "usd": 92.21,
+       "cost": 1134183,
+       "price": 1270500,
+       "off": false,
+       "im": "/where-x5.webp"
+      },
+      {
+       "oid": "12000_echo_beads",
+       "name": "12000 Echo Beads",
+       "usd": 184.26,
+       "cost": 2266398,
+       "price": 2538500,
+       "off": true
+      }
+     ]
+    }
+   ],
+   "img": "/meet-x1.jpg",
+   "hbg": "/where-x12.webp"
+  },
+  {
+   "id": "zenlesszonezero",
+   "name": "Zenless Zone Zero",
+   "cats": [
+    {
+     "cat": "zenless_zone_zero_global",
+     "label": "Global",
+     "fields": [
+      {
+       "key": "player_id",
+       "label": "Player ID",
+       "type": "text"
+      },
+      {
+       "key": "server",
+       "label": "Server",
+       "type": "select",
+       "options": [
+        {
+         "label": "Asia",
+         "value": "asia"
+        },
+        {
+         "label": "America",
+         "value": "america"
+        },
+        {
+         "label": "Europe",
+         "value": "europe"
+        },
+        {
+         "label": "TW,HK,MO",
+         "value": "tw_hk_mo"
+        }
+       ]
+      }
+     ],
+     "offers": [
+      {
+       "oid": "60_monochromes",
+       "name": "60 Monochromes",
+       "usd": 0.9651,
+       "cost": 11871,
+       "price": 17000,
+       "off": false
+      },
+      {
+       "oid": "300_30_monochromes",
+       "name": "300 + 30 Monochromes",
+       "usd": 4.8783,
+       "cost": 60003,
+       "price": 75500,
+       "off": false
+      },
+      {
+       "oid": "980_110_monochromes",
+       "name": "980 + 110 Monochromes",
+       "usd": 14.6349,
+       "cost": 180009,
+       "price": 202000,
+       "off": false
+      },
+      {
+       "oid": "1980_260_monochromes",
+       "name": "1980 + 260 Monochromes",
+       "usd": 29.2698,
+       "cost": 360019,
+       "price": 403500,
+       "off": false
+      },
+      {
+       "oid": "3280_600_monochromes",
+       "name": "3280 + 600 Monochromes",
+       "usd": 48.783,
+       "cost": 600031,
+       "price": 672500,
+       "off": false
+      },
+      {
+       "oid": "6480_1600_monochromes",
+       "name": "6480 + 1600 Monochromes",
+       "usd": 97.566,
+       "cost": 1200062,
+       "price": 1344500,
+       "off": false
+      },
+      {
+       "oid": "inter_knot_membership",
+       "name": "Inter-Knot Membership",
+       "usd": 4.8783,
+       "cost": 60003,
+       "price": 75500,
+       "off": false
+      }
+     ]
+    },
+    {
+     "cat": "zenless_zone_zero_ru",
+     "label": "RU",
+     "fields": [
+      {
+       "key": "player_id",
+       "label": "Player ID",
+       "type": "text"
+      },
+      {
+       "key": "server",
+       "label": "Server",
+       "type": "select",
+       "options": [
+        {
+         "label": "Asia",
+         "value": "asia"
+        },
+        {
+         "label": "America",
+         "value": "america"
+        },
+        {
+         "label": "Europe",
+         "value": "europe"
+        },
+        {
+         "label": "TW,HK,MO",
+         "value": "tw_hk_mo"
+        }
+       ]
+      }
+     ],
+     "offers": [
+      {
+       "oid": "60_monochromes",
+       "name": "60 Monochromes",
+       "usd": 0.91,
+       "cost": 11193,
+       "price": 16500,
+       "off": false
+      },
+      {
+       "oid": "300_30_monochromes",
+       "name": "300 + 30 Monochromes",
+       "usd": 4.6,
+       "cost": 56580,
+       "price": 72000,
+       "off": false
+      },
+      {
+       "oid": "inter_knot_membership",
+       "name": "Inter-Knot Membership",
+       "usd": 4.6,
+       "cost": 56580,
+       "price": 72000,
+       "off": false
+      },
+      {
+       "oid": "980_110_monochromes",
+       "name": "980 + 110 Monochromes",
+       "usd": 13.8,
+       "cost": 169740,
+       "price": 190500,
+       "off": false
+      },
+      {
+       "oid": "1980_260_monochromes",
+       "name": "1980 + 260 Monochromes",
+       "usd": 27.6,
+       "cost": 339480,
+       "price": 380500,
+       "off": false
+      },
+      {
+       "oid": "3280_600_monochromes",
+       "name": "3280 + 600 Monochromes",
+       "usd": 46,
+       "cost": 565800,
+       "price": 634000,
+       "off": false
+      },
+      {
+       "oid": "6480_1600_monochromes",
+       "name": "6480 + 1600 Monochromes",
+       "usd": 92,
+       "cost": 1131600,
+       "price": 1267500,
+       "off": false
+      }
+     ]
+    },
+    {
+     "cat": "zenless_zone_zero_us",
+     "label": "US",
+     "fields": [
+      {
+       "key": "player_id",
+       "label": "Player ID",
+       "type": "text"
+      },
+      {
+       "key": "server",
+       "label": "Server",
+       "type": "select",
+       "options": [
+        {
+         "label": "Asia",
+         "value": "asia"
+        },
+        {
+         "label": "America",
+         "value": "america"
+        },
+        {
+         "label": "Europe",
+         "value": "europe"
+        },
+        {
+         "label": "TW,HK,MO",
+         "value": "tw_hk_mo"
+        }
+       ]
+      }
+     ],
+     "offers": [
+      {
+       "oid": "60_monochromes",
+       "name": "60 Monochromes",
+       "usd": 0.91,
+       "cost": 11193,
+       "price": 16500,
+       "off": false
+      },
+      {
+       "oid": "300_30_monochromes",
+       "name": "300 + 30 Monochromes",
+       "usd": 4.6,
+       "cost": 56580,
+       "price": 72000,
+       "off": false
+      },
+      {
+       "oid": "inter_knot_membership",
+       "name": "Inter-Knot Membership",
+       "usd": 4.6,
+       "cost": 56580,
+       "price": 72000,
+       "off": false
+      },
+      {
+       "oid": "980_110_monochromes",
+       "name": "980 + 110 Monochromes",
+       "usd": 13.8,
+       "cost": 169740,
+       "price": 190500,
+       "off": false
+      },
+      {
+       "oid": "1980_260_monochromes",
+       "name": "1980 + 260 Monochromes",
+       "usd": 27.6,
+       "cost": 339480,
+       "price": 380500,
+       "off": false
+      },
+      {
+       "oid": "3280_600_monochromes",
+       "name": "3280 + 600 Monochromes",
+       "usd": 46,
+       "cost": 565800,
+       "price": 634000,
+       "off": false
+      },
+      {
+       "oid": "6480_1600_monochromes",
+       "name": "6480 + 1600 Monochromes",
+       "usd": 92,
+       "cost": 1131600,
+       "price": 1267500,
+       "off": false
+      }
+     ]
+    }
+   ],
+   "img": "/zenlees-x1.jpg",
+   "maint": true
+  }
+ ]
+}
