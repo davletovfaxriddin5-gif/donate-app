@@ -1388,6 +1388,29 @@ async function tgAsk(method, body){
 }
 
 const pendTop = {};      /* /toldirish: admin -> kutilayotgan foydalanuvchi id */
+const pendCut = {};      /* /yechish: admin -> kutilayotgan foydalanuvchi id */
+
+/* ---------- Qo'lda to'ldirilganda mijozga ketadigan tushuntirish ----------
+   Ko'pchilik hisob to'ldirishda ekranda ko'rsatilgan aniq summani emas,
+   yumaloqlangan summani yuboradi (40 100 o'rniga 40 000). Shunda tizim
+   to'lovni taniy olmaydi. Shu xabar buni bir marta tushuntiradi. */
+const OTZIV_URL = "https://t.me/mlbb_otzivv";
+function topupNote(balance){
+  return "\u2705 Balansingiz to'ldirildi\n" +
+         "Joriy balans: " + balance + " so'm\n\n" +
+         "\u2139\uFE0F Nega avtomatik tushmadi?\n\n" +
+         "Hisobni to'ldirishda ekranda sizga ANIQ summa ko'rsatiladi. " +
+         "Masalan 40 000 so'm yozsangiz, ekranda 40 100 yoki 40 200 deb chiqadi. " +
+         "Tizim to'lovni aynan o'sha aniq summa orqali taniydi \u2014 shuning uchun " +
+         "har bir odamga boshqacha raqam beriladi.\n\n" +
+         "Siz yumaloq summa yuborganingiz uchun to'lov egasini topib bo'lmadi va " +
+         "balansingiz qo'llab-quvvatlash orqali qo'lda to'ldirildi.\n\n" +
+         "Keyingi safar ekrandagi summani oxirgi raqamigacha ko'chiring \u2014 " +
+         "shunda pul bir necha soniyada o'zi tushadi.\n\n" +
+         "\u2B50 Agar yordamimiz yoqqan bo'lsa, bir og'iz fikr qoldirsangiz biz uchun " +
+         "katta quvvat bo'ladi. Pastdagi tugma orqali yozib qoldirishingiz mumkin.";
+}
+const OTZIV_KB = { inline_keyboard: [[ { text: "\u2B50 Fikr qoldirish", url: OTZIV_URL } ]] };
 function tgCall(method, body){
   if(!TOKEN) return;
   fetch("https://api.telegram.org/bot"+TOKEN+"/"+method, {
@@ -3166,6 +3189,58 @@ app.post("/webhook", (req,res)=>{
       return;
     }
     /* /toldirish @username  \u2014 ikki qadamli balans to'ldirish */
+    /* /bekor - kutilayotgan to'ldirish yoki yechishni bekor qiladi */
+    if(text.indexOf("/bekor") === 0 && (pendTop[fromId] || pendCut[fromId])){
+      if(ADMIN_ID && fromId !== ADMIN_ID) return;
+      delete pendTop[fromId]; delete pendCut[fromId];
+      send(fromId, "\u274C Bekor qilindi");
+      return;
+    }
+    /* /yechish @username - balansdan pul yechish (xato to'ldirishni qaytarish) */
+    if(text.indexOf("/yechish") === 0){
+      if(ADMIN_ID && fromId !== ADMIN_ID) return;
+      const q3 = text.replace("/yechish", "").trim().replace(/^@/, "").toLowerCase();
+      if(!q3){
+        send(fromId, "Ishlatilishi:\n/yechish @username\nyoki\n/yechish 123456789");
+        return;
+      }
+      const db3 = load();
+      let hit3 = "";
+      Object.keys(db3).forEach(function(k){
+        if(!/^\d+$/.test(k)) return;
+        if(k === q3) hit3 = k;
+        else if(db3[k].un && db3[k].un === q3) hit3 = k;
+      });
+      if(!hit3){ send(fromId, "\u274C \"" + q3 + "\" topilmadi."); return; }
+      const u3 = urec(db3, hit3);
+      pendCut[fromId] = hit3;
+      save(db3);
+      send(fromId, "\uD83D\uDCB8 " + (u3.nm || hit3) + (u3.un ? " (@" + u3.un + ")" : "") +
+                   "\nid: " + hit3 +
+                   "\nJoriy balans: " + (u3.balance || 0) + " so'm" +
+                   "\n\nQancha so'm YECHMOQCHISIZ? Raqam yozing." +
+                   "\nHammasini yechish uchun: hammasi" +
+                   "\nBekor qilish: /bekor");
+      return;
+    }
+    /* /yechish dan keyingi raqam yoki "hammasi" */
+    if(pendCut[fromId] && (/^\d+$/.test(text.trim()) || /^hammasi$/i.test(text.trim()))){
+      const tgt = pendCut[fromId];
+      delete pendCut[fromId];
+      const db4 = load();
+      const u4 = urec(db4, tgt);
+      const eski4 = Number(u4.balance) || 0;
+      const all4 = /^hammasi$/i.test(text.trim());
+      let sum = all4 ? eski4 : Number(text.trim());
+      if(sum > eski4) sum = eski4;                 /* minusga tushirmaymiz */
+      u4.balance = eski4 - sum;
+      save(db4);
+      send(fromId, "\u2705 " + (u4.nm || tgt) + (u4.un ? " (@" + u4.un + ")" : "") + "\n" +
+                   "Yechildi: " + sum + " so'm\n" +
+                   eski4 + " \u2192 " + u4.balance + " so'm");
+      if(sum > 0) send(tgt, "\u2139\uFE0F Balansingiz to'g'irlandi.\nJoriy balans: " + u4.balance + " so'm");
+      return;
+    }
     if(text.indexOf("/toldirish") === 0 || text.indexOf("/to'ldirish") === 0){
       if(ADMIN_ID && fromId !== ADMIN_ID) return;
       const q = text.replace(/^\/to'?ldirish/, "").trim().replace(/^@/, "").toLowerCase();
@@ -3206,7 +3281,7 @@ app.post("/webhook", (req,res)=>{
       u.balance += Number(text.trim());
       save(db);
       send(fromId, "\u2705 " + (u.nm || target) + "\n" + eski + " \u2192 " + u.balance + " so'm");
-      send(target, "\u2705 Balansingiz to'ldirildi!\nJoriy balans: " + u.balance + " so'm");
+      send(target, topupNote(u.balance), OTZIV_KB);
       return;
     }
     /* /balans <uid> <summa>  \u2014 balansni QO'LDA o'rnatish (faqat admin).
