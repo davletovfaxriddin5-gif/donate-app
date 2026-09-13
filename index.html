@@ -113,7 +113,7 @@ input{font-family:inherit}
 .gd-head .nm{font-weight:800;font-size:19px;letter-spacing:-.4px;line-height:1.1;text-transform:uppercase}
 .gd-head .cur{font-size:17px;margin-top:3px}
 /* Chetda yashiringan qahramon \u2014 o'lchamlarni shu yerdan sozlanadi */
-:root{ --peek-h:124px; --peek-right:-12px; --peek-top:300px }
+:root{ --peek-h:124px; --peek-right:-12px; --peek-top:336px }
 .gd-head.hasbg{background-size:cover;background-position:center;overflow:hidden;position:relative;
   background-clip:padding-box;border-color:rgba(11,17,32,.85)}
 .gd-head.hasbg>*{position:relative;z-index:2}
@@ -312,7 +312,7 @@ input{font-family:inherit}
 .chg-btn{background:none;border:none;padding:4px 2px;color:#7E93FF;font-size:12.5px;font-weight:500;
   font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif;white-space:nowrap}
 .chg-btn:active{opacity:.55}
-.toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 12px);transform:translateX(-50%) translateY(-20px);
+.toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top) + var(--tg-top, 46px) + 6px);transform:translateX(-50%) translateY(-20px);
   background:var(--card-2);border:1px solid var(--stroke-2);color:#fff;padding:12px 18px;border-radius:13px;
   font-size:13px;font-weight:600;z-index:99;opacity:0;transition:.25s;box-shadow:0 12px 30px rgba(0,0,0,.5);
   pointer-events:none;max-width:88%;text-align:center}
@@ -1312,17 +1312,6 @@ body.kb-open .mg-empty{ display:none }
 /* Klaviatura ochilganda "Sotib olish" tugmasi uning ustiga chiqib qolardi. */
 body.kb-open .buy-bar{ display:none !important }
 
-/* Pastga surib yangilaganda chiqadigan belgi */
-.pt-spin{ position:fixed; left:50%; top:calc(env(safe-area-inset-top) + var(--tg-top, 46px));
-  transform:translateX(-50%) scale(.7); width:34px; height:34px; border-radius:50%;
-  background:var(--card); border:1px solid var(--stroke); display:grid; place-items:center;
-  opacity:0; pointer-events:none; z-index:200; transition:opacity .2s, transform .2s }
-.pt-spin.on{ opacity:1; transform:translateX(-50%) scale(1) }
-.pt-spin span{ width:15px; height:15px; border-radius:50%;
-  border:2px solid var(--stroke-2); border-top-color:var(--blue);
-  animation:ptr .7s linear infinite }
-@keyframes ptr{ to{ transform:rotate(360deg) } }
-
 .pw-lock{ position:fixed; inset:0; z-index:400; display:none; place-items:center;
   background:var(--bg); padding:24px }
 .pw-lock.on{ display:grid }
@@ -1443,7 +1432,6 @@ body.kb-open .buy-bar{ display:none !important }
 </svg>
 
 <div class="toast" id="toast"></div>
-<div class="pt-spin" id="ptSpin"><span></span></div>
 
 <script>
 const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
@@ -6211,44 +6199,6 @@ function loadBalance(){
     }
   }).catch(function(){});
 }
-/* ---------- Pastga surib yangilash ----------
-   Sahifaning eng tepasida turib barmoq bilan pastga tortilsa, balans
-   serverdan qaytadan olinadi. Sahifa qayta yuklanmaydi, hech qanday
-   Telegram hodisasiga ulanmaydi — faqat barmoq harakatini kuzatadi. */
-let ptY = -1, ptGo = false, ptBusy = false;
-function ptRun(){
-  if(ptBusy) return;
-  ptBusy = true;
-  haptic('medium');
-  const sp = document.getElementById('ptSpin');
-  if(sp) sp.classList.add('on');
-  try{ loadBalance(); }catch(e){}
-  setTimeout(function(){
-    ptBusy = false;
-    if(sp) sp.classList.remove('on');
-    notify('success');
-  }, 900);
-}
-document.addEventListener('touchstart', function(e){
-  ptY = -1; ptGo = false;
-  if(ptBusy || e.touches.length !== 1) return;
-  if(document.body.classList.contains('kb-open')) return;
-  /* tugma, maydon yoki gorizontal ro'yxat ustida bo'lsa — aralashmaymiz */
-  const t = e.target;
-  if(t && t.closest && t.closest('button, input, textarea, a, .scroll, .sheet')) return;
-  const sc = document.scrollingElement || document.documentElement;
-  if(sc.scrollTop > 0) return;
-  ptY = e.touches[0].clientY;
-}, { passive:true });
-document.addEventListener('touchmove', function(e){
-  if(ptY < 0 || ptBusy) return;
-  if(e.touches[0].clientY - ptY > 110) ptGo = true;
-}, { passive:true });
-document.addEventListener('touchend', function(){
-  if(ptGo) ptRun();
-  ptY = -1; ptGo = false;
-}, { passive:true });
-
 function loadPhone(){
   const uid = tgUser && tgUser.id ? tgUser.id : '';
   if(!uid) return;
