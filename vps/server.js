@@ -1405,6 +1405,120 @@ async function tgAsk(method, body){
 const pendTop = {};      /* /toldirish: admin -> kutilayotgan foydalanuvchi id */
 const pendCut = {};      /* /yechish: admin -> kutilayotgan foydalanuvchi id */
 
+function n0(x){ return String(Math.round(Number(x)||0)).replace(/\B(?=(\d{3})+(?!\d))/g, " "); }
+
+/* Davr bo'yicha barcha buyurtmalarni yig'ib, hisobot matnini qaytaradi */
+function profitReport(days){
+  const db  = load();
+  const now = Date.now();
+  const from = Math.max(now - days*86400e3, Date.parse(PROFIT_FROM + "T00:00:00Z"));
+  const prevFrom = from - days*86400e3;
+  const DEAD = ["cancel","refund","expired"];          /* bular hisobga olinmaydi */
+
+  let n=0, sum=0, cost=0, pn=0, psum=0;
+  const games={}, packs={}, buyers={}, firstSeen={};
+  let noCost=0;
+
+  Object.keys(db).forEach(function(uid){
+    if(!/^\d+$/.test(uid)) return;
+    const u = db[uid] || {};
+    (u.orders||[]).forEach(function(o){
+      const t = o.at ? Date.parse(o.at) : 0;
+      if(!t) return;
+      if(DEAD.indexOf(String(o.status)) > -1) return;
+      const pr = Number(o.price)||0, co = Number(o.cost)||0;
+      if(t >= prevFrom && t < from){ pn++; psum += pr; return; }
+      if(t < from) return;
+      n++; sum += pr; cost += co;
+      if(!co) noCost++;
+      const g = o.game || "?";
+      if(!games[g]) games[g] = { n:0, sum:0, prof:0 };
+      games[g].n++; games[g].sum += pr; games[g].prof += (pr - co);
+      const pk = g + " \u2014 " + (o.package || "?");
+      packs[pk] = (packs[pk]||0) + 1;
+      buyers[uid] = (buyers[uid]||0) + pr;
+      if(!firstSeen[uid] || t < firstSeen[uid]) firstSeen[uid] = t;
+    });
+  });
+
+  if(!n) return "\uD83D\uDCCA Bu davrda buyurtma yo'q.\n\nSanoq " + PROFIT_FROM + " dan boshlanadi.";
+
+  /* davr ichida BIRINCHI marta buyurtma bergani — yangi mijoz */
+  let fresh = 0;
+  Object.keys(firstSeen).forEach(function(uid){
+    const u = db[uid] || {};
+    const older = (u.orders||[]).some(function(o){
+      const t = o.at ? Date.parse(o.at) : 0;
+      return t && t < from && DEAD.indexOf(String(o.status)) < 0;
+    });
+    if(!older) fresh++;
+  });
+
+  const prof = sum - cost;
+  const pct  = sum ? (prof / sum * 100) : 0;
+  const grow = psum ? Math.round((sum - psum) / psum * 100) : null;
+
+  const gList = Object.keys(games).sort(function(a,b){ return games[b].sum - games[a].sum; });
+  const pList = Object.keys(packs).sort(function(a,b){ return packs[b] - packs[a]; });
+  const bList = Object.keys(buyers).sort(function(a,b){ return buyers[b] - buyers[a]; }).slice(0,10);
+
+  let t = "\uD83D\uDCCA HISOBOT \u2014 " + days + " kun\n";
+  t += "(" + new Date(from).toISOString().slice(0,10) + " \u2192 bugun)\n\n";
+  t += "Buyurtmalar: " + n + " ta\n";
+  t += "Tushum:      " + n0(sum) + " so'm\n";
+  t += "Tannarx:     " + n0(cost) + " so'm\n";
+  t += "SOF FOYDA:   " + n0(prof) + " so'm  (" + pct.toFixed(1) + "%)\n";
+  t += "O'rtacha buyurtma: " + n0(sum/n) + " so'm\n";
+  if(grow !== null) t += "Oldingi davrga nisbatan: " + (grow>0?"+":"") + grow + "%\n";
+  t += "Yangi mijozlar: " + fresh + " ta\n";
+  if(noCost) t += "\n\u26A0\uFE0F " + noCost + " ta buyurtmada tannarx yo'q (foyda to'liq emas)\n";
+
+  t += "\n\u2500\u2500 O'YINLAR \u2500\u2500\n";
+  gList.slice(0,12).forEach(function(g){
+    t += g + "\n   " + games[g].n + " ta \u00B7 " + n0(games[g].sum) + " so'm \u00B7 foyda " + n0(games[g].prof) + "\n";
+  });
+
+  t += "\n\u2500\u2500 ENG KO'P SOTILGAN \u2500\u2500\n";
+  pList.slice(0,5).forEach(function(pk, i){
+    t += (i+1) + ". " + pk + " \u2014 " + packs[pk] + " ta\n";
+  });
+
+  t += "\n\u2500\u2500 TOP 10 MIJOZ \u2500\u2500\n";
+  bList.forEach(function(uid, i){
+    const u = db[uid] || {};
+    t += (i+1) + ". " + (u.nm || uid) + (u.un ? " (@" + u.un + ")" : "") +
+         " \u2014 " + n0(buyers[uid]) + " so'm\n";
+  });
+  return t;
+}
+
+/* ---------- FOYDA HISOBI ----------
+   fzr-costs.json — FazerCards'dagi asl narxlar (USD), costs.js yig'adi.
+   Har buyurtmaga sotuv narxi bilan birga tannarx ham yoziladi, shunda
+   foyda taxminiy emas, aniq bo'ladi. */
+const COSTS_FILE = "/root/donate-app/fzr-costs.json";
+const COST_RATE  = Number(process.env.COST_RATE || 11800);   /* 1 USD = shuncha so'm */
+const PROFIT_FROM = String(process.env.PROFIT_FROM || "2026-09-13");  /* shu kundan sanaydi */
+let FZR_COST = {};
+function loadCosts(){
+  try{
+    FZR_COST = JSON.parse(fs.readFileSync(COSTS_FILE, "utf8")) || {};
+    let n = 0;
+    Object.keys(FZR_COST).forEach(function(c){
+      if(FZR_COST[c] && typeof FZR_COST[c] === "object") n += Object.keys(FZR_COST[c]).length;
+    });
+    console.log("Tannarx jadvali: " + Object.keys(FZR_COST).length + " kategoriya, " + n + " paket");
+  }catch(e){ FZR_COST = {}; console.log("fzr-costs.json o'qilmadi:", e.message); }
+}
+loadCosts();
+setInterval(loadCosts, 6*3600*1000);
+/* Paketning yetkazuvchidagi narxi (USD). Topilmasa 0 qaytaradi. */
+function costUsd(cat, oid){
+  const c = FZR_COST[String(cat||"")];
+  if(!c) return 0;
+  return Number(c[String(oid||"")]) || 0;
+}
+
 /* ---------- Qo'lda to'ldirilganda mijozga ketadigan tushuntirish ----------
    Ko'pchilik hisob to'ldirishda ekranda ko'rsatilgan aniq summani emas,
    yumaloqlangan summani yuboradi (40 100 o'rniga 40 000). Shunda tizim
@@ -1628,6 +1742,9 @@ app.post("/order", async (req,res)=>{
       details: o.details || {}, region: o.region || null,
       nick: String(o.nick||""), accRegion: String(o.accRegion||""),
       oid: oid, cat: auto ? off.cat : "", auto: auto,
+      /* tannarx — foyda hisobi uchun. usd: yetkazuvchi narxi, cost: o'sha paytdagi so'm */
+      usd: auto ? costUsd(off.cat, oid) : 0,
+      cost: auto ? Math.round(costUsd(off.cat, oid) * COST_RATE) : 0,
       fzr: "", status: "wait", at: new Date().toISOString()
     };
     u.orders.unshift(rec); u.orders = u.orders.slice(0,100);
@@ -2602,6 +2719,12 @@ function handleCb(cq){
     return;
   }
   const d = String(cq.data||"");
+  if(d.indexOf("pf:") === 0){
+    tgCall("answerCallbackQuery", { callback_query_id: cq.id, text: "Hisoblanmoqda\u2026" });
+    try{ send(from, profitReport(Number(d.slice(3)) || 30)); }
+    catch(e){ send(from, "\u274C Hisobot xatosi: " + e.message); }
+    return;
+  }
   if(d === "bc_ok" || d === "bc_no" || d === "bc_del"){
     tgCall("answerCallbackQuery", { callback_query_id: cq.id });
     if(d === "bc_no"){ bcastReset(); send(ADMIN_ID, "\u274C Bekor qilindi"); return; }
@@ -3025,6 +3148,16 @@ app.post("/webhook", (req,res)=>{
     /* /nakrutka @user  -> tahlil
        /nakrutka @user tozala -> soxta referallarni uzadi va bloklaydi */
     /* /bloklar - bloklangan hisoblar ro'yxati */
+    /* /foyda - davr bo'yicha foyda va statistika */
+    if(text.indexOf("/foyda") === 0){
+      if(ADMIN_ID && fromId !== ADMIN_ID) return;
+      send(fromId, "\uD83D\uDCCA Qaysi davr uchun hisobot?", { inline_keyboard: [
+        [{ text:"7 kun",  callback_data:"pf:7"  }, { text:"15 kun", callback_data:"pf:15" }],
+        [{ text:"1 oy",   callback_data:"pf:30" }, { text:"3 oy",   callback_data:"pf:90" }],
+        [{ text:"6 oy",   callback_data:"pf:180"}, { text:"1 yil",  callback_data:"pf:365"}]
+      ]});
+      return;
+    }
     if(text.indexOf("/bloklar") === 0){
       if(ADMIN_ID && fromId !== ADMIN_ID) return;
       const dbb = load();
