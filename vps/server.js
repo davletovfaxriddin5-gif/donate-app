@@ -3262,9 +3262,16 @@ app.post("/webhook", (req,res)=>{
     }
     if(text.indexOf("/toldirish") === 0 || text.indexOf("/to'ldirish") === 0){
       if(ADMIN_ID && fromId !== ADMIN_ID) return;
-      const q = text.replace(/^\/to'?ldirish/, "").trim().replace(/^@/, "").toLowerCase();
+      const raw = text.replace(/^\/to'?ldirish/, "").trim();
+      /* Oxirida raqam bo'lsa — bir qadamda bajaramiz */
+      const mAdd  = raw.match(/\s+(-?\d+)\s*$/);
+      const addIn = mAdd ? mAdd[1] : "";
+      const q = (mAdd ? raw.slice(0, mAdd.index) : raw).trim().replace(/^@/, "").toLowerCase();
       if(!q){
-        send(fromId, "Ishlatilishi:\n/toldirish @username\nyoki\n/toldirish 123456789");
+        send(fromId, "Ishlatilishi:\n" +
+                     "/toldirish @username\n" +
+                     "/toldirish @username 20000\n" +
+                     "/toldirish 123456789 5000");
         return;
       }
       const db = load();
@@ -3280,6 +3287,15 @@ app.post("/webhook", (req,res)=>{
         return;
       }
       const u = urec(db, hit);
+      if(addIn){
+        const eskiB = Number(u.balance) || 0;
+        u.balance = eskiB + Number(addIn);
+        save(db);
+        send(fromId, "\u2705 " + (u.nm || hit) + (u.un ? " (@" + u.un + ")" : "") + "\n" +
+                     eskiB + " \u2192 " + u.balance + " so'm");
+        send(hit, topupNote(u.balance), OTZIV_KB, true);
+        return;
+      }
       pendTop[fromId] = hit;
       save(db);
       send(fromId, "\uD83D\uDC64 " + (u.nm || hit) + (u.un ? " (@" + u.un + ")" : "") +
