@@ -2868,6 +2868,78 @@ app.post("/webhook", (req,res)=>{
     /* /qoshish - bloklangan odamni qaytarish. Hamma ma'lumoti joyida qoladi. */
     /* /fayl - bitta faylni Telegramga yuborish (games.json, data.json va h.k.) */
     /* /rasm - GitHub'dagi rasmlarni VPS'ga (/var/www/img) yangilaydi */
+    /* /nakrutka @user  -> tahlil
+       /nakrutka @user tozala -> soxta referallarni uzadi va bloklaydi */
+    if(text.indexOf("/nakrutka") === 0){
+      if(ADMIN_ID && fromId !== ADMIN_ID) return;
+      const rest = text.replace("/nakrutka", "").trim();
+      const doIt = /tozala/i.test(rest);
+      const who  = rest.replace(/tozala/ig, "").trim();
+      if(!who){
+        send(fromId, "\uD83D\uDD0E Referal tekshiruvi\n\n" +
+          "/nakrutka @username \u2014 kimlar qo'shilganini ko'rsatadi\n" +
+          "/nakrutka @username tozala \u2014 soxtalarini uzadi va bloklaydi");
+        return;
+      }
+      const dbn = load();
+      const uid3 = findUser(dbn, who);
+      if(!uid3 || !dbn[uid3]){ send(fromId, "\u274C Topilmadi: " + who); return; }
+      const inv = dbn[uid3];
+      const list = Array.isArray(inv.refs) ? inv.refs.slice() : [];
+      if(!list.length){ send(fromId, "Bu odamda referal yo'q."); return; }
+
+      const nums = list.map(Number).filter(function(n){ return n > 0; });
+      const near = {};
+      nums.forEach(function(n){
+        let c2 = 0;
+        nums.forEach(function(m){ if(Math.abs(m - n) <= ID_CLUSTER) c2++; });
+        near[n] = c2;
+      });
+
+      const bots = [], reals = [];
+      list.forEach(function(rid){
+        const r = dbn[String(rid)];
+        const un = r && r.un ? String(r.un) : "";
+        let sc = 0;
+        if(botName(un)) sc += 2; else if(!un) sc += 1;
+        if(!refAlive(r)) sc += 1;
+        if((near[Number(rid)] || 0) >= ID_NEAR_MIN) sc += 1;
+        (sc >= REF_SCORE ? bots : reals).push(String(rid));
+      });
+
+      if(!doIt){
+        const namz = reals.slice(0, 10).map(function(rid){
+          const r = dbn[String(rid)] || {};
+          return "  " + (r.nm || "-") + (r.un ? " (@" + r.un + ")" : " (username yo'q)");
+        }).join("\n");
+        send(fromId, "\uD83D\uDD0E " + (inv.nm || "-") + (inv.un ? " (@" + inv.un + ")" : "") +
+          "\nid: " + uid3 + "\n\n" +
+          "Jami referal: " + list.length + " ta\n" +
+          "  \u2022 soxta ko'rinadi: " + bots.length + " ta\n" +
+          "  \u2022 chin ko'rinadi: " + reals.length + " ta\n\n" +
+          (reals.length ? ("Chin ko'ringanlar (tegilmaydi):\n" + namz +
+             (reals.length > 10 ? "\n  \u2026 va yana " + (reals.length-10) + " ta" : "") + "\n\n") : "") +
+          "Tozalash uchun:\n/nakrutka " + who + " tozala");
+        return;
+      }
+
+      if(!Array.isArray(inv.refsCut)) inv.refsCut = [];
+      bots.forEach(function(rid){
+        const r = dbn[String(rid)];
+        if(r){ r.refByCut = r.refBy; r.refAtCut = r.refAt; delete r.refBy; delete r.refAt; }
+        if(inv.refsCut.indexOf(String(rid)) < 0) inv.refsCut.push(String(rid));
+        banUser(dbn, rid, "nakrutka hisobi");
+      });
+      inv.refs = inv.refs.filter(function(rid){ return bots.indexOf(String(rid)) < 0; });
+      save(dbn);
+      send(fromId, "\u2705 Tozalandi\n\n" +
+        (inv.nm || "-") + (inv.un ? " (@" + inv.un + ")" : "") + "\n\n" +
+        "Chiqarilgan soxta hisoblar: " + bots.length + " ta\n" +
+        "Tegilmagan (chin ko'ringan): " + reals.length + " ta\n" +
+        "Qolgan referali: " + inv.refs.length + " ta\n\n" +
+        "Xato bo'lsa: /qoshish " + who);
+      return;
+    }
     if(text.indexOf("/rasm") === 0){
       if(ADMIN_ID && fromId !== ADMIN_ID) return;
       send(fromId, "\u23F3 Rasmlar yangilanyapti\u2026");
