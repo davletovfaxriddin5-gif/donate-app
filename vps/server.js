@@ -1411,31 +1411,43 @@ function n0(x){ return String(Math.round(Number(x)||0)).replace(/\B(?=(\d{3})+(?
 function profitReport(days){
   const db  = load();
   const now = Date.now();
-  const from = Math.max(now - days*86400e3, Date.parse(PROFIT_FROM + "T00:00:00Z"));
+  const startAt = Date.parse(PROFIT_FROM + "T00:00:00Z");
+  const want = now - days*86400e3;
+  const from = Math.max(want, startAt);
+  const canCompare = want >= startAt;
   const prevFrom = from - days*86400e3;
-  const DEAD = ["cancel","refund","expired"];          /* bular hisobga olinmaydi */
+  const DEAD = ["cancel","refund","expired"];
 
-  let n=0, sum=0, cost=0, pn=0, psum=0;
-  const games={}, packs={}, buyers={}, firstSeen={};
-  let noCost=0;
+  let n=0, sum=0;                 /* barcha buyurtmalar */
+  let cn=0, csum=0, cost=0;       /* tannarxi ma'lum bo'lganlar */
+  let pn=0, psum=0;               /* oldingi davr */
+  let topN=0, topSum=0;           /* balans to'ldirishlar */
+  const games={}, buyers={}, firstSeen={};
 
   Object.keys(db).forEach(function(uid){
     if(!/^\d+$/.test(uid)) return;
     const u = db[uid] || {};
+    (u.topups||[]).forEach(function(x){
+      const t = x.at ? Date.parse(x.at) : 0;
+      if(!t || t < from) return;
+      if(String(x.status) !== "ok") return;
+      topN++; topSum += Number(x.amount)||0;
+    });
     (u.orders||[]).forEach(function(o){
       const t = o.at ? Date.parse(o.at) : 0;
       if(!t) return;
       if(DEAD.indexOf(String(o.status)) > -1) return;
       const pr = Number(o.price)||0, co = Number(o.cost)||0;
-      if(t >= prevFrom && t < from){ pn++; psum += pr; return; }
+      if(canCompare && t >= prevFrom && t < from){ pn++; psum += pr; return; }
       if(t < from) return;
-      n++; sum += pr; cost += co;
-      if(!co) noCost++;
+      n++; sum += pr;
       const g = o.game || "?";
-      if(!games[g]) games[g] = { n:0, sum:0, prof:0 };
-      games[g].n++; games[g].sum += pr; games[g].prof += (pr - co);
-      const pk = g + " \u2014 " + (o.package || "?");
-      packs[pk] = (packs[pk]||0) + 1;
+      if(!games[g]) games[g] = { n:0, sum:0, cn:0, csum:0, prof:0 };
+      games[g].n++; games[g].sum += pr;
+      if(co > 0){
+        cn++; csum += pr; cost += co;
+        games[g].cn++; games[g].csum += pr; games[g].prof += (pr - co);
+      }
       buyers[uid] = (buyers[uid]||0) + pr;
       if(!firstSeen[uid] || t < firstSeen[uid]) firstSeen[uid] = t;
     });
@@ -1443,7 +1455,6 @@ function profitReport(days){
 
   if(!n) return "\uD83D\uDCCA Bu davrda buyurtma yo'q.\n\nSanoq " + PROFIT_FROM + " dan boshlanadi.";
 
-  /* davr ichida BIRINCHI marta buyurtma bergani — yangi mijoz */
   let fresh = 0;
   Object.keys(firstSeen).forEach(function(uid){
     const u = db[uid] || {};
@@ -1454,34 +1465,46 @@ function profitReport(days){
     if(!older) fresh++;
   });
 
-  const prof = sum - cost;
-  const pct  = sum ? (prof / sum * 100) : 0;
-  const grow = psum ? Math.round((sum - psum) / psum * 100) : null;
-
+  const prof = csum - cost;
+  const pct  = csum ? (prof / csum * 100) : 0;
+  const grow = (canCompare && psum) ? Math.round((sum - psum) / psum * 100) : null;
   const gList = Object.keys(games).sort(function(a,b){ return games[b].sum - games[a].sum; });
-  const pList = Object.keys(packs).sort(function(a,b){ return packs[b] - packs[a]; });
   const bList = Object.keys(buyers).sort(function(a,b){ return buyers[b] - buyers[a]; }).slice(0,10);
 
   let t = "\uD83D\uDCCA HISOBOT \u2014 " + days + " kun\n";
   t += "(" + new Date(from).toISOString().slice(0,10) + " \u2192 bugun)\n\n";
-  t += "Buyurtmalar: " + n + " ta\n";
-  t += "Tushum:      " + n0(sum) + " so'm\n";
-  t += "Tannarx:     " + n0(cost) + " so'm\n";
-  t += "SOF FOYDA:   " + n0(prof) + " so'm  (" + pct.toFixed(1) + "%)\n";
-  t += "O'rtacha buyurtma: " + n0(sum/n) + " so'm\n";
+
+  t += "\u2500\u2500 SAVDO \u2500\u2500\n";
+  t += "Buyurtmalar soni: " + n + " ta\n";
+  t += "Mijozlar to'lagan: " + n0(sum) + " so'm\n";
+  t += "Bitta buyurtma o'rtacha: " + n0(sum/n) + " so'm\n";
   if(grow !== null) t += "Oldingi davrga nisbatan: " + (grow>0?"+":"") + grow + "%\n";
-  t += "Yangi mijozlar: " + fresh + " ta\n";
-  if(noCost) t += "\n\u26A0\uFE0F " + noCost + " ta buyurtmada tannarx yo'q (foyda to'liq emas)\n";
+  t += "Birinchi marta olganlar: " + fresh + " ta\n";
 
-  t += "\n\u2500\u2500 O'YINLAR \u2500\u2500\n";
-  gList.slice(0,12).forEach(function(g){
-    t += g + "\n   " + games[g].n + " ta \u00B7 " + n0(games[g].sum) + " so'm \u00B7 foyda " + n0(games[g].prof) + "\n";
+  t += "\n\u2500\u2500 SIZGA QOLGAN FOYDA \u2500\u2500\n";
+  if(!cn){
+    t += "Hali hisoblab bo'lmaydi \u2014 bu davrdagi\nbuyurtmalarda tannarx yozilmagan.\n";
+  } else {
+    t += "Mijozlar to'lagan:      " + n0(csum) + " so'm\n";
+    t += "Yetkazuvchiga ketgan:   " + n0(cost) + " so'm\n";
+    t += "SIZGA QOLDI:            " + n0(prof) + " so'm\n";
+    t += "Har 100 so'mdan foyda:  " + pct.toFixed(1) + " so'm\n";
+    if(cn < n) t += "\n\u26A0\uFE0F " + (n-cn) + " ta buyurtmada tannarx yo'q,\nular foyda hisobiga kirmadi.\n";
+  }
+
+  t += "\n\u2500\u2500 O'YINLAR BO'YICHA \u2500\u2500\n";
+  gList.forEach(function(g){
+    t += g + "\n";
+    t += "   Mijozlar to'lagan: " + n0(games[g].sum) + " so'm (" + games[g].n + " ta)\n";
+    t += games[g].cn
+      ? ("   Sizga qolgan: " + n0(games[g].prof) + " so'm" +
+         (games[g].cn < games[g].n ? " (" + games[g].cn + " ta bo'yicha)" : "") + "\n")
+      : "   Sizga qolgan: hisoblanmadi\n";
   });
 
-  t += "\n\u2500\u2500 ENG KO'P SOTILGAN \u2500\u2500\n";
-  pList.slice(0,5).forEach(function(pk, i){
-    t += (i+1) + ". " + pk + " \u2014 " + packs[pk] + " ta\n";
-  });
+  t += "\n\u2500\u2500 BALANS TO'LDIRISHLAR \u2500\u2500\n";
+  t += topN + " ta \u00B7 " + n0(topSum) + " so'm\n";
+  t += "(bu savdo emas \u2014 hisobga tushgan pul)\n";
 
   t += "\n\u2500\u2500 TOP 10 MIJOZ \u2500\u2500\n";
   bList.forEach(function(uid, i){
