@@ -2417,7 +2417,8 @@ function bcastKb(mode){
   const L = { bonus: "\uD83C\uDF81 Bonus olish",
               oyin:  "\uD83C\uDFAE Yangi o'yinlarni ko'rish",
               yangi: "\u2728 Yangilikni sinab ko'rish",
-              kirish:"\uD83C\uDFAE MinatoUz kirish" };
+              kirish:"\uD83C\uDFAE MinatoUz kirish",
+              minato:"\uD83C\uDFAE MinatoUz kirish" };
   const label = L[mode] || "\uD83D\uDE80 Xaridni boshlash";
   return { inline_keyboard: [[ { text: label, web_app: { url: APP_URL } } ]] };
 }
@@ -2432,6 +2433,7 @@ function bcastAsk(){
              : bcast.mode === "bonus" ? "\uD83C\uDF81 Bonus olish tugmasi bilan"
              : bcast.mode === "oyin"  ? "\uD83C\uDFAE Yangi o'yinlar tugmasi bilan"
              : bcast.mode === "yangi" ? "\u2728 Yangilik tugmasi bilan"
+             : bcast.mode === "kirish" || bcast.mode === "minato" ? "\uD83C\uDFAE MinatoUz kirish tugmasi bilan"
              : "\uD83D\uDE80 Xaridni boshlash tugmasi bilan";
   tgCall("sendMessage", { chat_id: ADMIN_ID,
     text: "\uD83D\uDCE2 " + what + " (" + btn + ")\n" + n + " ta foydalanuvchiga yuborilsinmi?",
@@ -2496,6 +2498,16 @@ function doBroadcast(){
           const r = j.result;
           if(Array.isArray(r)) r.forEach(function(m){ sent.push({ u:uid, m:m.message_id }); });
           else if(r && r.message_id) sent.push({ u:uid, m:r.message_id });
+          /* Albom ostiga tugma qo'yib bo'lmaydi (Telegram cheklovi) —
+             shuning uchun tugmani ketidan alohida xabarda yuboramiz. */
+          if(kind === "album" && kb){
+            fetch("https://api.telegram.org/bot" + TOKEN + "/sendMessage", {
+              method:"POST", headers:{"Content-Type":"application/json"},
+              body: JSON.stringify({ chat_id: uid, text: "\uD83D\uDC47 Ilovaga o'tish", reply_markup: kb })
+            }).then(function(r2){ return r2.json(); })
+              .then(function(j2){ if(j2 && j2.ok && j2.result) sent.push({ u:uid, m:j2.result.message_id }); })
+              .catch(function(){});
+          }
         } else {
           fail++;
           /* Tarqatma 403 bersa — odam bloklagan, darhol belgilaymiz */
@@ -2884,7 +2896,8 @@ app.post("/webhook", (req,res)=>{
       if(adminReply(msg)) return;
     }
     if(ADMIN_ID && fromId === ADMIN_ID){
-      const arm = { "/xabar":"btn", "/bonus":"bonus", "/oyin":"oyin", "/yangi":"yangi", "/albom":"plain", "/kirish":"kirish" };
+      const arm = { "/xabar":"btn", "/bonus":"bonus", "/oyin":"oyin", "/yangi":"yangi",
+                    "/albom":"plain", "/kirish":"kirish", "/minato":"minato" };
       let hit = null;
       Object.keys(arm).forEach(function(c){ if(text.indexOf(c) === 0) hit = c; });
       if(hit){
@@ -2899,6 +2912,10 @@ app.post("/webhook", (req,res)=>{
             ? "Bitta rasm yoki matn yuboring. Ostida \uD83C\uDFAE Yangi o'yinlarni ko'rish tugmasi bo'ladi."
           : hit === "/yangi"
             ? "Bitta rasm yoki matn yuboring. Ostida \u2728 Yangilikni sinab ko'rish tugmasi bo'ladi."
+          : hit === "/minato"
+            ? "Rasm (1 yoki 2 ta) va matn yuboring. Ostida \uD83C\uDFAE MinatoUz kirish tugmasi bo'ladi.\n\n" +
+              "Eslatma: Telegram albom ostiga tugma qo'yishga ruxsat bermaydi, shuning uchun " +
+              "2 ta rasm yuborsangiz tugma ketidan alohida xabarda boradi."
           : "Bitta rasm yoki matn yuboring. Ostida \uD83D\uDE80 Xaridni boshlash tugmasi bo'ladi.";
         send(fromId, "\uD83D\uDCE2 Keyingi xabaringiz BARCHA foydalanuvchilarga yuboriladi.\n\n" +
                      tip + "\nBekor qilish uchun /bekor");
