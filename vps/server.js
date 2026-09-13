@@ -574,7 +574,6 @@ const CATALOG = {
     "250_25_diamonds_first_top_up_bonus":46231,
     "500_65_diamonds_first_top_up_bonus":94871,
     "10_1_diamonds":5000,
-    "51_5_diamonds":15000,
     "78_8_diamonds":15134,
     "156_16_diamonds":28781,
     "234_23_diamonds":42342,
@@ -2407,9 +2406,29 @@ function bcastReset(){
             album:[], grp:null, timer:null };
 }
 
+/* Tarqatma kimga ketadi. Bloklangan hisoblar (nakrutka botlari) va botni
+   o'zi bloklab tashlaganlar chiqarib tashlanadi — ularga yuborish behuda. */
 function bcastTargets(){
   const db = load();
-  return Object.keys(db).filter(function(k){ return /^\d+$/.test(k); });
+  return Object.keys(db).filter(function(k){
+    if(!/^\d+$/.test(k)) return false;
+    const u = db[k] || {};
+    if(u.banned || isBanned(k)) return false;
+    if(u.left) return false;
+    return true;
+  });
+}
+/* Tasdiq oynasida ko'rsatish uchun: kim chiqarib tashlandi */
+function bcastSkipped(){
+  const db = load();
+  let ban = 0, left = 0;
+  Object.keys(db).forEach(function(k){
+    if(!/^\d+$/.test(k)) return;
+    const u = db[k] || {};
+    if(u.banned || isBanned(k)) ban++;
+    else if(u.left) left++;
+  });
+  return { ban: ban, left: left };
 }
 
 function bcastKb(mode){
@@ -2435,8 +2454,13 @@ function bcastAsk(){
              : bcast.mode === "yangi" ? "\u2728 Yangilik tugmasi bilan"
              : bcast.mode === "kirish" || bcast.mode === "minato" ? "\uD83C\uDFAE MinatoUz kirish tugmasi bilan"
              : "\uD83D\uDE80 Xaridni boshlash tugmasi bilan";
+  const sk = bcastSkipped();
   tgCall("sendMessage", { chat_id: ADMIN_ID,
-    text: "\uD83D\uDCE2 " + what + " (" + btn + ")\n" + n + " ta foydalanuvchiga yuborilsinmi?",
+    text: "\uD83D\uDCE2 " + what + " (" + btn + ")\n" +
+          n + " ta foydalanuvchiga yuborilsinmi?" +
+          ((sk.ban || sk.left) ? ("\n\nChiqarib tashlandi:" +
+            (sk.ban  ? "\n  bloklangan: " + sk.ban + " ta" : "") +
+            (sk.left ? "\n  botni bloklagan: " + sk.left + " ta" : "")) : ""),
     reply_markup: { inline_keyboard: [[
       { text: "\u2705 Ha, yuborilsin", callback_data: "bc_ok" },
       { text: "\u274C Yo'q", callback_data: "bc_no" }
@@ -3107,7 +3131,8 @@ app.post("/webhook", (req,res)=>{
         "rm -rf /tmp/rasmtmp && " +
         "git clone --depth 1 -q https://github.com/davletovfaxriddin5-gif/donate-app.git /tmp/rasmtmp && " +
         "mkdir -p /var/www/img && " +
-        "cp /tmp/rasmtmp/*.png /tmp/rasmtmp/*.jpg /tmp/rasmtmp/*.jpeg /tmp/rasmtmp/*.webp /var/www/img/ 2>/dev/null; " +
+        /* -iname: katta-kichik harfli kengaytmalarni ham oladi (.PNG, .png) */
+        "find /tmp/rasmtmp -maxdepth 1 -type f \\( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.webp' -o -iname '*.gif' \\) -exec cp {} /var/www/img/ \\; ; " +
         "rm -rf /tmp/rasmtmp; " +
         "ls -1 /var/www/img | wc -l; du -sh /var/www/img | cut -f1";
       require("child_process").exec(cmd, { timeout: 180000 }, function(err, out){
