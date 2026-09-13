@@ -5137,7 +5137,7 @@
        "usd": 1.21,
        "cost": 14278,
        "price": 15300,
-       "off": false,
+       "off": true,
        "grp": "Olmoslar"
       },
       {
@@ -5237,7 +5237,8 @@
        "cost": 51731,
        "price": 54600,
        "off": false,
-       "grp": "Olmoslar"
+       "grp": "Olmoslar",
+       "im": "/magic-x22.png"
       },
       {
        "oid": "344_diamonds",
@@ -5255,7 +5256,7 @@
        "usd": 6.53,
        "cost": 77054,
        "price": 81100,
-       "off": false,
+       "off": true,
        "grp": "Olmoslar",
        "im": "/magic-x22.png"
       },
