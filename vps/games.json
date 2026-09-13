@@ -3608,8 +3608,8 @@
        "oid": "120_cabala_crystals",
        "name": "120 Cabala Crystals",
        "usd": 1.765,
-       "cost": 21710,
-       "price": 32000,
+       "cost": 20827,
+       "price": 23000,
        "off": false,
        "im": "/neverland-x2.webp",
        "grp": "Cabala Crystals"
@@ -3618,8 +3618,8 @@
        "oid": "300_cabala_crystals",
        "name": "300 Cabala Crystals",
        "usd": 4.417,
-       "cost": 54329,
-       "price": 69500,
+       "cost": 52121,
+       "price": 55000,
        "off": false,
        "im": "/neverland-x9.webp",
        "grp": "Cabala Crystals"
@@ -3628,8 +3628,8 @@
        "oid": "600_cabala_crystals",
        "name": "600 Cabala Crystals",
        "usd": 8.854,
-       "cost": 108904,
-       "price": 122000,
+       "cost": 104477,
+       "price": 109000,
        "off": false,
        "im": "/neverland-x3.webp",
        "grp": "Cabala Crystals"
@@ -3638,8 +3638,8 @@
        "oid": "1200_cabala_crystals",
        "name": "1200 Cabala Crystals",
        "usd": 17.707,
-       "cost": 217796,
-       "price": 244000,
+       "cost": 208943,
+       "price": 216600,
        "off": false,
        "im": "/neverland-x4.webp",
        "grp": "Cabala Crystals"
@@ -3648,8 +3648,8 @@
        "oid": "3000_cabala_crystals",
        "name": "3000 Cabala Crystals",
        "usd": 44.288,
-       "cost": 544742,
-       "price": 610500,
+       "cost": 522598,
+       "price": 539000,
        "off": false,
        "im": "/neverland-x10.webp",
        "grp": "Cabala Crystals"
@@ -3658,8 +3658,8 @@
        "oid": "6000_cabala_crystals",
        "name": "6000 Cabala Crystals",
        "usd": 88.587,
-       "cost": 1089620,
-       "price": 1220500,
+       "cost": 1045327,
+       "price": 1090000,
        "off": false,
        "im": "/neverland-x5.webp",
        "grp": "Cabala Crystals"
@@ -3668,8 +3668,8 @@
        "oid": "cabala_crystal_investment_weekly_card",
        "name": "Cabala Crystal Investment Weekly Card",
        "usd": 1.765,
-       "cost": 21710,
-       "price": 32000,
+       "cost": 20827,
+       "price": 22200,
        "off": false,
        "im": "/neverland-x27.webp",
        "grp": "Obunalar kartasi"
@@ -3678,8 +3678,8 @@
        "oid": "monthly_pack_ii",
        "name": "Monthly Card Pack II",
        "usd": 2.7213,
-       "cost": 33472,
-       "price": 43500,
+       "cost": 32111,
+       "price": 35000,
        "off": false,
        "im": "/neverland-x12.webp",
        "grp": "Obunalar kartasi"
@@ -3688,8 +3688,8 @@
        "oid": "star_guard",
        "name": "Star Guard",
        "usd": 2.652,
-       "cost": 32620,
-       "price": 43000,
+       "cost": 31294,
+       "price": 34500,
        "off": false,
        "im": "/neverland-x7.webp",
        "grp": "Obunalar kartasi"
@@ -3698,8 +3698,8 @@
        "oid": "flower_fairy_link_weekly_card",
        "name": "Flower Fairy Summon Weekly Card",
        "usd": 4.417,
-       "cost": 54329,
-       "price": 69500,
+       "cost": 52121,
+       "price": 54200,
        "off": false,
        "im": "/neverland-x28.webp",
        "grp": "Obunalar kartasi"
@@ -3708,8 +3708,8 @@
        "oid": "monthly_pack_iii",
        "name": "Monthly Card Pack III",
        "usd": 4.5463,
-       "cost": 55919,
-       "price": 71000,
+       "cost": 53646,
+       "price": 55700,
        "off": false,
        "im": "/neverland-x20.webp",
        "grp": "Obunalar kartasi"
@@ -3718,8 +3718,8 @@
        "oid": "moon_blessing",
        "name": "Moon Blessing",
        "usd": 4.417,
-       "cost": 54329,
-       "price": 69500,
+       "cost": 52121,
+       "price": 55000,
        "off": false,
        "im": "/neverland-x6.webp",
        "grp": "Obunalar kartasi"
@@ -3728,8 +3728,8 @@
        "oid": "privilege_pack",
        "name": "Privilege Pack",
        "usd": 4.417,
-       "cost": 54329,
-       "price": 69500,
+       "cost": 52121,
+       "price": 55000,
        "off": false,
        "im": "/neverland-x8.webp",
        "grp": "Obunalar kartasi"
@@ -3738,8 +3738,8 @@
        "oid": "sapphire_investment_weekly_card",
        "name": "Sapphire Investment Weekly Card",
        "usd": 8.854,
-       "cost": 108904,
-       "price": 122000,
+       "cost": 104477,
+       "price": 109000,
        "off": false,
        "im": "/neverland-x29.webp",
        "grp": "Obunalar kartasi"
@@ -3748,8 +3748,8 @@
        "oid": "flower_fairy_progress_weekly_card",
        "name": "Flower Fairy Progress Weekly Card",
        "usd": 13.28,
-       "cost": 163344,
-       "price": 183000,
+       "cost": 156704,
+       "price": 165000,
        "off": false,
        "im": "/neverland-x30.webp",
        "grp": "Obunalar kartasi"
@@ -3758,8 +3758,8 @@
        "oid": "path_of_fire_sword_battle_pass",
        "name": "Path of Fire Sword Battle Pass",
        "usd": 13.28,
-       "cost": 163344,
-       "price": 183000,
+       "cost": 156704,
+       "price": 165000,
        "off": false,
        "im": "/neverland-x31.webp",
        "grp": "Obunalar kartasi"
@@ -3768,8 +3768,8 @@
        "oid": "candock_wish_pack",
        "name": "Candock Wish Pack",
        "usd": 0.877,
-       "cost": 10787,
-       "price": 16000,
+       "cost": 10349,
+       "price": 11600,
        "off": false,
        "im": "/neverland-x16.webp",
        "grp": "Maxsus takliflar"
@@ -3778,7 +3778,7 @@
        "oid": "companion_pack",
        "name": "Companion Pack",
        "usd": 0.877,
-       "cost": 10787,
+       "cost": 10349,
        "price": 16000,
        "off": true
       },
@@ -3786,7 +3786,7 @@
        "oid": "selection_pack",
        "name": "Selection Pack",
        "usd": 0.877,
-       "cost": 10787,
+       "cost": 10349,
        "price": 16000,
        "off": true
       },
@@ -3794,8 +3794,8 @@
        "oid": "superb_flower_fairy_sale_pack",
        "name": "Superb Flower Fairy Sale Pack",
        "usd": 0.877,
-       "cost": 10787,
-       "price": 16000,
+       "cost": 10349,
+       "price": 11600,
        "off": false,
        "im": "/neverland-x13.webp",
        "grp": "Maxsus takliflar"
@@ -3804,8 +3804,8 @@
        "oid": "growth_pack",
        "name": "Boost Pack",
        "usd": 1.765,
-       "cost": 21710,
-       "price": 32000,
+       "cost": 20827,
+       "price": 22900,
        "off": false,
        "im": "/neverland-x14.webp",
        "grp": "Maxsus takliflar"
@@ -3814,7 +3814,7 @@
        "oid": "limited_time_discount_pack_i",
        "name": "Limited-time Discount Pack I",
        "usd": 1.8169,
-       "cost": 22348,
+       "cost": 21439,
        "price": 32500,
        "off": true
       },
@@ -3822,7 +3822,7 @@
        "oid": "meteor_wish_pack",
        "name": "Meteor Wish Pack",
        "usd": 1.765,
-       "cost": 21710,
+       "cost": 20827,
        "price": 32000,
        "off": true
       },
@@ -3830,7 +3830,7 @@
        "oid": "selection_pack_ii",
        "name": "Selection Pack II",
        "usd": 1.8169,
-       "cost": 22348,
+       "cost": 21439,
        "price": 32500,
        "off": true
       },
@@ -3838,7 +3838,7 @@
        "oid": "special_flower_fairy_pack_ii_butterfly_orchid",
        "name": "Special Flower Fairy Pack II (Butterfly Orchid)",
        "usd": 1.7924,
-       "cost": 22047,
+       "cost": 21150,
        "price": 32500,
        "off": true
       },
@@ -3846,7 +3846,7 @@
        "oid": "chain_pack_1",
        "name": "Chain Pack 1",
        "usd": 1.7924,
-       "cost": 22047,
+       "cost": 21150,
        "price": 32500,
        "off": true
       },
@@ -3854,7 +3854,7 @@
        "oid": "special_flower_fairy_pack_ii_water_bundle",
        "name": "Special Flower Fairy Pack II(Water Bundle)",
        "usd": 1.7924,
-       "cost": 22047,
+       "cost": 21150,
        "price": 32500,
        "off": true
       },
@@ -3862,8 +3862,8 @@
        "oid": "fighter_pack",
        "name": "Warrior's Pack",
        "usd": 2.652,
-       "cost": 32620,
-       "price": 43000,
+       "cost": 31294,
+       "price": 33300,
        "off": false,
        "im": "/neverland-x15.webp",
        "grp": "Maxsus takliflar"
@@ -3872,7 +3872,7 @@
        "oid": "flower_fairy_wish_pack",
        "name": "Flower Fairy Wish Pack",
        "usd": 2.652,
-       "cost": 32620,
+       "cost": 31294,
        "price": 43000,
        "off": true
       },
@@ -3880,8 +3880,8 @@
        "oid": "premium_flower_fairy_pack",
        "name": "Super-valued Flower Fairy Box",
        "usd": 2.652,
-       "cost": 32620,
-       "price": 43000,
+       "cost": 31294,
+       "price": 33300,
        "off": false,
        "im": "/neverland-x17.webp",
        "grp": "Maxsus takliflar"
@@ -3890,8 +3890,8 @@
        "oid": "rename_card",
        "name": "Change Name Card",
        "usd": 2.652,
-       "cost": 32620,
-       "price": 43000,
+       "cost": 31294,
+       "price": 33300,
        "off": false,
        "im": "/neverland-x23.webp",
        "grp": "Maxsus takliflar"
@@ -3900,7 +3900,7 @@
        "oid": "special_flower_fairy_pack_iv_butterfly_orchid",
        "name": "Special Flower Fairy Pack IV (Butterfly Orchid)",
        "usd": 2.6887,
-       "cost": 33071,
+       "cost": 31727,
        "price": 43500,
        "off": true
       },
@@ -3908,7 +3908,7 @@
        "oid": "special_flower_fairy_pack_iv_water_bundle",
        "name": "Special Flower Fairy Pack IV(Water Bundle)",
        "usd": 2.6887,
-       "cost": 33071,
+       "cost": 31727,
        "price": 43500,
        "off": true
       },
@@ -3916,7 +3916,7 @@
        "oid": "anima_progress_pack_1",
        "name": "Anima Progress Pack 1",
        "usd": 4.417,
-       "cost": 54329,
+       "cost": 52121,
        "price": 69500,
        "off": true
       },
@@ -3924,7 +3924,7 @@
        "oid": "anima_progress_pack_2",
        "name": "Anima Progress Pack 2",
        "usd": 4.417,
-       "cost": 54329,
+       "cost": 52121,
        "price": 69500,
        "off": true
       },
@@ -3932,7 +3932,7 @@
        "oid": "anima_progress_pack_3",
        "name": "Anima Progress Pack 3",
        "usd": 4.417,
-       "cost": 54329,
+       "cost": 52121,
        "price": 69500,
        "off": true
       },
@@ -3940,7 +3940,7 @@
        "oid": "anima_progress_pack_4",
        "name": "Anima Progress Pack 4",
        "usd": 4.417,
-       "cost": 54329,
+       "cost": 52121,
        "price": 69500,
        "off": true
       },
@@ -3948,7 +3948,7 @@
        "oid": "anima_progress_pack_5",
        "name": "Anima Progress Pack 5",
        "usd": 4.417,
-       "cost": 54329,
+       "cost": 52121,
        "price": 69500,
        "off": true
       },
@@ -3956,7 +3956,7 @@
        "oid": "anima_upgrade_pack_1",
        "name": "Anima Upgrade Pack 1",
        "usd": 4.417,
-       "cost": 54329,
+       "cost": 52121,
        "price": 69500,
        "off": true
       },
@@ -3964,8 +3964,8 @@
        "oid": "flower_fairy_accessory_pack",
        "name": "Flower Fairy Accessory Box",
        "usd": 4.417,
-       "cost": 54329,
-       "price": 69500,
+       "cost": 52121,
+       "price": 56189,
        "off": false,
        "im": "/neverland-x24.webp",
        "grp": "Maxsus takliflar"
@@ -3974,7 +3974,7 @@
        "oid": "special_flower_fairy_pack_vi_butterfly_orchid",
        "name": "Special Flower Fairy Pack VI (Butterfly Orchid)",
        "usd": 4.4893,
-       "cost": 55218,
+       "cost": 52974,
        "price": 70500,
        "off": true
       },
@@ -3982,7 +3982,7 @@
        "oid": "special_flower_fairy_pack_vi_water_bundle",
        "name": "Special Flower Fairy Pack VI(Water Bundle)",
        "usd": 4.4893,
-       "cost": 55218,
+       "cost": 52974,
        "price": 70500,
        "off": true
       },
@@ -3990,7 +3990,7 @@
        "oid": "limited_time_discount_pack_ii",
        "name": "Limited-time Discount Pack II",
        "usd": 5.4588,
-       "cost": 67143,
+       "cost": 64414,
        "price": 82500,
        "off": true
       },
@@ -3998,7 +3998,7 @@
        "oid": "special_flower_fairy_pack_i_butterfly_orchid",
        "name": "Special Flower Fairy Pack I (Butterfly Orchid)",
        "usd": 5.3936,
-       "cost": 66341,
+       "cost": 63644,
        "price": 81500,
        "off": true
       },
@@ -4006,7 +4006,7 @@
        "oid": "special_flower_fairy_pack_i_water_bundle",
        "name": "Special Flower Fairy Pack I(Water Bundle)",
        "usd": 5.3936,
-       "cost": 66341,
+       "cost": 63644,
        "price": 81500,
        "off": true
       },
@@ -4014,7 +4014,7 @@
        "oid": "special_flower_fairy_pack_v_butterfly_orchid",
        "name": "Special Flower Fairy Pack V (Butterfly Orchid)",
        "usd": 6.2898,
-       "cost": 77365,
+       "cost": 74220,
        "price": 92500,
        "off": true
       },
@@ -4022,7 +4022,7 @@
        "oid": "special_flower_fairy_pack_v_water_bundle",
        "name": "Special Flower Fairy Pack V(Water Bundle)",
        "usd": 6.2898,
-       "cost": 77365,
+       "cost": 74220,
        "price": 92500,
        "off": true
       },
@@ -4030,7 +4030,7 @@
        "oid": "anima_pack_1",
        "name": "Anima Pack 1",
        "usd": 8.854,
-       "cost": 108904,
+       "cost": 104477,
        "price": 122000,
        "off": true
       },
@@ -4038,7 +4038,7 @@
        "oid": "anima_progress_pack_6",
        "name": "Anima Progress Pack 6",
        "usd": 8.854,
-       "cost": 108904,
+       "cost": 104477,
        "price": 122000,
        "off": true
       },
@@ -4046,7 +4046,7 @@
        "oid": "anima_progress_pack_7",
        "name": "Anima Progress Pack 7",
        "usd": 8.854,
-       "cost": 108904,
+       "cost": 104477,
        "price": 122000,
        "off": true
       },
@@ -4054,7 +4054,7 @@
        "oid": "anima_progress_pack_8",
        "name": "Anima Progress Pack 8",
        "usd": 8.854,
-       "cost": 108904,
+       "cost": 104477,
        "price": 122000,
        "off": true
       },
@@ -4062,7 +4062,7 @@
        "oid": "anima_progress_pack_9",
        "name": "Anima Progress Pack 9",
        "usd": 8.854,
-       "cost": 108904,
+       "cost": 104477,
        "price": 122000,
        "off": true
       },
@@ -4070,7 +4070,7 @@
        "oid": "anima_upgrade_pack_2",
        "name": "Anima Upgrade Pack 2",
        "usd": 8.854,
-       "cost": 108904,
+       "cost": 104477,
        "price": 122000,
        "off": true
       },
@@ -4078,7 +4078,7 @@
        "oid": "anima_upgrade_pack_3",
        "name": "Anima Upgrade Pack 3",
        "usd": 8.854,
-       "cost": 108904,
+       "cost": 104477,
        "price": 122000,
        "off": true
       },
@@ -4086,7 +4086,7 @@
        "oid": "anima_upgrade_pack_4",
        "name": "Anima Upgrade Pack 4",
        "usd": 8.854,
-       "cost": 108904,
+       "cost": 104477,
        "price": 122000,
        "off": true
       },
@@ -4094,7 +4094,7 @@
        "oid": "anima_upgrade_pack_5",
        "name": "Anima Upgrade Pack 5",
        "usd": 8.854,
-       "cost": 108904,
+       "cost": 104477,
        "price": 122000,
        "off": true
       },
@@ -4102,7 +4102,7 @@
        "oid": "bloom_pack_1",
        "name": "Bloom Pack 1",
        "usd": 8.854,
-       "cost": 108904,
+       "cost": 104477,
        "price": 122000,
        "off": true
       },
@@ -4110,7 +4110,7 @@
        "oid": "crystal_battle_pass",
        "name": "Crystal Battle Pass",
        "usd": 8.854,
-       "cost": 108904,
+       "cost": 104477,
        "price": 122000,
        "off": true
       },
@@ -4118,8 +4118,8 @@
        "oid": "flower_fairy_exp_pack",
        "name": "Flower Fairy EXP Box",
        "usd": 8.854,
-       "cost": 108904,
-       "price": 122000,
+       "cost": 104477,
+       "price": 107000,
        "off": false,
        "im": "/neverland-x22.webp",
        "grp": "Maxsus takliflar"
@@ -4128,7 +4128,7 @@
        "oid": "fund_plan",
        "name": "Fund Plan",
        "usd": 8.854,
-       "cost": 108904,
+       "cost": 104477,
        "price": 122000,
        "off": true
       },
@@ -4136,7 +4136,7 @@
        "oid": "special_flower_fairy_pack_iii_butterfly_orchid",
        "name": "Special Flower Fairy Pack III (Butterfly Orchid)",
        "usd": 8.9948,
-       "cost": 110636,
+       "cost": 106139,
        "price": 124000,
        "off": true
       },
@@ -4144,7 +4144,7 @@
        "oid": "chain_pack_2",
        "name": "Chain Pack 2",
        "usd": 4.4893,
-       "cost": 55218,
+       "cost": 52974,
        "price": 70500,
        "off": true
       },
@@ -4152,7 +4152,7 @@
        "oid": "special_flower_fairy_pack_iii_water_bundle",
        "name": "Special Flower Fairy Pack III(Water Bundle)",
        "usd": 8.9948,
-       "cost": 110636,
+       "cost": 106139,
        "price": 124000,
        "off": true
       },
@@ -4160,8 +4160,8 @@
        "oid": "weekly_limited_pack",
        "name": "Weekly Limited Pack",
        "usd": 11.506,
-       "cost": 141524,
-       "price": 159000,
+       "cost": 135771,
+       "price": 141000,
        "off": false,
        "im": "/neverland-x21.webp",
        "grp": "Maxsus takliflar"
@@ -4170,8 +4170,8 @@
        "oid": "fantasy_beast_cultivation_pack",
        "name": "Fantasy Beast Cultivation Pack",
        "usd": 13.28,
-       "cost": 163344,
-       "price": 183000,
+       "cost": 156704,
+       "price": 164000,
        "off": false,
        "im": "/neverland-x18.webp",
        "grp": "Maxsus takliflar"
@@ -4180,7 +4180,7 @@
        "oid": "limited_time_discount_pack_iii",
        "name": "Limited-time Discount Pack III",
        "usd": 13.6633,
-       "cost": 168059,
+       "cost": 161227,
        "price": 188500,
        "off": true
       },
@@ -4188,8 +4188,8 @@
        "oid": "monthly_limited_pack",
        "name": "Monthly Limited Pack",
        "usd": 13.28,
-       "cost": 163344,
-       "price": 183000,
+       "cost": 156704,
+       "price": 164000,
        "off": false,
        "im": "/neverland-x26.webp",
        "grp": "Maxsus takliflar"
@@ -4198,7 +4198,7 @@
        "oid": "anima_upgrade_pack_6",
        "name": "Anima Upgrade Pack 6",
        "usd": 17.707,
-       "cost": 217796,
+       "cost": 208943,
        "price": 244000,
        "off": true
       },
@@ -4206,7 +4206,7 @@
        "oid": "anima_upgrade_pack_7",
        "name": "Anima Upgrade Pack 7",
        "usd": 17.707,
-       "cost": 217796,
+       "cost": 208943,
        "price": 244000,
        "off": true
       },
@@ -4214,7 +4214,7 @@
        "oid": "anima_upgrade_pack_8",
        "name": "Anima Upgrade Pack 8",
        "usd": 17.707,
-       "cost": 217796,
+       "cost": 208943,
        "price": 244000,
        "off": true
       },
@@ -4222,7 +4222,7 @@
        "oid": "anima_upgrade_pack_9",
        "name": "Anima Upgrade Pack 9",
        "usd": 17.707,
-       "cost": 217796,
+       "cost": 208943,
        "price": 244000,
        "off": true
       },
@@ -4230,7 +4230,7 @@
        "oid": "bloom_pack_2",
        "name": "Bloom Pack 2",
        "usd": 17.707,
-       "cost": 217796,
+       "cost": 208943,
        "price": 244000,
        "off": true
       },
@@ -4238,7 +4238,7 @@
        "oid": "anima_pack_2",
        "name": "Anima Pack 2",
        "usd": 26.571,
-       "cost": 326823,
+       "cost": 313538,
        "price": 366500,
        "off": true
       },
@@ -4246,7 +4246,7 @@
        "oid": "bloom_pack_3",
        "name": "Bloom Pack 3",
        "usd": 26.571,
-       "cost": 326823,
+       "cost": 313538,
        "price": 366500,
        "off": true
       },
@@ -4254,7 +4254,7 @@
        "oid": "surprise_pack",
        "name": "Surprise Pack",
        "usd": 26.571,
-       "cost": 326823,
+       "cost": 313538,
        "price": 366500,
        "off": true
       },
@@ -4262,7 +4262,7 @@
        "oid": "anima_pack_3",
        "name": "Anima Pack 3",
        "usd": 35.435,
-       "cost": 435851,
+       "cost": 418133,
        "price": 488500,
        "off": true
       },
@@ -4270,7 +4270,7 @@
        "oid": "chain_pack_3",
        "name": "Chain Pack 3",
        "usd": 5.3855,
-       "cost": 66242,
+       "cost": 63549,
        "price": 81500,
        "off": true
       },
@@ -4278,8 +4278,8 @@
        "oid": "sakura_pack",
        "name": "Sakura Pack",
        "usd": 48.725,
-       "cost": 599318,
-       "price": 671500,
+       "cost": 574955,
+       "price": 596000,
        "off": false,
        "im": "/neverland-x19.webp",
        "grp": "Maxsus takliflar"
@@ -4288,8 +4288,8 @@
        "oid": "fantasy_beast_summoning_pack",
        "name": "Fantasy Beast Summon Pack",
        "usd": 91.1132,
-       "cost": 1120692,
-       "price": 1255500,
+       "cost": 1075136,
+       "price": 1099000,
        "off": false,
        "im": "/neverland-x25.webp",
        "grp": "Maxsus takliflar"
@@ -4298,7 +4298,7 @@
        "oid": "luxury_pack",
        "name": "Luxury Pack",
        "usd": 91.1132,
-       "cost": 1120692,
+       "cost": 1075136,
        "price": 1255500,
        "off": true
       },
@@ -4306,7 +4306,7 @@
        "oid": "chain_pack_4",
        "name": "Chain Pack 4",
        "usd": 8.9867,
-       "cost": 110536,
+       "cost": 106043,
        "price": 124000,
        "off": true
       },
@@ -4314,7 +4314,7 @@
        "oid": "60000_no_2x_bonus",
        "name": "60000 (No 2x Bonus)",
        "usd": 911.2456,
-       "cost": 11208321,
+       "cost": 10752698,
        "price": 12553500,
        "off": true
       }
@@ -4335,8 +4335,8 @@
        "oid": "120_cabala_crystals",
        "name": "120 Cabala Crystals",
        "usd": 1.765,
-       "cost": 21710,
-       "price": 32000,
+       "cost": 20827,
+       "price": 22900,
        "off": false,
        "im": "/neverland-x32.webp",
        "grp": "Cabala Crystals"
@@ -4345,8 +4345,8 @@
        "oid": "300_cabala_crystals",
        "name": "300 Cabala Crystals",
        "usd": 4.417,
-       "cost": 54329,
-       "price": 69500,
+       "cost": 52121,
+       "price": 54200,
        "off": false,
        "im": "/neverland-x33.webp",
        "grp": "Cabala Crystals"
@@ -4355,8 +4355,8 @@
        "oid": "600_cabala_crystals",
        "name": "600 Cabala Crystals",
        "usd": 8.854,
-       "cost": 108904,
-       "price": 122000,
+       "cost": 104477,
+       "price": 107000,
        "off": false,
        "im": "/neverland-x34.webp",
        "grp": "Cabala Crystals"
@@ -4365,8 +4365,8 @@
        "oid": "1200_cabala_crystals",
        "name": "1200 Cabala Crystals",
        "usd": 17.707,
-       "cost": 217796,
-       "price": 244000,
+       "cost": 208943,
+       "price": 211500,
        "off": false,
        "im": "/neverland-x35.webp",
        "grp": "Cabala Crystals"
@@ -4375,8 +4375,8 @@
        "oid": "3000_cabala_crystals",
        "name": "3000 Cabala Crystals",
        "usd": 44.288,
-       "cost": 544742,
-       "price": 610500,
+       "cost": 522598,
+       "price": 525600,
        "off": false,
        "im": "/neverland-x36.webp",
        "grp": "Cabala Crystals"
@@ -4385,8 +4385,8 @@
        "oid": "6000_cabala_crystals",
        "name": "6000 Cabala Crystals",
        "usd": 88.587,
-       "cost": 1089620,
-       "price": 1220500,
+       "cost": 1045327,
+       "price": 1048400,
        "off": false,
        "im": "/neverland-x37.webp",
        "grp": "Cabala Crystals"
@@ -4395,8 +4395,8 @@
        "oid": "cabala_crystal_investment_weekly_card",
        "name": "Cabala Crystal Investment Weekly Card",
        "usd": 1.765,
-       "cost": 21710,
-       "price": 32000,
+       "cost": 20827,
+       "price": 22900,
        "off": false,
        "im": "/neverland-x57.webp",
        "grp": "Obunalar kartasi"
@@ -4405,8 +4405,8 @@
        "oid": "monthly_pack_ii",
        "name": "Monthly Card Pack II",
        "usd": 2.7213,
-       "cost": 33472,
-       "price": 43500,
+       "cost": 32111,
+       "price": 34200,
        "off": false,
        "im": "/neverland-x42.webp",
        "grp": "Obunalar kartasi"
@@ -4415,8 +4415,8 @@
        "oid": "star_guard",
        "name": "Star Guard",
        "usd": 2.652,
-       "cost": 32620,
-       "price": 43000,
+       "cost": 31294,
+       "price": 33300,
        "off": false,
        "im": "/neverland-x39.webp",
        "grp": "Obunalar kartasi"
@@ -4425,8 +4425,8 @@
        "oid": "flower_fairy_link_weekly_card",
        "name": "Flower Fairy Summon Weekly Card",
        "usd": 4.417,
-       "cost": 54329,
-       "price": 69500,
+       "cost": 52121,
+       "price": 54200,
        "off": false,
        "im": "/neverland-x58.webp",
        "grp": "Obunalar kartasi"
@@ -4435,8 +4435,8 @@
        "oid": "monthly_pack_iii",
        "name": "Monthly Card Pack III",
        "usd": 4.5463,
-       "cost": 55919,
-       "price": 71000,
+       "cost": 53646,
+       "price": 55700,
        "off": false,
        "im": "/neverland-x50.webp",
        "grp": "Obunalar kartasi"
@@ -4445,8 +4445,8 @@
        "oid": "moon_blessing",
        "name": "Moon Blessing",
        "usd": 4.417,
-       "cost": 54329,
-       "price": 69500,
+       "cost": 52121,
+       "price": 54200,
        "off": false,
        "im": "/neverland-x38.webp",
        "grp": "Obunalar kartasi"
@@ -4455,8 +4455,8 @@
        "oid": "privilege_pack",
        "name": "Privilege Pack",
        "usd": 4.417,
-       "cost": 54329,
-       "price": 69500,
+       "cost": 52121,
+       "price": 54200,
        "off": false,
        "im": "/neverland-x40.webp",
        "grp": "Obunalar kartasi"
@@ -4465,8 +4465,8 @@
        "oid": "sapphire_investment_weekly_card",
        "name": "Sapphire Investment Weekly Card",
        "usd": 8.854,
-       "cost": 108904,
-       "price": 122000,
+       "cost": 104477,
+       "price": 107000,
        "off": false,
        "im": "/neverland-x59.webp",
        "grp": "Obunalar kartasi"
@@ -4475,8 +4475,8 @@
        "oid": "flower_fairy_progress_weekly_card",
        "name": "Flower Fairy Progress Weekly Card",
        "usd": 13.28,
-       "cost": 163344,
-       "price": 183000,
+       "cost": 156704,
+       "price": 159300,
        "off": false,
        "im": "/neverland-x60.webp",
        "grp": "Obunalar kartasi"
@@ -4485,8 +4485,8 @@
        "oid": "path_of_fire_sword_battle_pass",
        "name": "Path of Fire Sword Battle Pass",
        "usd": 13.28,
-       "cost": 163344,
-       "price": 183000,
+       "cost": 156704,
+       "price": 159300,
        "off": false,
        "im": "/neverland-x61.webp",
        "grp": "Obunalar kartasi"
@@ -4495,8 +4495,8 @@
        "oid": "candock_wish_pack",
        "name": "Candock Wish Pack",
        "usd": 0.877,
-       "cost": 10787,
-       "price": 16000,
+       "cost": 10349,
+       "price": 12400,
        "off": false,
        "im": "/neverland-x46.webp",
        "grp": "Maxsus takliflar"
@@ -4505,7 +4505,7 @@
        "oid": "companion_pack",
        "name": "Companion Pack",
        "usd": 0.877,
-       "cost": 10787,
+       "cost": 10349,
        "price": 16000,
        "off": true
       },
@@ -4513,7 +4513,7 @@
        "oid": "selection_pack",
        "name": "Selection Pack",
        "usd": 0.877,
-       "cost": 10787,
+       "cost": 10349,
        "price": 16000,
        "off": true
       },
@@ -4521,8 +4521,8 @@
        "oid": "superb_flower_fairy_sale_pack",
        "name": "Superb Flower Fairy Sale Pack",
        "usd": 0.877,
-       "cost": 10787,
-       "price": 16000,
+       "cost": 10349,
+       "price": 12400,
        "off": false,
        "im": "/neverland-x43.webp",
        "grp": "Maxsus takliflar"
@@ -4531,8 +4531,8 @@
        "oid": "growth_pack",
        "name": "Boost Pack",
        "usd": 1.765,
-       "cost": 21710,
-       "price": 32000,
+       "cost": 20827,
+       "price": 22900,
        "off": false,
        "im": "/neverland-x44.webp",
        "grp": "Maxsus takliflar"
@@ -4541,7 +4541,7 @@
        "oid": "limited_time_discount_pack_i",
        "name": "Limited-time Discount Pack I",
        "usd": 1.8169,
-       "cost": 22348,
+       "cost": 21439,
        "price": 32500,
        "off": true
       },
@@ -4549,7 +4549,7 @@
        "oid": "meteor_wish_pack",
        "name": "Meteor Wish Pack",
        "usd": 1.765,
-       "cost": 21710,
+       "cost": 20827,
        "price": 32000,
        "off": true
       },
@@ -4557,7 +4557,7 @@
        "oid": "selection_pack_ii",
        "name": "Selection Pack II",
        "usd": 1.8169,
-       "cost": 22348,
+       "cost": 21439,
        "price": 32500,
        "off": true
       },
@@ -4565,7 +4565,7 @@
        "oid": "special_flower_fairy_pack_ii_butterfly_orchid",
        "name": "Special Flower Fairy Pack II (Butterfly Orchid)",
        "usd": 1.7924,
-       "cost": 22047,
+       "cost": 21150,
        "price": 32500,
        "off": true
       },
@@ -4573,8 +4573,8 @@
        "oid": "fighter_pack",
        "name": "Warrior's Pack",
        "usd": 2.652,
-       "cost": 32620,
-       "price": 43000,
+       "cost": 31294,
+       "price": 33300,
        "off": false,
        "im": "/neverland-x45.webp",
        "grp": "Maxsus takliflar"
@@ -4583,7 +4583,7 @@
        "oid": "flower_fairy_wish_pack",
        "name": "Flower Fairy Wish Pack",
        "usd": 2.652,
-       "cost": 32620,
+       "cost": 31294,
        "price": 43000,
        "off": true
       },
@@ -4591,8 +4591,8 @@
        "oid": "premium_flower_fairy_pack",
        "name": "Super-valued Flower Fairy Box",
        "usd": 2.652,
-       "cost": 32620,
-       "price": 43000,
+       "cost": 31294,
+       "price": 33300,
        "off": false,
        "im": "/neverland-x47.webp",
        "grp": "Maxsus takliflar"
@@ -4601,8 +4601,8 @@
        "oid": "rename_card",
        "name": "Change Name Card",
        "usd": 2.652,
-       "cost": 32620,
-       "price": 43000,
+       "cost": 31294,
+       "price": 33300,
        "off": false,
        "im": "/neverland-x53.webp",
        "grp": "Maxsus takliflar"
@@ -4611,7 +4611,7 @@
        "oid": "special_flower_fairy_pack_iv_butterfly_orchid",
        "name": "Special Flower Fairy Pack IV (Butterfly Orchid)",
        "usd": 2.6887,
-       "cost": 33071,
+       "cost": 31727,
        "price": 43500,
        "off": true
       },
@@ -4619,7 +4619,7 @@
        "oid": "anima_progress_pack_1",
        "name": "Anima Progress Pack 1",
        "usd": 4.417,
-       "cost": 54329,
+       "cost": 52121,
        "price": 69500,
        "off": true
       },
@@ -4627,7 +4627,7 @@
        "oid": "anima_progress_pack_2",
        "name": "Anima Progress Pack 2",
        "usd": 4.417,
-       "cost": 54329,
+       "cost": 52121,
        "price": 69500,
        "off": true
       },
@@ -4635,7 +4635,7 @@
        "oid": "anima_progress_pack_3",
        "name": "Anima Progress Pack 3",
        "usd": 4.417,
-       "cost": 54329,
+       "cost": 52121,
        "price": 69500,
        "off": true
       },
@@ -4643,7 +4643,7 @@
        "oid": "anima_progress_pack_4",
        "name": "Anima Progress Pack 4",
        "usd": 4.417,
-       "cost": 54329,
+       "cost": 52121,
        "price": 69500,
        "off": true
       },
@@ -4651,7 +4651,7 @@
        "oid": "anima_progress_pack_5",
        "name": "Anima Progress Pack 5",
        "usd": 4.417,
-       "cost": 54329,
+       "cost": 52121,
        "price": 69500,
        "off": true
       },
@@ -4659,7 +4659,7 @@
        "oid": "anima_upgrade_pack_1",
        "name": "Anima Upgrade Pack 1",
        "usd": 4.417,
-       "cost": 54329,
+       "cost": 52121,
        "price": 69500,
        "off": true
       },
@@ -4667,8 +4667,8 @@
        "oid": "flower_fairy_accessory_pack",
        "name": "Flower Fairy Accessory Box",
        "usd": 4.417,
-       "cost": 54329,
-       "price": 69500,
+       "cost": 52121,
+       "price": 54200,
        "off": false,
        "im": "/neverland-x54.webp",
        "grp": "Maxsus takliflar"
@@ -4677,7 +4677,7 @@
        "oid": "special_flower_fairy_pack_vi_butterfly_orchid",
        "name": "Special Flower Fairy Pack VI (Butterfly Orchid)",
        "usd": 4.4893,
-       "cost": 55218,
+       "cost": 52974,
        "price": 70500,
        "off": true
       },
@@ -4685,7 +4685,7 @@
        "oid": "limited_time_discount_pack_ii",
        "name": "Limited-time Discount Pack II",
        "usd": 5.4588,
-       "cost": 67143,
+       "cost": 64414,
        "price": 82500,
        "off": true
       },
@@ -4693,7 +4693,7 @@
        "oid": "special_flower_fairy_pack_i_butterfly_orchid",
        "name": "Special Flower Fairy Pack I (Butterfly Orchid)",
        "usd": 5.3936,
-       "cost": 66341,
+       "cost": 63644,
        "price": 81500,
        "off": true
       },
@@ -4701,7 +4701,7 @@
        "oid": "special_flower_fairy_pack_v_butterfly_orchid",
        "name": "Special Flower Fairy Pack V (Butterfly Orchid)",
        "usd": 6.2898,
-       "cost": 77365,
+       "cost": 74220,
        "price": 92500,
        "off": true
       },
@@ -4709,7 +4709,7 @@
        "oid": "anima_pack_1",
        "name": "Anima Pack 1",
        "usd": 8.854,
-       "cost": 108904,
+       "cost": 104477,
        "price": 122000,
        "off": true
       },
@@ -4717,7 +4717,7 @@
        "oid": "anima_progress_pack_6",
        "name": "Anima Progress Pack 6",
        "usd": 8.854,
-       "cost": 108904,
+       "cost": 104477,
        "price": 122000,
        "off": true
       },
@@ -4725,7 +4725,7 @@
        "oid": "anima_progress_pack_7",
        "name": "Anima Progress Pack 7",
        "usd": 8.854,
-       "cost": 108904,
+       "cost": 104477,
        "price": 122000,
        "off": true
       },
@@ -4733,7 +4733,7 @@
        "oid": "anima_progress_pack_8",
        "name": "Anima Progress Pack 8",
        "usd": 8.854,
-       "cost": 108904,
+       "cost": 104477,
        "price": 122000,
        "off": true
       },
@@ -4741,7 +4741,7 @@
        "oid": "anima_progress_pack_9",
        "name": "Anima Progress Pack 9",
        "usd": 8.854,
-       "cost": 108904,
+       "cost": 104477,
        "price": 122000,
        "off": true
       },
@@ -4749,7 +4749,7 @@
        "oid": "anima_upgrade_pack_2",
        "name": "Anima Upgrade Pack 2",
        "usd": 8.854,
-       "cost": 108904,
+       "cost": 104477,
        "price": 122000,
        "off": true
       },
@@ -4757,7 +4757,7 @@
        "oid": "anima_upgrade_pack_3",
        "name": "Anima Upgrade Pack 3",
        "usd": 8.854,
-       "cost": 108904,
+       "cost": 104477,
        "price": 122000,
        "off": true
       },
@@ -4765,7 +4765,7 @@
        "oid": "anima_upgrade_pack_4",
        "name": "Anima Upgrade Pack 4",
        "usd": 8.854,
-       "cost": 108904,
+       "cost": 104477,
        "price": 122000,
        "off": true
       },
@@ -4773,7 +4773,7 @@
        "oid": "anima_upgrade_pack_5",
        "name": "Anima Upgrade Pack 5",
        "usd": 8.854,
-       "cost": 108904,
+       "cost": 104477,
        "price": 122000,
        "off": true
       },
@@ -4781,7 +4781,7 @@
        "oid": "bloom_pack_1",
        "name": "Bloom Pack 1",
        "usd": 8.854,
-       "cost": 108904,
+       "cost": 104477,
        "price": 122000,
        "off": true
       },
@@ -4789,7 +4789,7 @@
        "oid": "crystal_battle_pass",
        "name": "Crystal Battle Pass",
        "usd": 8.854,
-       "cost": 108904,
+       "cost": 104477,
        "price": 122000,
        "off": true
       },
@@ -4797,8 +4797,8 @@
        "oid": "flower_fairy_exp_pack",
        "name": "Flower Fairy EXP Box",
        "usd": 8.854,
-       "cost": 108904,
-       "price": 122000,
+       "cost": 104477,
+       "price": 107000,
        "off": false,
        "im": "/neverland-x52.webp",
        "grp": "Maxsus takliflar"
@@ -4807,7 +4807,7 @@
        "oid": "fund_plan",
        "name": "Fund Plan",
        "usd": 8.854,
-       "cost": 108904,
+       "cost": 104477,
        "price": 122000,
        "off": true
       },
@@ -4815,7 +4815,7 @@
        "oid": "special_flower_fairy_pack_iii_butterfly_orchid",
        "name": "Special Flower Fairy Pack III (Butterfly Orchid)",
        "usd": 8.9948,
-       "cost": 110636,
+       "cost": 106139,
        "price": 124000,
        "off": true
       },
@@ -4823,8 +4823,8 @@
        "oid": "weekly_limited_pack",
        "name": "Weekly Limited Pack",
        "usd": 11.506,
-       "cost": 141524,
-       "price": 159000,
+       "cost": 135771,
+       "price": 138300,
        "off": false,
        "im": "/neverland-x51.webp",
        "grp": "Maxsus takliflar"
@@ -4833,8 +4833,8 @@
        "oid": "fantasy_beast_cultivation_pack",
        "name": "Fantasy Beast Cultivation Pack",
        "usd": 13.28,
-       "cost": 163344,
-       "price": 183000,
+       "cost": 156704,
+       "price": 159300,
        "off": false,
        "im": "/neverland-x48.webp",
        "grp": "Maxsus takliflar"
@@ -4843,7 +4843,7 @@
        "oid": "limited_time_discount_pack_iii",
        "name": "Limited-time Discount Pack III",
        "usd": 13.6633,
-       "cost": 168059,
+       "cost": 161227,
        "price": 188500,
        "off": true
       },
@@ -4851,8 +4851,8 @@
        "oid": "monthly_limited_pack",
        "name": "Monthly Limited Pack",
        "usd": 13.28,
-       "cost": 163344,
-       "price": 183000,
+       "cost": 156704,
+       "price": 159300,
        "off": false,
        "im": "/neverland-x56.webp",
        "grp": "Maxsus takliflar"
@@ -4861,7 +4861,7 @@
        "oid": "anima_upgrade_pack_6",
        "name": "Anima Upgrade Pack 6",
        "usd": 17.707,
-       "cost": 217796,
+       "cost": 208943,
        "price": 244000,
        "off": true
       },
@@ -4869,7 +4869,7 @@
        "oid": "anima_upgrade_pack_7",
        "name": "Anima Upgrade Pack 7",
        "usd": 17.707,
-       "cost": 217796,
+       "cost": 208943,
        "price": 244000,
        "off": true
       },
@@ -4877,7 +4877,7 @@
        "oid": "anima_upgrade_pack_8",
        "name": "Anima Upgrade Pack 8",
        "usd": 17.707,
-       "cost": 217796,
+       "cost": 208943,
        "price": 244000,
        "off": true
       },
@@ -4885,7 +4885,7 @@
        "oid": "anima_upgrade_pack_9",
        "name": "Anima Upgrade Pack 9",
        "usd": 17.707,
-       "cost": 217796,
+       "cost": 208943,
        "price": 244000,
        "off": true
       },
@@ -4893,7 +4893,7 @@
        "oid": "bloom_pack_2",
        "name": "Bloom Pack 2",
        "usd": 17.707,
-       "cost": 217796,
+       "cost": 208943,
        "price": 244000,
        "off": true
       },
@@ -4901,7 +4901,7 @@
        "oid": "anima_pack_2",
        "name": "Anima Pack 2",
        "usd": 26.571,
-       "cost": 326823,
+       "cost": 313538,
        "price": 366500,
        "off": true
       },
@@ -4909,7 +4909,7 @@
        "oid": "bloom_pack_3",
        "name": "Bloom Pack 3",
        "usd": 26.571,
-       "cost": 326823,
+       "cost": 313538,
        "price": 366500,
        "off": true
       },
@@ -4917,7 +4917,7 @@
        "oid": "surprise_pack",
        "name": "Surprise Pack",
        "usd": 26.571,
-       "cost": 326823,
+       "cost": 313538,
        "price": 366500,
        "off": true
       },
@@ -4925,7 +4925,7 @@
        "oid": "anima_pack_3",
        "name": "Anima Pack 3",
        "usd": 35.435,
-       "cost": 435851,
+       "cost": 418133,
        "price": 488500,
        "off": true
       },
@@ -4933,8 +4933,8 @@
        "oid": "sakura_pack",
        "name": "Sakura Pack",
        "usd": 48.725,
-       "cost": 599318,
-       "price": 671500,
+       "cost": 574955,
+       "price": 578000,
        "off": false,
        "im": "/neverland-x49.webp",
        "grp": "Maxsus takliflar"
@@ -4943,8 +4943,8 @@
        "oid": "fantasy_beast_summoning_pack",
        "name": "Fantasy Beast Summon Pack",
        "usd": 91.1132,
-       "cost": 1120692,
-       "price": 1255500,
+       "cost": 1075136,
+       "price": 1078200,
        "off": false,
        "im": "/neverland-x55.webp",
        "grp": "Maxsus takliflar"
@@ -4953,7 +4953,7 @@
        "oid": "luxury_pack",
        "name": "Luxury Pack",
        "usd": 91.1132,
-       "cost": 1120692,
+       "cost": 1075136,
        "price": 1255500,
        "off": true
       },
@@ -4961,7 +4961,7 @@
        "oid": "60000_cabala_crystals_no_2x_bonus",
        "name": "60000 Cabala Crystals (No 2x Bonus)",
        "usd": 911.2456,
-       "cost": 11208321,
+       "cost": 10752698,
        "price": 12553500,
        "off": true
       }
