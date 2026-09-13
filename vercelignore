@@ -1,0 +1,9 @@
+# Rasmlar Vercel'ga yuborilmaydi — ular VPS'dan (api.minatoh.uz/img/) tarqatiladi.
+# GitHub'da esa o'z joyida qoladi, ya'ni zaxira saqlanadi.
+*.png
+*.jpg
+*.jpeg
+*.webp
+*.gif
+*.mp4
+*.mov
