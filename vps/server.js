@@ -565,8 +565,24 @@ const CATALOG = {
     "mythic_emblem_pack":52000
   }},
   freefire: { cat:"free_fire_cis", srv:false, items:{
-    "110_diamonds":13000, "341_diamonds":34000, "572_diamonds":54000,
-    "1166_diamonds":112000, "2398_diamonds":212000, "6160_diamonds":537000
+    "110_diamonds":13000,
+    "341_diamonds":34000,
+    "572_diamonds":54000,
+    "1166_diamonds":112000,
+    "2398_diamonds":212000,
+    "6160_diamonds":537000,
+    "newbie_bundle":3400,
+    "level_up_package_6":4500,
+    "weekly_lite":5600,
+    "evo_access_3d":5700,
+    "level_up_package_10":7000,
+    "level_up_package_20":7000,
+    "level_up_package_25":7000,
+    "evo_access_7d":9800,
+    "level_up_package_30":9800,
+    "weekly_membership":19000,
+    "evo_access_30d":25200,
+    "monthly_membership":66500
   }},
   mlbb: { cat:"mobile_legends_global", srv:true, items:{
     "50_5_diamonds_first_top_up_bonus":10000,
