@@ -1309,20 +1309,8 @@ body.light .svc .st-off{ background:rgba(16,24,40,.06) }
 /* Klaviatura ochilganda pastki panel yuqoriga ko'tarilmasin */
 body.kb-open .nav{ display:none !important }
 body.kb-open .mg-empty{ display:none }
-/* Klaviatura ochilganda "Sotib olish" tugmasi uning ustiga chiqib qolardi.
-   Yopilishi bilan o'zi qaytadi. */
+/* Klaviatura ochilganda "Sotib olish" tugmasi uning ustiga chiqib qolardi. */
 body.kb-open .buy-bar{ display:none !important }
-
-/* Pastga surib yangilaganda chiqadigan aylanma belgi */
-.pt-spin{ position:fixed; left:50%; top:14px; transform:translateX(-50%) scale(.7);
-  width:34px; height:34px; border-radius:50%; background:var(--card);
-  border:1px solid var(--stroke); display:grid; place-items:center;
-  opacity:0; pointer-events:none; z-index:200; transition:opacity .2s, transform .2s }
-.pt-spin.on{ opacity:1; transform:translateX(-50%) scale(1) }
-.pt-spin span{ width:15px; height:15px; border-radius:50%;
-  border:2px solid var(--stroke-2); border-top-color:var(--blue);
-  animation:ptr .7s linear infinite }
-@keyframes ptr{ to{ transform:rotate(360deg) } }
 
 .pw-lock{ position:fixed; inset:0; z-index:400; display:none; place-items:center;
   background:var(--bg); padding:24px }
@@ -1444,7 +1432,6 @@ body.kb-open .buy-bar{ display:none !important }
 </svg>
 
 <div class="toast" id="toast"></div>
-<div class="pt-spin" id="ptSpin"><span></span></div>
 
 <script>
 const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
@@ -1461,14 +1448,8 @@ if(tg){
   }catch(e){}
   [0,60,200,500,900,1500,2500].forEach(function(ms){ setTimeout(function(){ try{ tg.expand(); }catch(e){} }, ms); });
   /* Pastga surib yopishni to'samiz — ilova faqat tepadagi tugma bilan yopiladi.
-     Eski Telegram'larda bu funksiya yo'q, shuning uchun try ichida. */
+     Bu bitta chaqiruv, hech qanday hodisaga ulanmaydi. */
   try{ tg.disableVerticalSwipes && tg.disableVerticalSwipes(); }catch(e){}
-  /* Foydalanuvchi baribir kichraytirsa — qaytadan to'liq ochamiz */
-  try{
-    tg.onEvent('viewportChanged', function(ev){
-      if(ev && ev.isStateStable && !tg.isExpanded){ try{ tg.expand(); }catch(e){} }
-    });
-  }catch(e){}
   try{ tg.setHeaderColor && tg.setHeaderColor('#0B1120'); tg.setBackgroundColor && tg.setBackgroundColor('#0B1120'); }catch(e){}
   tgUser = tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user : null;
   tg.onEvent('backButtonClicked', onBack);
@@ -6211,50 +6192,6 @@ function loadBalance(){
     }
   }).catch(function(){});
 }
-/* ---------- Pastga surib yangilash ----------
-   Sahifa tepasida turganda barmoq bilan pastga tortilsa, ma'lumot
-   qaytadan olinadi: balans, tarix, kurslar. Sahifa qayta yuklanmaydi. */
-let ptStart = -1, ptOn = false, ptBusy = false;
-function ptRefresh(){
-  if(ptBusy) return;
-  ptBusy = true;
-  haptic('medium');
-  const el = document.getElementById('ptSpin');
-  if(el) el.classList.add('on');
-  Promise.all([
-    new Promise(function(r){ try{ loadBalance(); }catch(e){} setTimeout(r, 600); }),
-    new Promise(function(r){ try{ loadFx && loadFx(); }catch(e){} r(); })
-  ]).then(function(){
-    try{
-      if(view === 'history') renderHistory();
-      else if(view === 'home') renderHome();
-      else if(view === 'settings') renderSettings();
-      else if(view === 'profile') renderProfile();
-    }catch(e){}
-    setTimeout(function(){
-      ptBusy = false;
-      if(el) el.classList.remove('on');
-      notify('success');
-    }, 350);
-  });
-}
-document.addEventListener('touchstart', function(e){
-  if(ptBusy) return;
-  if(document.body.classList.contains('kb-open')) return;
-  const sc = document.scrollingElement || document.documentElement;
-  ptStart = (sc.scrollTop <= 0 && e.touches.length === 1) ? e.touches[0].clientY : -1;
-  ptOn = false;
-}, { passive:true });
-document.addEventListener('touchmove', function(e){
-  if(ptStart < 0 || ptBusy) return;
-  const dy = e.touches[0].clientY - ptStart;
-  if(dy > 70 && !ptOn){ ptOn = true; }
-}, { passive:true });
-document.addEventListener('touchend', function(){
-  if(ptOn && !ptBusy) ptRefresh();
-  ptStart = -1; ptOn = false;
-}, { passive:true });
-
 function loadPhone(){
   const uid = tgUser && tgUser.id ? tgUser.id : '';
   if(!uid) return;
