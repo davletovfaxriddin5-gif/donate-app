@@ -1021,9 +1021,9 @@ body.nft-mode .nav-inner{ flex:1 1 auto; width:auto }
 
 /* === Stars / Premium bo'limi === */
 .sp-seg{ display:flex; background:var(--card-2); border:1px solid var(--stroke-2);
-  border-radius:999px; padding:4px; margin-bottom:2px }
-.sp-seg button{ flex:1; height:40px; border-radius:999px; font-size:14px; font-weight:600;
-  color:var(--faint); transition:.16s }
+  border-radius:999px; padding:3px; margin-bottom:2px }
+.sp-seg button{ flex:1; height:33px; border-radius:999px; font-size:13px; font-weight:600;
+  color:var(--faint); transition:color .22s ease, background .22s ease }
 .sp-seg button.on{ background:#fff; color:#0F1626 }
 body.light .sp-seg button.on{ background:#0F1626; color:#fff }
 /* Uzun rasmning qaysi qismi ko'rinishi --sp-y bilan boshqariladi.
@@ -1040,29 +1040,37 @@ body.light .sp-seg button.on{ background:#0F1626; color:#fff }
 .sp-hero:after{ content:''; position:absolute; left:0; right:0; bottom:0; height:38%;
   pointer-events:none;
   background:linear-gradient(180deg, var(--bg-t), var(--bg)) }
-.sp-card{ position:relative; z-index:1; margin-top:-86px; background:transparent; border:0; padding:0 0 4px;
-  background:var(--card); border:1px solid var(--stroke); border-radius:20px; padding:16px }
-.sp-card h3{ font-size:19px; font-weight:700; letter-spacing:-.4px; color:var(--text);
-  text-align:center; margin:0 0 4px; text-shadow:0 1px 12px rgba(0,0,0,.55) }
+.sp-card{ position:relative; z-index:1; margin-top:-86px;
+  background:var(--card); border:1px solid var(--stroke); border-radius:20px; padding:14px }
+.sp-card h3{ font-size:17px; font-weight:700; letter-spacing:-.4px; color:var(--text);
+  text-align:center; margin:0 0 3px; text-shadow:0 1px 12px rgba(0,0,0,.55) }
 body.light .sp-card h3{ text-shadow:none }
-.sp-card .sub{ font-size:13px; color:var(--dim); text-align:center; margin:0 0 16px;
+/* Quyidagilar faqat Stars/Premium kartochkasi ichida kichraytiriladi —
+   ot-in, gr-quick va gr-go boshqa ekranlarda ham ishlatiladi, ularga tegilmaydi. */
+.sp-card .ot-in{ height:42px; margin-bottom:9px; border-radius:13px }
+.sp-card .ot-in input{ font-size:14px }
+.sp-card .ot-in .act{ font-size:13px }
+.sp-card .gr-quick{ gap:6px; margin-bottom:11px }
+.sp-card .gr-quick button{ height:34px; padding:0 12px; font-size:13px; border-radius:11px }
+.sp-card .gr-go{ height:44px; font-size:14.5px; border-radius:14px }
+.sp-card .sub{ font-size:12.5px; color:var(--dim); text-align:center; margin:0 0 12px;
   text-shadow:0 1px 10px rgba(0,0,0,.5) }
 body.light .sp-card .sub{ text-shadow:none; color:var(--faint) }
-.sp-pay{ display:flex; gap:10px; margin-bottom:13px }
-.sp-pay button{ flex:1; display:flex; align-items:center; gap:9px; padding:10px 12px;
-  border-radius:14px; background:var(--card-2); border:1px solid var(--stroke-2);
-  color:var(--text); font-size:14px; font-weight:600; transition:.14s }
-.sp-rd{ width:19px; height:19px; border-radius:50%; flex-shrink:0;
+.sp-pay{ display:flex; gap:8px; margin-bottom:10px }
+.sp-pay button{ flex:1; display:flex; align-items:center; gap:7px; padding:8px 10px;
+  border-radius:12px; background:var(--card-2); border:1px solid var(--stroke-2);
+  color:var(--text); font-size:13px; font-weight:600; transition:.14s }
+.sp-rd{ width:16px; height:16px; border-radius:50%; flex-shrink:0;
   border:2px solid var(--stroke-2); display:grid; place-items:center; transition:.14s }
-.sp-rd i{ width:9px; height:9px; border-radius:50%; background:var(--blue); opacity:0; transition:.14s }
+.sp-rd i{ width:7px; height:7px; border-radius:50%; background:var(--blue); opacity:0; transition:.14s }
 .on > .sp-rd, .on .sp-rd{ border-color:var(--blue) }
 .on > .sp-rd i, .on .sp-rd i{ opacity:1 }
 .sp-err{ color:#FF6B6B; font-size:12.5px; margin:-6px 4px 11px; line-height:1.4 }
-.sp-prem{ display:flex; gap:9px; margin-bottom:14px }
-.sp-prem button{ flex:1; min-width:0; padding:12px 10px; border-radius:15px; text-align:left;
+.sp-prem{ display:flex; gap:7px; margin-bottom:11px }
+.sp-prem button{ flex:1; min-width:0; padding:9px 8px; border-radius:13px; text-align:left;
   background:var(--card-2); border:1px solid var(--stroke-2); transition:.14s }
 .sp-prem button.on{ border-color:var(--blue); background:var(--blue-soft) }
-.sp-prem .m{ font-size:13.5px; font-weight:600; color:var(--text); margin-top:9px; white-space:nowrap }
+.sp-prem .m{ font-size:12.5px; font-weight:600; color:var(--text); margin-top:6px; white-space:nowrap }
 .sp-prem .p{ font-size:12.5px; color:#7C8CFF; margin-top:3px; white-space:nowrap }
 
 /* === Market filtrlari === */
