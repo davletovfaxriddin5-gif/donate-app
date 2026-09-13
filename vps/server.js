@@ -1518,6 +1518,13 @@ function costUsd(cat, oid){
   if(!c) return 0;
   return Number(c[String(oid||"")]) || 0;
 }
+/* Telegram Stars va Premium narxi jonli kotirovkadan olinadi (tgQ).
+   Ular oddiy katalogda yo'q — alohida endpoint'da turadi. */
+function orderUsd(tg, cat, oid, n){
+  if(tg === "stars")   return (Number(tgQ.star) || 0) * (Number(n) || 0);
+  if(tg === "premium") return Number((tgQ.prem || {})[String(n)]) || 0;
+  return costUsd(cat, oid);
+}
 
 /* ---------- Qo'lda to'ldirilganda mijozga ketadigan tushuntirish ----------
    Ko'pchilik hisob to'ldirishda ekranda ko'rsatilgan aniq summani emas,
@@ -1743,8 +1750,8 @@ app.post("/order", async (req,res)=>{
       nick: String(o.nick||""), accRegion: String(o.accRegion||""),
       oid: oid, cat: auto ? off.cat : "", auto: auto,
       /* tannarx — foyda hisobi uchun. usd: yetkazuvchi narxi, cost: o'sha paytdagi so'm */
-      usd: auto ? costUsd(off.cat, oid) : 0,
-      cost: auto ? Math.round(costUsd(off.cat, oid) * COST_RATE) : 0,
+      usd: auto ? orderUsd(tg, off.cat, oid, tgn) : 0,
+      cost: auto ? Math.round(orderUsd(tg, off.cat, oid, tgn) * COST_RATE) : 0,
       fzr: "", status: "wait", at: new Date().toISOString()
     };
     u.orders.unshift(rec); u.orders = u.orders.slice(0,100);
