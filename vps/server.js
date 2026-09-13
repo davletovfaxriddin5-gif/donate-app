@@ -1481,30 +1481,55 @@ function profitReport(days){
   if(grow !== null) t += "Oldingi davrga nisbatan: " + (grow>0?"+":"") + grow + "%\n";
   t += "Birinchi marta olganlar: " + fresh + " ta\n";
 
-  t += "\n\u2500\u2500 SIZGA QOLGAN FOYDA \u2500\u2500\n";
+  t += "\n\u2500\u2500 FOYDA \u2500\u2500\n";
   if(!cn){
-    t += "Hali hisoblab bo'lmaydi \u2014 bu davrdagi\nbuyurtmalarda tannarx yozilmagan.\n";
+    t += "Hali hisoblab bo'lmaydi \u2014 bu davrdagi\nbuyurtmalarda tannarx saqlanmagan.\n";
   } else {
-    t += "Mijozlar to'lagan:      " + n0(csum) + " so'm\n";
-    t += "Yetkazuvchiga ketgan:   " + n0(cost) + " so'm\n";
-    t += "SIZGA QOLDI:            " + n0(prof) + " so'm\n";
-    t += "Har 100 so'mdan foyda:  " + pct.toFixed(1) + " so'm\n";
-    if(cn < n) t += "\n\u26A0\uFE0F " + (n-cn) + " ta buyurtmada tannarx yo'q,\nular foyda hisobiga kirmadi.\n";
+    if(cn < n){
+      t += n + " ta buyurtmadan " + cn + " tasi hisoblandi.\n";
+      t += "Qolgan " + (n-cn) + " tasi eski \u2014 ularda tannarx\nsaqlanmagan, chetda qoldi.\n\n";
+      t += "Hisoblangan " + cn + " ta buyurtma:\n";
+    }
+    t += "   Mijoz to'lagan: " + n0(csum) + " so'm\n";
+    t += "   Sizga turdi:    " + n0(cost) + " so'm\n";
+    t += "   SIZGA QOLDI:    " + n0(prof) + " so'm\n";
+    t += "   Har 100 so'mdan " + pct.toFixed(1) + " so'm foyda\n";
   }
 
   t += "\n\u2500\u2500 O'YINLAR BO'YICHA \u2500\u2500\n";
   gList.forEach(function(g){
     t += g + "\n";
-    t += "   Mijozlar to'lagan: " + n0(games[g].sum) + " so'm (" + games[g].n + " ta)\n";
-    t += games[g].cn
-      ? ("   Sizga qolgan: " + n0(games[g].prof) + " so'm" +
-         (games[g].cn < games[g].n ? " (" + games[g].cn + " ta bo'yicha)" : "") + "\n")
-      : "   Sizga qolgan: hisoblanmadi\n";
+    t += "   " + games[g].n + " ta buyurtma \u00B7 " + n0(games[g].sum) + " so'm\n";
+    if(games[g].cn === games[g].n)      t += "   Sizga qoldi: " + n0(games[g].prof) + " so'm\n";
+    else if(games[g].cn)                t += "   Sizga qoldi: " + n0(games[g].prof) +
+                                             " so'm (faqat " + games[g].cn + " ta bo'yicha)\n";
+    else                                t += "   Sizga qoldi: hisoblanmadi (tannarx yo'q)\n";
   });
 
-  t += "\n\u2500\u2500 BALANS TO'LDIRISHLAR \u2500\u2500\n";
+  /* Mijozlar hisobida yotgan pul — bu sizning qarzingiz, ular uchun tovar berishingiz kerak */
+  const hold = [];
+  let holdSum = 0;
+  Object.keys(db).forEach(function(uid){
+    if(!/^\d+$/.test(uid)) return;
+    const b = Number((db[uid]||{}).balance) || 0;
+    if(b > 0){ hold.push([uid, b]); holdSum += b; }
+  });
+  hold.sort(function(a,b){ return b[1] - a[1]; });
+  t += "\n\u2500\u2500 HISOBDA YOTGAN PUL \u2500\u2500\n";
+  if(!hold.length) t += "Hech kimda qoldiq yo'q.\n";
+  else{
+    t += hold.length + " ta mijozda jami " + n0(holdSum) + " so'm\n";
+    t += "(bu savdo emas \u2014 ular hali sotib olmagan)\n\n";
+    hold.slice(0,10).forEach(function(x, i){
+      const u = db[x[0]] || {};
+      t += (i+1) + ". " + (u.nm || x[0]) + (u.un ? " (@" + u.un + ")" : "") +
+           " \u2014 " + n0(x[1]) + " so'm\n";
+    });
+    if(hold.length > 10) t += "\u2026 va yana " + (hold.length-10) + " ta\n";
+  }
+
+  t += "\n\u2500\u2500 DAVR ICHIDA TO'LDIRGANLAR \u2500\u2500\n";
   t += topN + " ta \u00B7 " + n0(topSum) + " so'm\n";
-  t += "(bu savdo emas \u2014 hisobga tushgan pul)\n";
 
   t += "\n\u2500\u2500 TOP 10 MIJOZ \u2500\u2500\n";
   bList.forEach(function(uid, i){
