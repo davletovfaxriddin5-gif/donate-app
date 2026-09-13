@@ -2867,6 +2867,26 @@ app.post("/webhook", (req,res)=>{
     /* /tekshir \u2014 referal ro'yxatidagilarni tekshirish (kim chiqib ketgan) */
     /* /qoshish - bloklangan odamni qaytarish. Hamma ma'lumoti joyida qoladi. */
     /* /fayl - bitta faylni Telegramga yuborish (games.json, data.json va h.k.) */
+    /* /rasm - GitHub'dagi rasmlarni VPS'ga (/var/www/img) yangilaydi */
+    if(text.indexOf("/rasm") === 0){
+      if(ADMIN_ID && fromId !== ADMIN_ID) return;
+      send(fromId, "\u23F3 Rasmlar yangilanyapti\u2026");
+      const cmd =
+        "rm -rf /tmp/rasmtmp && " +
+        "git clone --depth 1 -q https://github.com/davletovfaxriddin5-gif/donate-app.git /tmp/rasmtmp && " +
+        "mkdir -p /var/www/img && " +
+        "cp /tmp/rasmtmp/*.png /tmp/rasmtmp/*.jpg /tmp/rasmtmp/*.jpeg /tmp/rasmtmp/*.webp /var/www/img/ 2>/dev/null; " +
+        "rm -rf /tmp/rasmtmp; " +
+        "ls -1 /var/www/img | wc -l; du -sh /var/www/img | cut -f1";
+      require("child_process").exec(cmd, { timeout: 180000 }, function(err, out){
+        if(err){ send(fromId, "\u274C Yangilanmadi: " + String(err.message).slice(0, 200)); return; }
+        const p2 = String(out).trim().split("\n");
+        send(fromId, "\u2705 Rasmlar yangilandi\n\n" +
+                     "Soni: " + (p2[0] || "?").trim() + " ta\n" +
+                     "Hajmi: " + (p2[1] || "?").trim());
+      });
+      return;
+    }
     if(text.indexOf("/fayl") === 0){
       if(ADMIN_ID && fromId !== ADMIN_ID) return;
       const nm = text.replace("/fayl", "").trim() || "games.json";
