@@ -3907,7 +3907,7 @@ function renderHome(){
     ${GAMES.map(g=>`
       <button class="game" onclick="openGame('${g.id}')">
         <div class="tile">
-          ${g.img ? `<img src="${g.img}" alt="">` : `<span class="glyph">${g.glyph}</span>`}
+          ${g.img ? `<img src="${IMG(g.img)}" alt="">` : `<span class="glyph">${g.glyph}</span>`}
           ${g.star ? `<span class="star ${g.star}">★</span>` : ''}
           ${g.badge ? `<span class="badge">${g.badge}</span>` : ''}
           ${g.maint ? `<span class="maint"><span>TEXNIK ISH</span></span>` : ''}
@@ -3949,7 +3949,7 @@ function pkgHtml(list){
     return head + `
       <button class="pkg ${p.txt?'txt-only':''} ${p.promo?'promo':''}" data-i="${i}" onclick="pickPkg(${i})" style="${p.promo?'border-color:#F5B301;box-shadow:0 0 0 1px rgba(245,179,1,.32),0 0 20px rgba(245,179,1,.24)':''}">
         ${p.hit?`<span class="hit">HIT</span>`:''}
-        <span class="pic"><span class="em">${p.im?'<img class="pim" src="'+p.im+'">':p.txt?'🎁':(p.c==='💎'?'💎':p.c==='⭐'?'⭐':'🪙')}</span>${p.x2?`<span class="x2">x2</span>`:''}</span>
+        <span class="pic"><span class="em">${p.im?'<img class="pim" src="'+IMG(p.im)+'">':p.txt?'🎁':(p.c==='💎'?'💎':p.c==='⭐'?'⭐':'🪙')}</span>${p.x2?`<span class="x2">x2</span>`:''}</span>
         <span class="info"><span class="a ${p.txt?'small':''}">${p.a}${p.c&&p.c.length<=2?' '+p.c:''}</span><span class="p">${money(p.p,true)}</span></span>
       </button>`;
   }).join('');
@@ -4026,18 +4026,18 @@ function renderGame(){
   const head = (g.vid || g.bg)
     ? '<div class="gd-hero">'
       + ((g.vid && !noMo)
-          ? '<video src="' + g.vid + '" poster="' + (g.bg || g.img || '') + '" autoplay muted loop playsinline'
+          ? '<video src="' + IMG(g.vid) + '" poster="' + (g.bg || g.img || '') + '" autoplay muted loop playsinline'
             + ' preload="metadata" disablepictureinpicture></video>'
-          : '<img src="' + (g.bg || g.img || '') + '">')
+          : '<img src="' + IMG(g.bg || g.img) + '">')
       + '<div class="ht">' + esc(g.name) + '</div>'
       + '</div>'
     : '<div class="gd-head' + (g.hbg ? ' hasbg' : '') + (g.hpop ? ' haspop' : '') + '"'
-      + (g.hbg ? ' style="background-image:url(\'' + g.hbg + '\')"' : '') + '>'
-      + (g.hpop ? '<img class="pop" src="' + g.hpop + '" alt="">' : '')
-      + '<div class="ic">' + ((g.hicon || g.img) ? '<img src="' + (g.hicon || g.img) + '">' : g.glyph) + '</div>'
+      + (g.hbg ? ' style="background-image:url(\'' + IMG(g.hbg) + '\')"' : '') + '>'
+      + (g.hpop ? '<img class="pop" src="' + IMG(g.hpop) + '" alt="">' : '')
+      + '<div class="ic">' + ((g.hicon || g.img) ? '<img src="' + IMG(g.hicon || g.img) + '">' : g.glyph) + '</div>'
       + '<div><div class="nm">' + esc(g.name) + '</div><div class="cur">' + (g.cur||'') + '</div></div>'
       + '</div>'
-      + (g.peek ? '<img class="peek-side" src="' + g.peek + '" alt="">' : '');
+      + (g.peek ? '<img class="peek-side" src="' + IMG(g.peek) + '" alt="">' : '');
 
   app.innerHTML = head
   + (ids.length ? '<div class="sec-lbl" style="margin-top:0">Saqlangan ID\'lar</div>'
@@ -4448,7 +4448,7 @@ document.addEventListener('visibilitychange', function(){
 });
 /* Buyurtma ikonkasi: yozuvda rasm bo'lmasa, o'yinlar ro'yxatidan topib olamiz */
 function ordIcon(o){
-  if(o && o.img) return '<img src="' + o.img + '">';
+  if(o && o.img) return '<img src="' + IMG(o.img) + '">';
   var g = null;
   try{
     g = GAMES.filter(function(x){
@@ -4456,8 +4456,8 @@ function ordIcon(o){
                    String(x.name||'').toLowerCase() === String(o.game||'').toLowerCase());
     })[0];
   }catch(e){}
-  if(g && g.img)   return '<img src="' + g.img + '">';
-  if(g && g.hicon) return '<img src="' + g.hicon + '">';
+  if(g && g.img)   return '<img src="' + IMG(g.img) + '">';
+  if(g && g.hicon) return '<img src="' + IMG(g.hicon) + '">';
   return (o && o.glyph) || (g && g.glyph) || '\uD83C\uDFAE';
 }
 function renderHistory(){
@@ -4974,7 +4974,7 @@ function nftMarketCards(){
   const listy = (mktView === 'list');
   return `<div class="nftm-grid${listy?' list':''}">${items.map(function(n){
     if(listy) return `<div class="nftm-card">
-      <div class="nftm-pic">${n.img ? `<img src="${n.img}" alt="" loading="lazy">` : `<span class="gl">${n.glyph||'🎁'}</span>`}</div>
+      <div class="nftm-pic">${n.img ? `<img src="${IMG(n.img)}" alt="" loading="lazy">` : `<span class="gl">${n.glyph||'🎁'}</span>`}</div>
       <div class="tx"><div class="nm">${n.name||'NFT'}</div><div class="no">#${n.num||'—'}</div></div>
       <div class="nftm-buy">
         <button class="pr" onclick="nftBuy()">${n.price ? fmtGram(n.price) + ' 💎' : '—'}</button>
@@ -4986,7 +4986,7 @@ function nftMarketCards(){
     return ((function(n){
     return `<div class="nftm-card">
       <div class="nftm-pic">
-        ${n.img ? `<img src="${n.img}" alt="" loading="lazy">` : `<span class="gl">${n.glyph||'🎁'}</span>`}
+        ${n.img ? `<img src="${IMG(n.img)}" alt="" loading="lazy">` : `<span class="gl">${n.glyph||'🎁'}</span>`}
         <span class="nftm-badges"><span>💳</span><span>🍀</span></span>
       </div>
       <div class="nm">${n.name||'NFT'}</div>
@@ -5099,7 +5099,7 @@ function fsRows(){
     const on = fsTmp.indexOf(g.key) > -1;
     const pic = fsField === 'bg' && g.color
       ? `<span class="dot" style="background:${g.color}"></span>`
-      : (g.img ? `<img src="${g.img}" alt="">` : (g.glyph || '🎁'));
+      : (g.img ? `<img src="${IMG(g.img)}" alt="">` : (g.glyph || '🎁'));
     return `<button class="fs-it ${on?'on':''}" onclick="fsPick('${String(g.key).replace(/'/g,"\\'")}')">
       <span class="box"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7"/></svg></span>
       <span class="pic">${pic}</span>
@@ -5196,7 +5196,7 @@ function spPanel(){
     <button class="${spTab==='stars'?'on':''}"   onclick="spSetTab('stars')">Stars</button>
     <button class="${spTab==='premium'?'on':''}" onclick="spSetTab('premium')">Premium</button>
   </div>
-  <div class="sp-hero"><img src="${img}" alt="" onerror="this.closest('.sp-hero').style.display='none'"></div>`;
+  <div class="sp-hero"><img src="${IMG(img)}" alt="" onerror="this.closest('.sp-hero').style.display='none'"></div>`;
 
   const pay = `
     <div class="sp-pay">
@@ -5290,7 +5290,7 @@ function mgHistory(){
     const key = d.getFullYear()+'-'+d.getMonth()+'-'+d.getDate();
     if(key !== last){ last = key; out += `<div class="mg-day">${d.getDate()} ${M[d.getMonth()]} ${d.getFullYear()}</div>`; }
     out += `<div class="mg-row">
-      <div class="ic">${o.img ? `<img src="${o.img}" alt="">` : (o.glyph||'🎁')}</div>
+      <div class="ic">${o.img ? `<img src="${IMG(o.img)}" alt="">` : (o.glyph||'🎁')}</div>
       <div class="tx"><div class="nm">${o.item||'NFT'}</div><div class="sb">Sotib olindi</div></div>
       ${o.price ? `<div class="pv">-${money(o.price, true)}</div>` : ''}
       <svg class="cv" viewBox="0 0 24 24"><path d="M9.5 6l6 6-6 6"/></svg>
@@ -5365,6 +5365,16 @@ function renderNftGifts(){
 
 /* Yuqoridagi aylanma bannerlar.
    Rasmlar boshqa papkada tursa faqat BANNER_BASE ni o'zgartiring. */
+/* Rasmlar Vercel'da emas, VPS'da turadi. Bu funksiya har qanday
+   "/rasm.png" havolasini to'liq manzilga aylantiradi. Havola allaqachon
+   to'liq bo'lsa yoki bo'sh bo'lsa — tegilmaydi. */
+const IMG_BASE = 'https://api.minatoh.uz/img/';
+function IMG(p){
+  const s = String(p == null ? '' : p);
+  if(!s) return '';
+  if(/^(https?:|data:|blob:)/i.test(s)) return s;
+  return IMG_BASE + s.replace(/^\/+/, '');
+}
 const BANNER_BASE = '';
 const BANNERS = ['banner-x1.webp','banner-x2.webp','banner-x3.webp','banner-x4.webp'];
 let mktTab = 'all';        /* all | cols | stars */
@@ -5466,7 +5476,7 @@ function mktBanner(){
   let list = [];
   for(let k = 0; k < MKT_REP; k++) list = list.concat(BANNERS);
   const slides = list.map(function(f){
-    return `<img src="${BANNER_BASE}${f}" alt="" decoding="async" onerror="mktBanFail()">`;
+    return `<img src="${IMG_BASE}${BANNER_BASE}${f}" alt="" decoding="async" onerror="mktBanFail()">`;
   }).join('');
   return `<div class="mkt-ban" id="mktBan"><div class="rail" id="mktRail">${slides}</div></div>`;
 }
@@ -5578,11 +5588,11 @@ function renderNftTopup(){
     ${Object.keys(CARDS).map(function(k){
       const c = CARDS[k];
       const ic = c.icon.indexOf('/') === 0
-        ? `<img src="${c.icon}" style="width:100%;height:46px;object-fit:contain">` : c.icon;
+        ? `<img src="${IMG(c.icon)}" style="width:100%;height:46px;object-fit:contain">` : c.icon;
       return `<button class="pay" onclick="nftPick('${k}')"><span class="box" style="background:${c.bg};font-size:20px;width:100%;height:46px">${ic}</span><span class="nm">${c.bank}</span></button>`;
     }).join('')}
     <button class="pay" onclick="nftPick('stars')"><span class="box" style="font-size:30px;width:100%;height:46px">⭐</span><span class="nm">Telegram Stars</span></button>
-    <button class="pay" onclick="nftPick('usdt')"><span class="box" style="font-size:27px;width:100%;height:46px"><img src="/ton-x1.webp" style="width:100%;height:46px;object-fit:contain" onerror="this.replaceWith(document.createTextNode('💵'))"></span><span class="nm">USDT (TON)</span></button>
+    <button class="pay" onclick="nftPick('usdt')"><span class="box" style="font-size:27px;width:100%;height:46px"><img src="https://api.minatoh.uz/img/ton-x1.webp" style="width:100%;height:46px;object-fit:contain" onerror="this.replaceWith(document.createTextNode('💵'))"></span><span class="nm">USDT (TON)</span></button>
   </div>
   <button class="guide-btn" style="margin-top:16px" onclick="openLink('${GUIDE_URL}')">
     <span class="ic">📖</span><span class="t">Qo'llanma</span><span class="r">Kanal</span>
@@ -6146,7 +6156,7 @@ function loadDynGames(){
     setTimeout(function(){
       add.forEach(function(g){
         [g.hbg, g.peek, g.bg].forEach(function(u){
-          if(u){ const im = new Image(); im.src = u; }
+          if(u){ const im = new Image(); im.src = IMG(u); }
         });
       });
     }, 400);
@@ -6519,9 +6529,9 @@ function renderTopup(){
     <div class="page-title">Hisobni to'ldirish</div>
     <p style="color:var(--dim);font-size:13.5px;margin:-6px 2px 18px">To'lov usulini tanlang</p>
     <div class="pay-grid">
-     ${Object.keys(CARDS).map(k=>`<button class="pay" onclick="pickPay('${k}')"><span class="box"style="background:${CARDS[k].bg};font-size:20px;width:100%;height:46px">${CARDS[k].icon.indexOf('/')===0 ? `<img src="${CARDS[k].icon}" style="width:100%;height:46px;object-fit:contain">` : CARDS[k].icon}</span><span class="nm">${CARDS[k].bank}</span></button>`).join('')}
+     ${Object.keys(CARDS).map(k=>`<button class="pay" onclick="pickPay('${k}')"><span class="box"style="background:${CARDS[k].bg};font-size:20px;width:100%;height:46px">${CARDS[k].icon.indexOf('/')===0 ? `<img src="${IMG(CARDS[k].icon)}" style="width:100%;height:46px;object-fit:contain">` : CARDS[k].icon}</span><span class="nm">${CARDS[k].bank}</span></button>`).join('')}
      <button class="pay" onclick="pickPay('stars')"><span class="box" style="font-size:30px;width:100%;height:46px">⭐</span><span class="nm">Telegram Stars</span></button>
-     <button class="pay" onclick="pickPay('usdt')"><span class="box" style="font-size:27px;width:100%;height:46px"><img src="/ton-x1.webp" style="width:100%;height:46px;object-fit:contain" onerror="this.replaceWith(document.createTextNode('💵'))"></span><span class="nm">USDT (TON)</span></button>
+     <button class="pay" onclick="pickPay('usdt')"><span class="box" style="font-size:27px;width:100%;height:46px"><img src="https://api.minatoh.uz/img/ton-x1.webp" style="width:100%;height:46px;object-fit:contain" onerror="this.replaceWith(document.createTextNode('💵'))"></span><span class="nm">USDT (TON)</span></button>
     </div>
     <button class="guide-btn" style="margin-top:16px" onclick="openLink('${GUIDE_URL}')">
       <span class="ic">📖</span><span class="t">Qo'llanma</span><span class="r">Kanal</span>
