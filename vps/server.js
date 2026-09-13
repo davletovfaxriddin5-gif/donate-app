@@ -2984,6 +2984,30 @@ app.post("/webhook", (req,res)=>{
     /* /rasm - GitHub'dagi rasmlarni VPS'ga (/var/www/img) yangilaydi */
     /* /nakrutka @user  -> tahlil
        /nakrutka @user tozala -> soxta referallarni uzadi va bloklaydi */
+    /* /bloklar - bloklangan hisoblar ro'yxati */
+    if(text.indexOf("/bloklar") === 0){
+      if(ADMIN_ID && fromId !== ADMIN_ID) return;
+      const dbb = load();
+      const ban = Object.keys(dbb).filter(function(k){
+        return /^\d+$/.test(k) && (dbb[k].banned || BANSET.has(String(k)));
+      });
+      if(!ban.length){ send(fromId, "Bloklangan hisob yo'q."); return; }
+      const byWhy = {};
+      ban.forEach(function(k){
+        const w = dbb[k].banWhy || "qo'lda";
+        byWhy[w] = (byWhy[w] || 0) + 1;
+      });
+      const lines = ban.slice(0, 15).map(function(k){
+        const u5 = dbb[k];
+        return "  " + (u5.nm || "-") + (u5.un ? " (@" + u5.un + ")" : "") + " \u2014 " + k;
+      }).join("\n");
+      send(fromId, "\uD83D\uDEAB Bloklangan: " + ban.length + " ta\n\n" +
+        "Sabablari:\n" + Object.keys(byWhy).map(function(w){
+          return "  " + w + ": " + byWhy[w] + " ta"; }).join("\n") + "\n\n" +
+        lines + (ban.length > 15 ? "\n  \u2026 va yana " + (ban.length-15) + " ta" : "") +
+        "\n\nBirini qaytarish: /qoshish @username");
+      return;
+    }
     if(text.indexOf("/nakrutka") === 0){
       if(ADMIN_ID && fromId !== ADMIN_ID) return;
       const rest = text.replace("/nakrutka", "").trim();
