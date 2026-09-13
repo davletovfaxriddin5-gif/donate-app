@@ -43,7 +43,7 @@ body{ overflow-x:hidden; max-width:100%;
 }
 .reduce-motion *{animation:none!important;transition:none!important}
 .wrap{max-width:460px;margin:0 auto;position:relative;min-height:100dvh;overflow-x:hidden;
-  padding:calc(env(safe-area-inset-top) + 10px) 14px calc(var(--nav-h) + env(safe-area-inset-bottom) + 16px);}
+  padding:calc(env(safe-area-inset-top) + var(--tg-top, 46px)) 14px calc(var(--nav-h) + env(safe-area-inset-bottom) + 16px);}
 button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:none}
 input{font-family:inherit}
 ::-webkit-scrollbar{display:none}
@@ -1312,6 +1312,17 @@ body.kb-open .mg-empty{ display:none }
 /* Klaviatura ochilganda "Sotib olish" tugmasi uning ustiga chiqib qolardi. */
 body.kb-open .buy-bar{ display:none !important }
 
+/* Pastga surib yangilaganda chiqadigan belgi */
+.pt-spin{ position:fixed; left:50%; top:calc(env(safe-area-inset-top) + var(--tg-top, 46px));
+  transform:translateX(-50%) scale(.7); width:34px; height:34px; border-radius:50%;
+  background:var(--card); border:1px solid var(--stroke); display:grid; place-items:center;
+  opacity:0; pointer-events:none; z-index:200; transition:opacity .2s, transform .2s }
+.pt-spin.on{ opacity:1; transform:translateX(-50%) scale(1) }
+.pt-spin span{ width:15px; height:15px; border-radius:50%;
+  border:2px solid var(--stroke-2); border-top-color:var(--blue);
+  animation:ptr .7s linear infinite }
+@keyframes ptr{ to{ transform:rotate(360deg) } }
+
 .pw-lock{ position:fixed; inset:0; z-index:400; display:none; place-items:center;
   background:var(--bg); padding:24px }
 .pw-lock.on{ display:grid }
@@ -1432,6 +1443,7 @@ body.kb-open .buy-bar{ display:none !important }
 </svg>
 
 <div class="toast" id="toast"></div>
+<div class="pt-spin" id="ptSpin"><span></span></div>
 
 <script>
 const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
@@ -1450,6 +1462,13 @@ if(tg){
   /* Pastga surib yopishni to'samiz — ilova faqat tepadagi tugma bilan yopiladi.
      Bu bitta chaqiruv, hech qanday hodisaga ulanmaydi. */
   try{ tg.disableVerticalSwipes && tg.disableVerticalSwipes(); }catch(e){}
+  /* Telegram sarlavhasi ostida qolmaslik uchun tepadan bo'sh joy.
+     Yangi Telegram'lar aniq o'lchov beradi, eskilarida 46px qoladi.
+     Bir marta o'qiladi — hech qanday hodisaga ulanmaydi. */
+  try{
+    const sa = (tg.contentSafeAreaInset && tg.contentSafeAreaInset.top) || 0;
+    if(sa > 0) document.documentElement.style.setProperty('--tg-top', (sa + 10) + 'px');
+  }catch(e){}
   try{ tg.setHeaderColor && tg.setHeaderColor('#0B1120'); tg.setBackgroundColor && tg.setBackgroundColor('#0B1120'); }catch(e){}
   tgUser = tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user : null;
   tg.onEvent('backButtonClicked', onBack);
@@ -6192,6 +6211,44 @@ function loadBalance(){
     }
   }).catch(function(){});
 }
+/* ---------- Pastga surib yangilash ----------
+   Sahifaning eng tepasida turib barmoq bilan pastga tortilsa, balans
+   serverdan qaytadan olinadi. Sahifa qayta yuklanmaydi, hech qanday
+   Telegram hodisasiga ulanmaydi — faqat barmoq harakatini kuzatadi. */
+let ptY = -1, ptGo = false, ptBusy = false;
+function ptRun(){
+  if(ptBusy) return;
+  ptBusy = true;
+  haptic('medium');
+  const sp = document.getElementById('ptSpin');
+  if(sp) sp.classList.add('on');
+  try{ loadBalance(); }catch(e){}
+  setTimeout(function(){
+    ptBusy = false;
+    if(sp) sp.classList.remove('on');
+    notify('success');
+  }, 900);
+}
+document.addEventListener('touchstart', function(e){
+  ptY = -1; ptGo = false;
+  if(ptBusy || e.touches.length !== 1) return;
+  if(document.body.classList.contains('kb-open')) return;
+  /* tugma, maydon yoki gorizontal ro'yxat ustida bo'lsa — aralashmaymiz */
+  const t = e.target;
+  if(t && t.closest && t.closest('button, input, textarea, a, .scroll, .sheet')) return;
+  const sc = document.scrollingElement || document.documentElement;
+  if(sc.scrollTop > 0) return;
+  ptY = e.touches[0].clientY;
+}, { passive:true });
+document.addEventListener('touchmove', function(e){
+  if(ptY < 0 || ptBusy) return;
+  if(e.touches[0].clientY - ptY > 110) ptGo = true;
+}, { passive:true });
+document.addEventListener('touchend', function(){
+  if(ptGo) ptRun();
+  ptY = -1; ptGo = false;
+}, { passive:true });
+
 function loadPhone(){
   const uid = tgUser && tgUser.id ? tgUser.id : '';
   if(!uid) return;
