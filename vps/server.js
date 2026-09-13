@@ -1078,6 +1078,57 @@ const REF_SCORE   = 3;      /* bitta hisob shubhali deb topilishi uchun kerakli 
 const ID_CLUSTER  = 3e6;    /* id lar shu oraliqda bo'lsa — bir vaqtda ochilgan */
 const ID_NEAR_MIN = 5;      /* shuncha id yonma-yon tursa — to'da */
 const ID_NEAR_PCT = 0.6;    /* referallarning shuncha ulushi yonma-yon bo'lishi SHART */
+const NAME_PCT    = 0.7;    /* shuncha ulushi bot naqshidagi username bo'lsa — o'zi yetarli */
+
+/* ---------- Tezlik to'sig'i ----------
+   Odam bir necha daqiqada o'nlab do'stini chaqira olmaydi. Bunday tezlik
+   faqat dastur bilan bo'ladi. Chegaradan oshgach referal HISOBLANMAYDI —
+   tozalashni kutmaydi, o'sha zahoti to'xtaydi. Chin odam uchun zaxira katta:
+   5 daqiqada 25 ta, ya'ni daqiqasiga 5 ta. */
+const RATE_WIN  = 5 * 60e3;
+const RATE_MAX  = 40;
+const rateHit   = {};      /* kimga qachon ogohlantirish yuborilgan */
+function refTooFast(db, invId){
+  const inv = db[String(invId)];
+  if(!inv || !Array.isArray(inv.refs)) return false;
+  const now = Date.now();
+  let n = 0;
+  inv.refs.forEach(function(rid){
+    const r = db[String(rid)];
+    const t = r && r.refAt ? Date.parse(r.refAt) : 0;
+    if(t && (now - t) <= RATE_WIN) n++;
+  });
+  if(n < RATE_MAX) return false;
+
+  /* To'plamning O'ZINI ham uzamiz — aks holda nakrutkachiga chegaragacha
+     yig'ilgan referallar qolib ketardi. Hech narsa o'chirilmaydi: hammasi
+     refsCut ga yoziladi va /qoshish bilan to'liq qaytariladi. */
+  let cutN = 0;
+  if(!Array.isArray(inv.refsCut)) inv.refsCut = [];
+  inv.refs.slice().forEach(function(rid){
+    const r = db[String(rid)];
+    const t = r && r.refAt ? Date.parse(r.refAt) : 0;
+    if(!t || (now - t) > RATE_WIN) return;
+    r.refByCut = r.refBy; r.refAtCut = r.refAt;
+    delete r.refBy; delete r.refAt;
+    if(inv.refsCut.indexOf(String(rid)) < 0) inv.refsCut.push(String(rid));
+    inv.refs.splice(inv.refs.indexOf(rid), 1);
+    cutN++;
+  });
+
+  /* Bir marta xabar beramiz, har referalda emas */
+  if(!rateHit[String(invId)] || (now - rateHit[String(invId)]) > 3600e3){
+    rateHit[String(invId)] = now;
+    if(ADMIN_ID) tgCall("sendMessage", { chat_id: ADMIN_ID,
+      text: "\u26A0\uFE0F NAKRUTKA TO'XTATILDI\n\n" +
+            (inv.nm || "-") + (inv.un ? " (@" + inv.un + ")" : "") + "\nid: " + invId + "\n\n" +
+            "5 daqiqada " + n + " ta referal \u2014 bu odam qila olmaydi.\n" +
+            "Uzilgan: " + cutN + " ta. Yangilari ham hisoblanmaydi.\n\n" +
+            "Ko'rish: /nakrutka @" + (inv.un || invId) + "\n" +
+            "Xato bo'lsa qaytarish: /qoshish @" + (inv.un || invId) });
+  }
+  return true;
+}
 const REF_AGE_H   = 24;     /* jonsizlikni baholashdan oldin shuncha soat kutamiz */
 /* .env da BAN_DRY=1 bo'lsa — hech narsa o'zgartirilmaydi, faqat xabar yuboriladi.
    Avval kuzatib turish uchun. Ishonch hosil qilgach o'sha qatorni olib tashlaysiz. */
@@ -1116,7 +1167,7 @@ function refSweep(){
       near[n] = c;
     });
 
-    const bad = [];
+    const bad = [], scores = {};
     let nName = 0, nDead = 0, nNear = 0;
     inv.refs.forEach(function(rid){
       const r  = db[String(rid)];
@@ -1130,15 +1181,37 @@ function refSweep(){
       else if(!un) sc += 1;
       if(oldEnough && !refAlive(r)){ sc += 1; nDead++; }
       if(cl){ sc += 1; nNear++; }
+      scores[String(rid)] = sc;
       if(sc >= REF_SCORE) bad.push(String(rid));
     });
 
+    /* Guruh qoidasi: bir odamning referallarining ko'pchiligi bot naqshidagi
+       username'ga ega bo'lsa, naqshning o'zi yetarli dalil. Chin do'stlar
+       to'dasida hamma birdan avtomatik username olmaydi. */
+    const namePct = inv.refs.length ? nName / inv.refs.length : 0;
+    if(namePct >= NAME_PCT){
+      inv.refs.forEach(function(rid){
+        if(bad.indexOf(String(rid)) < 0 && (scores[String(rid)] || 0) >= 2) bad.push(String(rid));
+      });
+    }
+
+    /* Eng zich 5 daqiqa: shuncha vaqtda nechta referal kelgan */
+    const ts = inv.refs.map(function(rid){
+      const r = db[String(rid)]; return r && r.refAt ? Date.parse(r.refAt) : 0;
+    }).filter(Boolean).sort(function(a,b){ return a-b; });
+    let burst = 0;
+    for(let i = 0; i < ts.length; i++){
+      let n2 = 0;
+      for(let j = i; j < ts.length && ts[j] - ts[i] <= RATE_WIN; j++) n2++;
+      if(n2 > burst) burst = n2;
+    }
     const pct  = inv.refs.length ? bad.length / inv.refs.length : 0;
     const near_pct = inv.refs.length ? nNear / inv.refs.length : 0;
     /* Eng ishonchli himoya: chin do'stlarning Telegram id lari yillar bo'ylab
        tarqoq bo'ladi. Ommaviy ochilgan hisoblar esa yonma-yon turadi.
        Shu belgi bo'lmasa — hech kim bloklanmaydi. */
-    if(bad.length < REF_MIN || pct < REF_BAD_PCT || near_pct < ID_NEAR_PCT) return;
+    if(bad.length < REF_MIN || pct < REF_BAD_PCT) return;
+    if(near_pct < ID_NEAR_PCT && namePct < NAME_PCT && burst < RATE_MAX) return;
 
     if(BAN_DRY){
       if(ADMIN_ID) tgCall("sendMessage", { chat_id: ADMIN_ID,
@@ -1169,7 +1242,8 @@ function refSweep(){
             "Belgilar bo'yicha:\n" +
             "  \u2022 bot ko'rinishidagi username: " + nName + " ta\n" +
             "  \u2022 id lari yonma-yon: " + nNear + " ta\n" +
-            "  \u2022 24 soatdan beri jonsiz: " + nDead + " ta\n\n" +
+            "  \u2022 24 soatdan beri jonsiz: " + nDead + " ta\n" +
+            "  \u2022 eng zich 5 daqiqada: " + burst + " ta\n\n" +
             "Bu odam botdan chiqarildi. Endi unga botga kirish taqiqlangan." });
   });
 
@@ -2131,7 +2205,7 @@ app.post("/ref", (req,res)=>{
                    (u.balance||0) > 0 || !!u.phone;
     const fresh  = ageMin <= 30 && !used && !u.greeted;
 
-    if(by && by !== uid && !u.refBy && fresh && !isBanned(by)){
+    if(by && by !== uid && !u.refBy && fresh && !isBanned(by) && !refTooFast(db, by)){
       const inv = urec(db, by);
       u.refBy = by;
       u.refAt = new Date().toISOString();
@@ -2873,18 +2947,20 @@ app.post("/webhook", (req,res)=>{
     if(text.indexOf("/nakrutka") === 0){
       if(ADMIN_ID && fromId !== ADMIN_ID) return;
       const rest = text.replace("/nakrutka", "").trim();
-      const doIt = /tozala/i.test(rest);
-      const who  = rest.replace(/tozala/ig, "").trim();
+      const doIt = /tozala|hammasi/i.test(rest);
+      const allR = /hammasi/i.test(rest);
+      const who  = rest.replace(/tozala|hammasi/ig, "").trim();
       if(!who){
         send(fromId, "\uD83D\uDD0E Referal tekshiruvi\n\n" +
           "/nakrutka @username \u2014 kimlar qo'shilganini ko'rsatadi\n" +
-          "/nakrutka @username tozala \u2014 soxtalarini uzadi va bloklaydi");
+          "/nakrutka @username tozala \u2014 soxta deb topilganlarini chiqaradi\n" +
+          "/nakrutka @username hammasi \u2014 hammasini chiqaradi");
         return;
       }
-      const dbn = load();
+      const dbn  = load();
       const uid3 = findUser(dbn, who);
       if(!uid3 || !dbn[uid3]){ send(fromId, "\u274C Topilmadi: " + who); return; }
-      const inv = dbn[uid3];
+      const inv  = dbn[uid3];
       const list = Array.isArray(inv.refs) ? inv.refs.slice() : [];
       if(!list.length){ send(fromId, "Bu odamda referal yo'q."); return; }
 
@@ -2897,15 +2973,29 @@ app.post("/webhook", (req,res)=>{
       });
 
       const bots = [], reals = [];
+      let cName = 0, cNoUn = 0, cDead = 0, cNear = 0;
       list.forEach(function(rid){
-        const r = dbn[String(rid)];
+        const r  = dbn[String(rid)];
         const un = r && r.un ? String(r.un) : "";
         let sc = 0;
-        if(botName(un)) sc += 2; else if(!un) sc += 1;
-        if(!refAlive(r)) sc += 1;
-        if((near[Number(rid)] || 0) >= ID_NEAR_MIN) sc += 1;
+        if(botName(un)){ sc += 2; cName++; }
+        else if(!un){ sc += 1; cNoUn++; }
+        if(!refAlive(r)){ sc += 1; cDead++; }
+        if((near[Number(rid)] || 0) >= ID_NEAR_MIN){ sc += 1; cNear++; }
         (sc >= REF_SCORE ? bots : reals).push(String(rid));
       });
+      /* Guruh qoidasi: ko'pchiligining username'i bot naqshida bo'lsa,
+         naqshning o'zi yetarli dalil hisoblanadi. */
+      if((cName / list.length) >= NAME_PCT){
+        reals.slice().forEach(function(rid){
+          const r = dbn[String(rid)];
+          if(botName(r && r.un ? String(r.un) : "")){
+            bots.push(rid);
+            reals.splice(reals.indexOf(rid), 1);
+          }
+        });
+      }
+      const cut = allR ? list.slice() : bots;
 
       if(!doIt){
         const namz = reals.slice(0, 10).map(function(rid){
@@ -2917,25 +3007,31 @@ app.post("/webhook", (req,res)=>{
           "Jami referal: " + list.length + " ta\n" +
           "  \u2022 soxta ko'rinadi: " + bots.length + " ta\n" +
           "  \u2022 chin ko'rinadi: " + reals.length + " ta\n\n" +
-          (reals.length ? ("Chin ko'ringanlar (tegilmaydi):\n" + namz +
+          "Belgilar bo'yicha:\n" +
+          "  bot naqshidagi username: " + cName + "\n" +
+          "  username umuman yo'q: " + cNoUn + "\n" +
+          "  id lari yonma-yon: " + cNear + "\n" +
+          "  jonsiz hisob: " + cDead + "\n\n" +
+          (reals.length ? ("Chin ko'ringanlar:\n" + namz +
              (reals.length > 10 ? "\n  \u2026 va yana " + (reals.length-10) + " ta" : "") + "\n\n") : "") +
-          "Tozalash uchun:\n/nakrutka " + who + " tozala");
+          "Soxtalarini chiqarish:\n/nakrutka " + who + " tozala\n\n" +
+          "Hammasini chiqarish:\n/nakrutka " + who + " hammasi");
         return;
       }
 
       if(!Array.isArray(inv.refsCut)) inv.refsCut = [];
-      bots.forEach(function(rid){
+      cut.forEach(function(rid){
         const r = dbn[String(rid)];
         if(r){ r.refByCut = r.refBy; r.refAtCut = r.refAt; delete r.refBy; delete r.refAt; }
         if(inv.refsCut.indexOf(String(rid)) < 0) inv.refsCut.push(String(rid));
         banUser(dbn, rid, "nakrutka hisobi");
       });
-      inv.refs = inv.refs.filter(function(rid){ return bots.indexOf(String(rid)) < 0; });
+      inv.refs = inv.refs.filter(function(rid){ return cut.indexOf(String(rid)) < 0; });
       save(dbn);
       send(fromId, "\u2705 Tozalandi\n\n" +
         (inv.nm || "-") + (inv.un ? " (@" + inv.un + ")" : "") + "\n\n" +
-        "Chiqarilgan soxta hisoblar: " + bots.length + " ta\n" +
-        "Tegilmagan (chin ko'ringan): " + reals.length + " ta\n" +
+        (allR ? "Hammasi chiqarildi: " : "Chiqarilgan soxta hisoblar: ") + cut.length + " ta\n" +
+        (allR ? "" : "Tegilmagan: " + reals.length + " ta\n") +
         "Qolgan referali: " + inv.refs.length + " ta\n\n" +
         "Xato bo'lsa: /qoshish " + who);
       return;
@@ -3195,7 +3291,7 @@ app.post("/webhook", (req,res)=>{
          Botga avval o'zi kirgan odam keyin havola bossa — hisoblanmaydi. */
       const usedG = (ug.orders||[]).length > 0 || (ug.topups||[]).length > 0 ||
                     (ug.balance||0) > 0 || !!ug.phone;
-      if(rid && rid !== fromId && !ug.refBy && first && !usedG && !isBanned(rid)){
+      if(rid && rid !== fromId && !ug.refBy && first && !usedG && !isBanned(rid) && !refTooFast(dbg, rid)){
         const inv = urec(dbg, rid);
         ug.refBy = rid;
         ug.refAt = new Date().toISOString();
