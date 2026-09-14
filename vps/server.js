@@ -1630,6 +1630,53 @@ function tgCall(method, body){
   }).catch(function(e){ console.log("TG "+method+" xato:", e.message); });
 }
 
+/* ---------- GRAM to'ldirish ----------
+   Odam o'z hamyonidan bizning manzilga GRAM yuboradi. Har so'rovga
+   NOYOB summa beriladi (masalan 2.000137) — server aynan shu summa
+   bo'yicha to'lov egasini topadi. Izoh (memo) kerak emas, chunki uni
+   TON Connect orqali yuborish murakkab va ba'zi hamyonlar qo'llamaydi. */
+const GRAM_MIN = Number(process.env.GRAM_MIN || 0.5);   /* eng kam to'ldirish */
+const GRAM_FEE = Number(process.env.GRAM_FEE || 0.01);  /* yechishda olinadigan haq */
+
+app.post("/gram/start", (req,res)=>{
+  const who = checkInit(req.body && req.body.initData);
+  if(!who) return res.json({ ok:false, error:"auth" });
+  if(!TON_ADDR) return res.json({ ok:false, error:"off" });
+  const want = Number(req.body.amount) || 0;
+  if(!(want >= GRAM_MIN)) return res.json({ ok:false, error:"min", min:GRAM_MIN });
+  if(want > 10000)        return res.json({ ok:false, error:"max" });
+
+  const db = load();
+  const u  = urec(db, who.id);
+  if(!Array.isArray(u.gramTops)) u.gramTops = [];
+
+  /* Boshqa hech kimda shunday kutilayotgan summa bo'lmasin */
+  const busy = {};
+  Object.keys(db).forEach(function(k){
+    if(!/^\d+$/.test(k)) return;
+    ((db[k].gramTops)||[]).forEach(function(t){
+      if(t.status === "wait") busy[String(t.nano)] = 1;
+    });
+  });
+  let nano = 0;
+  for(let i = 0; i < 400; i++){
+    const tail = Math.floor(Math.random() * 900000) + 100000;   /* 6 xonali dum */
+    const n = Math.round(want * 1e9) + tail;
+    if(!busy[String(n)]){ nano = n; break; }
+  }
+  if(!nano) return res.json({ ok:false, error:"busy" });
+
+  const rec = { id:"G"+Date.now().toString().slice(-9), nano:nano,
+                gram: nano / 1e9, want: want, status:"wait",
+                at:new Date().toISOString() };
+  u.gramTops.unshift(rec);
+  u.gramTops = u.gramTops.slice(0, 40);
+  save(db);
+  res.json({ ok:true, addr:TON_ADDR, nano:String(nano),
+             show:(nano/1e9).toFixed(9).replace(/0+$/,"").replace(/\.$/,""),
+             id:rec.id });
+});
+
 /* ---------- NFT bo'limining hamyonlari ----------
    GRAM va NFT so'm qoldig'i. Ilgari telefonda (localStorage) turardi —
    uni har kim o'zgartira olardi va telefon tozalansa yo'qolardi.
@@ -2113,6 +2160,43 @@ async function tonCheck(){
     if(e.in_progress) continue;                       /* hali tugamagan */
     if(st.seen.indexOf(e.event_id) > -1) continue;    /* allaqachon hisoblangan */
 
+    /* ---- Oddiy GRAM (TON) o'tkazmasi ---- */
+    for(const a of (e.actions || [])){
+      if(a.type !== "TonTransfer" || a.status !== "ok") continue;
+      const tt = a.TonTransfer || {};
+      const to = (tt.recipient && (tt.recipient.address || tt.recipient)) || "";
+      if(String(to) !== String(TON_ADDR)) continue;      /* bizga kelganini olamiz */
+      const nano = Number(tt.amount || 0);
+      if(!(nano > 0)) continue;
+
+      /* NOYOB summa bo'yicha egasini topamiz */
+      let gid = "", grec = null;
+      Object.keys(db).forEach(function(k){
+        if(!/^\d+$/.test(k)) return;
+        ((db[k].gramTops)||[]).forEach(function(t){
+          if(t.status === "wait" && Number(t.nano) === nano){ gid = k; grec = t; }
+        });
+      });
+      if(!grec) continue;                                /* mos so'rov yo'q — tegmaymiz */
+
+      st.seen.push(e.event_id);
+      if(st.seen.length > 400) st.seen.shift();
+      changed = true;
+
+      const got = Math.round((nano / 1e9) * 1e9) / 1e9;
+      const ug  = urec(db, gid);
+      grec.status = "done"; grec.auto = true; grec.got = got;
+      ug.gram = Math.round((Number(ug.gram || 0) + got) * 1e9) / 1e9;
+
+      send(gid, "\u2705 GRAM hamyoningiz to'ldirildi: +" + got +
+                "\nJoriy qoldiq: " + ug.gram + " GRAM", null, true);
+      if(ADMIN_ID) send(ADMIN_ID, "\uD83E\uDD16 AVTO TASDIQ (GRAM) " + grec.id +
+        "\nKelgan: " + got + " GRAM" +
+        "\nKimga: " + (ug.nm || gid) + (ug.un ? " (@" + ug.un + ")" : "") +
+        "\nYangi qoldiq: " + ug.gram);
+    }
+
+    /* ---- USDT (jetton) o'tkazmasi ---- */
     for(const a of (e.actions || [])){
       if(a.type !== "JettonTransfer" || a.status !== "ok") continue;
       const j = a.JettonTransfer || {};
