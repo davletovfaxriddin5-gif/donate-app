@@ -5504,9 +5504,12 @@ function mktBanStep(){
   mktAnim(r, (i + 1) * step, function(){ mktBusy = false; mktRemember(r); mktFix(); });
 }
 function mktBanStart(){
-  clearInterval(mktBanT); mktBanT = null;
   const r = document.getElementById('mktRail');
-  if(!r || BANNERS.length < 2) return;
+  if(!r || BANNERS.length < 2){ clearInterval(mktBanT); mktBanT = null; return; }
+  /* Karusel allaqachon yurib turgan bo'lsa — tegmaymiz. Aks holda har tugma
+     bosilganda taymer noldan boshlanar va tez-tez bosilsa umuman ishlamasdi. */
+  if(r.dataset.ban === '1' && mktBanT) return;
+  clearInterval(mktBanT); mktBanT = null;
   mktBanHold = 0; mktBusy = false; mktTouch = false;
   const home = MKT_MID * BANNERS.length + mktIdx;   /* eslab qolingan rasmdan davom etamiz */
   const put = function(){ const s = mktStepPx(r); if(s && r.scrollLeft < 1) r.scrollLeft = home * s; };
@@ -5516,7 +5519,7 @@ function mktBanStart(){
   /* Bu element uchun tinglovchilar allaqachon qo'yilgan bo'lsa takrorlamaymiz —
      aks holda har qayta chizilishda ular to'planib ketadi. */
   if(r.dataset.ban === '1'){ mktBanT = setInterval(mktBanStep, MKT_WAIT + MKT_MS); return; }
-  r.dataset.ban = '1';
+  r.dataset.ban = '1';   /* bu element uchun tinglovchilar bir marta qo'yiladi */
   /* Barmoq tekkan lahzada markazga qaytaramiz. Bu paytda inersiya baribir
      to'xtaydi, shuning uchun hech narsa yo'qotilmaydi — har yangi surishda
      ikkala tomonga to'liq zaxira bo'ladi. */
