@@ -1338,6 +1338,44 @@ body.kb-open .mg-empty{ display:none }
 /* Klaviatura ochilganda "Sotib olish" tugmasi uning ustiga chiqib qolardi. */
 body.kb-open .buy-bar{ display:none !important }
 
+/* ---- Ulangan hamyon: tugma ichidagi ko'rinish ---- */
+[data-wal] b.a{ font-weight:600; color:var(--dim); margin-left:6px; font-family:var(--sys) }
+[data-wal] span.g{ display:inline-block; margin-left:8px; padding:2px 8px; border-radius:8px;
+  background:var(--blue); color:#fff; font-size:11.5px; font-weight:700; font-family:var(--sys) }
+
+/* ---- Hamyon varag'i: chap tarafda yirik sarlavhalar ---- */
+.tc-sh{ text-align:left }
+.tc-sh .tc-h{ font-size:22px; font-weight:700; letter-spacing:-.5px; font-family:var(--sys);
+  color:var(--text); margin:2px 0 18px }
+.tc-sh .tc-h2{ font-size:17px; font-weight:700; letter-spacing:-.3px; font-family:var(--sys);
+  color:var(--text); margin-bottom:4px }
+.tc-sh .tc-bal{ font-size:26px; font-weight:700; letter-spacing:-.8px; font-family:var(--sys);
+  color:var(--text); margin-bottom:16px }
+/* Yumshoq quti — chegara chizig'isiz */
+.tc-sh .tc-addr{ display:flex; align-items:center; gap:11px; margin-bottom:14px;
+  padding:12px 13px; border-radius:16px; background:rgba(0,0,0,.40) }
+body.light .tc-sh .tc-addr{ background:rgba(16,24,40,.06) }
+.tc-sh .tc-addr .ic{ width:34px; height:34px; border-radius:11px; flex-shrink:0;
+  display:grid; place-items:center; background:rgba(255,255,255,.07) }
+body.light .tc-sh .tc-addr .ic{ background:rgba(16,24,40,.07) }
+.tc-sh .tc-addr .ic svg{ width:19px; height:19px; color:rgba(255,255,255,.62) }
+body.light .tc-sh .tc-addr .ic svg{ color:rgba(16,24,40,.55) }
+.tc-sh .tc-addr .tx{ flex:1; min-width:0; font-size:15px; font-weight:600;
+  font-family:var(--sys); color:var(--text); overflow:hidden;
+  text-overflow:ellipsis; white-space:nowrap }
+.tc-sh .tc-addr .tx small{ display:block; font-size:11.5px; font-weight:500;
+  color:var(--faint); margin-bottom:1px }
+.tc-sh .tc-addr .cp{ flex-shrink:0; width:34px; height:34px; border-radius:11px;
+  display:grid; place-items:center; background:rgba(255,255,255,.07); transition:.14s }
+body.light .tc-sh .tc-addr .cp{ background:rgba(16,24,40,.07) }
+.tc-sh .tc-addr .cp svg{ width:17px; height:17px; color:rgba(255,255,255,.62) }
+body.light .tc-sh .tc-addr .cp svg{ color:rgba(16,24,40,.55) }
+.tc-sh .tc-addr .cp:active{ transform:scale(.92) }
+.tc-sh .tc-re{ width:100%; height:46px; border-radius:15px; background:var(--card-2);
+  border:1px solid var(--stroke-2); color:var(--text); font-size:14.5px; font-weight:600;
+  font-family:var(--sys); transition:.14s }
+.tc-sh .tc-re:active{ transform:scale(.98) }
+
 .pw-lock{ position:fixed; inset:0; z-index:400; display:none; place-items:center;
   background:var(--bg); padding:24px }
 .pw-lock.on{ display:grid }
@@ -1476,6 +1514,10 @@ if(tg){
   /* Pastga surib yopishni to'samiz — ilova faqat tepadagi tugma bilan yopiladi.
      Bu bitta chaqiruv, hech qanday hodisaga ulanmaydi. */
   try{ tg.disableVerticalSwipes && tg.disableVerticalSwipes(); }catch(e){}
+  /* Hamyon ulanishini kutubxonaning o'zi tiklaydi. Shuning uchun uni ilova
+     ochilgach tayyorlab qo'yamiz — aks holda oldin ulangan hamyon ko'rinmaydi
+     va har safar qaytadan ulash so'raladi. */
+  setTimeout(function(){ try{ tcLib().then(function(ok){ if(ok) tcInit(); }); }catch(e){} }, 900);
   /* Telegram sarlavhasi ostida qolmaslik uchun tepadan bo'sh joy.
      Yangi Telegram'lar aniq o'lchov beradi, eskilarida 46px qoladi.
      Bir marta o'qiladi — hech qanday hodisaga ulanmaydi. */
@@ -5885,6 +5927,15 @@ function grIn(el){
   const go = document.getElementById('grGo');
   if(go) go.disabled = !(parseFloat(s) > 0);
 }
+/* Hamyondagi butun GRAM qoldig'ini maydonga yozadi */
+function grAll(){
+  haptic();
+  if(!tcAddr){ toast('Avval hamyonni ulang'); return; }
+  if(!tcLoaded){ tcLoad(); toast('Balans olinmoqda\u2026'); return; }
+  const el = document.getElementById('grAmt'); if(!el) return;
+  el.value = fmtGram(tcGram);
+  grIn(el);
+}
 function grSet(v){
   haptic();
   const el = document.getElementById('grAmt'); if(!el) return;
@@ -5896,9 +5947,9 @@ function renderGram(){
   app.innerHTML = `<div class="page-title">To'ldirish</div>
   <div class="gr-card">
     <div class="lb">Ulangan hamyon</div>
-    <button class="gr-wal" onclick="wlSoon()">
+    <button class="gr-wal" onclick="wlConnectOnly()">
       <svg viewBox="0 0 24 24"><path d="M3.5 8A2.5 2.5 0 0 1 6 5.5h10.5A2.5 2.5 0 0 1 19 8"/><rect x="3.5" y="8" width="17" height="10.5" rx="2.5"/><path d="M20.5 11.6h-3a1.9 1.9 0 0 0 0 3.8h3"/></svg>
-      Hamyonni ulash
+      <span data-wal2="Hamyonni ulash">${tcAddr ? esc(tcShort(tcAddr)) : 'Hamyonni ulash'}</span>
     </button>
     <div class="gr-amt">
       <input id="grAmt" type="text" inputmode="decimal" value="0" oninput="grIn(this)" onfocus="this.select()">
@@ -5908,7 +5959,7 @@ function renderGram(){
       <button onclick="grSet(10)"><span class="d">${GRAM_ICON}</span>10</button>
       <button onclick="grSet(50)"><span class="d">${GRAM_ICON}</span>50</button>
       <button onclick="grSet(100)"><span class="d">${GRAM_ICON}</span>100</button>
-      <button onclick="grSet(${bal})"><span class="d">${GRAM_ICON}</span>Hammasi</button>
+      <button onclick="grAll()"><span class="d">${GRAM_ICON}</span>Hammasi</button>
     </div>
     <button class="gr-go" id="grGo" disabled onclick="wlSoon()">To'ldirish</button>
   </div>`;
@@ -5930,6 +5981,149 @@ function setWlTab(t){
   if(!tb || !bx){ renderWallet(); return; }
   [].slice.call(tb.querySelectorAll('button')).forEach(function(b){ b.classList.toggle('on', b.dataset.t === t); });
   bx.innerHTML = walletRows();
+}
+/* ---------- TON Connect: hamyon ulash ----------
+   Hamyonlar ro'yxatini (Telegram Wallet, Tonkeeper, MyTonWallet va h.k.)
+   kutubxonaning o'zi rasmiy reyestrdan oladi — biz sanab chiqmaymiz. */
+const TC_MANIFEST = 'https://www.minatoh.uz/tonconnect-manifest.json';
+let tcUI = null, tcAddr = '';
+function tcShort(a){
+  const s = String(a || '');
+  return s.length > 12 ? (s.slice(0, 6) + '…' + s.slice(-4)) : s;
+}
+let tcTon = 0, tcGram = 0, tcLoaded = false;
+/* Ulangan bo'lsa: "Sizning hamyoningiz · Qusjk9…8f2a" va ko'k katakda GRAM */
+function tcLabel(def){
+  if(!tcAddr) return esc(def);
+  return "Sizning hamyoningiz <b class=\"a\">" + esc(tcShort(tcAddr)) + "</b>" +
+         "<span class=\"g\">" + fmtGram(tcGram) + " GRAM</span>";
+}
+function tcPaint(){
+  document.querySelectorAll('[data-wal]').forEach(function(el){
+    el.innerHTML = tcLabel(el.dataset.wal);
+  });
+  /* GRAM ekranida faqat manzil ko'rinadi — qo'shimcha yozuvsiz */
+  document.querySelectorAll('[data-wal2]').forEach(function(el){
+    el.textContent = tcAddr ? tcShort(tcAddr) : el.dataset.wal2;
+  });
+}
+/* Hamyon qoldig'ini serverdan olamiz (kalit u yerda qoladi) */
+function tcLoad(){
+  if(!tcAddr){ tcTon = 0; tcGram = 0; tcLoaded = false; tcPaint(); return; }
+  fetch(VBASE + '/ton/wallet?addr=' + encodeURIComponent(tcAddr))
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if(d && d.ok){ tcTon = Number(d.ton)||0; tcGram = Number(d.gram)||0; tcLoaded = true; }
+      tcPaint(); tcSheetFill();
+    }).catch(function(){ tcPaint(); });
+}
+/* Kutubxonani faqat kerak bo'lganda yuklaymiz */
+let tcLoading = null;
+function tcLib(){
+  if(window.TON_CONNECT_UI) return Promise.resolve(true);
+  if(tcLoading) return tcLoading;
+  tcLoading = new Promise(function(res){
+    const s = document.createElement('script');
+    s.src = 'https://unpkg.com/@tonconnect/ui@2/dist/tonconnect-ui.min.js';
+    s.onload = function(){ res(!!window.TON_CONNECT_UI); };
+    s.onerror = function(){ res(false); };
+    document.head.appendChild(s);
+  });
+  return tcLoading;
+}
+function tcInit(){
+  try{
+    if(!window.TON_CONNECT_UI || tcUI) return;
+    tcUI = new TON_CONNECT_UI.TonConnectUI({ manifestUrl: TC_MANIFEST });
+    /* Oldingi ulanish darrov tayyor bo'lmaydi — kutubxona uni tiklaguncha kutamiz */
+    if(tcUI.connectionRestored && tcUI.connectionRestored.then){
+      tcUI.connectionRestored.then(function(){
+        const w2 = tcUI.wallet;
+        tcAddr = (w2 && w2.account && w2.account.address) || '';
+        tcPaint(); if(tcAddr) tcLoad();
+      }).catch(function(){});
+    }
+    const w = tcUI.wallet;
+    if(w && w.account) tcAddr = w.account.address || '';
+    tcUI.onStatusChange(function(x){
+      tcAddr = (x && x.account && x.account.address) || '';
+      tcPaint(); tcLoad();
+      if(tcAddr) notify('success');
+    });
+    tcPaint(); if(tcAddr) tcLoad();
+  }catch(e){ console.log('TON Connect xato:', e.message); }
+}
+function wlConnect(){
+  haptic();
+  if(tcAddr && tcUI){ tcSheet(); return; }
+  tcLib().then(function(ok){
+    if(!ok){ toast('Hamyon moduli yuklanmadi'); return; }
+    tcInit();
+    if(!tcUI){ toast('Hamyon moduli yuklanmadi'); return; }
+    if(tcAddr){ tcSheet(); return; }
+    tcUI.openModal().catch(function(){ toast('Ochilmadi, qayta urinib ko\'ring'); });
+  });
+}
+/* GRAM ekranidagi tugma: ulanmagan bo'lsa ulaydi, ulangan bo'lsa tegmaydi */
+function wlConnectOnly(){
+  if(tcAddr) return;
+  wlConnect();
+}
+/* ---- Pastdan chiqadigan hamyon varag'i ---- */
+function tcSheetFill(){
+  const b = document.getElementById('tcBal');
+  if(b) b.textContent = tcLoaded ? (fmtGram(tcGram) + ' GRAM') : '\u2026';
+}
+function tcSheet(){
+  const old = document.getElementById('tcSh');
+  if(old) old.remove();
+  const bg = document.createElement('div');
+  bg.className = 'sheet-bg'; bg.id = 'tcShBg';
+  bg.onclick = tcSheetClose;
+  const sh = document.createElement('div');
+  sh.className = 'sheet tc-sh'; sh.id = 'tcSh';
+  sh.innerHTML =
+    '<div class="grab"></div>' +
+    '<div class="tc-h">Sizning hamyoningiz</div>' +
+    '<div class="tc-h2">Balans</div>' +
+    '<div class="tc-bal" id="tcBal">\u2026</div>' +
+    '<div class="tc-addr">' +
+      '<span class="ic"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none">' +
+      '<path d="M5 5.5h11a3 3 0 0 1 3 3v.5H5.6a.6.6 0 0 1 0-1.2H18V7A2.5 2.5 0 0 0 15.5 5H5a1 1 0 0 0 0 .5z"/>' +
+      '<path d="M4 8.6c0-1.2 1-2.1 2.2-2.1H17A3 3 0 0 1 20 9.5v8A2.5 2.5 0 0 1 17.5 20h-11A2.5 2.5 0 0 1 4 17.5V8.6zm12.8 3.4a1.8 1.8 0 0 0 0 3.6H20v-3.6h-3.2z"/>' +
+      '</svg></span>' +
+      '<span class="tx"><small>Adres</small>' + esc(tcShort(tcAddr)) + '</span>' +
+      '<button class="cp" onclick="tcCopy()" aria-label="Nusxalash">' +
+      '<svg viewBox="0 0 24 24" fill="currentColor" stroke="none">' +
+      '<rect x="9" y="9" width="11" height="12" rx="2.6"/>' +
+      '<path d="M6.5 3h8A2.5 2.5 0 0 1 17 5.5V7h-2.2V5.8a.8.8 0 0 0-.8-.8H6.8a.8.8 0 0 0-.8.8v8.4c0 .45.35.8.8.8H8v2.2H6.5A2.5 2.5 0 0 1 4 14.5v-9A2.5 2.5 0 0 1 6.5 3z"/>' +
+      '</svg></button>' +
+    '</div>' +
+    '<button class="tc-re" onclick="tcAgain()">Qaytadan ulash</button>';
+  document.body.appendChild(bg); document.body.appendChild(sh);
+  requestAnimationFrame(function(){
+    requestAnimationFrame(function(){ bg.classList.add('on'); sh.classList.add('on'); });
+  });
+  tcSheetFill();
+  if(!tcLoaded) tcLoad();
+}
+function tcSheetClose(){
+  const sh = document.getElementById('tcSh'), bg = document.getElementById('tcShBg');
+  if(sh) sh.classList.remove('on');
+  if(bg) bg.classList.remove('on');
+  setTimeout(function(){ if(sh) sh.remove(); if(bg) bg.remove(); }, 320);
+}
+function tcCopy(){
+  haptic();
+  try{ navigator.clipboard.writeText(tcAddr); toast('Manzil nusxalandi'); }
+  catch(e){ toast('Nusxalanmadi'); }
+}
+function tcAgain(){
+  haptic(); tcSheetClose();
+  if(!tcUI) return;
+  tcUI.disconnect().catch(function(){}).then(function(){
+    setTimeout(function(){ tcUI.openModal().catch(function(){}); }, 260);
+  });
 }
 function wlSoon(){ haptic(); toast('Tez orada'); }
 /* Pul yoki qiymat harakatlanadigan amallar — avval Face ID / barmoq izi.
@@ -5982,9 +6176,9 @@ function renderWallet(){
   const i = main.lastIndexOf(' ');
   const big = i > 0 ? main.slice(0, i) + '<small>' + main.slice(i + 1) + '</small>' : main;
   app.innerHTML = `
-  <button class="wl-top" onclick="wlSoon()">
+  <button class="wl-top" onclick="wlConnect()">
     <svg viewBox="0 0 24 24"><path d="M3.5 8A2.5 2.5 0 0 1 6 5.5h10.5A2.5 2.5 0 0 1 19 8"/><rect x="3.5" y="8" width="17" height="10.5" rx="2.5"/><path d="M20.5 11.6h-3a1.9 1.9 0 0 0 0 3.8h3"/></svg>
-    O'z hamyoningizni ulash
+    <span data-wal="O'z hamyoningizni ulash">O'z hamyoningizni ulash</span>
     <span class="arw">›</span>
   </button>
 
