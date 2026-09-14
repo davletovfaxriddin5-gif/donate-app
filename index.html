@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
 <title>minatoh</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<!-- TON Connect: hamyon ulash oynasini shu kutubxona chizadi.
-     Yuklanmasa ilova baribir ishlaydi, faqat hamyon tugmasi xabar beradi. -->
-<script src="https://unpkg.com/@tonconnect/ui@2/dist/tonconnect-ui.min.js"></script>
+<!-- TON Connect kutubxonasi bu yerda yuklanmaydi. U hamyon tugmasi
+     bosilgandagina yuklanadi — aks holda iPhone'da butun ilovadagi
+     tugmalarda bosilish animatsiyasi yonib ketardi. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -1343,23 +1343,36 @@ body.kb-open .buy-bar{ display:none !important }
 [data-wal] span.g{ display:inline-block; margin-left:8px; padding:2px 8px; border-radius:8px;
   background:var(--blue); color:#fff; font-size:11.5px; font-weight:700; font-family:var(--sys) }
 
-/* ---- Hamyon varag'i ---- */
-.tc-sh{ text-align:center }
-.tc-sh .tc-h{ font-size:13px; color:var(--faint); margin-bottom:6px }
-.tc-sh .tc-bal{ font-size:30px; font-weight:700; letter-spacing:-1px; font-family:var(--sys);
-  color:var(--text); margin-bottom:2px }
-.tc-sh .tc-bal small{ display:block; font-size:13px; font-weight:500; color:var(--faint);
-  letter-spacing:0; margin-top:3px }
-.tc-sh .tc-addr{ display:flex; align-items:center; gap:9px; margin:16px 0 12px;
-  padding:11px 12px; border-radius:14px; background:var(--card-2);
-  border:1px solid var(--stroke-2) }
-.tc-sh .tc-addr svg{ width:18px; height:18px; stroke:#5B8CFF; fill:none; stroke-width:1.8;
-  stroke-linecap:round; stroke-linejoin:round; flex-shrink:0 }
-.tc-sh .tc-addr span{ flex:1; text-align:left; font-size:13.5px; font-family:var(--sys);
-  color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
-.tc-sh .tc-addr button{ font-size:12.5px; font-weight:600; color:var(--blue); flex-shrink:0 }
-.tc-sh .tc-re{ width:100%; height:44px; border-radius:14px; background:var(--card-2);
-  border:1px solid var(--stroke-2); color:var(--text); font-size:14px; font-weight:600;
+/* ---- Hamyon varag'i: chap tarafda yirik sarlavhalar ---- */
+.tc-sh{ text-align:left }
+.tc-sh .tc-h{ font-size:22px; font-weight:700; letter-spacing:-.5px; font-family:var(--sys);
+  color:var(--text); margin:2px 0 18px }
+.tc-sh .tc-h2{ font-size:17px; font-weight:700; letter-spacing:-.3px; font-family:var(--sys);
+  color:var(--text); margin-bottom:4px }
+.tc-sh .tc-bal{ font-size:26px; font-weight:700; letter-spacing:-.8px; font-family:var(--sys);
+  color:var(--text); margin-bottom:16px }
+/* Yumshoq quti — chegara chizig'isiz */
+.tc-sh .tc-addr{ display:flex; align-items:center; gap:11px; margin-bottom:14px;
+  padding:12px 13px; border-radius:16px; background:rgba(0,0,0,.40) }
+body.light .tc-sh .tc-addr{ background:rgba(16,24,40,.06) }
+.tc-sh .tc-addr .ic{ width:34px; height:34px; border-radius:11px; flex-shrink:0;
+  display:grid; place-items:center; background:rgba(255,255,255,.07) }
+body.light .tc-sh .tc-addr .ic{ background:rgba(16,24,40,.07) }
+.tc-sh .tc-addr .ic svg{ width:19px; height:19px; color:rgba(255,255,255,.62) }
+body.light .tc-sh .tc-addr .ic svg{ color:rgba(16,24,40,.55) }
+.tc-sh .tc-addr .tx{ flex:1; min-width:0; font-size:15px; font-weight:600;
+  font-family:var(--sys); color:var(--text); overflow:hidden;
+  text-overflow:ellipsis; white-space:nowrap }
+.tc-sh .tc-addr .tx small{ display:block; font-size:11.5px; font-weight:500;
+  color:var(--faint); margin-bottom:1px }
+.tc-sh .tc-addr .cp{ flex-shrink:0; width:34px; height:34px; border-radius:11px;
+  display:grid; place-items:center; background:rgba(255,255,255,.07); transition:.14s }
+body.light .tc-sh .tc-addr .cp{ background:rgba(16,24,40,.07) }
+.tc-sh .tc-addr .cp svg{ width:17px; height:17px; color:rgba(255,255,255,.62) }
+body.light .tc-sh .tc-addr .cp svg{ color:rgba(16,24,40,.55) }
+.tc-sh .tc-addr .cp:active{ transform:scale(.92) }
+.tc-sh .tc-re{ width:100%; height:46px; border-radius:15px; background:var(--card-2);
+  border:1px solid var(--stroke-2); color:var(--text); font-size:14.5px; font-weight:600;
   font-family:var(--sys); transition:.14s }
 .tc-sh .tc-re:active{ transform:scale(.98) }
 
@@ -1501,10 +1514,16 @@ if(tg){
   /* Pastga surib yopishni to'samiz — ilova faqat tepadagi tugma bilan yopiladi.
      Bu bitta chaqiruv, hech qanday hodisaga ulanmaydi. */
   try{ tg.disableVerticalSwipes && tg.disableVerticalSwipes(); }catch(e){}
-  /* TON Connect'ni fon rejimida tayyorlaymiz — ilgari ulangan hamyon bo'lsa
-     manzili o'zi paydo bo'ladi. Kutubxona kech yuklansa ham urinib ko'ramiz. */
-  setTimeout(function(){ try{ tcInit(); }catch(e){} }, 600);
-  setTimeout(function(){ try{ tcInit(); }catch(e){} }, 2500);
+  /* Hamyon holatini localStorage'dan tiklaymiz — kutubxonani yuklamasdan.
+     Kutubxona faqat tugma bosilganda yuklanadi. */
+  try{
+    const raw = localStorage.getItem('ton-connect-ui_wallet-info') ||
+                localStorage.getItem('ton-connect-storage_bridge-connection');
+    if(raw){
+      const m = String(raw).match(/"address"\s*:\s*"([^"]+)"/);
+      if(m){ tcAddr = m[1]; setTimeout(function(){ tcPaint(); tcLoad(); }, 300); }
+    }
+  }catch(e){}
   /* Telegram sarlavhasi ostida qolmaslik uchun tepadan bo'sh joy.
      Yangi Telegram'lar aniq o'lchov beradi, eskilarida 46px qoladi.
      Bir marta o'qiladi — hech qanday hodisaga ulanmaydi. */
@@ -5914,6 +5933,15 @@ function grIn(el){
   const go = document.getElementById('grGo');
   if(go) go.disabled = !(parseFloat(s) > 0);
 }
+/* Hamyondagi butun GRAM qoldig'ini maydonga yozadi */
+function grAll(){
+  haptic();
+  if(!tcAddr){ toast('Avval hamyonni ulang'); return; }
+  if(!tcLoaded){ tcLoad(); toast('Balans olinmoqda\u2026'); return; }
+  const el = document.getElementById('grAmt'); if(!el) return;
+  el.value = fmtGram(tcGram);
+  grIn(el);
+}
 function grSet(v){
   haptic();
   const el = document.getElementById('grAmt'); if(!el) return;
@@ -5925,9 +5953,9 @@ function renderGram(){
   app.innerHTML = `<div class="page-title">To'ldirish</div>
   <div class="gr-card">
     <div class="lb">Ulangan hamyon</div>
-    <button class="gr-wal" onclick="wlConnect()">
+    <button class="gr-wal" onclick="wlConnectOnly()">
       <svg viewBox="0 0 24 24"><path d="M3.5 8A2.5 2.5 0 0 1 6 5.5h10.5A2.5 2.5 0 0 1 19 8"/><rect x="3.5" y="8" width="17" height="10.5" rx="2.5"/><path d="M20.5 11.6h-3a1.9 1.9 0 0 0 0 3.8h3"/></svg>
-      <span data-wal="Hamyonni ulash">Hamyonni ulash</span>
+      <span data-wal2="Hamyonni ulash">${tcAddr ? esc(tcShort(tcAddr)) : 'Hamyonni ulash'}</span>
     </button>
     <div class="gr-amt">
       <input id="grAmt" type="text" inputmode="decimal" value="0" oninput="grIn(this)" onfocus="this.select()">
@@ -5937,7 +5965,7 @@ function renderGram(){
       <button onclick="grSet(10)"><span class="d">${GRAM_ICON}</span>10</button>
       <button onclick="grSet(50)"><span class="d">${GRAM_ICON}</span>50</button>
       <button onclick="grSet(100)"><span class="d">${GRAM_ICON}</span>100</button>
-      <button onclick="grSet(${bal})"><span class="d">${GRAM_ICON}</span>Hammasi</button>
+      <button onclick="grAll()"><span class="d">${GRAM_ICON}</span>Hammasi</button>
     </div>
     <button class="gr-go" id="grGo" disabled onclick="wlSoon()">To'ldirish</button>
   </div>`;
@@ -5980,6 +6008,10 @@ function tcPaint(){
   document.querySelectorAll('[data-wal]').forEach(function(el){
     el.innerHTML = tcLabel(el.dataset.wal);
   });
+  /* GRAM ekranida faqat manzil ko'rinadi — qo'shimcha yozuvsiz */
+  document.querySelectorAll('[data-wal2]').forEach(function(el){
+    el.textContent = tcAddr ? tcShort(tcAddr) : el.dataset.wal2;
+  });
 }
 /* Hamyon qoldig'ini serverdan olamiz (kalit u yerda qoladi) */
 function tcLoad(){
@@ -5990,6 +6022,20 @@ function tcLoad(){
       if(d && d.ok){ tcTon = Number(d.ton)||0; tcGram = Number(d.gram)||0; tcLoaded = true; }
       tcPaint(); tcSheetFill();
     }).catch(function(){ tcPaint(); });
+}
+/* Kutubxonani faqat kerak bo'lganda yuklaymiz */
+let tcLoading = null;
+function tcLib(){
+  if(window.TON_CONNECT_UI) return Promise.resolve(true);
+  if(tcLoading) return tcLoading;
+  tcLoading = new Promise(function(res){
+    const s = document.createElement('script');
+    s.src = 'https://unpkg.com/@tonconnect/ui@2/dist/tonconnect-ui.min.js';
+    s.onload = function(){ res(!!window.TON_CONNECT_UI); };
+    s.onerror = function(){ res(false); };
+    document.head.appendChild(s);
+  });
+  return tcLoading;
 }
 function tcInit(){
   try{
@@ -6007,17 +6053,24 @@ function tcInit(){
 }
 function wlConnect(){
   haptic();
-  tcInit();
-  if(!tcUI){ toast('Hamyon moduli yuklanmadi'); return; }
-  if(tcAddr){ tcSheet(); return; }        /* ulangan — ma'lumot varag'i */
-  tcUI.openModal().catch(function(){ toast('Ochilmadi, qayta urinib ko\'ring'); });
+  if(tcAddr && tcUI){ tcSheet(); return; }
+  tcLib().then(function(ok){
+    if(!ok){ toast('Hamyon moduli yuklanmadi'); return; }
+    tcInit();
+    if(!tcUI){ toast('Hamyon moduli yuklanmadi'); return; }
+    if(tcAddr){ tcSheet(); return; }
+    tcUI.openModal().catch(function(){ toast('Ochilmadi, qayta urinib ko\'ring'); });
+  });
+}
+/* GRAM ekranidagi tugma: ulanmagan bo'lsa ulaydi, ulangan bo'lsa tegmaydi */
+function wlConnectOnly(){
+  if(tcAddr) return;
+  wlConnect();
 }
 /* ---- Pastdan chiqadigan hamyon varag'i ---- */
 function tcSheetFill(){
   const b = document.getElementById('tcBal');
-  if(b) b.textContent = tcLoaded ? (fmtGram(tcGram) + ' GRAM') : '…';
-  const t = document.getElementById('tcTon');
-  if(t) t.textContent = tcLoaded ? (fmtGram(tcTon) + ' TON') : '';
+  if(b) b.textContent = tcLoaded ? (fmtGram(tcGram) + ' GRAM') : '\u2026';
 }
 function tcSheet(){
   const old = document.getElementById('tcSh');
@@ -6030,13 +6083,19 @@ function tcSheet(){
   sh.innerHTML =
     '<div class="grab"></div>' +
     '<div class="tc-h">Sizning hamyoningiz</div>' +
-    '<div class="tc-bal"><span id="tcBal">…</span><small id="tcTon"></small></div>' +
+    '<div class="tc-h2">Balans</div>' +
+    '<div class="tc-bal" id="tcBal">\u2026</div>' +
     '<div class="tc-addr">' +
-      '<svg viewBox="0 0 24 24"><path d="M3.5 8A2.5 2.5 0 0 1 6 5.5h10.5A2.5 2.5 0 0 1 19 8"/>' +
-      '<rect x="3.5" y="8" width="17" height="10.5" rx="2.5"/>' +
-      '<path d="M20.5 11.6h-3a1.9 1.9 0 0 0 0 3.8h3"/></svg>' +
-      '<span>' + esc(tcShort(tcAddr)) + '</span>' +
-      '<button onclick="tcCopy()">Nusxalash</button>' +
+      '<span class="ic"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none">' +
+      '<path d="M5 5.5h11a3 3 0 0 1 3 3v.5H5.6a.6.6 0 0 1 0-1.2H18V7A2.5 2.5 0 0 0 15.5 5H5a1 1 0 0 0 0 .5z"/>' +
+      '<path d="M4 8.6c0-1.2 1-2.1 2.2-2.1H17A3 3 0 0 1 20 9.5v8A2.5 2.5 0 0 1 17.5 20h-11A2.5 2.5 0 0 1 4 17.5V8.6zm12.8 3.4a1.8 1.8 0 0 0 0 3.6H20v-3.6h-3.2z"/>' +
+      '</svg></span>' +
+      '<span class="tx"><small>Adres</small>' + esc(tcShort(tcAddr)) + '</span>' +
+      '<button class="cp" onclick="tcCopy()" aria-label="Nusxalash">' +
+      '<svg viewBox="0 0 24 24" fill="currentColor" stroke="none">' +
+      '<rect x="9" y="9" width="11" height="12" rx="2.6"/>' +
+      '<path d="M6.5 3h8A2.5 2.5 0 0 1 17 5.5V7h-2.2V5.8a.8.8 0 0 0-.8-.8H6.8a.8.8 0 0 0-.8.8v8.4c0 .45.35.8.8.8H8v2.2H6.5A2.5 2.5 0 0 1 4 14.5v-9A2.5 2.5 0 0 1 6.5 3z"/>' +
+      '</svg></button>' +
     '</div>' +
     '<button class="tc-re" onclick="tcAgain()">Qaytadan ulash</button>';
   document.body.appendChild(bg); document.body.appendChild(sh);
