@@ -5876,15 +5876,106 @@ function renderOut(){
 }
 
 function renderOutWallet(){
+  const bal = getGram();
   app.innerHTML = `<div class="page-title">Tashqi hamyon</div>
   <div class="ot-in">
-    <input id="otAddr" type="text" placeholder="TON manzili" autocomplete="off" spellcheck="false">
-    <button class="act" onclick="wlSoon()">Qo'yish</button>
-    <button class="qr" onclick="wlSoon()"><svg viewBox="0 0 24 24"><path d="M4 8.5V6a2 2 0 0 1 2-2h2.5M20 8.5V6a2 2 0 0 0-2-2h-2.5M4 15.5V18a2 2 0 0 0 2 2h2.5M20 15.5V18a2 2 0 0 1-2 2h-2.5M6.5 12h11"/></svg></button>
+    <input id="otAddr" type="text" placeholder="TON manzili" autocomplete="off" spellcheck="false" oninput="ocSync()">
+    <button class="act" onclick="ocMine()">Meniki</button>
   </div>
   <div class="ot-hint">GRAM faqat TON tarmog'idagi manzilga yuboriladi.</div>
-  <div class="pf-sec">Oxirgilari</div>
-  <div class="empty"><div class="em">🕓</div><h3>Hozircha bo'sh</h3><p>Yuborilgan manzillar shu yerda saqlanadi.</p></div>`;
+
+  <div class="gr-card" style="margin-top:14px">
+    <div class="lb">Chiqariladigan miqdor</div>
+    <div class="gr-amt">
+      <input id="ocAmt" type="text" inputmode="decimal" value="0" oninput="ocIn(this)" onfocus="this.select()">
+      <span class="u">GRAM</span>
+    </div>
+    <div class="gr-quick">
+      <button onclick="ocSet(1)"><span class="d">${GRAM_ICON}</span>1</button>
+      <button onclick="ocSet(5)"><span class="d">${GRAM_ICON}</span>5</button>
+      <button onclick="ocSet(10)"><span class="d">${GRAM_ICON}</span>10</button>
+      <button onclick="ocMax()"><span class="d">${GRAM_ICON}</span>Hammasi</button>
+    </div>
+    <div class="ot-hint" style="text-align:center;margin:0 0 12px">
+      Hisobingizda ${fmtGram(bal)} GRAM · xizmat haqi 0.01 GRAM
+    </div>
+    <button class="gr-go" id="ocGo" disabled onclick="ocSend()">Chiqarib olish</button>
+  </div>`;
+  ocSync();
+}
+/* Miqdorni tozalab yozamiz */
+function ocIn(el){
+  el.value = String(el.value).replace(/[^0-9.,]/g, '').replace(',', '.');
+  ocSync();
+}
+function ocSet(v){ haptic(); const el = document.getElementById('ocAmt'); if(el){ el.value = String(v); ocSync(); } }
+function ocMax(){
+  haptic();
+  const el = document.getElementById('ocAmt'); if(!el) return;
+  const left = Math.max(0, Math.floor((getGram() - 0.01) * 1000) / 1000);
+  el.value = String(left);
+  ocSync();
+}
+/* Ulangan hamyon manzilini qo'yamiz */
+function ocMine(){
+  haptic();
+  if(!tcAddr){ toast('Avval hamyonni ulang'); return; }
+  const el = document.getElementById('otAddr');
+  if(el){ el.value = tcAddr; ocSync(); }
+}
+/* Tugma faqat hammasi to'g'ri bo'lganda yonadi */
+function ocSync(){
+  const a = document.getElementById('otAddr');
+  const m = document.getElementById('ocAmt');
+  const g = document.getElementById('ocGo');
+  if(!g) return;
+  const addr = a ? String(a.value).trim() : '';
+  const amt  = m ? Number(String(m.value).replace(',', '.')) : 0;
+  const okA  = /^[A-Za-z0-9_-]{48}$/.test(addr) || /^0:[0-9a-fA-F]{64}$/.test(addr);
+  const okM  = amt > 0 && (amt + 0.01) <= getGram();
+  g.disabled = !(okA && okM);
+}
+let ocBusy = false;
+function ocSend(){
+  if(ocBusy) return;
+  haptic();
+  const addr = String(document.getElementById('otAddr').value).trim();
+  const amt  = Number(String(document.getElementById('ocAmt').value).replace(',', '.'));
+  /* Face ID yoqilgan bo'lsa so'raladi */
+  bioAsk(function(){
+    ocBusy = true;
+    const g = document.getElementById('ocGo');
+    if(g){ g.disabled = true; g.textContent = 'Yuborilmoqda…'; }
+    fetch(VBASE + '/gram/out', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ initData: tg.initData || '', to: addr, amount: amt })
+    }).then(function(r){ return r.json(); }).then(function(d){
+      ocBusy = false;
+      if(g){ g.textContent = 'Chiqarib olish'; }
+      if(d && d.ok){
+        setGram(d.left);
+        notify('success');
+        toast('Yuborildi: ' + fmtGram(d.sent) + ' GRAM');
+        nftHistLoad();
+        nftLoad();
+        go('nft_wallet');
+        return;
+      }
+      if(g) g.disabled = false;
+      if(!d) return toast('Aloqa yo\'q');
+      if(d.error === 'low')  return toast('Mablag\' yetarli emas');
+      if(d.error === 'max')  return toast('Bittada eng ko\'pi ' + d.max + ' GRAM');
+      if(d.error === 'day')  return toast('Kunlik chegara: ' + d.day + ' GRAM');
+      if(d.error === 'addr') return toast('Manzil noto\'g\'ri');
+      if(d.error === 'off')  return toast('Chiqarish vaqtincha yopiq');
+      if(d.error === 'send') return toast('Yuborilmadi, pul qaytarildi');
+      toast('Bajarilmadi');
+    }).catch(function(){
+      ocBusy = false;
+      if(g){ g.disabled = false; g.textContent = 'Chiqarib olish'; }
+      toast('Aloqa yo\'q');
+    });
+  });
 }
 
 function renderOutStars(){
