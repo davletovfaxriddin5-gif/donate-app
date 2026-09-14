@@ -1521,6 +1521,7 @@ if(tg){
   /* NFT hamyonlari endi serverda. Telefonda eski qoldiq bo'lsa bir marta
      ko'chiramiz, bo'lmasa shunchaki serverdan o'qiymiz. */
   setTimeout(function(){ try{ nftMigrate(); }catch(e){} }, 400);
+  setTimeout(function(){ try{ nftHistLoad(); }catch(e){} }, 700);
   /* Telegram sarlavhasi ostida qolmaslik uchun tepadan bo'sh joy.
      Yangi Telegram'lar aniq o'lchov beradi, eskilarida 46px qoladi.
      Bir marta o'qiladi — hech qanday hodisaga ulanmaydi. */
@@ -5693,7 +5694,26 @@ function getPayouts(){ try{ return JSON.parse(localStorage.getItem('mt_payouts')
 function addPayout(o){
   try{ const a = getPayouts(); a.unshift(o); localStorage.setItem('mt_payouts', JSON.stringify(a.slice(0,200))); }catch(e){}
 }
-function nftRefresh(){ haptic(); renderNft('nft_hist'); toastOk('Yangilandi'); }
+/* ---------- NFT tarixi: endi SERVERDA ----------
+   Ilgari telefonda turardi — mijoz keshni tozalasa yo'qolardi va
+   nizo chiqsa dalil bo'lmasdi. Endi server saqlaydi. */
+let nftHist = [], nftHistLoaded = false;
+function nftHistLoad(cb){
+  const uid = tgUser && tgUser.id ? tgUser.id : '';
+  if(!uid){ if(cb) cb(); return; }
+  fetch(VBASE + '/nft/hist?id=' + encodeURIComponent(uid))
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if(d && d.ok && Array.isArray(d.rows)){ nftHist = d.rows; nftHistLoaded = true; }
+      if(view === 'nft_hist') renderNft('nft_hist');
+      if(cb) cb();
+    }).catch(function(){ if(cb) cb(); });
+}
+function nftRefresh(){
+  haptic();
+  nftHistLoad(function(){ toastOk('Yangilandi'); });
+  nftLoad();
+}
 
 function nftMoneyRows(){
   const dt = function(v){ return new Date(v||Date.now()).toLocaleString('ru-RU',
@@ -5706,34 +5726,46 @@ function nftMoneyRows(){
     return `<span class="badge-st ${ok?'done':'wait'}"${style}>${lbl}</span>`;
   };
 
+  /* Kirim va chiqimlarni serverdagi yagona tarixdan ajratamiz */
+  const IN  = ['gram_in','som_in','nft_sell'];
+  const OUT = ['gram_out','som_out','nft_buy'];
+  const ICO = { gram_in:'\uD83D\uDC8E', gram_out:'\uD83D\uDC8E', som_in:'\uD83C\uDF81',
+                som_out:'\uD83C\uDFE7', nft_buy:'\uD83D\uDED2', nft_sell:'\uD83C\uDF81' };
+  const TTL = { gram_in:"GRAM to'ldirildi", gram_out:'GRAM yechildi',
+                som_in:"So'm tushdi", som_out:"So'm yechildi",
+                nft_buy:'NFT sotib olindi', nft_sell:'NFT sotildi' };
+
   if(nftHTab === 'in'){
-    const rows = getNftIn();
-    if(!rows.length) return `<div class="empty"><div class="em">🎁</div><h3>Hozircha bo'sh</h3><p>Sovg'angiz sotilib, pul hisobingizga tushganda shu yerda ko'rinadi.</p></div>`;
+    const rows = nftHist.filter(function(r){ return IN.indexOf(r.kind) > -1; });
+    if(!rows.length) return `<div class="empty"><div class="em">\uD83C\uDF81</div><h3>Hozircha bo'sh</h3><p>Hisobingizga tushgan pul shu yerda ko'rinadi.</p></div>`;
     return rows.map(function(r){
+      const cur = r.cur || "so'm";
+      const amt = cur === 'GRAM' ? fmtGram(r.amount) : fmt(r.amount);
       return `<div class="order">
         <div class="top">
-          <div class="g"><div class="ic">🎁</div><div><div class="nm">${r.item||'Sovg\'a'}</div><div class="sub">Sotildi</div></div></div>
-          <div class="price" style="color:#4FE0A0">+${fmt(r.amount||0)}<small>so'm</small></div>
+          <div class="g"><div class="ic">${ICO[r.kind]||'\uD83D\uDCB0'}</div><div><div class="nm">${esc(r.item || TTL[r.kind] || 'Kirim')}</div><div class="sub">${esc(r.note||'')}</div></div></div>
+          <div class="price" style="color:#4FE0A0">+${amt}<small>${cur}</small></div>
         </div>
         <div class="sep"></div>
-        <div class="kv"><span class="k">Xaridor</span><span class="v">${r.from||'—'}</span></div>
         <div class="kv"><span class="k">Holat</span>${badge(r.status,'Hisobga tushdi')}</div>
         <div class="date">${dt(r.at)}</div>
       </div>`;
     }).join('');
   }
 
-  const rows = getPayouts();
+  const rows = nftHist.filter(function(r){ return OUT.indexOf(r.kind) > -1; });
   if(!rows.length) return `<div class="empty"><div class="em">🏧</div><h3>Hozircha bo'sh</h3><p>Kartangizga yechib olganlaringiz shu yerda ko'rinadi.</p></div>`;
-  return rows.map(function(p){
+  return rows.map(function(r){
+    const cur = r.cur || "so'm";
+    const amt = cur === 'GRAM' ? fmtGram(r.amount) : fmt(r.amount);
     return `<div class="order">
       <div class="top">
-        <div class="g"><div class="ic">🏧</div><div><div class="nm">${p.card||'Karta'}</div><div class="sub">Kartaga yechish</div></div></div>
-        <div class="price">-${fmt(p.amount||0)}<small>so'm</small></div>
+        <div class="g"><div class="ic">${ICO[r.kind]||'\uD83C\uDFE7'}</div><div><div class="nm">${esc(r.item || r.card || TTL[r.kind] || 'Chiqim')}</div><div class="sub">${esc(r.note||'')}</div></div></div>
+        <div class="price">-${amt}<small>${cur}</small></div>
       </div>
       <div class="sep"></div>
-      <div class="kv"><span class="k">Holat</span>${badge(p.status,'Yechib olindi')}</div>
-      <div class="date">${dt(p.at)}</div>
+      <div class="kv"><span class="k">Holat</span>${badge(r.status,'Bajarildi')}</div>
+      <div class="date">${dt(r.at)}</div>
     </div>`;
   }).join('');
 }
@@ -6053,6 +6085,7 @@ function grWatch(n){
       grBusy = false;
       notify('success');
       toast('GRAM qo\'shildi');
+      nftHistLoad();
       if(view === 'nft_gram') renderGram();
       return;
     }
