@@ -2164,10 +2164,13 @@ async function tonCheck(){
     for(const a of (e.actions || [])){
       if(a.type !== "TonTransfer" || a.status !== "ok") continue;
       const tt = a.TonTransfer || {};
-      const to = (tt.recipient && (tt.recipient.address || tt.recipient)) || "";
-      if(String(to) !== String(TON_ADDR)) continue;      /* bizga kelganini olamiz */
       const nano = Number(tt.amount || 0);
       if(!(nano > 0)) continue;
+      /* Manzilni solishtirmaymiz: hodisalar allaqachon BIZNING hisobimizdan
+         olinyapti. Formatlar (raw / UQ / EQ) har xil bo'lgani uchun solishtirish
+         noto'g'ri rad etardi. Chiqib ketgan pulni esa yo'nalish bo'yicha ajratamiz. */
+      const outHit = String((tt.sender && (tt.sender.address || tt.sender)) || "");
+      if(outHit && TON_ADDR && outHit.slice(-48) === String(TON_ADDR).slice(-48)) continue;
 
       /* NOYOB summa bo'yicha egasini topamiz */
       let gid = "", grec = null;
@@ -2177,7 +2180,18 @@ async function tonCheck(){
           if(t.status === "wait" && Number(t.nano) === nano){ gid = k; grec = t; }
         });
       });
-      if(!grec) continue;                                /* mos so'rov yo'q — tegmaymiz */
+      if(!grec){
+        /* Mos so'rov topilmadi — adminni xabardor qilamiz, jimgina yo'qolmasin */
+        if(!st.seen.indexOf || st.seen.indexOf("x"+e.event_id) < 0){
+          st.seen.push("x"+e.event_id);
+          if(st.seen.length > 400) st.seen.shift();
+          changed = true;
+          if(ADMIN_ID) send(ADMIN_ID, "\u26A0\uFE0F GRAM keldi: " + (nano/1e9) +
+            "\nMos so'rov topilmadi \u2014 QO'LDA ko'ring.\n" +
+            "Kutilayotgan summalar: /gramlar");
+        }
+        continue;
+      }
 
       st.seen.push(e.event_id);
       if(st.seen.length > 400) st.seen.shift();
@@ -3386,6 +3400,30 @@ app.post("/webhook", (req,res)=>{
                    "GRAM: " + eskiG + " \u2192 " + uG.gram);
       if(amtG > 0) send(hitG, "\uD83D\uDC8E NFT hamyoningizga " + amtG +
                         " GRAM qo'shildi.\nJoriy qoldiq: " + uG.gram + " GRAM", null, true);
+      return;
+    }
+    /* /gramlar — kutilayotgan GRAM to'ldirishlari va oxirgi kelganlar */
+    if(text.indexOf("/gramlar") === 0){
+      if(ADMIN_ID && fromId !== ADMIN_ID) return;
+      const dbL = load();
+      const wait = [];
+      Object.keys(dbL).forEach(function(k){
+        if(!/^\d+$/.test(k)) return;
+        ((dbL[k].gramTops)||[]).forEach(function(t){
+          if(t.status === "wait") wait.push({ k:k, t:t });
+        });
+      });
+      wait.sort(function(a,b){ return Date.parse(b.t.at) - Date.parse(a.t.at); });
+      if(!wait.length){ send(fromId, "Kutilayotgan GRAM to'ldirish yo'q."); return; }
+      let s = "\u23F3 Kutilayotgan GRAM to'ldirishlar: " + wait.length + " ta\n\n";
+      wait.slice(0, 15).forEach(function(x){
+        const u = dbL[x.k] || {};
+        s += (u.nm || x.k) + (u.un ? " (@" + u.un + ")" : "") + "\n";
+        s += "   kutilyapti: " + (Number(x.t.nano)/1e9).toFixed(9).replace(/0+$/,"").replace(/\.$/,"") + " GRAM\n";
+        s += "   " + String(x.t.at).slice(0,16).replace("T"," ") + "\n";
+      });
+      s += "\nQo'lda yozish: /gram @username 1";
+      send(fromId, s);
       return;
     }
     if(text.indexOf("/bloklar") === 0){
