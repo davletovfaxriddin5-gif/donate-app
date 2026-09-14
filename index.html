@@ -1338,6 +1338,31 @@ body.kb-open .mg-empty{ display:none }
 /* Klaviatura ochilganda "Sotib olish" tugmasi uning ustiga chiqib qolardi. */
 body.kb-open .buy-bar{ display:none !important }
 
+/* ---- Ulangan hamyon: tugma ichidagi ko'rinish ---- */
+[data-wal] b.a{ font-weight:600; color:var(--dim); margin-left:6px; font-family:var(--sys) }
+[data-wal] span.g{ display:inline-block; margin-left:8px; padding:2px 8px; border-radius:8px;
+  background:var(--blue); color:#fff; font-size:11.5px; font-weight:700; font-family:var(--sys) }
+
+/* ---- Hamyon varag'i ---- */
+.tc-sh{ text-align:center }
+.tc-sh .tc-h{ font-size:13px; color:var(--faint); margin-bottom:6px }
+.tc-sh .tc-bal{ font-size:30px; font-weight:700; letter-spacing:-1px; font-family:var(--sys);
+  color:var(--text); margin-bottom:2px }
+.tc-sh .tc-bal small{ display:block; font-size:13px; font-weight:500; color:var(--faint);
+  letter-spacing:0; margin-top:3px }
+.tc-sh .tc-addr{ display:flex; align-items:center; gap:9px; margin:16px 0 12px;
+  padding:11px 12px; border-radius:14px; background:var(--card-2);
+  border:1px solid var(--stroke-2) }
+.tc-sh .tc-addr svg{ width:18px; height:18px; stroke:#5B8CFF; fill:none; stroke-width:1.8;
+  stroke-linecap:round; stroke-linejoin:round; flex-shrink:0 }
+.tc-sh .tc-addr span{ flex:1; text-align:left; font-size:13.5px; font-family:var(--sys);
+  color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+.tc-sh .tc-addr button{ font-size:12.5px; font-weight:600; color:var(--blue); flex-shrink:0 }
+.tc-sh .tc-re{ width:100%; height:44px; border-radius:14px; background:var(--card-2);
+  border:1px solid var(--stroke-2); color:var(--text); font-size:14px; font-weight:600;
+  font-family:var(--sys); transition:.14s }
+.tc-sh .tc-re:active{ transform:scale(.98) }
+
 .pw-lock{ position:fixed; inset:0; z-index:400; display:none; place-items:center;
   background:var(--bg); padding:24px }
 .pw-lock.on{ display:grid }
@@ -5944,11 +5969,27 @@ function tcShort(a){
   const s = String(a || '');
   return s.length > 12 ? (s.slice(0, 6) + '…' + s.slice(-4)) : s;
 }
+let tcTon = 0, tcGram = 0, tcLoaded = false;
+/* Ulangan bo'lsa: "Sizning hamyoningiz · Qusjk9…8f2a" va ko'k katakda GRAM */
+function tcLabel(def){
+  if(!tcAddr) return esc(def);
+  return "Sizning hamyoningiz <b class=\"a\">" + esc(tcShort(tcAddr)) + "</b>" +
+         "<span class=\"g\">" + fmtGram(tcGram) + " GRAM</span>";
+}
 function tcPaint(){
-  /* Ulangan manzil ko'rinadigan joylarni yangilaymiz */
   document.querySelectorAll('[data-wal]').forEach(function(el){
-    el.textContent = tcAddr ? tcShort(tcAddr) : el.dataset.wal;
+    el.innerHTML = tcLabel(el.dataset.wal);
   });
+}
+/* Hamyon qoldig'ini serverdan olamiz (kalit u yerda qoladi) */
+function tcLoad(){
+  if(!tcAddr){ tcTon = 0; tcGram = 0; tcLoaded = false; tcPaint(); return; }
+  fetch(VBASE + '/ton/wallet?addr=' + encodeURIComponent(tcAddr))
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if(d && d.ok){ tcTon = Number(d.ton)||0; tcGram = Number(d.gram)||0; tcLoaded = true; }
+      tcPaint(); tcSheetFill();
+    }).catch(function(){ tcPaint(); });
 }
 function tcInit(){
   try{
@@ -5958,26 +5999,70 @@ function tcInit(){
     if(w && w.account) tcAddr = w.account.address || '';
     tcUI.onStatusChange(function(x){
       tcAddr = (x && x.account && x.account.address) || '';
-      tcPaint();
+      tcPaint(); tcLoad();
       if(tcAddr) notify('success');
     });
-    tcPaint();
+    tcPaint(); if(tcAddr) tcLoad();
   }catch(e){ console.log('TON Connect xato:', e.message); }
 }
 function wlConnect(){
   haptic();
   tcInit();
   if(!tcUI){ toast('Hamyon moduli yuklanmadi'); return; }
-  if(tcAddr){
-    /* Ulangan — uzishni so'raymiz */
-    if(tg && tg.showConfirm){
-      tg.showConfirm('Hamyonni uzasizmi?\n' + tcShort(tcAddr), function(ok){
-        if(ok) tcUI.disconnect().catch(function(){});
-      });
-    } else if(confirm('Hamyonni uzasizmi?')) tcUI.disconnect().catch(function(){});
-    return;
-  }
+  if(tcAddr){ tcSheet(); return; }        /* ulangan — ma'lumot varag'i */
   tcUI.openModal().catch(function(){ toast('Ochilmadi, qayta urinib ko\'ring'); });
+}
+/* ---- Pastdan chiqadigan hamyon varag'i ---- */
+function tcSheetFill(){
+  const b = document.getElementById('tcBal');
+  if(b) b.textContent = tcLoaded ? (fmtGram(tcGram) + ' GRAM') : '…';
+  const t = document.getElementById('tcTon');
+  if(t) t.textContent = tcLoaded ? (fmtGram(tcTon) + ' TON') : '';
+}
+function tcSheet(){
+  const old = document.getElementById('tcSh');
+  if(old) old.remove();
+  const bg = document.createElement('div');
+  bg.className = 'sheet-bg'; bg.id = 'tcShBg';
+  bg.onclick = tcSheetClose;
+  const sh = document.createElement('div');
+  sh.className = 'sheet tc-sh'; sh.id = 'tcSh';
+  sh.innerHTML =
+    '<div class="grab"></div>' +
+    '<div class="tc-h">Sizning hamyoningiz</div>' +
+    '<div class="tc-bal"><span id="tcBal">…</span><small id="tcTon"></small></div>' +
+    '<div class="tc-addr">' +
+      '<svg viewBox="0 0 24 24"><path d="M3.5 8A2.5 2.5 0 0 1 6 5.5h10.5A2.5 2.5 0 0 1 19 8"/>' +
+      '<rect x="3.5" y="8" width="17" height="10.5" rx="2.5"/>' +
+      '<path d="M20.5 11.6h-3a1.9 1.9 0 0 0 0 3.8h3"/></svg>' +
+      '<span>' + esc(tcShort(tcAddr)) + '</span>' +
+      '<button onclick="tcCopy()">Nusxalash</button>' +
+    '</div>' +
+    '<button class="tc-re" onclick="tcAgain()">Qaytadan ulash</button>';
+  document.body.appendChild(bg); document.body.appendChild(sh);
+  requestAnimationFrame(function(){
+    requestAnimationFrame(function(){ bg.classList.add('on'); sh.classList.add('on'); });
+  });
+  tcSheetFill();
+  if(!tcLoaded) tcLoad();
+}
+function tcSheetClose(){
+  const sh = document.getElementById('tcSh'), bg = document.getElementById('tcShBg');
+  if(sh) sh.classList.remove('on');
+  if(bg) bg.classList.remove('on');
+  setTimeout(function(){ if(sh) sh.remove(); if(bg) bg.remove(); }, 320);
+}
+function tcCopy(){
+  haptic();
+  try{ navigator.clipboard.writeText(tcAddr); toast('Manzil nusxalandi'); }
+  catch(e){ toast('Nusxalanmadi'); }
+}
+function tcAgain(){
+  haptic(); tcSheetClose();
+  if(!tcUI) return;
+  tcUI.disconnect().catch(function(){}).then(function(){
+    setTimeout(function(){ tcUI.openModal().catch(function(){}); }, 260);
+  });
 }
 function wlSoon(){ haptic(); toast('Tez orada'); }
 /* Pul yoki qiymat harakatlanadigan amallar — avval Face ID / barmoq izi.
