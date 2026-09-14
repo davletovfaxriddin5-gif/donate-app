@@ -5099,7 +5099,15 @@ function mktFiltered(){
 function mktContent(){ return (mktTab === 'stars') ? spPanel() : nftMarketCards(); }
 function mktBodyDraw(){
   const box = document.getElementById('mktBody');
+  /* Stars/Premium almashtirgichini saqlab qolamiz — aks holda u qayta
+     chizilganda o'chadi va oq kapsulaning sirg'alishi ko'rinmay qoladi. */
+  const oldSeg = document.getElementById('spSeg');
+  if(oldSeg) oldSeg.remove();
   if(box) box.innerHTML = mktContent(); else renderNftMarket();
+  if(oldSeg){
+    const fresh = document.getElementById('spSeg');
+    if(fresh && fresh.parentNode) fresh.parentNode.replaceChild(oldSeg, fresh);
+  }
   const tools = document.getElementById('mktTools');
   if(tools) tools.style.display = (mktTab === 'stars') ? 'none' : '';
   /* Karusel to'xtab qolmasin: tugma bosilganda u qotib qolardi.
