@@ -5544,10 +5544,18 @@ function mktBanner(){
 }
 
 function renderNftMarket(){
-  /* Eski karusel o'chirilishidan oldin qaysi rasmda turganini yozib olamiz.
-     Aks holda yangi karusel har safar birinchi rasmdan boshlanadi. */
-  const oldRail = document.getElementById('mktRail');
-  if(oldRail) mktRemember(oldRail);
+  /* Karuselni qayta qurmaymiz — eski elementni saqlab qolib, yangi
+     sahifaga o'zini qo'yamiz. Shunda rasm ham, joyi ham, yurishi ham
+     buzilmaydi: miltillash va boshiga qaytish bo'lmaydi. */
+  const oldBan = document.getElementById('mktBan');
+  let keepBan = null, keepSl = 0;
+  if(oldBan){
+    const rr = document.getElementById('mktRail');
+    keepSl = rr ? rr.scrollLeft : 0;
+    if(rr) mktRemember(rr);
+    keepBan = oldBan;
+    oldBan.remove();
+  }
   app.innerHTML = `
   <div class="mg-bal">
     <button class="chip" onclick="openGram()">${fmtGram(getGram())}<small>GRAM</small></button>
@@ -5578,6 +5586,14 @@ function renderNftMarket(){
   <div class="nftm-fil" id="mktFil">${mktChips()}</div>
   </div>
   <div id="mktBody">${mktContent()}</div>`;
+  if(keepBan){
+    const fresh = document.getElementById('mktBan');
+    if(fresh && fresh.parentNode){
+      fresh.parentNode.replaceChild(keepBan, fresh);
+      const rr = document.getElementById('mktRail');
+      if(rr && keepSl > 0) rr.scrollLeft = keepSl;
+    }
+  }
   setTimeout(mktBanStart, 0);
 }
 
