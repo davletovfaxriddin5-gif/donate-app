@@ -1630,6 +1630,21 @@ function tgCall(method, body){
   }).catch(function(e){ console.log("TG "+method+" xato:", e.message); });
 }
 
+/* ---------- To'ldirishni kerakli hisobga yo'naltirish ----------
+   To'lov yozuvida dest:"nft" bo'lsa pul NFT bo'limining so'm hamyoniga
+   tushadi, aks holda odatdagidek asosiy balansga. Bitta joyda hal
+   qilamiz — shunda barcha usullar (karta, Stars, USDT) bir xil ishlaydi. */
+function creditTopup(u, rec, som){
+  const toNft = rec && String(rec.dest) === "nft";
+  if(toNft){
+    u.nftSom = Math.round((Number(u.nftSom || 0) + som));
+    nftLog(u, "som_in", som, { cur:"so'm", note: (rec.method || "To'ldirish"), ref: rec.id });
+    return { nft:true, left:u.nftSom };
+  }
+  u.balance = Math.round((Number(u.balance || 0) + som));
+  return { nft:false, left:u.balance };
+}
+
 /* ---------- GRAM yechish ----------
    Mijoz o'z hamyoniga GRAM chiqarib oladi. Server pul YUBORADI, ya'ni
    maxfiy kalit shu yerda turadi — shuning uchun uchta himoya bor:
@@ -2415,15 +2430,15 @@ async function tonCheck(){
          Ko'proq yuborsa ko'proq, ozroq yuborsa ozroq tushadi. */
       const som = Math.floor(usdt * TON_RATE);
       const u = urec(db, uid);
-      if(typeof u.balance !== "number") u.balance = 0;
       rec.status = "done";
       rec.auto   = true;
       rec.usdt   = usdt;
       rec.amount = som;
-      u.balance += som;
+      const crU = creditTopup(u, rec, som);
 
-      send(uid, "\u2705 Balansingiz to'ldirildi: +"+som+" so'm ("+usdt.toFixed(2)+
-        " USDT)\nJoriy balans: "+u.balance+" so'm");
+      send(uid, "\u2705 " + (crU.nft ? "NFT hisobingiz" : "Balansingiz") +
+        " to'ldirildi: +"+som+" so'm ("+usdt.toFixed(2)+
+        " USDT)\nJoriy qoldiq: "+crU.left+" so'm");
       if(ADMIN_ID) send(ADMIN_ID, "\uD83E\uDD16 AVTO TASDIQ (USDT) "+rec.id+
         "\nKelgan: "+usdt.toFixed(2)+" USDT"+
         "\nMemo: "+memo+
@@ -2797,6 +2812,8 @@ app.post("/topup", (req,res)=>{
     const uid = who.id;
     const base = Math.round(Number(b.amount) || 0);
     if(!(base >= 1000) || base > 50000000) return res.json({ ok:false, error:"amount" });
+    /* dest: "nft" bo'lsa pul NFT bo'limining so'm hamyoniga tushadi */
+    const dest = (String(b.dest || "") === "nft") ? "nft" : "main";
 
     const db = load();
     expireOld(db);
@@ -2824,7 +2841,7 @@ app.post("/topup", (req,res)=>{
 
       const tid = "TP" + Date.now().toString().slice(-8);
       u.topups.unshift({ id:tid, amount:base, base:base, method:String(b.method||""),
-                         memo:memo, usdtWant:usdt, status:"wait",
+                         memo:memo, usdtWant:usdt, status:"wait", dest:dest,
                          at:new Date().toISOString(), who:who2(who) });
       u.topups = u.topups.slice(0,60);
       save(db);
@@ -2849,7 +2866,7 @@ app.post("/topup", (req,res)=>{
 
     const id = "TP"+Date.now().toString().slice(-8);
     u.topups.unshift({ id:id, amount:pay, base:base, method:String(b.method||""),
-                       status:"wait", at:new Date().toISOString(),
+                       status:"wait", dest:dest, at:new Date().toISOString(),
                        who:who2(who) });
     u.topups = u.topups.slice(0,60);
     save(db);
@@ -3160,9 +3177,11 @@ function handleCb(cq){
   }
   let note;
   if(parts[0] === "tp_ok"){
-    t.status = "done"; u.balance += t.amount;
-    note = "✅ Tasdiqlandi (+"+t.amount+")";
-    send(uid, "✅ Balansingiz to'ldirildi: +"+t.amount+" so'm\nJoriy balans: "+u.balance+" so'm");
+    t.status = "done";
+    const cr = creditTopup(u, t, t.amount);
+    note = "✅ Tasdiqlandi (+"+t.amount+")" + (cr.nft ? " → NFT" : "");
+    send(uid, "✅ " + (cr.nft ? "NFT hisobingiz" : "Balansingiz") + " to'ldirildi: +" +
+              t.amount + " so'm\nJoriy qoldiq: " + cr.left + " so'm");
   } else {
     t.status = "cancel";
     note = "❌ Rad etildi";
