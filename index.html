@@ -5456,7 +5456,9 @@ function mktStepPx(r){
    vaqt o'tib o'zi almashganda o'zgaradi. */
 let mktIdx = 0;
 function mktRemember(r){
+  if(!r) return;
   const step = mktStepPx(r); if(!step) return;
+  if(r.scrollLeft < 1) return;          /* hali joylashmagan — tegmaymiz */
   const n = BANNERS.length;
   const i = Math.round(r.scrollLeft / step);
   mktIdx = ((i % n) + n) % n;
@@ -5539,6 +5541,10 @@ function mktBanner(){
 }
 
 function renderNftMarket(){
+  /* Eski karusel o'chirilishidan oldin qaysi rasmda turganini yozib olamiz.
+     Aks holda yangi karusel har safar birinchi rasmdan boshlanadi. */
+  const oldRail = document.getElementById('mktRail');
+  if(oldRail) mktRemember(oldRail);
   app.innerHTML = `
   <div class="mg-bal">
     <button class="chip" onclick="openGram()">${fmtGram(getGram())}<small>GRAM</small></button>
