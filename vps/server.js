@@ -1645,11 +1645,30 @@ async function tonWallet(){
   if(tonW) return tonW;
   if(!TON_SEND_SEED) return null;
   const { mnemonicToPrivateKey } = require("@ton/crypto");
-  const { WalletContractV4, TonClient, TonClient4 } = require("@ton/ton");
+  const T = require("@ton/ton");
+  const { TonClient, TonClient4 } = T;
   const words = TON_SEND_SEED.trim().split(/\s+/);
   if(words.length < 12) return null;
   const key = await mnemonicToPrivateKey(words);
-  const wallet = WalletContractV4.create({ workchain: 0, publicKey: key.publicKey });
+
+  /* Hamyon turini MANZIL bo'yicha aniqlaymiz. Tonkeeper endi W5 yaratadi,
+     eski ilovalar V4. Bir xil seed'dan ikki xil manzil chiqadi — noto'g'ri
+     turni tanlasak, bo'sh hamyondan yuborishga urinamiz va pul ketmaydi. */
+  let wallet = null;
+  const cands = [];
+  if(T.WalletContractV5R1) cands.push(T.WalletContractV5R1.create({ workChain:0, publicKey:key.publicKey }));
+  cands.push(T.WalletContractV4.create({ workchain:0, publicKey:key.publicKey }));
+  if(T.WalletContractV3R2) cands.push(T.WalletContractV3R2.create({ workchain:0, publicKey:key.publicKey }));
+  for(const w of cands){
+    const a1 = w.address.toString({ bounceable:false });
+    const a2 = w.address.toString({ bounceable:true });
+    if(a1 === TON_SEND_ADDR || a2 === TON_SEND_ADDR){ wallet = w; break; }
+  }
+  if(!wallet){
+    console.log("TON: .env dagi TON_SEND_ADDR seed'ga mos kelmadi");
+    return null;
+  }
+  console.log("TON yuboruvchi hamyon: " + wallet.address.toString({ bounceable:false }));
   /* Ochiq toncenter kalitsiz qattiq cheklangan va 429 qaytaradi.
      Shuning uchun kalit talab qilmaydigan v4 tugunidan foydalanamiz.
      .env da TONCENTER_KEY bo'lsa, o'shanga o'tadi. */
