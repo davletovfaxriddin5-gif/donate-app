@@ -5099,15 +5099,7 @@ function mktFiltered(){
 function mktContent(){ return (mktTab === 'stars') ? spPanel() : nftMarketCards(); }
 function mktBodyDraw(){
   const box = document.getElementById('mktBody');
-  /* Stars/Premium almashtirgichini saqlab qolamiz — aks holda u qayta
-     chizilganda o'chadi va oq kapsulaning sirg'alishi ko'rinmay qoladi. */
-  const oldSeg = document.getElementById('spSeg');
-  if(oldSeg) oldSeg.remove();
   if(box) box.innerHTML = mktContent(); else renderNftMarket();
-  if(oldSeg){
-    const fresh = document.getElementById('spSeg');
-    if(fresh && fresh.parentNode) fresh.parentNode.replaceChild(oldSeg, fresh);
-  }
   const tools = document.getElementById('mktTools');
   if(tools) tools.style.display = (mktTab === 'stars') ? 'none' : '';
   /* Karusel to'xtab qolmasin: tugma bosilganda u qotib qolardi.
@@ -5206,6 +5198,7 @@ function mktChips(){
 
 /* --- Stars / Premium --- */
 let spTab = 'stars';      /* stars | premium */
+let spSegR = false;       /* oq kapsula o'ngdami — ko'rinish holati */
 let spGram = false;       /* false = so'm, true = GRAM */
 let spMonths = 12;
 const SP_QUICK = [50, 100, 250, 500, 1000, 2500];
@@ -5216,16 +5209,22 @@ const SP_MIN = 50;
 function spSetTab(t){
   if(t === spTab) return;
   haptic(); spTab = t;
-  /* Avval kapsulani sirg'atamiz — element o'z joyida qolgani uchun
-     harakat ko'rinadi. Qolgan qism keyin yangilanadi. */
-  const sg = document.getElementById('spSeg');
-  if(sg){
-    sg.classList.toggle('r', t === 'premium');
-    [].slice.call(sg.querySelectorAll('button')).forEach(function(b, i){
-      b.classList.toggle('on', (i === 0) === (t === 'stars'));
-    });
-  }
+  /* Bo'lim ESKI kapsula holatida chiziladi, keyin ikki kadrdan so'ng
+     yangi holatga o'tkaziladi — shundagina CSS harakati ko'rinadi.
+     Elementni DOM'dan chiqarib qo'ysak, harakat bekor bo'lardi. */
   mktBodyDraw();
+  const want = (t === 'premium');
+  requestAnimationFrame(function(){
+    requestAnimationFrame(function(){
+      spSegR = want;
+      const sg = document.getElementById('spSeg');
+      if(!sg) return;
+      sg.classList.toggle('r', want);
+      const bs = sg.querySelectorAll('button');
+      if(bs[0]) bs[0].classList.toggle('on', !want);
+      if(bs[1]) bs[1].classList.toggle('on', want);
+    });
+  });
 }
 function spSetPay(g){ haptic(); spGram = g; mktBodyDraw(); }
 function spSetPrem(m){ haptic(); spMonths = m; mktBodyDraw(); }
@@ -5268,9 +5267,9 @@ function spPanel(){
   const img  = BANNER_BASE + (spTab === 'stars' ? 'stars-x4.webp' : 'premium-x4.webp');
   const unit = spGram ? 'GRAM' : "so'm";
   const head = `
-  <div class="sp-seg${spTab==='premium'?' r':''}" id="spSeg">
-    <button class="${spTab==='stars'?'on':''}"   onclick="spSetTab('stars')">Stars</button>
-    <button class="${spTab==='premium'?'on':''}" onclick="spSetTab('premium')">Premium</button>
+  <div class="sp-seg${spSegR?' r':''}" id="spSeg">
+    <button class="${!spSegR?'on':''}" onclick="spSetTab('stars')">Stars</button>
+    <button class="${spSegR?'on':''}"  onclick="spSetTab('premium')">Premium</button>
   </div>
   <div class="sp-hero"><img src="${IMG(img)}" alt="" onerror="this.closest('.sp-hero').style.display='none'"></div>`;
 
