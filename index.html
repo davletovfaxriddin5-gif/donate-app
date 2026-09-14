@@ -5448,6 +5448,16 @@ function mktStepPx(r){
 /* Ko'rinayotgan rasmni saqlagan holda tasmani markazga qaytaradi.
    Kasr qismi ham saqlanadi, shuning uchun harakat o'rtasida chaqirilsa ham
    ko'zga hech narsa sezilmaydi — o'sha o'rinda aynan o'sha rasm turadi. */
+/* Qaysi rasmda turganini eslab qolamiz — bo'lim qaytadan chizilganda
+   karusel boshiga sakramasin. Faqat foydalanuvchi o'zi surganda yoki
+   vaqt o'tib o'zi almashganda o'zgaradi. */
+let mktIdx = 0;
+function mktRemember(r){
+  const step = mktStepPx(r); if(!step) return;
+  const n = BANNERS.length;
+  const i = Math.round(r.scrollLeft / step);
+  mktIdx = ((i % n) + n) % n;
+}
 function mktFixNow(r){
   if(mktBusy) return;
   const step = mktStepPx(r); if(!step) return;
@@ -5455,6 +5465,7 @@ function mktFixNow(r){
   const f = r.scrollLeft / step;
   const i = Math.floor(f), frac = f - i;
   const cur = ((i % n) + n) % n;
+  mktIdx = cur;
   const want = MKT_MID * n + cur;
   if(i !== want) r.scrollLeft = (want + frac) * step;
 }
@@ -5485,14 +5496,14 @@ function mktBanStep(){
   const step = mktStepPx(r); if(!step) return;
   const i = Math.round(r.scrollLeft / step);
   mktBusy = true;
-  mktAnim(r, (i + 1) * step, function(){ mktBusy = false; mktFix(); });
+  mktAnim(r, (i + 1) * step, function(){ mktBusy = false; mktRemember(r); mktFix(); });
 }
 function mktBanStart(){
   clearInterval(mktBanT); mktBanT = null;
   const r = document.getElementById('mktRail');
   if(!r || BANNERS.length < 2) return;
   mktBanHold = 0; mktBusy = false; mktTouch = false;
-  const home = MKT_MID * BANNERS.length;
+  const home = MKT_MID * BANNERS.length + mktIdx;   /* eslab qolingan rasmdan davom etamiz */
   const put = function(){ const s = mktStepPx(r); if(s && r.scrollLeft < 1) r.scrollLeft = home * s; };
   put(); setTimeout(put, 80); setTimeout(put, 400);
 
