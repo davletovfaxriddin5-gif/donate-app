@@ -1645,15 +1645,21 @@ async function tonWallet(){
   if(tonW) return tonW;
   if(!TON_SEND_SEED) return null;
   const { mnemonicToPrivateKey } = require("@ton/crypto");
-  const { WalletContractV4, TonClient } = require("@ton/ton");
+  const { WalletContractV4, TonClient, TonClient4 } = require("@ton/ton");
   const words = TON_SEND_SEED.trim().split(/\s+/);
   if(words.length < 12) return null;
   const key = await mnemonicToPrivateKey(words);
   const wallet = WalletContractV4.create({ workchain: 0, publicKey: key.publicKey });
-  const client = new TonClient({
-    endpoint: "https://toncenter.com/api/v2/jsonRPC",
-    apiKey: process.env.TONCENTER_KEY || undefined
-  });
+  /* Ochiq toncenter kalitsiz qattiq cheklangan va 429 qaytaradi.
+     Shuning uchun kalit talab qilmaydigan v4 tugunidan foydalanamiz.
+     .env da TONCENTER_KEY bo'lsa, o'shanga o'tadi. */
+  let client;
+  if(process.env.TONCENTER_KEY){
+    client = new TonClient({ endpoint: "https://toncenter.com/api/v2/jsonRPC",
+                             apiKey: process.env.TONCENTER_KEY });
+  } else {
+    client = new TonClient4({ endpoint: "https://mainnet-v4.tonhubapi.com" });
+  }
   tonW = { key: key, wallet: wallet, client: client };
   return tonW;
 }
@@ -1701,12 +1707,25 @@ app.post("/gram/out", async (req,res)=>{
     if(!w) throw new Error("hamyon ochilmadi");
     const { internal, toNano } = require("@ton/ton");
     const c = w.client.open(w.wallet);
-    const seqno = await c.getSeqno();
-    await c.sendTransfer({
-      seqno: seqno,
-      secretKey: w.key.secretKey,
-      messages: [ internal({ to: to, value: toNano(String(amt)), bounce: false }) ]
-    });
+    /* Tugun band bo'lsa (429) biroz kutib qayta urinamiz */
+    let seqno = 0, lastErr = null;
+    for(let i = 0; i < 4; i++){
+      try{ seqno = await c.getSeqno(); lastErr = null; break; }
+      catch(e){ lastErr = e; await new Promise(r=>setTimeout(r, 1200 * (i+1))); }
+    }
+    if(lastErr) throw lastErr;
+    let sent = false;
+    for(let i = 0; i < 4; i++){
+      try{
+        await c.sendTransfer({
+          seqno: seqno,
+          secretKey: w.key.secretKey,
+          messages: [ internal({ to: to, value: toNano(String(amt)), bounce: false }) ]
+        });
+        sent = true; break;
+      }catch(e){ lastErr = e; await new Promise(r=>setTimeout(r, 1500 * (i+1))); }
+    }
+    if(!sent) throw lastErr || new Error("yuborilmadi");
     const db2 = load(); const u2 = urec(db2, who.id);
     const r2 = ((u2.nftHist)||[]).find(function(x){ return x.id === rec.id; });
     if(r2) r2.status = "done";
