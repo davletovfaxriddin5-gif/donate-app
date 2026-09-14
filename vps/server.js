@@ -1630,6 +1630,107 @@ function tgCall(method, body){
   }).catch(function(e){ console.log("TG "+method+" xato:", e.message); });
 }
 
+/* ---------- GRAM yechish ----------
+   Mijoz o'z hamyoniga GRAM chiqarib oladi. Server pul YUBORADI, ya'ni
+   maxfiy kalit shu yerda turadi — shuning uchun uchta himoya bor:
+   alohida hamyon, bitta va kunlik chegara, hamda har amal haqida xabar. */
+const TON_SEND_ADDR = process.env.TON_SEND_ADDR || "";
+const TON_SEND_SEED = process.env.TON_SEND_SEED || "";
+const GRAM_OUT_MAX  = Number(process.env.GRAM_OUT_MAX || 20);    /* bittada eng ko'pi */
+const GRAM_OUT_DAY  = Number(process.env.GRAM_OUT_DAY || 100);   /* kuniga jami */
+
+/* Hamyonni bir marta ochamiz va xotirada saqlaymiz */
+let tonW = null;
+async function tonWallet(){
+  if(tonW) return tonW;
+  if(!TON_SEND_SEED) return null;
+  const { mnemonicToPrivateKey } = require("@ton/crypto");
+  const { WalletContractV4, TonClient } = require("@ton/ton");
+  const words = TON_SEND_SEED.trim().split(/\s+/);
+  if(words.length < 12) return null;
+  const key = await mnemonicToPrivateKey(words);
+  const wallet = WalletContractV4.create({ workchain: 0, publicKey: key.publicKey });
+  const client = new TonClient({
+    endpoint: "https://toncenter.com/api/v2/jsonRPC",
+    apiKey: process.env.TONCENTER_KEY || undefined
+  });
+  tonW = { key: key, wallet: wallet, client: client };
+  return tonW;
+}
+
+/* Bugun shu odam qancha yechgan */
+function gramOutToday(u){
+  const d0 = new Date(); d0.setHours(0,0,0,0);
+  let s = 0;
+  ((u.nftHist)||[]).forEach(function(r){
+    if(r.kind !== "gram_out" || r.status === "cancel") return;
+    const t = r.at ? Date.parse(r.at) : 0;
+    if(t >= d0.getTime()) s += Number(r.amount) || 0;
+  });
+  return Math.round(s * 1e9) / 1e9;
+}
+
+app.post("/gram/out", async (req,res)=>{
+  const who = checkInit(req.body && req.body.initData);
+  if(!who) return res.json({ ok:false, error:"auth" });
+  if(!TON_SEND_SEED || !TON_SEND_ADDR) return res.json({ ok:false, error:"off" });
+
+  const to  = String(req.body.to || "").trim();
+  const amt = Math.round((Number(req.body.amount) || 0) * 1e9) / 1e9;
+  if(!/^[A-Za-z0-9_\-]{48}$/.test(to) && !/^0:[0-9a-fA-F]{64}$/.test(to))
+    return res.json({ ok:false, error:"addr" });
+  if(!(amt > 0)) return res.json({ ok:false, error:"amount" });
+
+  const db = load();
+  const u  = urec(db, who.id);
+  const have = Number(u.gram) || 0;
+  const need = Math.round((amt + GRAM_FEE) * 1e9) / 1e9;
+  if(need > have) return res.json({ ok:false, error:"low", have:have, fee:GRAM_FEE });
+  if(amt > GRAM_OUT_MAX) return res.json({ ok:false, error:"max", max:GRAM_OUT_MAX });
+  if(gramOutToday(u) + amt > GRAM_OUT_DAY)
+    return res.json({ ok:false, error:"day", day:GRAM_OUT_DAY, used:gramOutToday(u) });
+
+  /* Avval balansdan yechamiz — shunda ikki marta bosilsa ham ikki marta ketmaydi */
+  u.gram = Math.round((have - need) * 1e9) / 1e9;
+  const rec = nftLog(u, "gram_out", amt,
+    { cur:"GRAM", note:"Hamyonga chiqarildi", fee:GRAM_FEE, to:to, status:"wait" });
+  save(db);
+
+  try{
+    const w = await tonWallet();
+    if(!w) throw new Error("hamyon ochilmadi");
+    const { internal, toNano } = require("@ton/ton");
+    const c = w.client.open(w.wallet);
+    const seqno = await c.getSeqno();
+    await c.sendTransfer({
+      seqno: seqno,
+      secretKey: w.key.secretKey,
+      messages: [ internal({ to: to, value: toNano(String(amt)), bounce: false }) ]
+    });
+    const db2 = load(); const u2 = urec(db2, who.id);
+    const r2 = ((u2.nftHist)||[]).find(function(x){ return x.id === rec.id; });
+    if(r2) r2.status = "done";
+    save(db2);
+    if(ADMIN_ID) send(ADMIN_ID, "\uD83D\uDCB8 GRAM chiqarildi\n" +
+      (u2.nm || who.id) + (u2.un ? " (@" + u2.un + ")" : "") +
+      "\nMiqdor: " + amt + " GRAM  (haq " + GRAM_FEE + ")" +
+      "\nManzil: " + to.slice(0,10) + "\u2026" + to.slice(-6) +
+      "\nQoldiq: " + u2.gram);
+    res.json({ ok:true, sent:amt, fee:GRAM_FEE, left:u2.gram });
+  }catch(e){
+    /* Yuborilmadi — pulni qaytaramiz, mijoz zarar ko'rmasin */
+    const db3 = load(); const u3 = urec(db3, who.id);
+    u3.gram = Math.round((Number(u3.gram||0) + need) * 1e9) / 1e9;
+    const r3 = ((u3.nftHist)||[]).find(function(x){ return x.id === rec.id; });
+    if(r3){ r3.status = "cancel"; r3.note = "Yuborilmadi, pul qaytarildi"; }
+    save(db3);
+    if(ADMIN_ID) send(ADMIN_ID, "\u26A0\uFE0F GRAM chiqarilmadi\n" +
+      (u3.nm || who.id) + "\nSabab: " + String(e.message||e).slice(0,120) +
+      "\nPul qaytarildi.");
+    res.json({ ok:false, error:"send", msg:String(e.message||e).slice(0,80) });
+  }
+});
+
 /* ---------- NFT bo'limining tarixi ----------
    Barcha kirim va chiqimlar shu yerda. Ilgari ular telefonda turardi —
    nizo chiqsa dalil bo'lmasdi. Endi serverda va zaxiraga tushadi.
