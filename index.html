@@ -1518,6 +1518,9 @@ if(tg){
      ochilgach tayyorlab qo'yamiz — aks holda oldin ulangan hamyon ko'rinmaydi
      va har safar qaytadan ulash so'raladi. */
   setTimeout(function(){ try{ tcLib().then(function(ok){ if(ok) tcInit(); }); }catch(e){} }, 900);
+  /* NFT hamyonlari endi serverda. Telefonda eski qoldiq bo'lsa bir marta
+     ko'chiramiz, bo'lmasa shunchaki serverdan o'qiymiz. */
+  setTimeout(function(){ try{ nftMigrate(); }catch(e){} }, 400);
   /* Telegram sarlavhasi ostida qolmaslik uchun tepadan bo'sh joy.
      Yangi Telegram'lar aniq o'lchov beradi, eskilarida 46px qoladi.
      Bir marta o'qiladi — hech qanday hodisaga ulanmaydi. */
@@ -5897,12 +5900,64 @@ function ocAll(){
    Ikkalasi bir-biriga aylanmaydi, hech qanday bog'liqligi yo'q. */
 const GRAM_ICON = '<svg viewBox="0 0 24 24"><path d="M12 2.5 21 9l-9 12.5L3 9z"/></svg>';
 let gramFrom = 'nft_market';
-function getGram(){ const v = Number(localStorage.getItem('mt_gram')); return isFinite(v) ? v : 0; }
+/* ---------- NFT hamyonlari: endi SERVERDA ----------
+   Ilgari bu qiymatlar telefonda (localStorage) turardi. U yerda ularni
+   har kim o'zgartira olardi va telefon tozalansa pul yo'qolardi.
+   Endi server saqlaydi, bu yerda faqat oxirgi ko'rsatilgan nusxasi turadi. */
+let nftGram = 0, nftSom = 0, nftLoaded = false;
+function getGram(){ return nftGram; }
 /* NFT bo'limining o'z so'm hamyoni. Bosh sahifadagi balans bilan HECH QANDAY
    aloqasi yo'q — u yerdagi pul u yerda qoladi va chiqarib bo'lmaydi. */
-function getNftSom(){ const v = Number(localStorage.getItem('mt_nft_som')); return isFinite(v) ? v : 0; }
-function setNftSom(v){ try{ localStorage.setItem('mt_nft_som', String(v)); }catch(e){} }
-function setGram(v){ try{ localStorage.setItem('mt_gram', String(v)); }catch(e){} }
+function getNftSom(){ return nftSom; }
+/* Yozish endi faqat serverda bo'ladi. Bu ikkovi ko'rsatkichni darrov
+   yangilash uchun qoldi — haqiqiy qiymatni server belgilaydi. */
+function setNftSom(v){ nftSom = Number(v) || 0; }
+function setGram(v){ nftGram = Number(v) || 0; }
+
+/* Serverdan qoldiqni olamiz */
+function nftLoad(cb){
+  const uid = tgUser && tgUser.id ? tgUser.id : '';
+  if(!uid){ if(cb) cb(); return; }
+  fetch(VBASE + '/nft/balance?id=' + encodeURIComponent(uid))
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if(d && d.ok){
+        nftGram = Number(d.gram) || 0;
+        nftSom  = Number(d.som)  || 0;
+        nftLoaded = true;
+        if(isNftView(view)) nftRepaint();
+      }
+      if(cb) cb();
+    }).catch(function(){ if(cb) cb(); });
+}
+/* Telefonda qolgan eski qoldiqni bir marta serverga ko'chiramiz */
+function nftMigrate(){
+  let g = 0, s = 0;
+  try{
+    g = Number(localStorage.getItem('mt_gram'))    || 0;
+    s = Number(localStorage.getItem('mt_nft_som')) || 0;
+  }catch(e){}
+  if(!(g > 0 || s > 0)){ nftLoad(); return; }
+  fetch(VBASE + '/nft/migrate', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ initData: tg.initData || '', gram:g, som:s })
+  }).then(function(r){ return r.json(); })
+    .then(function(d){
+      /* Ko'chirilgach telefondagi nusxani olib tashlaymiz — chalkashmasin */
+      try{ localStorage.removeItem('mt_gram'); localStorage.removeItem('mt_nft_som'); }catch(e){}
+      if(d && d.ok){ nftGram = Number(d.gram)||0; nftSom = Number(d.som)||0; nftLoaded = true;
+                     if(isNftView(view)) nftRepaint(); }
+      else nftLoad();
+    }).catch(function(){ nftLoad(); });
+}
+/* NFT ekranlarini qayta chizadi */
+function nftRepaint(){
+  if(view === 'nft_market')      mktBodyDraw();
+  else if(view === 'nft_gifts')  renderNftGifts();
+  else if(view === 'nft_wallet') renderWallet();
+  else if(view === 'nft_gram')   renderGram();
+  else if(view === 'nft_hist')   renderNft('nft_hist');
+}
 function fmtGram(v){
   const n = Number(v) || 0;
   return n % 1 === 0 ? String(n) : n.toFixed(2).replace(/0+$/,'').replace(/\.$/,'');
