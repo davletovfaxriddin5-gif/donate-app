@@ -1517,11 +1517,17 @@ if(tg){
   /* Hamyon ulanishini kutubxonaning o'zi tiklaydi. Shuning uchun uni ilova
      ochilgach tayyorlab qo'yamiz — aks holda oldin ulangan hamyon ko'rinmaydi
      va har safar qaytadan ulash so'raladi. */
-  setTimeout(function(){ try{ tcLib().then(function(ok){ if(ok) tcInit(); }); }catch(e){} }, 900);
-  /* NFT hamyonlari endi serverda. Telefonda eski qoldiq bo'lsa bir marta
-     ko'chiramiz, bo'lmasa shunchaki serverdan o'qiymiz. */
-  setTimeout(function(){ try{ nftMigrate(); }catch(e){} }, 400);
-  setTimeout(function(){ try{ nftHistLoad(); }catch(e){} }, 700);
+  /* TON Connect og'ir kutubxona. Uni faqat ilgari hamyon ulagan odamda
+     oldindan yuklaymiz — qolganlarda tugma bosilgandagina yuklanadi. */
+  try{
+    let had = false;
+    for(let i = 0; i < localStorage.length; i++){
+      if(String(localStorage.key(i)).indexOf('ton-connect') === 0){ had = true; break; }
+    }
+    if(had) setTimeout(function(){ tcLib().then(function(ok){ if(ok) tcInit(); }); }, 1200);
+  }catch(e){}
+  /* NFT ma'lumotlari bosh sahifada kerak emas — ular NFT bo'limiga
+     kirilgandagina yuklanadi. Shunda ilova tezroq ochiladi. */
   /* Telegram sarlavhasi ostida qolmaslik uchun tepadan bo'sh joy.
      Yangi Telegram'lar aniq o'lchov beradi, eskilarida 46px qoladi.
      Bir marta o'qiladi — hech qanday hodisaga ulanmaydi. */
@@ -3699,6 +3705,14 @@ let histTab = 'orders', histFilter = 'all';
 const app = document.getElementById('app');
 const fmt = n => n.toLocaleString('ru-RU').replace(/,/g,' ');
 
+let nftReady = false;
+/* NFT bo'limiga birinchi kirishda ma'lumotni olamiz */
+function nftEnsure(){
+  if(nftReady) return;
+  nftReady = true;
+  try{ nftMigrate(); }catch(e){}
+  setTimeout(function(){ try{ nftHistLoad(); }catch(e){} }, 250);
+}
 function go(v){
   /* Ayni shu ekranda turib o'sha tugmani bosish hech narsani o'zgartirmaydi.
      Qayta chizsak — karusel uziladi va ro'yxat bir lahza yo'qoladi. */
@@ -3712,6 +3726,7 @@ function go(v){
   if(tg&&tg.BackButton){ sub ? tg.BackButton.show() : tg.BackButton.hide(); }
   document.querySelector('.nav').style.display = (v==='game'||v==='chat') ? 'none' : 'flex';
   document.body.classList.toggle('nft-mode', isNftView(v));
+  if(isNftView(v)) nftEnsure();
   const _nb=document.getElementById('navNft'); if(_nb) _nb.classList.toggle('on', isNftView(v));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('on', n.dataset.tab===v));
   if(v==='home') renderHome();
