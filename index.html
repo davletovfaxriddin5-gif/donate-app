@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
 <title>minatoh</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<!-- TON Connect: hamyon ulash oynasini shu kutubxona chizadi.
+     Yuklanmasa ilova baribir ishlaydi, faqat hamyon tugmasi xabar beradi. -->
+<script src="https://unpkg.com/@tonconnect/ui@2/dist/tonconnect-ui.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -1473,6 +1476,10 @@ if(tg){
   /* Pastga surib yopishni to'samiz — ilova faqat tepadagi tugma bilan yopiladi.
      Bu bitta chaqiruv, hech qanday hodisaga ulanmaydi. */
   try{ tg.disableVerticalSwipes && tg.disableVerticalSwipes(); }catch(e){}
+  /* TON Connect'ni fon rejimida tayyorlaymiz — ilgari ulangan hamyon bo'lsa
+     manzili o'zi paydo bo'ladi. Kutubxona kech yuklansa ham urinib ko'ramiz. */
+  setTimeout(function(){ try{ tcInit(); }catch(e){} }, 600);
+  setTimeout(function(){ try{ tcInit(); }catch(e){} }, 2500);
   /* Telegram sarlavhasi ostida qolmaslik uchun tepadan bo'sh joy.
      Yangi Telegram'lar aniq o'lchov beradi, eskilarida 46px qoladi.
      Bir marta o'qiladi — hech qanday hodisaga ulanmaydi. */
@@ -5893,9 +5900,9 @@ function renderGram(){
   app.innerHTML = `<div class="page-title">To'ldirish</div>
   <div class="gr-card">
     <div class="lb">Ulangan hamyon</div>
-    <button class="gr-wal" onclick="wlSoon()">
+    <button class="gr-wal" onclick="wlConnect()">
       <svg viewBox="0 0 24 24"><path d="M3.5 8A2.5 2.5 0 0 1 6 5.5h10.5A2.5 2.5 0 0 1 19 8"/><rect x="3.5" y="8" width="17" height="10.5" rx="2.5"/><path d="M20.5 11.6h-3a1.9 1.9 0 0 0 0 3.8h3"/></svg>
-      Hamyonni ulash
+      <span data-wal="Hamyonni ulash">Hamyonni ulash</span>
     </button>
     <div class="gr-amt">
       <input id="grAmt" type="text" inputmode="decimal" value="0" oninput="grIn(this)" onfocus="this.select()">
@@ -5927,6 +5934,50 @@ function setWlTab(t){
   if(!tb || !bx){ renderWallet(); return; }
   [].slice.call(tb.querySelectorAll('button')).forEach(function(b){ b.classList.toggle('on', b.dataset.t === t); });
   bx.innerHTML = walletRows();
+}
+/* ---------- TON Connect: hamyon ulash ----------
+   Hamyonlar ro'yxatini (Telegram Wallet, Tonkeeper, MyTonWallet va h.k.)
+   kutubxonaning o'zi rasmiy reyestrdan oladi — biz sanab chiqmaymiz. */
+const TC_MANIFEST = 'https://www.minatoh.uz/tonconnect-manifest.json';
+let tcUI = null, tcAddr = '';
+function tcShort(a){
+  const s = String(a || '');
+  return s.length > 12 ? (s.slice(0, 6) + '…' + s.slice(-4)) : s;
+}
+function tcPaint(){
+  /* Ulangan manzil ko'rinadigan joylarni yangilaymiz */
+  document.querySelectorAll('[data-wal]').forEach(function(el){
+    el.textContent = tcAddr ? tcShort(tcAddr) : el.dataset.wal;
+  });
+}
+function tcInit(){
+  try{
+    if(!window.TON_CONNECT_UI || tcUI) return;
+    tcUI = new TON_CONNECT_UI.TonConnectUI({ manifestUrl: TC_MANIFEST });
+    const w = tcUI.wallet;
+    if(w && w.account) tcAddr = w.account.address || '';
+    tcUI.onStatusChange(function(x){
+      tcAddr = (x && x.account && x.account.address) || '';
+      tcPaint();
+      if(tcAddr) notify('success');
+    });
+    tcPaint();
+  }catch(e){ console.log('TON Connect xato:', e.message); }
+}
+function wlConnect(){
+  haptic();
+  tcInit();
+  if(!tcUI){ toast('Hamyon moduli yuklanmadi'); return; }
+  if(tcAddr){
+    /* Ulangan — uzishni so'raymiz */
+    if(tg && tg.showConfirm){
+      tg.showConfirm('Hamyonni uzasizmi?\n' + tcShort(tcAddr), function(ok){
+        if(ok) tcUI.disconnect().catch(function(){});
+      });
+    } else if(confirm('Hamyonni uzasizmi?')) tcUI.disconnect().catch(function(){});
+    return;
+  }
+  tcUI.openModal().catch(function(){ toast('Ochilmadi, qayta urinib ko\'ring'); });
 }
 function wlSoon(){ haptic(); toast('Tez orada'); }
 /* Pul yoki qiymat harakatlanadigan amallar — avval Face ID / barmoq izi.
@@ -5979,9 +6030,9 @@ function renderWallet(){
   const i = main.lastIndexOf(' ');
   const big = i > 0 ? main.slice(0, i) + '<small>' + main.slice(i + 1) + '</small>' : main;
   app.innerHTML = `
-  <button class="wl-top" onclick="wlSoon()">
+  <button class="wl-top" onclick="wlConnect()">
     <svg viewBox="0 0 24 24"><path d="M3.5 8A2.5 2.5 0 0 1 6 5.5h10.5A2.5 2.5 0 0 1 19 8"/><rect x="3.5" y="8" width="17" height="10.5" rx="2.5"/><path d="M20.5 11.6h-3a1.9 1.9 0 0 0 0 3.8h3"/></svg>
-    O'z hamyoningizni ulash
+    <span data-wal="O'z hamyoningizni ulash">O'z hamyoningizni ulash</span>
     <span class="arw">›</span>
   </button>
 
