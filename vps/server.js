@@ -3277,6 +3277,33 @@ app.post("/webhook", (req,res)=>{
       ]});
       return;
     }
+    /* /gram @user 5   yoki   /gram @user -2   — NFT GRAM hamyoniga yozish */
+    if(text.indexOf("/gram") === 0){
+      if(ADMIN_ID && fromId !== ADMIN_ID) return;
+      const rawG = text.replace("/gram", "").trim();
+      const mG   = rawG.match(/\s+(-?\d+(?:[.,]\d+)?)\s*$/);
+      const amtG = mG ? Number(String(mG[1]).replace(",", ".")) : NaN;
+      const qG   = (mG ? rawG.slice(0, mG.index) : rawG).trim().replace(/^@/, "").toLowerCase();
+      if(!qG || !mG || !isFinite(amtG)){
+        send(fromId, "Ishlatilishi:\n/gram @username 5\n/gram @username -2\n/gram 123456789 1.5\n\n" +
+                     "Musbat son qo'shadi, manfiy son ayiradi.");
+        return;
+      }
+      const dbG = load();
+      const hitG = findUser(dbG, qG);
+      if(!hitG || !dbG[hitG]){ send(fromId, "\u274C Topilmadi: " + qG); return; }
+      const uG   = urec(dbG, hitG);
+      const eskiG = Number(uG.gram) || 0;
+      let yangiG = eskiG + amtG;
+      if(yangiG < 0) yangiG = 0;                 /* minusga tushmaydi */
+      uG.gram = Math.round(yangiG * 1e9) / 1e9;  /* kasrni tozalaymiz */
+      save(dbG);
+      send(fromId, "\u2705 " + (uG.nm || hitG) + (uG.un ? " (@" + uG.un + ")" : "") + "\n" +
+                   "GRAM: " + eskiG + " \u2192 " + uG.gram);
+      if(amtG > 0) send(hitG, "\uD83D\uDC8E NFT hamyoningizga " + amtG +
+                        " GRAM qo'shildi.\nJoriy qoldiq: " + uG.gram + " GRAM", null, true);
+      return;
+    }
     if(text.indexOf("/bloklar") === 0){
       if(ADMIN_ID && fromId !== ADMIN_ID) return;
       const dbb = load();
