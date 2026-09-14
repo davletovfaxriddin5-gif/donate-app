@@ -1329,6 +1329,39 @@ function fxApply(usdPerSom, rubPerUsd){
   if(out.length) console.log("Kurs yangilandi: " + out.join(", "));
 }
 
+/* ---------- Ulangan hamyonning balansi ----------
+   Mijoz TON Connect orqali hamyonini ulaganda, uning TON va GRAM
+   qoldig'ini ko'rsatamiz. Kalit serverda qoladi, mijozga berilmaydi. */
+app.get("/ton/wallet", async (req, res) => {
+  const addr = String(req.query.addr || "").trim();
+  if(!addr) return res.json({ ok:false, error:"addr" });
+  if(!TON_KEY) return res.json({ ok:false, error:"key" });
+  try{
+    const hd = { "Authorization": "Bearer " + TON_KEY };
+    const ac = new AbortController();
+    const tm = setTimeout(()=>ac.abort(), 12000);
+    const [a, b] = await Promise.all([
+      fetch("https://tonapi.io/v2/accounts/" + encodeURIComponent(addr),
+            { headers: hd, signal: ac.signal }).then(r=>r.json()).catch(()=>null),
+      fetch("https://tonapi.io/v2/accounts/" + encodeURIComponent(addr) + "/jettons",
+            { headers: hd, signal: ac.signal }).then(r=>r.json()).catch(()=>null)
+    ]);
+    clearTimeout(tm);
+    const ton = a && a.balance ? Number(a.balance) / 1e9 : 0;
+    let gram = 0;
+    /* GRAM'ni manzil bo'yicha emas, belgisi bo'yicha topamiz —
+       shunda shartnoma manzili o'zgarsa ham ishlayveradi. */
+    ((b && b.balances) || []).forEach(function(x){
+      const sym = String((x.jetton && x.jetton.symbol) || "").toUpperCase();
+      if(sym !== "GRAM") return;
+      const dec = Number((x.jetton && x.jetton.decimals) != null ? x.jetton.decimals : 9);
+      gram = Number(x.balance || 0) / Math.pow(10, dec);
+    });
+    res.json({ ok:true, ton: ton, gram: gram,
+               addrFriendly: (a && a.address) ? a.address : addr });
+  }catch(e){ res.json({ ok:false, error:String(e.message||e).slice(0,80) }); }
+});
+
 /* ---------- USDT (TON tarmog'i) orqali to'ldirish ---------- */
 const TON_KEY  = process.env.TON_KEY  || "";
 const TON_ADDR = process.env.TON_ADDR || "";
