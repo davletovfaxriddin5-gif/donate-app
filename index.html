@@ -5089,6 +5089,9 @@ function mktBodyDraw(){
   if(box) box.innerHTML = mktContent(); else renderNftMarket();
   const tools = document.getElementById('mktTools');
   if(tools) tools.style.display = (mktTab === 'stars') ? 'none' : '';
+  /* Karusel to'xtab qolmasin: tugma bosilganda u qotib qolardi.
+     Element o'z joyida qoladi, faqat yuritgich qayta yoqiladi. */
+  setTimeout(function(){ if(document.getElementById('mktRail')) mktBanStart(); }, 0);
 }
 function mktRefresh(){
   if(view === 'nft_gifts'){ renderNftGifts(); return; }
@@ -5508,6 +5511,10 @@ function mktBanStart(){
   put(); setTimeout(put, 80); setTimeout(put, 400);
 
   const settle = function(){ clearTimeout(mktSettle); mktSettle = setTimeout(mktFix, 130); };
+  /* Bu element uchun tinglovchilar allaqachon qo'yilgan bo'lsa takrorlamaymiz —
+     aks holda har qayta chizilishda ular to'planib ketadi. */
+  if(r.dataset.ban === '1'){ mktBanT = setInterval(mktBanStep, MKT_WAIT + MKT_MS); return; }
+  r.dataset.ban = '1';
   /* Barmoq tekkan lahzada markazga qaytaramiz. Bu paytda inersiya baribir
      to'xtaydi, shuning uchun hech narsa yo'qotilmaydi — har yangi surishda
      ikkala tomonga to'liq zaxira bo'ladi. */
