@@ -3644,6 +3644,12 @@ const app = document.getElementById('app');
 const fmt = n => n.toLocaleString('ru-RU').replace(/,/g,' ');
 
 function go(v){
+  /* Ayni shu ekranda turib o'sha tugmani bosish hech narsani o'zgartirmaydi.
+     Qayta chizsak — karusel uziladi va ro'yxat bir lahza yo'qoladi. */
+  if(v === view && (v === 'nft_market' || v === 'nft_gifts' || v === 'nft_hist')){
+    window.scrollTo(0,0);
+    return;
+  }
   view = v; window.scrollTo(0,0);
   setTimeout(function(){ try{ bindHistTaps(); }catch(e){} }, 0);
   const sub = (v==='game' || v==='topup' || v==='spam' || v==='chat' || v==='lang' || v==='profile' || isNftView(v));
@@ -5585,15 +5591,7 @@ function renderNftMarket(){
     </div>` : ''}
   <div class="nftm-fil" id="mktFil">${mktChips()}</div>
   </div>
-  <div id="mktBody">${mktBusy ? '' : mktContent()}</div>`;
-  /* Rasm almashayotgan payt og'ir ro'yxatni chizmaymiz — brauzer band bo'lib
-     animatsiya titrardi. Harakat tugagach o'zi to'ldiriladi. */
-  if(mktBusy){
-    setTimeout(function(){
-      const b = document.getElementById('mktBody');
-      if(b && !b.innerHTML) b.innerHTML = mktContent();
-    }, MKT_MS + 40);
-  }
+  <div id="mktBody">${mktContent()}</div>`;
   if(keepBan){
     const fresh = document.getElementById('mktBan');
     if(fresh && fresh.parentNode){
