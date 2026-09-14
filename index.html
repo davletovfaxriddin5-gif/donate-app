@@ -3740,7 +3740,7 @@ function go(v){
   else if(v==='game') renderGame();
   else if(v==='history') renderHistory();
   else if(v==='settings'){ renderSettings(); loadPhone(); }
-  else if(v==='topup'){ topMethod=null; stConfirm=0; stBusy=false; renderTopup(); }
+  else if(v==='topup'){ topDest='main'; topMethod=null; stConfirm=0; stBusy=false; renderTopup(); }
   else if(v==='lang') renderLang();
   else if(v==='spam') renderSpam();
   else if(v==='chat') renderChat();
@@ -5835,7 +5835,17 @@ function renderNftTopup(){
     <span class="ic">📖</span><span class="t">Qo'llanma</span><span class="r">Kanal</span>
   </button>`;
 }
-function nftPick(k){ haptic(); toast('Tez orada'); }
+/* NFT so'm hisobini to'ldirish. Bosh sahifadagi to'lov ekranining
+   o'zi ishlatiladi — faqat pul NFT hisobiga tushadi. */
+let topDest = 'main';
+function nftPick(k){
+  haptic();
+  topDest = 'nft';
+  topMethod = null; stConfirm = 0; stBusy = false; topPend = null;
+  view = 'topup';
+  renderTopup();
+  setTimeout(function(){ try{ pickPay(k); }catch(e){} }, 0);
+}
 
 /* ===== Yechib olish ekranlari =====
    Hammasi NFT bo'limining o'z hamyonlariga tegishli.
@@ -7530,7 +7540,8 @@ function sendTopup(){
   if(box){ box.className='id-res wait'; box.textContent=tr('⏳ Tayyorlanmoqda…'); }
   fetch(VBASE + '/topup', {
     method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({ amount: amt, method: bank, initData: (tg && tg.initData) || '' })
+    body: JSON.stringify({ amount: amt, method: bank, dest: topDest,
+                           initData: (tg && tg.initData) || '' })
   }).then(function(r){ return r.json(); }).then(function(d){
     if(btn){ btn.disabled = false; btn.textContent = tr('Davom etish'); }
     if(d && d.ok){
