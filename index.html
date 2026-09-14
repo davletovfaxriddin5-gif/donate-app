@@ -5,9 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
 <title>minatoh</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<!-- TON Connect kutubxonasi bu yerda yuklanmaydi. U hamyon tugmasi
-     bosilgandagina yuklanadi — aks holda iPhone'da butun ilovadagi
-     tugmalarda bosilish animatsiyasi yonib ketardi. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -79,7 +76,7 @@ input{font-family:inherit}
   border-radius:17px;padding:11px 6px;display:flex;flex-direction:column;
   align-items:center;gap:7px;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif;
   font-size:12px;font-weight:400;color:#fff;line-height:1.25;text-align:center;transition:.15s}
-.bal-btn:active{transform:scale(.96);background:rgba(255,255,255,.22)}
+.bal-btn:active{transform:scale(.992);background:rgba(255,255,255,.10)}
 .bal-btn svg{width:21px;height:21px;fill:#fff;stroke:none}
 
 .sec-lbl{font-size:11px;font-weight:700;letter-spacing:1.2px;color:var(--faint);text-transform:uppercase;margin:18px 2px 10px}
@@ -88,7 +85,7 @@ input{font-family:inherit}
 .game{position:relative;min-width:0}
 .game .tile{position:relative;width:100%;aspect-ratio:1;border-radius:15px;overflow:hidden;
   background:var(--card);display:grid;place-items:center;transition:transform .12s}
-.game:active .tile{transform:scale(.95)}
+.game:active .tile{transform:scale(.991)}
 .game .tile img{width:100%;height:100%;object-fit:cover}
 .game .glyph{font-size:26px;filter:drop-shadow(0 3px 8px rgba(0,0,0,.5))}
 .game .star{position:absolute;top:0;left:0;width:25px;height:25px;border-radius:15px 0 12px 0;
@@ -145,7 +142,7 @@ input{font-family:inherit}
   font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif;
   font-weight:500;font-size:14px;color:#fff;letter-spacing:-.1px;
   white-space:nowrap;box-shadow:0 10px 26px -10px rgba(79,70,245,.85)}
-.check-btn:active{transform:scale(.98)}
+.check-btn:active{transform:scale(.994)}
 .region-tabs{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:16px}
 .region-tabs .rt{background:var(--card);border:1px solid var(--stroke);border-radius:12px;padding:10px 14px;
 /* === Ixchamroq: region tablari, saqlangan ID, ID formasi === */
@@ -163,7 +160,7 @@ input{font-family:inherit}
 .pkg-sec{grid-column:1/-1;font-size:11px;font-weight:700;letter-spacing:1.2px;color:var(--faint);text-transform:uppercase;margin:12px 2px 2px}
 .pkg{position:relative;background:var(--card);border:1.5px solid rgba(240,169,60,.45);border-radius:14px;
   padding:13px 11px;display:flex;align-items:center;gap:10px;transition:.14s;text-align:left;overflow:hidden}
-.pkg:active{transform:scale(.98)}
+.pkg:active{transform:scale(.994)}
 .pkg.sel{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold),0 10px 26px -12px rgba(240,169,60,.5)}
 .pkg .pic{position:relative;flex-shrink:0}
 .pkg .pic .em{font-size:24px}
@@ -180,7 +177,7 @@ input{font-family:inherit}
   width:calc(100% - 28px);max-width:432px;z-index:60}
 .buy-btn{width:100%;background:var(--blue-grad);border-radius:15px;padding:15px;font-weight:800;font-size:15px;
   color:#fff;box-shadow:0 14px 34px -10px rgba(63,85,246,.7)}
-.buy-btn:active{transform:scale(.99)}
+.buy-btn:active{transform:scale(.996)}
 .buy-btn:disabled{opacity:.5;box-shadow:none}
 
 .page-title{font-weight:800;font-size:23px;letter-spacing:-.6px;margin:4px 2px 14px}
@@ -194,7 +191,7 @@ input{font-family:inherit}
 .chips .c.on{background:var(--blue);color:#fff;border-color:transparent}
 .refresh-btn{width:100%;background:var(--blue-soft);border:1px solid rgba(63,85,246,.3);border-radius:14px;
   padding:13px;font-weight:700;font-size:14px;color:#9CA9FF;display:flex;align-items:center;justify-content:center;gap:9px;margin-bottom:16px}
-.refresh-btn:active{transform:scale(.99)}
+.refresh-btn:active{transform:scale(.996)}
 .refresh-btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 @keyframes mtspin{to{transform:rotate(360deg)}}
 .refresh-btn.busy svg{animation:mtspin .8s linear infinite;transform-origin:50% 50%}
@@ -240,7 +237,7 @@ input{font-family:inherit}
 .stat .v small{font-size:12px;font-weight:600;color:var(--dim);margin-left:4px}
 .big-btn{width:100%;background:var(--blue-soft);border:1px solid rgba(63,85,246,.35);border-radius:14px;
   padding:14px 16px;display:flex;align-items:center;gap:12px;font-weight:700;font-size:14px;margin-bottom:8px;transition:.15s}
-.big-btn:active{transform:scale(.99)}
+.big-btn:active{transform:scale(.996)}
 .big-btn .ic{width:38px;height:38px;border-radius:11px;background:var(--blue);display:grid;place-items:center;flex-shrink:0}
 .big-btn .ic svg{width:20px;height:20px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .lang-toggle{display:flex;background:var(--card);border:1px solid var(--stroke);border-radius:15px;padding:5px;margin-bottom:8px}
@@ -248,7 +245,10 @@ input{font-family:inherit}
 .lang-toggle button.on{background:var(--blue);color:#fff}
 .svc-list{background:var(--card);border:1px solid var(--stroke);border-radius:var(--radius);overflow:hidden}
 .svc{display:flex;align-items:center;gap:12px;padding:14px 16px;transition:.12s;width:100%;text-align:left}
-.svc:active{background:rgba(255,255,255,.03)}
+.svc:active{background:transparent}
+/* Butun qator oqarib ketmasin — bosilish faqat ikonkada sezilsin */
+.svc:active .ic{ transform:scale(.96); filter:brightness(1.07) }
+.svc .ic{ transition:transform .14s, filter .14s }
 .svc + .svc{border-top:1px solid var(--stroke)}
 .svc .ic{width:40px;height:40px;border-radius:11px;display:grid;place-items:center;flex-shrink:0}
 .svc .ic svg{width:20px;height:20px;stroke:#fff;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
@@ -263,14 +263,14 @@ input{font-family:inherit}
 
 .guide-btn{width:100%;background:var(--blue-soft);border:1px solid rgba(63,85,246,.35);border-radius:14px;
   padding:14px 16px;display:flex;align-items:center;gap:12px;margin-bottom:18px;transition:.15s}
-.guide-btn:active{transform:scale(.99)}
+.guide-btn:active{transform:scale(.996)}
 .guide-btn .ic{width:38px;height:38px;border-radius:11px;background:var(--blue);display:grid;place-items:center;font-size:18px;flex-shrink:0}
 .guide-btn .t{font-weight:700;font-size:15px;color:#9CA9FF}
 .guide-btn .r{margin-left:auto;color:#7E93FF;font-size:13px;font-weight:600}
 .pay-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px}
 .check-btn:disabled{opacity:.45}
 .pay{background:#fff;border-radius:13px;padding:11px 6px 9px;display:flex;flex-direction:column;align-items:center;gap:7px;transition:.14s}
-.pay:active{transform:scale(.96)}
+.pay:active{transform:scale(.992)}
 .pay .box{width:50px;height:50px;border-radius:12px;display:grid;place-items:center;overflow:hidden}
 .pay .nm{font-size:12.5px;font-weight:700;color:#1a2236;text-align:center}
 
@@ -286,7 +286,7 @@ input{font-family:inherit}
 .rent{width:58px;height:54px;border-radius:18px;border:1px solid var(--stroke);background:rgba(15,22,38,.9);
   backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);display:flex;flex-direction:column;align-items:center;
   justify-content:center;gap:3px;flex-shrink:0;color:var(--gold);font-size:10px;font-weight:700}
-.rent:active{transform:scale(.95)}
+.rent:active{transform:scale(.991)}
 .rent .g{display:flex;align-items:center;gap:4px}
 .rent .g svg{width:18px;height:18px}
 
@@ -301,7 +301,7 @@ input{font-family:inherit}
   font-weight:700;font-size:15px;color:var(--dim);flex-shrink:0;position:relative;overflow:hidden}
 .ref-av img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:50%}
 .ref-row.tap{cursor:pointer;transition:background .15s,transform .15s}
-.ref-row.tap:active{background:var(--card-2);transform:scale(.985)}
+.ref-row.tap:active{transform:scale(.995)}
 .ref-nm{flex:1;min-width:0}
 .ref-nm .a{font-weight:700;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ref-nm .b{color:var(--dim);font-size:12px;margin-top:3px}
@@ -493,7 +493,7 @@ body.light .rent{ background:rgba(255,255,255,.92) }
 body.light .rent{ color:#B8791A }
 body.light .toast{ color:var(--text) }
 body.light .pay{ border:1px solid var(--stroke) }
-body.light .svc:active{ background:rgba(16,24,40,.04) }
+body.light .svc:active{ background:transparent }
 body.light .switch{ background:#C7CEDC }
 body.light .game .star.off{ background:#B9C0D0 }
 body.light .refresh-btn,
@@ -529,7 +529,7 @@ body.light .set-profile{ box-shadow:0 2px 10px rgba(16,24,40,.05) }
 .nav-inner .nav-item.on{ background:transparent; border:0; color:#fff }
 .nav-item svg{ transition:transform .22s cubic-bezier(.34,1.4,.5,1) }
 .nav-inner .nav-item.on svg{ transform:scale(1.08) }
-.nav-inner .nav-item:active{ transform:scale(.94) }
+.nav-inner .nav-item:active{ transform:scale(.99) }
 .reduce-motion .nav-goo{ filter:none; -webkit-filter:none }
 /* === Tanlov tugmalari: suyuq kapsula === */
 .fx-host{ position:relative }
@@ -635,7 +635,7 @@ body.light .thm-lt{display:inline}
       background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.015)) !important;
       box-shadow:0 2px 12px rgba(0,0,0,.28) !important;
       transition:transform .15s ease, box-shadow .25s ease, border-color .25s ease }
-.pkg:active{ transform:scale(.97) }
+.pkg:active{ transform:scale(.993) }
 .pkg.sel{ border-color:rgba(110,130,255,.9) !important;
           box-shadow:0 0 0 1px rgba(110,130,255,.45), 0 0 24px rgba(110,130,255,.30) !important }
 .pkg.promo{ border-color:rgba(245,179,1,.7) !important;
@@ -788,7 +788,7 @@ body.light .set-profile .avatar{ box-shadow:0 0 0 2px var(--card), 0 0 0 3px rgb
 .id-chip{ font-size:13px !important; padding:3px 9px !important; margin-top:6px !important;
   border-radius:8px !important; font-weight:500 !important; letter-spacing:-.2px !important;
   gap:6px !important; transition:transform .12s, background .12s !important }
-.id-chip:active{ transform:scale(.93) !important; background:var(--card-2) !important;
+.id-chip:active{ transform:scale(.988) !important; background:var(--card-2) !important;
   filter:brightness(.88) !important }
 .id-chip svg{ width:12px !important; height:12px !important; transition:.2s }
 .id-chip svg.idok{ stroke:#4FE0A0 !important; stroke-width:2.6 !important }
@@ -816,7 +816,7 @@ body.light .rlk-box{ background:rgba(16,24,40,.05) }
 .rlk-b{ display:flex; align-items:center; justify-content:center; gap:9px; border:0; border-radius:14px;
   padding:11px 8px; font-size:14.5px; font-weight:500; letter-spacing:-.3px; transition:.15s;
   min-height:38px }
-.rlk-b:active{ transform:scale(.985) }
+.rlk-b:active{ transform:scale(.995) }
 .rlk-b svg{ width:17px; height:17px; fill:none; stroke-width:1.9; stroke-linecap:round;
   stroke-linejoin:round; flex-shrink:0 }
 .rlk-b2{ background:rgba(0,0,0,.30); color:var(--text) } .rlk-b2 svg{ stroke:var(--text) }
@@ -935,7 +935,7 @@ body.light .sheet .sh-close{ background:rgba(16,24,40,.04) !important;
 .nav-nft .ln{ display:flex; flex-direction:column; gap:2.5px }
 .nav-nft .ln i{ display:block; width:14px; height:1.6px; border-radius:2px; background:currentColor }
 .nav-nft.on{ color:#fff; border-color:rgba(124,140,255,.55); background:rgba(59,77,240,.30) }
-.nav-nft:active{ transform:scale(.93) }
+.nav-nft:active{ transform:scale(.988) }
 body.light .nav-nft{ background:rgba(255,255,255,.92) }
 
 .nav-item .lb{ display:block; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
@@ -981,7 +981,7 @@ body.light .seg button.on .n{ background:rgba(255,255,255,.26) }
   white-space:nowrap; transition:.14s }
 .mg-acts button svg{ width:19px; height:19px; stroke:currentColor; fill:none; stroke-width:1.9;
   stroke-linecap:round; stroke-linejoin:round }
-.mg-acts button:active{ transform:scale(.93) }
+.mg-acts button:active{ transform:scale(.988) }
 
 .mg-empty{ text-align:center; padding:0 20px 18px; min-height:34vh;
   display:flex; flex-direction:column; justify-content:flex-end }
@@ -991,7 +991,7 @@ body.light .seg button.on .n{ background:rgba(255,255,255,.26) }
   height:33px; padding:0 15px; border-radius:999px;
   background:#fff; color:#0F1626; font-size:12.5px; font-weight:600; transition:.14s }
 body.light .mg-empty .cta{ background:#0F1626; color:#fff }
-.mg-empty .cta:active{ transform:scale(.96) }
+.mg-empty .cta:active{ transform:scale(.992) }
 
 .mg-day{ font-size:12.5px; font-weight:500; letter-spacing:.4px; text-transform:uppercase;
   color:var(--faint); margin:16px 4px 9px }
@@ -1017,7 +1017,7 @@ body.light .mg-empty .cta{ background:#0F1626; color:#fff }
 .nav-back svg{ width:19px; height:19px; stroke:currentColor; fill:none; stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round }
 .nav-back .cv{ width:13px; height:19px; stroke-width:2.2 }
 .nav-back .lb{ white-space:nowrap }
-.nav-back:active{ transform:scale(.95) }
+.nav-back:active{ transform:scale(.991) }
 body.light .nav-back{ background:rgba(255,255,255,.92) }
 body.nft-mode .nav-back{ display:flex }
 body.nft-mode .nav-inner{ flex:1 1 auto; width:auto }
@@ -1120,7 +1120,7 @@ body.light .sp-card .sub{ text-shadow:none; color:var(--faint) }
 .fs-btns .re{ background:var(--card-2); color:var(--dim) }
 .fs-btns .ap{ background:var(--blue); color:#fff }
 .fs-btns button:disabled{ opacity:.45 }
-.fs-btns button:active{ transform:scale(.97) }
+.fs-btns button:active{ transform:scale(.993) }
 .nftm-fil button .cnt{ min-width:19px; height:19px; padding:0 5px; border-radius:999px;
   background:var(--blue); color:#fff; font-size:11px; font-weight:700;
   display:grid; place-items:center; margin-left:1px }
@@ -1194,7 +1194,7 @@ body.light .sp-card .sub{ text-shadow:none; color:var(--faint) }
   color:var(--text); font-size:12.5px; font-weight:500; font-family:var(--sys); transition:.14s }
 .gr-wal svg{ width:16px; height:16px; stroke:#5B8CFF; fill:none; stroke-width:1.8;
   stroke-linecap:round; stroke-linejoin:round }
-.gr-wal:active{ transform:scale(.96) }
+.gr-wal:active{ transform:scale(.992) }
 .gr-amt{ display:flex; align-items:baseline; justify-content:center; gap:8px; margin:18px 0 15px }
 .gr-amt input{ background:transparent; border:0; outline:none; padding:0; min-width:1ch;
   color:var(--text); font-size:38px; font-weight:700; letter-spacing:-1.2px;
@@ -1213,11 +1213,11 @@ body.light .sp-card .sub{ text-shadow:none; color:var(--faint) }
 .gr-quick button .d{ width:18px; height:18px; border-radius:50%; background:var(--blue);
   display:grid; place-items:center; flex-shrink:0 }
 .gr-quick button .d svg{ width:9px; height:9px; fill:#fff; stroke:none }
-.gr-quick button:active{ transform:scale(.95) }
+.gr-quick button:active{ transform:scale(.991) }
 .gr-go{ width:100%; height:44px; border-radius:14px; background:var(--blue); color:#fff;
   font-size:14.5px; font-weight:600; font-family:var(--sys); letter-spacing:.1px; transition:.14s }
 .gr-go:disabled{ opacity:.42 }
-.gr-go:active{ transform:scale(.98) }
+.gr-go:active{ transform:scale(.994) }
 
 /* === Hamyon ekrani (balans tugmasi bosilganda) === */
 .wl-top{ display:flex; align-items:center; gap:10px; width:100%; padding:11px 14px; margin-bottom:10px;
@@ -1226,7 +1226,7 @@ body.light .sp-card .sub{ text-shadow:none; color:var(--faint) }
 .wl-top > svg{ width:20px; height:20px; stroke:var(--dim); fill:none; stroke-width:1.8;
   stroke-linecap:round; stroke-linejoin:round; flex-shrink:0 }
 .wl-top .arw{ margin-left:auto; color:var(--faint); font-size:18px; line-height:1 }
-.wl-top:active{ transform:scale(.985) }
+.wl-top:active{ transform:scale(.995) }
 
 .wl-card{ background:var(--blue-grad); border-radius:20px; padding:16px; margin-bottom:12px; color:#fff }
 .wl-card .lb{ font-size:12.5px; opacity:.82 }
@@ -1240,7 +1240,7 @@ body.light .sp-card .sub{ text-shadow:none; color:var(--faint) }
   stroke-linecap:round; stroke-linejoin:round }
 .wl-card .b1{ background:#fff; color:#0F1626 }
 .wl-card .b2{ background:rgba(255,255,255,.22); color:#fff }
-.wl-card .btns button:active{ transform:scale(.96) }
+.wl-card .btns button:active{ transform:scale(.992) }
 
 /* === NFT Market === */
 .mkt-ban{ margin:0 0 12px }
@@ -1271,7 +1271,7 @@ body.light .sp-card .sub{ text-shadow:none; color:var(--faint) }
   color:var(--text); font-size:12.5px; font-weight:500; transition:.14s }
 .nftm-fil button svg{ width:13px; height:13px; stroke:var(--faint); fill:none; stroke-width:2.3;
   stroke-linecap:round; stroke-linejoin:round; flex-shrink:0 }
-.nftm-fil button:active{ transform:scale(.96) }
+.nftm-fil button:active{ transform:scale(.992) }
 
 .nftm-grid{ display:grid; grid-template-columns:1fr 1fr; gap:11px }
 .nftm-card{ background:var(--card); border:1px solid var(--stroke); border-radius:20px;
@@ -1294,7 +1294,7 @@ body.light .sp-card .sub{ text-shadow:none; color:var(--faint) }
   background:var(--card-2); border:1px solid var(--stroke-2); color:var(--dim); transition:.14s }
 .nftm-buy .cart svg{ width:17px; height:17px; stroke:currentColor; fill:none; stroke-width:1.9;
   stroke-linecap:round; stroke-linejoin:round }
-.nftm-buy button:active{ transform:scale(.95) }
+.nftm-buy button:active{ transform:scale(.991) }
 
 /* === Profil ekrani === */
 .profile .who{ cursor:pointer; transition:opacity .14s }
@@ -1338,44 +1338,6 @@ body.kb-open .mg-empty{ display:none }
 /* Klaviatura ochilganda "Sotib olish" tugmasi uning ustiga chiqib qolardi. */
 body.kb-open .buy-bar{ display:none !important }
 
-/* ---- Ulangan hamyon: tugma ichidagi ko'rinish ---- */
-[data-wal] b.a{ font-weight:600; color:var(--dim); margin-left:6px; font-family:var(--sys) }
-[data-wal] span.g{ display:inline-block; margin-left:8px; padding:2px 8px; border-radius:8px;
-  background:var(--blue); color:#fff; font-size:11.5px; font-weight:700; font-family:var(--sys) }
-
-/* ---- Hamyon varag'i: chap tarafda yirik sarlavhalar ---- */
-.tc-sh{ text-align:left }
-.tc-sh .tc-h{ font-size:22px; font-weight:700; letter-spacing:-.5px; font-family:var(--sys);
-  color:var(--text); margin:2px 0 18px }
-.tc-sh .tc-h2{ font-size:17px; font-weight:700; letter-spacing:-.3px; font-family:var(--sys);
-  color:var(--text); margin-bottom:4px }
-.tc-sh .tc-bal{ font-size:26px; font-weight:700; letter-spacing:-.8px; font-family:var(--sys);
-  color:var(--text); margin-bottom:16px }
-/* Yumshoq quti — chegara chizig'isiz */
-.tc-sh .tc-addr{ display:flex; align-items:center; gap:11px; margin-bottom:14px;
-  padding:12px 13px; border-radius:16px; background:rgba(0,0,0,.40) }
-body.light .tc-sh .tc-addr{ background:rgba(16,24,40,.06) }
-.tc-sh .tc-addr .ic{ width:34px; height:34px; border-radius:11px; flex-shrink:0;
-  display:grid; place-items:center; background:rgba(255,255,255,.07) }
-body.light .tc-sh .tc-addr .ic{ background:rgba(16,24,40,.07) }
-.tc-sh .tc-addr .ic svg{ width:19px; height:19px; color:rgba(255,255,255,.62) }
-body.light .tc-sh .tc-addr .ic svg{ color:rgba(16,24,40,.55) }
-.tc-sh .tc-addr .tx{ flex:1; min-width:0; font-size:15px; font-weight:600;
-  font-family:var(--sys); color:var(--text); overflow:hidden;
-  text-overflow:ellipsis; white-space:nowrap }
-.tc-sh .tc-addr .tx small{ display:block; font-size:11.5px; font-weight:500;
-  color:var(--faint); margin-bottom:1px }
-.tc-sh .tc-addr .cp{ flex-shrink:0; width:34px; height:34px; border-radius:11px;
-  display:grid; place-items:center; background:rgba(255,255,255,.07); transition:.14s }
-body.light .tc-sh .tc-addr .cp{ background:rgba(16,24,40,.07) }
-.tc-sh .tc-addr .cp svg{ width:17px; height:17px; color:rgba(255,255,255,.62) }
-body.light .tc-sh .tc-addr .cp svg{ color:rgba(16,24,40,.55) }
-.tc-sh .tc-addr .cp:active{ transform:scale(.92) }
-.tc-sh .tc-re{ width:100%; height:46px; border-radius:15px; background:var(--card-2);
-  border:1px solid var(--stroke-2); color:var(--text); font-size:14.5px; font-weight:600;
-  font-family:var(--sys); transition:.14s }
-.tc-sh .tc-re:active{ transform:scale(.98) }
-
 .pw-lock{ position:fixed; inset:0; z-index:400; display:none; place-items:center;
   background:var(--bg); padding:24px }
 .pw-lock.on{ display:grid }
@@ -1395,7 +1357,7 @@ body.light .tc-sh .tc-addr .cp svg{ color:rgba(16,24,40,.55) }
 .pw-lock input.err{ border-color:#FF6B6B }
 .pw-lock .go{ width:100%; height:52px; margin-top:6px; border-radius:16px;
   background:var(--blue); color:#fff; font-size:16px; font-weight:600; transition:.14s }
-.pw-lock .go:active{ transform:scale(.97) }
+.pw-lock .go:active{ transform:scale(.993) }
 .pw-lock .go:disabled{ opacity:.5 }
 .pw-lock .lnk{ margin-top:16px; background:none; color:var(--dim); font-size:13.5px; font-weight:500 }
 .pw-shake{ animation:pwshake .34s }
@@ -1514,16 +1476,6 @@ if(tg){
   /* Pastga surib yopishni to'samiz — ilova faqat tepadagi tugma bilan yopiladi.
      Bu bitta chaqiruv, hech qanday hodisaga ulanmaydi. */
   try{ tg.disableVerticalSwipes && tg.disableVerticalSwipes(); }catch(e){}
-  /* Hamyon holatini localStorage'dan tiklaymiz — kutubxonani yuklamasdan.
-     Kutubxona faqat tugma bosilganda yuklanadi. */
-  try{
-    const raw = localStorage.getItem('ton-connect-ui_wallet-info') ||
-                localStorage.getItem('ton-connect-storage_bridge-connection');
-    if(raw){
-      const m = String(raw).match(/"address"\s*:\s*"([^"]+)"/);
-      if(m){ tcAddr = m[1]; setTimeout(function(){ tcPaint(); tcLoad(); }, 300); }
-    }
-  }catch(e){}
   /* Telegram sarlavhasi ostida qolmaslik uchun tepadan bo'sh joy.
      Yangi Telegram'lar aniq o'lchov beradi, eskilarida 46px qoladi.
      Bir marta o'qiladi — hech qanday hodisaga ulanmaydi. */
@@ -5933,15 +5885,6 @@ function grIn(el){
   const go = document.getElementById('grGo');
   if(go) go.disabled = !(parseFloat(s) > 0);
 }
-/* Hamyondagi butun GRAM qoldig'ini maydonga yozadi */
-function grAll(){
-  haptic();
-  if(!tcAddr){ toast('Avval hamyonni ulang'); return; }
-  if(!tcLoaded){ tcLoad(); toast('Balans olinmoqda\u2026'); return; }
-  const el = document.getElementById('grAmt'); if(!el) return;
-  el.value = fmtGram(tcGram);
-  grIn(el);
-}
 function grSet(v){
   haptic();
   const el = document.getElementById('grAmt'); if(!el) return;
@@ -5953,9 +5896,9 @@ function renderGram(){
   app.innerHTML = `<div class="page-title">To'ldirish</div>
   <div class="gr-card">
     <div class="lb">Ulangan hamyon</div>
-    <button class="gr-wal" onclick="wlConnectOnly()">
+    <button class="gr-wal" onclick="wlSoon()">
       <svg viewBox="0 0 24 24"><path d="M3.5 8A2.5 2.5 0 0 1 6 5.5h10.5A2.5 2.5 0 0 1 19 8"/><rect x="3.5" y="8" width="17" height="10.5" rx="2.5"/><path d="M20.5 11.6h-3a1.9 1.9 0 0 0 0 3.8h3"/></svg>
-      <span data-wal2="Hamyonni ulash">${tcAddr ? esc(tcShort(tcAddr)) : 'Hamyonni ulash'}</span>
+      Hamyonni ulash
     </button>
     <div class="gr-amt">
       <input id="grAmt" type="text" inputmode="decimal" value="0" oninput="grIn(this)" onfocus="this.select()">
@@ -5965,7 +5908,7 @@ function renderGram(){
       <button onclick="grSet(10)"><span class="d">${GRAM_ICON}</span>10</button>
       <button onclick="grSet(50)"><span class="d">${GRAM_ICON}</span>50</button>
       <button onclick="grSet(100)"><span class="d">${GRAM_ICON}</span>100</button>
-      <button onclick="grAll()"><span class="d">${GRAM_ICON}</span>Hammasi</button>
+      <button onclick="grSet(${bal})"><span class="d">${GRAM_ICON}</span>Hammasi</button>
     </div>
     <button class="gr-go" id="grGo" disabled onclick="wlSoon()">To'ldirish</button>
   </div>`;
@@ -5987,141 +5930,6 @@ function setWlTab(t){
   if(!tb || !bx){ renderWallet(); return; }
   [].slice.call(tb.querySelectorAll('button')).forEach(function(b){ b.classList.toggle('on', b.dataset.t === t); });
   bx.innerHTML = walletRows();
-}
-/* ---------- TON Connect: hamyon ulash ----------
-   Hamyonlar ro'yxatini (Telegram Wallet, Tonkeeper, MyTonWallet va h.k.)
-   kutubxonaning o'zi rasmiy reyestrdan oladi — biz sanab chiqmaymiz. */
-const TC_MANIFEST = 'https://www.minatoh.uz/tonconnect-manifest.json';
-let tcUI = null, tcAddr = '';
-function tcShort(a){
-  const s = String(a || '');
-  return s.length > 12 ? (s.slice(0, 6) + '…' + s.slice(-4)) : s;
-}
-let tcTon = 0, tcGram = 0, tcLoaded = false;
-/* Ulangan bo'lsa: "Sizning hamyoningiz · Qusjk9…8f2a" va ko'k katakda GRAM */
-function tcLabel(def){
-  if(!tcAddr) return esc(def);
-  return "Sizning hamyoningiz <b class=\"a\">" + esc(tcShort(tcAddr)) + "</b>" +
-         "<span class=\"g\">" + fmtGram(tcGram) + " GRAM</span>";
-}
-function tcPaint(){
-  document.querySelectorAll('[data-wal]').forEach(function(el){
-    el.innerHTML = tcLabel(el.dataset.wal);
-  });
-  /* GRAM ekranida faqat manzil ko'rinadi — qo'shimcha yozuvsiz */
-  document.querySelectorAll('[data-wal2]').forEach(function(el){
-    el.textContent = tcAddr ? tcShort(tcAddr) : el.dataset.wal2;
-  });
-}
-/* Hamyon qoldig'ini serverdan olamiz (kalit u yerda qoladi) */
-function tcLoad(){
-  if(!tcAddr){ tcTon = 0; tcGram = 0; tcLoaded = false; tcPaint(); return; }
-  fetch(VBASE + '/ton/wallet?addr=' + encodeURIComponent(tcAddr))
-    .then(function(r){ return r.json(); })
-    .then(function(d){
-      if(d && d.ok){ tcTon = Number(d.ton)||0; tcGram = Number(d.gram)||0; tcLoaded = true; }
-      tcPaint(); tcSheetFill();
-    }).catch(function(){ tcPaint(); });
-}
-/* Kutubxonani faqat kerak bo'lganda yuklaymiz */
-let tcLoading = null;
-function tcLib(){
-  if(window.TON_CONNECT_UI) return Promise.resolve(true);
-  if(tcLoading) return tcLoading;
-  tcLoading = new Promise(function(res){
-    const s = document.createElement('script');
-    s.src = 'https://unpkg.com/@tonconnect/ui@2/dist/tonconnect-ui.min.js';
-    s.onload = function(){ res(!!window.TON_CONNECT_UI); };
-    s.onerror = function(){ res(false); };
-    document.head.appendChild(s);
-  });
-  return tcLoading;
-}
-function tcInit(){
-  try{
-    if(!window.TON_CONNECT_UI || tcUI) return;
-    tcUI = new TON_CONNECT_UI.TonConnectUI({ manifestUrl: TC_MANIFEST });
-    const w = tcUI.wallet;
-    if(w && w.account) tcAddr = w.account.address || '';
-    tcUI.onStatusChange(function(x){
-      tcAddr = (x && x.account && x.account.address) || '';
-      tcPaint(); tcLoad();
-      if(tcAddr) notify('success');
-    });
-    tcPaint(); if(tcAddr) tcLoad();
-  }catch(e){ console.log('TON Connect xato:', e.message); }
-}
-function wlConnect(){
-  haptic();
-  if(tcAddr && tcUI){ tcSheet(); return; }
-  tcLib().then(function(ok){
-    if(!ok){ toast('Hamyon moduli yuklanmadi'); return; }
-    tcInit();
-    if(!tcUI){ toast('Hamyon moduli yuklanmadi'); return; }
-    if(tcAddr){ tcSheet(); return; }
-    tcUI.openModal().catch(function(){ toast('Ochilmadi, qayta urinib ko\'ring'); });
-  });
-}
-/* GRAM ekranidagi tugma: ulanmagan bo'lsa ulaydi, ulangan bo'lsa tegmaydi */
-function wlConnectOnly(){
-  if(tcAddr) return;
-  wlConnect();
-}
-/* ---- Pastdan chiqadigan hamyon varag'i ---- */
-function tcSheetFill(){
-  const b = document.getElementById('tcBal');
-  if(b) b.textContent = tcLoaded ? (fmtGram(tcGram) + ' GRAM') : '\u2026';
-}
-function tcSheet(){
-  const old = document.getElementById('tcSh');
-  if(old) old.remove();
-  const bg = document.createElement('div');
-  bg.className = 'sheet-bg'; bg.id = 'tcShBg';
-  bg.onclick = tcSheetClose;
-  const sh = document.createElement('div');
-  sh.className = 'sheet tc-sh'; sh.id = 'tcSh';
-  sh.innerHTML =
-    '<div class="grab"></div>' +
-    '<div class="tc-h">Sizning hamyoningiz</div>' +
-    '<div class="tc-h2">Balans</div>' +
-    '<div class="tc-bal" id="tcBal">\u2026</div>' +
-    '<div class="tc-addr">' +
-      '<span class="ic"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none">' +
-      '<path d="M5 5.5h11a3 3 0 0 1 3 3v.5H5.6a.6.6 0 0 1 0-1.2H18V7A2.5 2.5 0 0 0 15.5 5H5a1 1 0 0 0 0 .5z"/>' +
-      '<path d="M4 8.6c0-1.2 1-2.1 2.2-2.1H17A3 3 0 0 1 20 9.5v8A2.5 2.5 0 0 1 17.5 20h-11A2.5 2.5 0 0 1 4 17.5V8.6zm12.8 3.4a1.8 1.8 0 0 0 0 3.6H20v-3.6h-3.2z"/>' +
-      '</svg></span>' +
-      '<span class="tx"><small>Adres</small>' + esc(tcShort(tcAddr)) + '</span>' +
-      '<button class="cp" onclick="tcCopy()" aria-label="Nusxalash">' +
-      '<svg viewBox="0 0 24 24" fill="currentColor" stroke="none">' +
-      '<rect x="9" y="9" width="11" height="12" rx="2.6"/>' +
-      '<path d="M6.5 3h8A2.5 2.5 0 0 1 17 5.5V7h-2.2V5.8a.8.8 0 0 0-.8-.8H6.8a.8.8 0 0 0-.8.8v8.4c0 .45.35.8.8.8H8v2.2H6.5A2.5 2.5 0 0 1 4 14.5v-9A2.5 2.5 0 0 1 6.5 3z"/>' +
-      '</svg></button>' +
-    '</div>' +
-    '<button class="tc-re" onclick="tcAgain()">Qaytadan ulash</button>';
-  document.body.appendChild(bg); document.body.appendChild(sh);
-  requestAnimationFrame(function(){
-    requestAnimationFrame(function(){ bg.classList.add('on'); sh.classList.add('on'); });
-  });
-  tcSheetFill();
-  if(!tcLoaded) tcLoad();
-}
-function tcSheetClose(){
-  const sh = document.getElementById('tcSh'), bg = document.getElementById('tcShBg');
-  if(sh) sh.classList.remove('on');
-  if(bg) bg.classList.remove('on');
-  setTimeout(function(){ if(sh) sh.remove(); if(bg) bg.remove(); }, 320);
-}
-function tcCopy(){
-  haptic();
-  try{ navigator.clipboard.writeText(tcAddr); toast('Manzil nusxalandi'); }
-  catch(e){ toast('Nusxalanmadi'); }
-}
-function tcAgain(){
-  haptic(); tcSheetClose();
-  if(!tcUI) return;
-  tcUI.disconnect().catch(function(){}).then(function(){
-    setTimeout(function(){ tcUI.openModal().catch(function(){}); }, 260);
-  });
 }
 function wlSoon(){ haptic(); toast('Tez orada'); }
 /* Pul yoki qiymat harakatlanadigan amallar — avval Face ID / barmoq izi.
@@ -6174,9 +5982,9 @@ function renderWallet(){
   const i = main.lastIndexOf(' ');
   const big = i > 0 ? main.slice(0, i) + '<small>' + main.slice(i + 1) + '</small>' : main;
   app.innerHTML = `
-  <button class="wl-top" onclick="wlConnect()">
+  <button class="wl-top" onclick="wlSoon()">
     <svg viewBox="0 0 24 24"><path d="M3.5 8A2.5 2.5 0 0 1 6 5.5h10.5A2.5 2.5 0 0 1 19 8"/><rect x="3.5" y="8" width="17" height="10.5" rx="2.5"/><path d="M20.5 11.6h-3a1.9 1.9 0 0 0 0 3.8h3"/></svg>
-    <span data-wal="O'z hamyoningizni ulash">O'z hamyoningizni ulash</span>
+    O'z hamyoningizni ulash
     <span class="arw">›</span>
   </button>
 
