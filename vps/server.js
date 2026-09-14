@@ -1363,8 +1363,14 @@ app.get("/ton/wallet", async (req, res) => {
       const dec = Number(j.decimals != null ? j.decimals : 9);
       gram = Number(x.balance || 0) / Math.pow(10, dec);
     });
-    /* syms — tashxis uchun: hamyondagi barcha tokenlar ro'yxati */
-    res.json({ ok:true, ton: ton, gram: gram, syms: syms,
+    /* Tashxis: so'rov haqiqatan javob berdimi yoki xato bo'ldimi —
+       ikkisi bir xil ko'rinmasligi uchun aniq ajratamiz. */
+    const diag = {
+      jettonOk: !!(b && Array.isArray(b.balances)),
+      jettonRaw: b ? String(JSON.stringify(b)).slice(0, 300) : "javob yo'q",
+      count: (b && b.balances) ? b.balances.length : -1
+    };
+    res.json({ ok:true, ton: ton, gram: gram, syms: syms, diag: diag,
                addrFriendly: (a && a.address) ? a.address : addr });
   }catch(e){ res.json({ ok:false, error:String(e.message||e).slice(0,80) }); }
 });
