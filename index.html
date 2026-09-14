@@ -247,7 +247,7 @@ input{font-family:inherit}
 .svc{display:flex;align-items:center;gap:12px;padding:14px 16px;transition:.12s;width:100%;text-align:left}
 .svc:active{background:transparent}
 /* Butun qator oqarib ketmasin — bosilish faqat ikonkada sezilsin */
-.svc:active .ic{ transform:scale(.96); filter:brightness(1.07) }
+.svc:active .ic{ transform:scale(.985); filter:brightness(1.03) }
 .svc .ic{ transition:transform .14s, filter .14s }
 .svc + .svc{border-top:1px solid var(--stroke)}
 .svc .ic{width:40px;height:40px;border-radius:11px;display:grid;place-items:center;flex-shrink:0}
@@ -6178,7 +6178,7 @@ function renderWallet(){
   app.innerHTML = `
   <button class="wl-top" onclick="wlConnect()">
     <svg viewBox="0 0 24 24"><path d="M3.5 8A2.5 2.5 0 0 1 6 5.5h10.5A2.5 2.5 0 0 1 19 8"/><rect x="3.5" y="8" width="17" height="10.5" rx="2.5"/><path d="M20.5 11.6h-3a1.9 1.9 0 0 0 0 3.8h3"/></svg>
-    <span data-wal="O'z hamyoningizni ulash">O'z hamyoningizni ulash</span>
+    <span data-wal="O'z hamyoningizni ulash">${tcLabel("O'z hamyoningizni ulash")}</span>
     <span class="arw">›</span>
   </button>
 
