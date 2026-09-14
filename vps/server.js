@@ -1349,15 +1349,22 @@ app.get("/ton/wallet", async (req, res) => {
     clearTimeout(tm);
     const ton = a && a.balance ? Number(a.balance) / 1e9 : 0;
     let gram = 0;
-    /* GRAM'ni manzil bo'yicha emas, belgisi bo'yicha topamiz —
-       shunda shartnoma manzili o'zgarsa ham ishlayveradi. */
+    const syms = [];
+    /* GRAM'ni manzil bo'yicha emas, nomi bo'yicha topamiz — shunda
+       shartnoma manzili o'zgarsa ham ishlayveradi. Belgi ham, to'liq nom
+       ham tekshiriladi, chunki turli hamyonlar turlicha yozadi. */
     ((b && b.balances) || []).forEach(function(x){
-      const sym = String((x.jetton && x.jetton.symbol) || "").toUpperCase();
-      if(sym !== "GRAM") return;
-      const dec = Number((x.jetton && x.jetton.decimals) != null ? x.jetton.decimals : 9);
+      const j = x.jetton || {};
+      const sym  = String(j.symbol || "").trim();
+      const name = String(j.name || "").trim();
+      syms.push(sym || name);
+      const hit = sym.toUpperCase() === "GRAM" || /(^|\s)gram(\s|$)/i.test(name);
+      if(!hit) return;
+      const dec = Number(j.decimals != null ? j.decimals : 9);
       gram = Number(x.balance || 0) / Math.pow(10, dec);
     });
-    res.json({ ok:true, ton: ton, gram: gram,
+    /* syms — tashxis uchun: hamyondagi barcha tokenlar ro'yxati */
+    res.json({ ok:true, ton: ton, gram: gram, syms: syms,
                addrFriendly: (a && a.address) ? a.address : addr });
   }catch(e){ res.json({ ok:false, error:String(e.message||e).slice(0,80) }); }
 });
