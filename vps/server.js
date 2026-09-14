@@ -1405,6 +1405,11 @@ function urec(db, id){
   if(!db[id]) db[id] = {};
   const u = db[id];
   if(typeof u.balance !== "number") u.balance = 0;
+  /* NFT bo'limining ikkita alohida hamyoni. Bosh sahifadagi balance bilan
+     aralashmaydi — u yerdagi pul u yerda qoladi. Ilgari bular telefonda
+     saqlanardi, endi shu yerda: yo'qolmaydi va o'zgartirib bo'lmaydi. */
+  if(typeof u.gram   !== "number") u.gram   = 0;   /* NFT: GRAM hamyoni */
+  if(typeof u.nftSom !== "number") u.nftSom = 0;   /* NFT: so'm hamyoni */
   if(!Array.isArray(u.orders)) u.orders = [];
   if(!Array.isArray(u.topups)) u.topups = [];
   return u;
@@ -1624,6 +1629,42 @@ function tgCall(method, body){
     method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(body)
   }).catch(function(e){ console.log("TG "+method+" xato:", e.message); });
 }
+
+/* ---------- NFT bo'limining hamyonlari ----------
+   GRAM va NFT so'm qoldig'i. Ilgari telefonda (localStorage) turardi —
+   uni har kim o'zgartira olardi va telefon tozalansa yo'qolardi.
+   Endi bu yerda: data.json'da saqlanadi va zaxiraga tushadi. */
+app.get("/nft/balance", (req,res)=>{
+  const id = String(req.query.id||"").trim();
+  if(!id) return res.json({ ok:false, error:"id" });
+  const db = load();
+  const rec = db[id];
+  res.json({ ok:true,
+             gram: (rec && Number(rec.gram))   || 0,
+             som:  (rec && Number(rec.nftSom)) || 0 });
+});
+
+/* Telefondagi eski qoldiqni bir martalik ko'chirish.
+   Faqat serverda hali nol bo'lsa va oqilona chegarada bo'lsa qabul qilinadi —
+   aks holda har kim o'ziga xohlagancha yozib olardi. */
+app.post("/nft/migrate", (req,res)=>{
+  const who = checkInit(req.body && req.body.initData);
+  if(!who) return res.json({ ok:false, error:"auth" });
+  const db  = load();
+  const u   = urec(db, who.id);
+  if(u.nftMigrated) return res.json({ ok:true, moved:false, gram:u.gram, som:u.nftSom });
+  const g = Math.max(0, Math.min(Number(req.body.gram) || 0, 1000));
+  const s = Math.max(0, Math.min(Number(req.body.som)  || 0, 50000000));
+  let moved = false;
+  if(u.gram   === 0 && g > 0){ u.gram   = g; moved = true; }
+  if(u.nftSom === 0 && s > 0){ u.nftSom = s; moved = true; }
+  u.nftMigrated = true;
+  save(db);
+  if(moved && ADMIN_ID) send(ADMIN_ID, "\u2139\uFE0F NFT hamyoni ko'chirildi\n" +
+    (u.nm||who.id) + (u.un ? " (@"+u.un+")" : "") +
+    "\nGRAM: " + u.gram + "  |  so'm: " + u.nftSom);
+  res.json({ ok:true, moved:moved, gram:u.gram, som:u.nftSom });
+});
 
 app.get("/balance", (req,res)=>{
   const db = load();
