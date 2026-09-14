@@ -5997,6 +5997,74 @@ function grSet(v){
   el.value = fmtGram(v);
   grIn(el);
 }
+/* ---------- GRAM to'ldirish ----------
+   Server noyob summa beradi, hamyon aynan shuni yuboradi.
+   Pul kelganini faqat server tasdiqlaydi — ilovaning so'ziga ishonilmaydi. */
+let grBusy = false;
+function grTop(){
+  if(grBusy) return;
+  haptic();
+  const el = document.getElementById('grAmt');
+  const v  = el ? Number(String(el.value).replace(',', '.')) : 0;
+  if(!(v > 0)){ toast('Miqdorni kiriting'); return; }
+  if(!tcAddr || !tcUI){ toast('Avval hamyonni ulang'); wlConnect(); return; }
+
+  /* Face ID yoqilgan bo'lsa avval tasdiqlatamiz */
+  bioAsk(function(){
+    grBusy = true;
+    const g = document.getElementById('grGo');
+    if(g){ g.disabled = true; g.textContent = 'Tayyorlanmoqda…'; }
+    fetch(VBASE + '/gram/start', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ initData: tg.initData || '', amount: v })
+    }).then(function(r){ return r.json(); }).then(function(d){
+      if(!d || !d.ok){
+        grBusy = false;
+        if(g){ g.disabled = false; g.textContent = "To'ldirish"; }
+        if(d && d.error === 'min')  return toast('Eng kami ' + d.min + ' GRAM');
+        if(d && d.error === 'off')  return toast('To\'ldirish vaqtincha yopiq');
+        return toast('Boshlab bo\'lmadi, qayta urining');
+      }
+      /* Hamyonga to'lov so'rovi — aynan noyob summa bilan */
+      return tcUI.sendTransaction({
+        validUntil: Math.floor(Date.now()/1000) + 600,
+        messages: [{ address: d.addr, amount: String(d.nano) }]
+      }).then(function(){
+        if(g) g.textContent = 'Kutilmoqda…';
+        toast('Yuborildi. Tasdiqni kutamiz…');
+        grWatch(0);
+      }).catch(function(){
+        grBusy = false;
+        if(g){ g.disabled = false; g.textContent = "To'ldirish"; }
+        toast('Bekor qilindi');
+      });
+    }).catch(function(){
+      grBusy = false;
+      if(g){ g.disabled = false; g.textContent = "To'ldirish"; }
+      toast('Aloqa yo\'q');
+    });
+  });
+}
+/* Qoldiq o'zgarishini kutamiz — server tasdiqlagach o'zi ko'payadi */
+function grWatch(n){
+  const was = nftGram;
+  nftLoad(function(){
+    if(nftGram > was){
+      grBusy = false;
+      notify('success');
+      toast('GRAM qo\'shildi');
+      if(view === 'nft_gram') renderGram();
+      return;
+    }
+    if(n < 40) setTimeout(function(){ grWatch(n + 1); }, 4000);
+    else{
+      grBusy = false;
+      const g = document.getElementById('grGo');
+      if(g){ g.disabled = false; g.textContent = "To'ldirish"; }
+      toast('Hali kelmadi. Kelganda xabar beramiz.');
+    }
+  });
+}
 function renderGram(){
   const bal = getGram();
   app.innerHTML = `<div class="page-title">To'ldirish</div>
@@ -6016,7 +6084,7 @@ function renderGram(){
       <button onclick="grSet(100)"><span class="d">${GRAM_ICON}</span>100</button>
       <button onclick="grAll()"><span class="d">${GRAM_ICON}</span>Hammasi</button>
     </div>
-    <button class="gr-go" id="grGo" disabled onclick="wlSoon()">To'ldirish</button>
+    <button class="gr-go" id="grGo" disabled onclick="grTop()">To'ldirish</button>
   </div>`;
   setTimeout(function(){ const el = document.getElementById('grAmt'); if(el) grSize(el); }, 0);
 }
