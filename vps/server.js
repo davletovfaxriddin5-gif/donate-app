@@ -1630,6 +1630,32 @@ function tgCall(method, body){
   }).catch(function(e){ console.log("TG "+method+" xato:", e.message); });
 }
 
+/* ---------- NFT bo'limining tarixi ----------
+   Barcha kirim va chiqimlar shu yerda. Ilgari ular telefonda turardi —
+   nizo chiqsa dalil bo'lmasdi. Endi serverda va zaxiraga tushadi.
+   kind: gram_in, gram_out, som_in, som_out, nft_buy, nft_sell */
+function nftLog(u, kind, amount, extra){
+  if(!Array.isArray(u.nftHist)) u.nftHist = [];
+  const rec = Object.assign({
+    id: "H" + Date.now().toString().slice(-9) + Math.floor(Math.random()*90+10),
+    kind: String(kind),
+    amount: Number(amount) || 0,
+    at: new Date().toISOString(),
+    status: "done"
+  }, extra || {});
+  u.nftHist.unshift(rec);
+  u.nftHist = u.nftHist.slice(0, 200);
+  return rec;
+}
+
+app.get("/nft/hist", (req,res)=>{
+  const id = String(req.query.id||"").trim();
+  if(!id) return res.json({ ok:false, error:"id" });
+  const db = load();
+  const rec = db[id];
+  res.json({ ok:true, rows: (rec && Array.isArray(rec.nftHist)) ? rec.nftHist : [] });
+});
+
 /* ---------- GRAM to'ldirish ----------
    Odam o'z hamyonidan bizning manzilga GRAM yuboradi. Har so'rovga
    NOYOB summa beriladi (masalan 2.000137) — server aynan shu summa
@@ -2201,6 +2227,7 @@ async function tonCheck(){
       const ug  = urec(db, gid);
       grec.status = "done"; grec.auto = true; grec.got = got;
       ug.gram = Math.round((Number(ug.gram || 0) + got) * 1e9) / 1e9;
+      nftLog(ug, "gram_in", got, { cur:"GRAM", note:"Hamyondan to'ldirildi", ref:grec.id });
 
       send(gid, "\u2705 GRAM hamyoningiz to'ldirildi: +" + got +
                 "\nJoriy qoldiq: " + ug.gram + " GRAM", null, true);
@@ -3395,6 +3422,8 @@ app.post("/webhook", (req,res)=>{
       let yangiG = eskiG + amtG;
       if(yangiG < 0) yangiG = 0;                 /* minusga tushmaydi */
       uG.gram = Math.round(yangiG * 1e9) / 1e9;  /* kasrni tozalaymiz */
+      nftLog(uG, amtG > 0 ? "gram_in" : "gram_out", Math.abs(amtG),
+             { cur:"GRAM", note: amtG > 0 ? "Qo'llab-quvvatlash orqali" : "Tuzatish" });
       save(dbG);
       send(fromId, "\u2705 " + (uG.nm || hitG) + (uG.un ? " (@" + uG.un + ")" : "") + "\n" +
                    "GRAM: " + eskiG + " \u2192 " + uG.gram);
