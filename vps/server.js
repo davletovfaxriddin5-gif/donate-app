@@ -1340,37 +1340,14 @@ app.get("/ton/wallet", async (req, res) => {
     const hd = { "Authorization": "Bearer " + TON_KEY };
     const ac = new AbortController();
     const tm = setTimeout(()=>ac.abort(), 12000);
-    const [a, b] = await Promise.all([
-      fetch("https://tonapi.io/v2/accounts/" + encodeURIComponent(addr),
-            { headers: hd, signal: ac.signal }).then(r=>r.json()).catch(()=>null),
-      fetch("https://tonapi.io/v2/accounts/" + encodeURIComponent(addr) + "/jettons",
-            { headers: hd, signal: ac.signal }).then(r=>r.json()).catch(()=>null)
-    ]);
+    const a = await fetch("https://tonapi.io/v2/accounts/" + encodeURIComponent(addr),
+                          { headers: hd, signal: ac.signal }).then(r=>r.json()).catch(()=>null);
     clearTimeout(tm);
     const ton = a && a.balance ? Number(a.balance) / 1e9 : 0;
-    let gram = 0;
-    const syms = [];
-    /* GRAM'ni manzil bo'yicha emas, nomi bo'yicha topamiz — shunda
-       shartnoma manzili o'zgarsa ham ishlayveradi. Belgi ham, to'liq nom
-       ham tekshiriladi, chunki turli hamyonlar turlicha yozadi. */
-    ((b && b.balances) || []).forEach(function(x){
-      const j = x.jetton || {};
-      const sym  = String(j.symbol || "").trim();
-      const name = String(j.name || "").trim();
-      syms.push(sym || name);
-      const hit = sym.toUpperCase() === "GRAM" || /(^|\s)gram(\s|$)/i.test(name);
-      if(!hit) return;
-      const dec = Number(j.decimals != null ? j.decimals : 9);
-      gram = Number(x.balance || 0) / Math.pow(10, dec);
-    });
-    /* Tashxis: so'rov haqiqatan javob berdimi yoki xato bo'ldimi —
-       ikkisi bir xil ko'rinmasligi uchun aniq ajratamiz. */
-    const diag = {
-      jettonOk: !!(b && Array.isArray(b.balances)),
-      jettonRaw: b ? String(JSON.stringify(b)).slice(0, 300) : "javob yo'q",
-      count: (b && b.balances) ? b.balances.length : -1
-    };
-    res.json({ ok:true, ton: ton, gram: gram, syms: syms, diag: diag,
+    /* GRAM — bu TON tarmog'ining o'z valyutasi (eski nomi Toncoin).
+       Alohida token emas, shuning uchun to'g'ridan-to'g'ri hisob
+       qoldig'idan olinadi. */
+    res.json({ ok:true, ton: ton, gram: ton,
                addrFriendly: (a && a.address) ? a.address : addr });
   }catch(e){ res.json({ ok:false, error:String(e.message||e).slice(0,80) }); }
 });
