@@ -4205,11 +4205,10 @@ function syncPromo(){
   const els = document.querySelectorAll('.pkg.promo');
   if(!els.length) return;
   els.forEach(function(el){ el.style.animation = 'none'; });
-  requestAnimationFrame(function(){
-    requestAnimationFrame(function(){
-      els.forEach(function(el){ el.style.animation = ''; });
-    });
-  });
+  /* Brauzerni darrov qayta hisoblashga majburlaymiz. Kadr kutish
+     ishonchsiz edi — ba'zan ikkinchi kadr kelmay, yonish to'xtab qolardi. */
+  void document.body.offsetWidth;
+  els.forEach(function(el){ el.style.animation = ''; });
 }
 
 /* Miqdor kiritilganda narxni jonli hisoblaymiz */
@@ -4242,8 +4241,14 @@ function onQty(){
   }
   syncBuy();
 }
-function pickPkg(i){ haptic(); selPkg=i; document.querySelectorAll('.pkg').forEach(el=>el.classList.toggle('sel', +el.dataset.i===i));
-  syncBuy(); }
+function pickPkg(i){
+  haptic(); selPkg = i;
+  document.querySelectorAll('.pkg').forEach(el=>el.classList.toggle('sel', +el.dataset.i===i));
+  syncBuy();
+  /* Tanlov o'zgargach 2x paketlarni qayta tenglashtiramiz — aks holda
+     tanlovdan chiqqan paket boshqalardan siljib qolardi. */
+  syncPromo();
+}
 const ID_RULES = {
   pubg:     { playerId:[10,12] },
   freefire: { playerId:[8,12] },
