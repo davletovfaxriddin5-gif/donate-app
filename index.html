@@ -6207,32 +6207,148 @@ function ocSend(){
 }
 
 function renderOutStars(){
-  const name  = tgUser ? (tgUser.first_name || 'Foydalanuvchi') : 'Foydalanuvchi';
-  const photo = tgUser && tgUser.photo_url ? `<img src="${tgUser.photo_url}" alt="">` : name.charAt(0).toUpperCase();
   const q = [100, 250, 500, 1000, 2500];
   app.innerHTML = `<div class="page-title">Telegram Stars</div>
-  <div class="ot-hint">O'zingizga yoki istalgan foydalanuvchiga sotib oling.</div>
+  <div class="ot-hint">GRAM hisobingizdan Stars sotib oling — o'zingizga yoki do'stingizga.</div>
+  <div class="ot-in">
+    <input id="soUser" type="text" placeholder="@ Telegram username" autocomplete="off" spellcheck="false" oninput="soUserIn()">
+    <button class="act" onclick="soMe()">O'zimga</button>
+  </div>
+  <div id="soWho" class="sp-who"></div>
   <div class="st-box">
-    <div class="st-to">
-      <div class="av">${photo}</div>
-      <div class="nm">${name}</div>
-      <button class="x" onclick="wlSoon()">✕</button>
-    </div>
     <div class="st-amt">
       <span class="ic">⭐️</span>
       <input id="stAmt" type="text" inputmode="numeric" placeholder="Miqdorni kiriting" oninput="stIn(this)">
     </div>
   </div>
-  <div class="st-bal">Mavjud balans: ${fmtGram(getGram())} GRAM</div>
+  <div class="st-bal" id="soCost">Mavjud balans: ${fmtGram(getGram())} GRAM</div>
   <div class="gr-quick scroll">
     ${q.map(function(v){ return `<button onclick="stSet(${v})">${fmt(v)} ⭐️</button>`; }).join('')}
   </div>
-  <button class="gr-go" id="stGo" disabled onclick="wlGuard()">Davom etish</button>`;
+  <button class="gr-go" id="stGo" disabled onclick="soBuy()">Sotib olish</button>`;
+  soSync();
+}
+/* ---------- Stars: username tekshiruvi ---------- */
+let soWhoT = null, soWhoOk = false, soWhoLast = '', soBusy = false;
+function soBox(x){ const b = document.getElementById('soWho'); if(b) b.innerHTML = x; }
+function soMe(){
+  haptic();
+  if(!(tgUser && tgUser.username)){ toast('Sizda username yo\'q'); return; }
+  const el = document.getElementById('soUser');
+  if(el){ el.value = '@' + tgUser.username; soUserIn(); }
+}
+function soUserIn(){
+  const raw = ((document.getElementById('soUser')||{}).value || '').trim().replace(/^@+/, '');
+  soWhoOk = false; clearTimeout(soWhoT);
+  if(!raw){ soBox(''); soWhoLast = ''; soSync(); return; }
+  if(!/^[A-Za-z0-9_]{4,32}$/.test(raw)){
+    soBox('<div class="sp-bad">Username kamida 4 ta belgi, faqat harf, raqam va _</div>');
+    soWhoLast = ''; soSync(); return;
+  }
+  soBox('<div class="sp-wait">Tekshirilmoqda\u2026</div>');
+  soWhoT = setTimeout(function(){ soWhoGo(raw); }, 550);
+  soSync();
+}
+function soWhoGo(u){
+  fetch(VBASE + '/tg/user?u=' + encodeURIComponent(u))
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      const now = ((document.getElementById('soUser')||{}).value || '').trim().replace(/^@+/, '');
+      if(now.toLowerCase() !== u.toLowerCase()) return;
+      if(d && d.ok && d.found){
+        soWhoOk = true; soWhoLast = u;
+        const av  = d.id ? (VBASE + '/avatar?id=' + encodeURIComponent(d.id)) : '';
+        const own = !!(tgUser && tgUser.username &&
+                       u.toLowerCase() === String(tgUser.username).toLowerCase());
+        soBox('<div class="sp-ok">' +
+          (av ? '<img src="' + av + '" alt="" onerror="this.style.display=\'none\'">'
+              : '<span class="ph">' + esc(d.name.slice(0,1).toUpperCase()) + '</span>') +
+          '<div class="tx"><b>' + esc(d.name) + '</b><small>' +
+          (own ? 'Sizning akkauntingiz' : 'Shu akkauntga tushadi') + '</small></div></div>');
+      } else if(d && d.why === 'not_user'){
+        soWhoOk = false; soWhoLast = '';
+        soBox('<div class="sp-bad">Bu kanal yoki guruh \u2014 foydalanuvchi emas</div>');
+      } else if(d && d.why === 'is_bot'){
+        soWhoOk = false; soWhoLast = '';
+        soBox('<div class="sp-bad">Bu bot \u2014 Stars yuborib bo\'lmaydi</div>');
+      } else if(d && d.why === 'none'){
+        soWhoOk = false; soWhoLast = '';
+        soBox('<div class="sp-bad">Bunday foydalanuvchi topilmadi</div>');
+      } else {
+        soWhoOk = true; soWhoLast = u;
+        soBox('<div class="sp-warn">Tekshirib bo\'lmadi \u2014 username to\'g\'riligiga ' +
+              'ishonch hosil qiling.</div>');
+      }
+      soSync();
+    }).catch(function(){ soBox(''); soSync(); });
+}
+/* Narxni GRAM'da hisoblab ko'rsatamiz */
+function soSync(){
+  const n = parseInt((document.getElementById('stAmt')||{}).value || '0', 10) || 0;
+  const g = document.getElementById('stGo');
+  const c = document.getElementById('soCost');
+  const gram = n >= SP_MIN ? somToGram(starPrice(n)) : 0;
+  if(c){
+    c.innerHTML = (n >= SP_MIN && gram)
+      ? ('Narxi: <b>' + fmtGram(gram) + ' GRAM</b> \u00b7 balans ' + fmtGram(getGram()) + ' GRAM')
+      : ('Mavjud balans: ' + fmtGram(getGram()) + ' GRAM');
+  }
+  if(g) g.disabled = !(soWhoOk && n >= SP_MIN && gram > 0 && gram <= getGram());
+}
+function soBuy(){
+  if(soBusy) return;
+  haptic();
+  const n = parseInt((document.getElementById('stAmt')||{}).value || '0', 10) || 0;
+  const u = ((document.getElementById('soUser')||{}).value || '').trim().replace(/^@+/, '');
+  if(n < SP_MIN){ toast('Eng kami ' + SP_MIN + ' Stars'); return; }
+  if(!soWhoOk || u.toLowerCase() !== soWhoLast.toLowerCase()){
+    toast('Avval username tekshirilsin'); return;
+  }
+  const som  = starPrice(n);
+  const gram = somToGram(som);
+  if(!(gram > 0)){ toast('Kurs olinmadi, qayta urining'); return; }
+  if(gram > getGram()){ toast('GRAM yetarli emas'); return; }
+
+  bioAsk(function(){
+    soBusy = true;
+    const b = document.getElementById('stGo');
+    if(b){ b.disabled = true; b.textContent = 'Yuborilmoqda\u2026'; }
+    fetch(VBASE + '/order', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ initData: (tg && tg.initData) || '', order: {
+        id:'MT'+Date.now().toString().slice(-8),
+        game:'TG STARS', gameId:'tgstars', glyph:'\u2B50',
+        package: n + ' \u2B50', price: som, oid:'', qty: n,
+        details:{ username:'@' + u },
+        pay:'gram', gram: gram,
+        tgUser: tgUser ? { id:tgUser.id, username:tgUser.username, name:tgUser.first_name } : null,
+        status:'wait', createdAt:new Date().toISOString()
+      }})
+    }).then(function(r){ return r.json(); }).then(function(d){
+      soBusy = false;
+      if(b) b.textContent = 'Sotib olish';
+      if(d && d.ok){
+        if(typeof d.gram === 'number') setGram(d.gram);
+        notify('success'); toastOk('\u2705 Buyurtma qabul qilindi');
+        nftHistLoad();
+        if(typeof loadOrders === 'function') loadOrders();
+        mgTab = 'history';
+        setTimeout(function(){ go('nft_gifts'); }, 700);
+        return;
+      }
+      if(b) b.disabled = false;
+      notify('error');
+      toastErr((d && d.error === 'balance') ? 'GRAM yetarli emas' : 'Bajarilmadi');
+    }).catch(function(){
+      soBusy = false;
+      if(b){ b.disabled = false; b.textContent = 'Sotib olish'; }
+      toastErr('Aloqa yo\'q');
+    });
+  });
 }
 function stIn(el){
   el.value = String(el.value).replace(/[^0-9]/g,'');
-  const g = document.getElementById('stGo');
-  if(g) g.disabled = !(parseInt(el.value,10) > 0);
+  soSync();          /* narxni GRAM'da qayta hisoblaydi */
 }
 function stSet(v){
   haptic();
