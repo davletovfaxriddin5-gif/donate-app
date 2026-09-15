@@ -1630,6 +1630,56 @@ function tgCall(method, body){
   }).catch(function(e){ console.log("TG "+method+" xato:", e.message); });
 }
 
+/* ---------- Kartaga yechish ----------
+   Pul so'rov kelishi bilan balansdan YECHILADI — shunda mijoz uni
+   oradagi vaqtda sarflab yubora olmaydi. Admin rad etsa qaytariladi.
+   Har arizaga raqam beriladi (W-1234) — uni bank izohiga yozib,
+   mijozga tasdiq sifatida ko'rsatiladi. */
+const SOM_OUT_MIN = Number(process.env.SOM_OUT_MIN || 20000);
+
+app.post("/som/out", (req,res)=>{
+  const who = checkInit(req.body && req.body.initData);
+  if(!who) return res.json({ ok:false, error:"auth" });
+  const amt  = Math.round(Number(req.body.amount) || 0);
+  const card = String(req.body.card || "").replace(/\s+/g, "");
+  const name = String(req.body.name || "").trim().slice(0, 60);
+  if(!/^\d{16}$/.test(card)) return res.json({ ok:false, error:"card" });
+  if(name.length < 3)        return res.json({ ok:false, error:"name" });
+  if(amt < SOM_OUT_MIN)      return res.json({ ok:false, error:"min", min:SOM_OUT_MIN });
+
+  const db = load();
+  const u  = urec(db, who.id);
+  if(amt > Number(u.nftSom || 0)) return res.json({ ok:false, error:"low", have:u.nftSom });
+  /* Bir vaqtda ikkitadan ortiq kutilayotgan ariza bo'lmasin */
+  const waiting = ((u.nftHist)||[]).filter(function(r){
+    return r.kind === "som_out" && r.status === "wait"; }).length;
+  if(waiting >= 2) return res.json({ ok:false, error:"busy" });
+
+  u.nftSom = Math.round(Number(u.nftSom) - amt);
+  const no  = "W-" + String(Date.now()).slice(-4) + Math.floor(Math.random()*9);
+  const rec = nftLog(u, "som_out", amt,
+    { cur:"so'm", note:"Kartaga chiqarish", status:"wait",
+      card:"•••• " + card.slice(-4), card4:card.slice(-4), no:no });
+  rec.cardFull = card; rec.holder = name;
+  save(db);
+
+  if(ADMIN_ID) tgCall("sendMessage", { chat_id: ADMIN_ID,
+    text: "\uD83C\uDFE7 KARTAGA CHIQARISH  " + no + "\n\n" +
+          (u.nm || who.id) + (u.un ? " (@" + u.un + ")" : "") + "\nid: " + who.id + "\n\n" +
+          "Summa: " + amt + " so'm\n" +
+          "Karta: " + card.replace(/(\d{4})(?=\d)/g, "$1 ") + "\n" +
+          "Egasi: " + name + "\n\n" +
+          "To'lov izohiga " + no + " deb yozing \u2014 mijoz shu orqali tekshiradi.\n" +
+          "Pul allaqachon hisobidan yechilgan.",
+    reply_markup: { inline_keyboard: [[
+      { text:"\u2705 To'landi",  callback_data:"so_ok:"+who.id+":"+rec.id },
+      { text:"\u274C Rad etish", callback_data:"so_no:"+who.id+":"+rec.id }
+    ]]} });
+
+  res.json({ ok:true, no:no, amount:amt, card:"•••• " + card.slice(-4),
+             at:rec.at, left:u.nftSom });
+});
+
 /* ---------- To'ldirishni kerakli hisobga yo'naltirish ----------
    To'lov yozuvida dest:"nft" bo'lsa pul NFT bo'limining so'm hamyoniga
    tushadi, aks holda odatdagidek asosiy balansga. Bitta joyda hal
@@ -3163,6 +3213,45 @@ function handleCb(cq){
     return;
   }
   const parts = d.split(":");
+  /* Kartaga chiqarish arizasi: tasdiqlash yoki rad etish */
+  if(parts[0] === "so_ok" || parts[0] === "so_no"){
+    const db = load();
+    const u  = urec(db, parts[1]);
+    const r  = ((u.nftHist)||[]).find(function(x){ return x.id === parts[2]; });
+    if(!r){ tgCall("answerCallbackQuery", { callback_query_id: cq.id, text:"Topilmadi" }); return; }
+    if(r.status !== "wait"){
+      tgCall("answerCallbackQuery", { callback_query_id: cq.id, text:"Allaqachon hal qilingan" });
+      return;
+    }
+    let note2;
+    if(parts[0] === "so_ok"){
+      r.status = "done"; r.doneAt = new Date().toISOString();
+      note2 = "\u2705 To'landi";
+      send(parts[1], "\u2705 Pul kartangizga yuborildi\n\n" +
+        "Ariza: " + (r.no || r.id) + "\n" +
+        "Summa: " + r.amount + " so'm\n" +
+        "Karta: " + (r.card || "") + "\n\n" +
+        "To'lov izohida " + (r.no || r.id) + " deb yoziladi \u2014 bank " +
+        "bildirishnomangizda shuni tekshiring.\n" +
+        "Bankka tushishi odatda 1-15 daqiqa.", null, true);
+    } else {
+      /* Rad etildi — pul qaytariladi */
+      u.nftSom = Math.round(Number(u.nftSom || 0) + Number(r.amount || 0));
+      r.status = "cancel"; r.note = "Rad etildi, pul qaytarildi";
+      note2 = "\u274C Rad etildi, pul qaytarildi";
+      send(parts[1], "\u274C Chiqarish arizasi rad etildi.\n" +
+        "Ariza: " + (r.no || r.id) + "\n" +
+        (r.amount) + " so'm hisobingizga qaytarildi.\n" +
+        "Joriy qoldiq: " + u.nftSom + " so'm\n\n" +
+        "Sabab bo'yicha qo'llab-quvvatlashga yozing.", null, true);
+    }
+    save(db);
+    tgCall("answerCallbackQuery", { callback_query_id: cq.id, text: note2 });
+    const m2 = cq.message;
+    if(m2 && m2.chat) tgCall("editMessageText", { chat_id:m2.chat.id, message_id:m2.message_id,
+      text: (m2.text||"") + "\n\n" + note2 });
+    return;
+  }
   if(parts.length !== 3 || (parts[0] !== "tp_ok" && parts[0] !== "tp_no")){
     tgCall("answerCallbackQuery", { callback_query_id: cq.id });
     return;
