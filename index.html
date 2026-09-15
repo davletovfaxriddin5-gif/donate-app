@@ -1354,6 +1354,8 @@ body.kb-open .buy-bar{ display:none !important }
 .sp-who{ margin:-4px 0 10px }
 .sp-who .sp-wait{ font-size:12.5px; color:var(--faint); padding:2px 2px }
 .sp-who .sp-bad{ font-size:12.5px; color:#FF6B6B; padding:2px 2px; line-height:1.4 }
+.sp-who .sp-warn{ font-size:12px; color:#F5B301; padding:7px 9px; line-height:1.45;
+  border-radius:11px; background:rgba(245,179,1,.08); border:1px solid rgba(245,179,1,.22) }
 .sp-who .sp-ok{ display:flex; align-items:center; gap:10px; padding:8px 10px;
   border-radius:13px; background:rgba(79,224,160,.10); border:1px solid rgba(79,224,160,.28) }
 .sp-who .sp-ok img{ width:34px; height:34px; border-radius:50%; object-fit:cover; flex-shrink:0 }
@@ -5352,8 +5354,9 @@ function spSetPrem(m){ haptic(); spMonths = m; mktBodyDraw(); }
 function spMe(){
   haptic();
   const el = document.getElementById('spUser'); if(!el) return;
-  el.value = (tgUser && tgUser.username) ? '@' + tgUser.username : '';
-  spCheck();
+  if(!(tgUser && tgUser.username)){ toast('Sizda username yo\'q'); return; }
+  el.value = '@' + tgUser.username;
+  spUserIn();          /* tekshiruvni ham ishga tushiramiz */
 }
 function spAmt(v){
   haptic();
@@ -5413,11 +5416,21 @@ function spWhoGo(u){
             '<div class="tx"><b>' + esc(d.name) + '</b>' +
             '<small>' + (own ? 'Sizning akkauntingiz' : 'Shu akkauntga tushadi') + '</small></div>' +
           '</div>');
-      } else {
+      } else if(d && d.why === 'not_user'){
         spWhoOk = false; spWhoLast = '';
-        spWhoBox('<div class="sp-bad">' +
-          ((d && d.why === 'not_user') ? 'Bu kanal yoki guruh \u2014 foydalanuvchi emas'
-                                       : 'Bunday foydalanuvchi topilmadi') + '</div>');
+        spWhoBox('<div class="sp-bad">Bu kanal yoki guruh \u2014 foydalanuvchi emas</div>');
+      } else if(d && d.why === 'is_bot'){
+        spWhoOk = false; spWhoLast = '';
+        spWhoBox('<div class="sp-bad">Bu bot \u2014 Stars yuborib bo\'lmaydi</div>');
+      } else if(d && d.why === 'none'){
+        spWhoOk = false; spWhoLast = '';
+        spWhoBox('<div class="sp-bad">Bunday foydalanuvchi topilmadi</div>');
+      } else {
+        /* Tekshiruv ishlamadi (xizmat vaqtincha yopiq bo'lishi mumkin).
+           To'sib qo'ymaymiz — faqat diqqat qilishni so'raymiz. */
+        spWhoOk = true; spWhoLast = u;
+        spWhoBox('<div class="sp-warn">Tekshirib bo\'lmadi \u2014 username to\'g\'riligiga ' +
+                 'ishonch hosil qiling. Xato yozilsa pul boshqa odamga ketadi.</div>');
       }
       spSync();
     }).catch(function(){ spWhoBox(''); spSync(); });
