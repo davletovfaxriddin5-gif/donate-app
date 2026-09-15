@@ -1362,16 +1362,18 @@ body.kb-open .buy-bar{ display:none !important }
   border-radius:26px 26px 0 0 !important; overflow:hidden;
   padding:0 0 calc(env(safe-area-inset-bottom) + 10px) !important }
 .hw-sh.drag{ transition:none !important }
+/* Varaq ochiq turganda orqadagi sahifa qimirlamaydi */
+body.sheet-lock{ overflow:hidden; touch-action:none }
 .hw-sh .hw-scroll{ flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch }
 .hw-sh .hw-pad{ padding:0 12px }
 .hw-sh .hw-foot{ padding-top:10px; flex-shrink:0 }
 /* Rasm: chetdan chetga, o'z nisbatida, kesilmaydi */
 .hw-sh .hw-img{ margin:0 0 14px; line-height:0; background:transparent }
-.hw-sh .hw-img img{ width:100%; height:auto; display:block; border-radius:0 0 20px 20px }
+.hw-sh .hw-img img{ width:100%; height:auto; display:block; border-radius:18px 18px 20px 20px }
 /* Tutqich — barmoq bilan pastga surib yopish uchun */
-/* Varaq burchagi 26px yumaloq. Tutqich shundan past bo'lsa, rasmning
-   tepa burchaklari o'sha egrilikda qirqilardi — shuning uchun teng qildik. */
-.hw-sh .hw-grab{ padding:11px 0 11px; display:grid; place-items:center;
+/* Tutqich ixcham, rasm esa unga yaqin turadi. Varaq burchagida
+   qirqilmasligi uchun rasmning o'z tepa burchaklari yumaloqlangan. */
+.hw-sh .hw-grab{ padding:9px 0 7px; display:grid; place-items:center;
   flex-shrink:0; touch-action:none }
 .hw-sh .hw-grab span{ width:40px; height:4px; border-radius:99px;
   background:var(--stroke-2); display:block }
@@ -5724,6 +5726,7 @@ function mgHowTo(){
       '<button class="hw-go" onclick="mgGoBot()">Sovg\'a qo\'shish</button></div>';
 
   document.body.appendChild(bg); document.body.appendChild(sh);
+  document.body.classList.add('sheet-lock');
   requestAnimationFrame(function(){
     requestAnimationFrame(function(){ bg.classList.add('on'); sh.classList.add('on'); });
   });
@@ -5741,6 +5744,8 @@ function hwDragStart(e){
 function hwDragMove(e){
   if(hwY < 0) return;
   const d  = e.touches[0].clientY - hwY;
+  /* Orqadagi sahifa birga surilib ketmasin */
+  if(e.cancelable) e.preventDefault();
   const sc = document.querySelector('#hwSh .hw-scroll');
   /* Ichkarida aylantirish ustun: ro'yxat tepasida turib pastga
      tortilgandagina varaqning o'zi harakatlanadi. */
@@ -5773,6 +5778,7 @@ function mgHowClose(){
   const sh = document.getElementById('hwSh'), bg = document.getElementById('hwBg');
   if(sh) sh.classList.remove('on');
   if(bg) bg.classList.remove('on');
+  document.body.classList.remove('sheet-lock');
   setTimeout(function(){ if(sh) sh.remove(); if(bg) bg.remove(); }, 320);
 }
 function mgCopyBot(){
