@@ -1350,6 +1350,21 @@ body.kb-open .buy-bar{ display:none !important }
 [data-wal] span.g{ display:inline-block; margin-left:8px; padding:2px 8px; border-radius:8px;
   background:var(--blue); color:#fff; font-size:11.5px; font-weight:700; font-family:var(--sys) }
 
+/* ---- Username tekshiruvi natijasi ---- */
+.sp-who{ margin:-4px 0 10px }
+.sp-who .sp-wait{ font-size:12.5px; color:var(--faint); padding:2px 2px }
+.sp-who .sp-bad{ font-size:12.5px; color:#FF6B6B; padding:2px 2px; line-height:1.4 }
+.sp-who .sp-ok{ display:flex; align-items:center; gap:10px; padding:8px 10px;
+  border-radius:13px; background:rgba(79,224,160,.10); border:1px solid rgba(79,224,160,.28) }
+.sp-who .sp-ok img{ width:34px; height:34px; border-radius:50%; object-fit:cover; flex-shrink:0 }
+.sp-who .sp-ok .ph{ width:34px; height:34px; border-radius:50%; flex-shrink:0;
+  display:grid; place-items:center; background:rgba(79,224,160,.18); color:#4FE0A0;
+  font-weight:700; font-size:15px; font-family:var(--sys) }
+.sp-who .sp-ok .tx{ flex:1; min-width:0 }
+.sp-who .sp-ok .tx b{ display:block; font-size:14px; font-weight:600; color:var(--text);
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+.sp-who .sp-ok .tx small{ display:block; font-size:11.5px; color:#4FE0A0; margin-top:1px }
+
 /* ---- Hamyon varag'i: chap tarafda yirik sarlavhalar ---- */
 .tc-sh{ text-align:left }
 .tc-sh .tc-h{ font-size:22px; font-weight:700; letter-spacing:-.5px; font-family:var(--sys);
@@ -5358,16 +5373,66 @@ function spCheck(){
     er.style.display = bad ? '' : 'none';
   }
   if(a) a.classList.toggle('err', !!bad);
-  const okUser = !!(u && u.value.trim().replace('@','').length >= 4);
-  if(go) go.disabled = !(okUser && n >= SP_MIN);
+  spSync();
 }
-function spPremCheck(){
-  const u  = document.getElementById('spUser');
-  const go = document.getElementById('spGo');
-  const okUser = !!(u && u.value.trim().replace('@','').length >= 4);
-  if(go) go.disabled = !okUser;
+function spPremCheck(){ spSync(); }
+/* ---------- Username tekshiruvi ----------
+   Tugma yo'q: odam yozishni to'xtatgach o'zi tekshiriladi.
+   Topilsa ism va rasm chiqadi, topilmasa qizil ogohlantirish. */
+let spWhoT = null, spWhoOk = false, spWhoLast = '';
+function spWhoBox(html){ const b = document.getElementById('spWho'); if(b) b.innerHTML = html; }
+function spUserIn(){
+  (spTab === 'stars') ? spCheck() : spPremCheck();
+  const raw = ((document.getElementById('spUser')||{}).value || '').trim().replace(/^@+/, '');
+  spWhoOk = false;
+  clearTimeout(spWhoT);
+  if(!raw){ spWhoBox(''); spWhoLast = ''; spSync(); return; }
+  if(!/^[A-Za-z0-9_]{4,32}$/.test(raw)){
+    spWhoBox('<div class="sp-bad">Username kamida 4 ta belgi, faqat harf, raqam va _</div>');
+    spWhoLast = ''; spSync(); return;
+  }
+  spWhoBox('<div class="sp-wait">Tekshirilmoqda\u2026</div>');
+  spWhoT = setTimeout(function(){ spWhoGo(raw); }, 550);
+  spSync();
 }
-function spUserIn(){ (spTab === 'stars') ? spCheck() : spPremCheck(); }
+function spWhoGo(u){
+  fetch(VBASE + '/tg/user?u=' + encodeURIComponent(u))
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      const now = ((document.getElementById('spUser')||{}).value || '').trim().replace(/^@+/, '');
+      if(now.toLowerCase() !== u.toLowerCase()) return;   /* matn o'zgargan — eskisini tashlaymiz */
+      if(d && d.ok && d.found){
+        spWhoOk = true; spWhoLast = u;
+        const av = d.id ? (VBASE + '/avatar?id=' + encodeURIComponent(d.id)) : '';
+        const own = !!(tgUser && tgUser.username &&
+                       u.toLowerCase() === String(tgUser.username).toLowerCase());
+        spWhoBox(
+          '<div class="sp-ok">' +
+            (av ? '<img src="' + av + '" alt="" onerror="this.style.display=\'none\'">'
+                : '<span class="ph">' + esc(d.name.slice(0,1).toUpperCase()) + '</span>') +
+            '<div class="tx"><b>' + esc(d.name) + '</b>' +
+            '<small>' + (own ? 'Sizning akkauntingiz' : 'Shu akkauntga tushadi') + '</small></div>' +
+          '</div>');
+      } else {
+        spWhoOk = false; spWhoLast = '';
+        spWhoBox('<div class="sp-bad">' +
+          ((d && d.why === 'not_user') ? 'Bu kanal yoki guruh \u2014 foydalanuvchi emas'
+                                       : 'Bunday foydalanuvchi topilmadi') + '</div>');
+      }
+      spSync();
+    }).catch(function(){ spWhoBox(''); spSync(); });
+}
+/* Sotib olish tugmasi faqat username tasdiqlangach yonadi */
+function spSync(){
+  const g = document.getElementById('spGo');
+  if(!g) return;
+  if(spTab === 'stars'){
+    const n = parseInt((document.getElementById('spAmt')||{}).value || '0', 10) || 0;
+    g.disabled = !(spWhoOk && n >= SP_MIN);
+  } else {
+    g.disabled = !spWhoOk;
+  }
+}
 
 function spPanel(){
   const img  = BANNER_BASE + (spTab === 'stars' ? 'stars-x4.webp' : 'premium-x4.webp');
@@ -5387,7 +5452,8 @@ function spPanel(){
     <div class="ot-in">
       <input id="spUser" type="text" placeholder="@ Telegram username" autocomplete="off" spellcheck="false" oninput="spUserIn()">
       <button class="act" onclick="spMe()">O'zimga</button>
-    </div>`;
+    </div>
+    <div id="spWho" class="sp-who"></div>`;
 
   if(spTab === 'premium'){
     return head + `<div class="sp-card">
@@ -5430,7 +5496,9 @@ function spBuy(){
   haptic();
   const u = (document.getElementById('spUser')||{}).value || '';
   const uname = String(u).trim().replace(/^@/, '');
-  if(uname.length < 4){ toast('Username kiriting'); return; }
+  if(!spWhoOk || uname.toLowerCase() !== spWhoLast.toLowerCase()){
+    toast('Avval username tekshirilsin'); return;
+  }
 
   let pkg, som, oid, qty = 0;
   if(spTab === 'stars'){
