@@ -1369,7 +1369,9 @@ body.kb-open .buy-bar{ display:none !important }
 .hw-sh .hw-img{ margin:0 0 14px; line-height:0; background:transparent }
 .hw-sh .hw-img img{ width:100%; height:auto; display:block; border-radius:0 0 20px 20px }
 /* Tutqich — barmoq bilan pastga surib yopish uchun */
-.hw-sh .hw-grab{ padding:7px 0 6px; display:grid; place-items:center;
+/* Varaq burchagi 26px yumaloq. Tutqich shundan past bo'lsa, rasmning
+   tepa burchaklari o'sha egrilikda qirqilardi — shuning uchun teng qildik. */
+.hw-sh .hw-grab{ padding:11px 0 11px; display:grid; place-items:center;
   flex-shrink:0; touch-action:none }
 .hw-sh .hw-grab span{ width:40px; height:4px; border-radius:99px;
   background:var(--stroke-2); display:block }
@@ -5697,18 +5699,20 @@ function mgHowTo(){
   bg.className = 'sheet-bg'; bg.id = 'hwBg'; bg.onclick = mgHowClose;
   const sh = document.createElement('div');
   sh.className = 'sheet hw-sh'; sh.id = 'hwSh';
+  sh.ontouchstart = hwDragStart;
+  sh.ontouchmove  = hwDragMove;
+  sh.ontouchend   = hwDragEnd;
   sh.innerHTML =
-    '<div class="hw-grab" ontouchstart="hwDragStart(event)" ' +
-      'ontouchmove="hwDragMove(event)" ontouchend="hwDragEnd(event)"><span></span></div>' +
+    '<div class="hw-grab"><span></span></div>' +
     '<div class="hw-scroll">' +
       '<div class="hw-img"><img src="' + IMG('/qoshish-x1.webp') + '" alt="" ' +
         'onerror="this.parentNode.style.display=\'none\'"></div>' +
       '<div class="hw-pad">' +
-        '<div class="hw-box hw-top"><div class="t">Quyidagi tugma orqali botga o\'ting</div>' +
-          '<div class="s">Bot username: <b onclick="mgCopyBot()">@' + esc(GIFT_TO) + '</b></div>' +
+        '<div class="hw-box hw-top"><div class="t">Quyidagi tugma orqali hisobga o\'ting</div>' +
+          '<div class="s">Hisob: <b onclick="mgCopyBot()">@' + esc(GIFT_TO) + '</b></div>' +
         '</div>' +
-        '<div class="hw-box"><div class="t">Botga sovg\'a yuboring</div>' +
-          '<div class="s">Soni cheklanmagan</div></div>' +
+        '<div class="hw-box"><div class="t">Sovg\'ani @' + esc(GIFT_TO) + ' hisobiga yuboring</div>' +
+          '<div class="s">Telegram orqali, oddiy sovg\'a yuborgandek. Soni cheklanmagan.</div></div>' +
         '<div class="hw-box"><div class="t">Sovg\'a &lt;Sotuvda emas&gt; bo\'limida paydo bo\'ladi</div>' +
           '<div class="s">Ishlov berish 2 daqiqadan oshmaydi</div></div>' +
         '<div class="hw-box warn"><div class="t">\u26A0\uFE0F Firibgarlardan ehtiyot bo\'ling</div>' +
@@ -5728,16 +5732,26 @@ function mgHowTo(){
    Barmoq bilan birga silliq harakatlanadi: surish paytida animatsiya
    o'chiriladi (aks holda har harakatda u qarshilik qilib qotardi) va
    yangilanish kadrga bog'lanadi. */
-let hwY = -1, hwD = 0, hwRaf = 0;
+let hwY = -1, hwD = 0, hwRaf = 0, hwGo = false;
 function hwDragStart(e){
   const sh = document.getElementById('hwSh'); if(!sh) return;
-  hwY = e.touches[0].clientY; hwD = 0;
+  hwY = e.touches[0].clientY; hwD = 0; hwGo = false;
   sh.classList.add('drag');
 }
 function hwDragMove(e){
   if(hwY < 0) return;
-  hwD = e.touches[0].clientY - hwY;
-  if(hwD < 0) hwD = 0;
+  const d  = e.touches[0].clientY - hwY;
+  const sc = document.querySelector('#hwSh .hw-scroll');
+  /* Ichkarida aylantirish ustun: ro'yxat tepasida turib pastga
+     tortilgandagina varaqning o'zi harakatlanadi. */
+  if(!hwGo){
+    if(d > 6 && (!sc || sc.scrollTop <= 0)) hwGo = true;
+    else if(d < -6 || (sc && sc.scrollTop > 0)){ hwY = -1; 
+      const s0 = document.getElementById('hwSh'); if(s0) s0.classList.remove('drag');
+      return; }
+    else return;
+  }
+  hwD = d < 0 ? 0 : d;
   if(hwRaf) return;
   hwRaf = requestAnimationFrame(function(){
     hwRaf = 0;
@@ -5753,7 +5767,7 @@ function hwDragEnd(){
   sh.classList.remove('drag');     /* animatsiya qaytadi — qolgani silliq */
   sh.style.transform = '';
   if(hwD > 90) mgHowClose();
-  hwD = 0;
+  hwD = 0; hwGo = false;
 }
 function mgHowClose(){
   const sh = document.getElementById('hwSh'), bg = document.getElementById('hwBg');
