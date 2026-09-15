@@ -4418,13 +4418,37 @@ async function checkId(){
   }
 
   if(!CHECK_GAMES[g.id]){
-    idOk = true; notify('success');
     if(vals.username != null){
-      const u   = String(vals.username).replace(/^@+/,'');
+      /* Username'ni HAQIQATAN tekshiramiz. Ilgari bu yerda hech narsa
+         tekshirilmasdi — yozilgan matn shunchaki qaytarib ko'rsatilardi,
+         ya'ni xato username ham yashil chiqardi va pul boshqa odamga ketardi. */
+      const u = String(vals.username).replace(/^@+/,'');
       const own = !!(tgUser && tgUser.username &&
                      u.toLowerCase() === String(tgUser.username).toLowerCase());
+      idOk = false; setRes('wait', 'Tekshirilmoqda\u2026'); syncBuy();
+      const d = await fetch(VBASE + '/tg/user?u=' + encodeURIComponent(u))
+        .then(function(x){ return x.json(); }).catch(function(){ return null; });
+
+      if(d && d.ok && d.found){
+        idOk = true; idName = d.name || u; notify('success');
+        afterCheckUser(d.name || u, own);
+        return true;
+      }
+      if(d && (d.why === 'not_user' || d.why === 'is_bot' || d.why === 'none')){
+        idOk = false; notify('error');
+        setRes('err', d.why === 'not_user' ? 'Bu kanal yoki guruh \u2014 foydalanuvchi emas'
+                    : d.why === 'is_bot'   ? 'Bu bot \u2014 yuborib bo\'lmaydi'
+                    : 'Bunday foydalanuvchi topilmadi');
+        syncBuy();
+        return false;
+      }
+      /* Tekshiruv ishlamadi — to'sib qo'ymaymiz, avvalgidek o'tkazamiz */
+      idOk = true; notify('success');
       afterCheckUser(u, own);
-    } else if(g.cats && g.cats.length){
+      return true;
+    }
+    idOk = true; notify('success');
+    if(g.cats && g.cats.length){
       const c    = activeCat() || {};
       const key  = ((c.fields || [])[0] || {}).key;
       const main = key ? String(vals[key] || '') : (Object.values(vals)[0] || '');
@@ -4563,7 +4587,19 @@ function buy(){
 function saveOrder(o){ try{ const a=getOrders(); a.unshift(o); localStorage.setItem('mt_orders', JSON.stringify(a.slice(0,60))); }catch(e){} }
 var srvOrders = null, srvTopups = null, histTimer = null, histAt = 0;
 function getTopups(){ return srvTopups || []; }
-function getOrders(){ if(srvOrders) return srvOrders; try{ return JSON.parse(localStorage.getItem('mt_orders')||'[]'); }catch(e){ return []; } }
+/* Bosh sahifa tarixi. NFT bo'limidan berilgan buyurtmalar bu yerga
+   TUSHMAYDI — ular o'z bo'limining tarixida ko'rinadi. */
+function getOrders(){
+  const all = srvOrders ? srvOrders
+            : (function(){ try{ return JSON.parse(localStorage.getItem('mt_orders')||'[]'); }
+                           catch(e){ return []; } })();
+  return all.filter(function(o){ const p = o && o.pay; return !p || p === 'main'; });
+}
+/* NFT bo'limidan berilgan buyurtmalar */
+function getNftOrders(){
+  const all = srvOrders || [];
+  return all.filter(function(o){ const p = o && o.pay; return p === 'nftsom' || p === 'gram'; });
+}
 function loadOrders(cb){
   const uid = tgUser && tgUser.id ? tgUser.id : '';
   if(!uid){ if(cb) cb(); return; }
@@ -5559,7 +5595,9 @@ function spBuy(){
         notify('success');
         toastOk('\u2705 Buyurtma qabul qilindi');
         nftHistLoad();
-        setTimeout(function(){ go('nft_hist'); }, 700);
+        if(typeof loadOrders === 'function') loadOrders();
+        mgTab = 'history';
+        setTimeout(function(){ go('nft_gifts'); }, 700);
         return;
       }
       if(b) b.disabled = false;
@@ -5625,10 +5663,18 @@ function mgHistory(){
     const d = new Date(o.at || Date.now());
     const key = d.getFullYear()+'-'+d.getMonth()+'-'+d.getDate();
     if(key !== last){ last = key; out += `<div class="mg-day">${d.getDate()} ${M[d.getMonth()]} ${d.getFullYear()}</div>`; }
+    /* Nomi: "TG STARS — 50 ⭐" ko'rinishida. Narx qaysi hamyondan
+       to'langan bo'lsa o'sha valyutada ko'rsatiladi. */
+    const nm  = esc(o.item || [o.game, o.package].filter(Boolean).join(' — ') || 'NFT');
+    const val = (o.pay === 'gram' && o.gram)
+              ? ('-' + fmtGram(o.gram) + ' GRAM')
+              : (o.price ? '-' + money(o.price, true) : '');
+    const st  = (o.status === 'refund' || o.status === 'cancel') ? 'Bekor qilindi'
+              : (o.status === 'wait') ? 'Yuborilmoqda' : 'Sotib olindi';
     out += `<div class="mg-row">
       <div class="ic">${o.img ? `<img src="${IMG(o.img)}" alt="">` : (o.glyph||'🎁')}</div>
-      <div class="tx"><div class="nm">${o.item||'NFT'}</div><div class="sb">Sotib olindi</div></div>
-      ${o.price ? `<div class="pv">-${money(o.price, true)}</div>` : ''}
+      <div class="tx"><div class="nm">${nm}</div><div class="sb">${st}</div></div>
+      ${val ? `<div class="pv">${val}</div>` : ''}
       <svg class="cv" viewBox="0 0 24 24"><path d="M9.5 6l6 6-6 6"/></svg>
     </div>`;
   });
@@ -5939,8 +5985,10 @@ function nftMoneyRows(){
   };
 
   /* Kirim va chiqimlarni serverdagi yagona tarixdan ajratamiz */
-  const IN  = ['gram_in','som_in','nft_sell'];
-  const OUT = ['gram_out','som_out','nft_buy'];
+  /* Bu yerda faqat PUL harakati: to'ldirish va yechish.
+     Sotib olishlar "Sovg'alarim" ustidagi tarixda ko'rinadi. */
+  const IN  = ['gram_in','som_in'];
+  const OUT = ['gram_out','som_out'];
   const ICO = { gram_in:'\uD83D\uDC8E', gram_out:'\uD83D\uDC8E', som_in:'\uD83C\uDF81',
                 som_out:'\uD83C\uDFE7', nft_buy:'\uD83D\uDED2', nft_sell:'\uD83C\uDF81' };
   const TTL = { gram_in:"GRAM to'ldirildi", gram_out:'GRAM yechildi',
