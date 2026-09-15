@@ -2811,8 +2811,43 @@ function scanQueue(ids){
    server o'zi olib, bayt sifatida uzatadi. 6 soat keshlanadi. */
 const avCache = new Map();
 /* ---------- Username bo'yicha profil ----------
-   Telegram'dan @username egasining ismini va rasmini olamiz.
-   Topilmasa "yo'q" deb qaytaradi — mijoz xato yozganini darrov ko'radi. */
+   Bot API notanish foydalanuvchini username orqali topa olmaydi — bu
+   Telegram cheklovi. Shuning uchun alohida hisob orqali qidiramiz.
+   Hisob cheklansa ham ilova ishlayveradi: shunchaki "tekshirib bo'lmadi"
+   deb qaytaradi va sotib olishni to'smaydi. */
+const TG_API_ID   = Number(process.env.TG_API_ID || 0);
+const TG_API_HASH = process.env.TG_API_HASH || "";
+const TG_SESSION  = process.env.TG_SESSION || "";
+let mtp = null, mtpBad = 0;
+
+async function mtpClient(){
+  if(mtp) return mtp;
+  if(!TG_API_ID || !TG_API_HASH || !TG_SESSION) return null;
+  if(mtpBad > 3) return null;            /* qayta-qayta urinib yurmaymiz */
+  try{
+    const { TelegramClient } = require("telegram");
+    const { StringSession }  = require("telegram/sessions");
+    const c = new TelegramClient(new StringSession(TG_SESSION), TG_API_ID, TG_API_HASH,
+      { connectionRetries: 2, useWSS: false });
+    await c.connect();
+    mtp = c;
+    console.log("Username tekshiruvi ulandi");
+    return mtp;
+  }catch(e){
+    mtpBad++;
+    console.log("Username tekshiruvi ulanmadi:", e && e.message);
+    return null;
+  }
+}
+
+/* So'rovlar orasida pauza — hisob cheklanmasligi uchun */
+let mtpLast = 0;
+async function mtpGap(){
+  const wait = 900 - (Date.now() - mtpLast);
+  if(wait > 0) await new Promise(r => setTimeout(r, wait));
+  mtpLast = Date.now();
+}
+
 const unCache = new Map();
 app.get("/tg/user", async (req,res)=>{
   const u = String(req.query.u || "").replace(/^@+/, "").trim();
@@ -2821,26 +2856,40 @@ app.get("/tg/user", async (req,res)=>{
   const key = u.toLowerCase();
   const hit = unCache.get(key);
   if(hit && Date.now() - hit.at < 3600000) return res.json(hit.v);
+  const cl = await mtpClient();
+  if(!cl) return res.json({ ok:true, found:false, why:"nocheck" });
   try{
-    const r = await fetch("https://api.telegram.org/bot" + TOKEN +
-      "/getChat?chat_id=" + encodeURIComponent("@" + u)).then(x=>x.json());
-    if(!r || !r.ok || !r.result){
-      const v = { ok:true, found:false };
-      unCache.set(key, { at:Date.now(), v:v });
-      return res.json(v);
-    }
-    const c = r.result;
-    /* Kanal yoki guruh bo'lsa Stars yuborib bo'lmaydi */
-    if(c.type && c.type !== "private"){
+    await mtpGap();
+    const ent = await cl.getEntity(u);
+    const cn  = ent && ent.className ? String(ent.className) : "";
+    if(cn !== "User"){
       const v = { ok:true, found:false, why:"not_user" };
       unCache.set(key, { at:Date.now(), v:v });
       return res.json(v);
     }
-    const name = [c.first_name, c.last_name].filter(Boolean).join(" ") || u;
-    const v = { ok:true, found:true, id:String(c.id||""), name:name, un:u };
+    if(ent.bot){
+      const v = { ok:true, found:false, why:"is_bot" };
+      unCache.set(key, { at:Date.now(), v:v });
+      return res.json(v);
+    }
+    const name = [ent.firstName, ent.lastName].filter(Boolean).join(" ") || u;
+    const v = { ok:true, found:true, id:String(ent.id||""), name:name, un:u };
     unCache.set(key, { at:Date.now(), v:v });
     res.json(v);
-  }catch(e){ res.json({ ok:false, error:"net" }); }
+  }catch(e){
+    const msg = String((e && e.message) || e);
+    /* Topilmadi — aniq javob. Boshqa xatoda "tekshirib bo'lmadi" deymiz. */
+    if(/USERNAME_NOT_OCCUPIED|USERNAME_INVALID|No user has|Cannot find/i.test(msg)){
+      const v = { ok:true, found:false, why:"none" };
+      unCache.set(key, { at:Date.now(), v:v });
+      return res.json(v);
+    }
+    if(/FLOOD_WAIT|AUTH_KEY|SESSION/i.test(msg)){
+      mtp = null; mtpBad++;
+      console.log("Username tekshiruvi to'xtadi:", msg.slice(0,80));
+    }
+    res.json({ ok:true, found:false, why:"nocheck" });
+  }
 });
 
 app.get("/avatar", async (req,res)=>{
