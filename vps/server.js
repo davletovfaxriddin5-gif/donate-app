@@ -1630,6 +1630,27 @@ function tgCall(method, body){
   }).catch(function(e){ console.log("TG "+method+" xato:", e.message); });
 }
 
+/* Pulni QAYERDAN yechilgan bo'lsa o'sha hamyonga qaytaradi.
+   Ilgari hammasi asosiy balansga qaytardi — NFT bo'limidan to'langan
+   bo'lsa ham. Bu mijozning pulini noto'g'ri joyga tushirardi. */
+function refundOrder(u, rec){
+  const pay = String(rec.pay || "main");
+  if(pay === "gram"){
+    const g = Number(rec.gram) || 0;
+    u.gram = Math.round((Number(u.gram || 0) + g) * 1e9) / 1e9;
+    nftLog(u, "gram_in", g, { cur:"GRAM", note:"Buyurtma bekor qilindi", ref:rec.id });
+    return { cur:"GRAM", amount:g, left:u.gram };
+  }
+  if(pay === "nftsom"){
+    const s = Number(rec.price) || 0;
+    u.nftSom = Math.round(Number(u.nftSom || 0) + s);
+    nftLog(u, "som_in", s, { cur:"so'm", note:"Buyurtma bekor qilindi", ref:rec.id });
+    return { cur:"so'm", amount:s, left:u.nftSom };
+  }
+  u.balance = Math.round(Number(u.balance || 0) + (Number(rec.price) || 0));
+  return { cur:"so'm", amount:Number(rec.price)||0, left:u.balance };
+}
+
 /* ---------- Kartaga yechish ----------
    Pul so'rov kelishi bilan balansdan YECHILADI — shunda mijoz uni
    oradagi vaqtda sarflab yubora olmaydi. Admin rad etsa qaytariladi.
@@ -1911,14 +1932,35 @@ app.post("/gram/start", (req,res)=>{
    GRAM va NFT so'm qoldig'i. Ilgari telefonda (localStorage) turardi —
    uni har kim o'zgartira olardi va telefon tozalansa yo'qolardi.
    Endi bu yerda: data.json'da saqlanadi va zaxiraga tushadi. */
+/* 1 GRAM necha so'm — narxlarni so'mdan GRAM'ga o'girish uchun.
+   Kurs 10 daqiqada bir yangilanadi, aks holda har so'rovda tashqi
+   xizmatga borib ilovani sekinlashtirardi. */
+let gramRate = { at:0, som:0 };
+async function gramSom(){
+  if(gramRate.som > 0 && Date.now() - gramRate.at < 600000) return gramRate.som;
+  try{
+    const r = await fetch("https://tonapi.io/v2/rates?tokens=ton&currencies=usd",
+      { headers: TON_KEY ? { "Authorization":"Bearer "+TON_KEY } : {} });
+    const j = await r.json();
+    const usd = Number(((j.rates||{}).TON||{}).prices?.USD) || 0;
+    if(usd > 0){
+      gramRate = { at: Date.now(), som: Math.round(usd * TON_RATE) };
+    }
+  }catch(e){}
+  return gramRate.som;
+}
+
 app.get("/nft/balance", (req,res)=>{
   const id = String(req.query.id||"").trim();
   if(!id) return res.json({ ok:false, error:"id" });
   const db = load();
   const rec = db[id];
-  res.json({ ok:true,
-             gram: (rec && Number(rec.gram))   || 0,
-             som:  (rec && Number(rec.nftSom)) || 0 });
+  gramSom().then(function(k){
+    res.json({ ok:true,
+               gram: (rec && Number(rec.gram))   || 0,
+               som:  (rec && Number(rec.nftSom)) || 0,
+               gramSom: k || 0 });
+  });
 });
 
 /* Telefondagi eski qoldiqni bir martalik ko'chirish.
@@ -2123,9 +2165,25 @@ app.post("/order", async (req,res)=>{
 
     const db = load();
     const u = urec(db, uid);
-    if(u.balance < price) return res.json({ ok:false, error:"balance", balance:u.balance, need:price });
-
-    u.balance -= price;
+    /* Qaysi hamyondan to'lanadi: asosiy balans, NFT so'm yoki NFT GRAM.
+       NFT bo'limidan berilgan buyurtmalar o'sha bo'limning pulidan yechiladi. */
+    const pay  = String(o.pay || "main");
+    const gram = Number(o.gram) || 0;          /* GRAM bilan to'lanadigan miqdor */
+    if(pay === "gram"){
+      if(!(gram > 0)) return res.json({ ok:false, error:"gram" });
+      if(Number(u.gram || 0) < gram)
+        return res.json({ ok:false, error:"balance", balance:u.gram, need:gram, cur:"GRAM" });
+      u.gram = Math.round((Number(u.gram) - gram) * 1e9) / 1e9;
+      nftLog(u, "nft_buy", gram, { cur:"GRAM", item:String(o.game||"") + " — " + String(o.package||"") });
+    } else if(pay === "nftsom"){
+      if(Number(u.nftSom || 0) < price)
+        return res.json({ ok:false, error:"balance", balance:u.nftSom, need:price });
+      u.nftSom = Math.round(Number(u.nftSom) - price);
+      nftLog(u, "nft_buy", price, { cur:"so'm", item:String(o.game||"") + " — " + String(o.package||"") });
+    } else {
+      if(u.balance < price) return res.json({ ok:false, error:"balance", balance:u.balance, need:price });
+      u.balance -= price;
+    }
     const rec = {
       id: String(o.id || ("MT"+Date.now().toString().slice(-8))),
       game: String(o.game||""), gkey: game, gameId: String(o.gameId||""),
@@ -2137,7 +2195,7 @@ app.post("/order", async (req,res)=>{
       package: String(o.package || (stars ? (stars + " \u2b50") : "")), price: price,
       details: o.details || {}, region: o.region || null,
       nick: String(o.nick||""), accRegion: String(o.accRegion||""),
-      oid: oid, cat: auto ? off.cat : "", auto: auto,
+      oid: oid, cat: auto ? off.cat : "", auto: auto, pay: pay, gram: gram,
       /* tannarx — foyda hisobi uchun. usd: yetkazuvchi narxi, cost: o'sha paytdagi so'm */
       usd: auto ? orderUsd(tg, off.cat, oid, tgn) : 0,
       cost: auto ? Math.round(orderUsd(tg, off.cat, oid, tgn) * COST_RATE) : 0,
@@ -2158,7 +2216,7 @@ app.post("/order", async (req,res)=>{
 
     if(!auto){
       send(uid, "✅ Buyurtma qabul qilindi: "+rec.package+"\nTez orada bajariladi.\nQoldiq balans: "+u.balance+" so'm");
-      return res.json({ ok:true, balance:u.balance, order:rec });
+      return res.json({ ok:true, balance:u.balance, nftSom:u.nftSom, gram:u.gram, pay:pay, order:rec });
     }
 
     /* Yetkazib beruvchiga yuboramiz \u2014 coindrop yoki FazerCards */
@@ -2180,17 +2238,19 @@ app.post("/order", async (req,res)=>{
       if(!r.id && ADMIN_ID) tgCall("sendMessage", { chat_id: ADMIN_ID,
         text: "\u2757 "+rec.id+" yuborildi, lekin FZR id qaytarmadi.\n"+rec.package+" \u2014 "+rec.pid+"\nPanelda qo'lda tekshiring." });
       send(uid, "⏳ Buyurtma yuborildi: "+rec.package+"\nOdatda 1-2 daqiqada tushadi.\nQoldiq balans: "+u2.balance+" so'm");
-      return res.json({ ok:true, balance:u2.balance, order:rec2 });
+      return res.json({ ok:true, balance:u2.balance, nftSom:u2.nftSom, gram:u2.gram, pay:pay, order:rec2 });
     }
 
-    /* rad etildi — pulni darrov qaytaramiz */
-    u2.balance += rec2.price;
+    /* rad etildi — pulni yechilgan hamyonga qaytaramiz */
+    const rf = refundOrder(u2, rec2);
     rec2.status = "refund"; rec2.fail = r.why;
     save(db2);
-    send(uid, "❌ Buyurtmani bajarib bo'lmadi. "+rec2.price+" so'm balansga qaytarildi.\nJoriy balans: "+u2.balance+" so'm");
+    send(uid, "\u274C Buyurtmani bajarib bo'lmadi. " + rf.amount + " " + rf.cur +
+              " qaytarildi.\nJoriy qoldiq: " + rf.left + " " + rf.cur);
     if(ADMIN_ID) tgCall("sendMessage", { chat_id: ADMIN_ID,
       text: "⚠️ "+(cdGame ? "coindrop" : "FZR")+" rad etdi: "+r.why+"\n"+rec.package+" — id "+uid+"\nQaytarildi: "+rec2.price+" so'm" });
-    res.json({ ok:false, error:"supplier", balance:u2.balance });
+    res.json({ ok:false, error:"supplier", balance:u2.balance,
+               nftSom:u2.nftSom, gram:u2.gram, pay:pay });
 
   }catch(e){ console.log("ORDER XATO:", e.message); res.json({ ok:false, error:"server" }); }
 });
@@ -2226,10 +2286,11 @@ async function checkOne(uid, ordId){
       save(dC);
       send(uid, "\u2705 "+rC.package+" hisobingizga tushdi!\nID: "+(rC.pid||""));
     } else {
-      uC.balance += rC.price;
+      const rfC = refundOrder(uC, rC);
       rC.status = "refund"; rC.fail = cs.why || "coindrop rad etdi";
       save(dC);
-      send(uid, "\u274C Buyurtma bajarilmadi. "+rC.price+" so'm balansga qaytarildi.\nJoriy balans: "+uC.balance+" so'm");
+      send(uid, "\u274C Buyurtma bajarilmadi. "+rfC.amount+" "+rfC.cur+
+                " qaytarildi.\nJoriy qoldiq: "+rfC.left+" "+rfC.cur);
       if(ADMIN_ID) tgCall("sendMessage", { chat_id: ADMIN_ID,
         text: "\u26A0\uFE0F coindrop rad etdi: "+(cs.why||"-")+"\n"+rC.package+" \u2014 id "+uid+"\nQaytarildi: "+rC.price+" so'm" });
     }
@@ -2252,10 +2313,11 @@ async function checkOne(uid, ordId){
     return;
   }
   if(s === "failed" || s === "cancelled" || s === "canceled" || s === "refunded"){
-    u.balance += r.price;
+    const rfS = refundOrder(u, r);
     r.status = "refund"; r.fail = String(st.fail_reason||"");
     save(db);
-    send(uid, "❌ Buyurtma bajarilmadi. "+r.price+" so'm balansga qaytarildi.\nJoriy balans: "+u.balance+" so'm");
+    send(uid, "\u274C Buyurtma bajarilmadi. "+rfS.amount+" "+rfS.cur+
+              " qaytarildi.\nJoriy qoldiq: "+rfS.left+" "+rfS.cur);
     if(ADMIN_ID) tgCall("sendMessage", { chat_id: ADMIN_ID,
       text: "⚠️ FZR fail "+r.fzr+"\n"+(st.fail_reason||"-")+"\n"+r.package+" — id "+uid+"\nQaytarildi: "+r.price+" so'm" });
     return;
@@ -2290,11 +2352,10 @@ async function sweep(){
         /* yuborilmay osilib qolgan (server o'chib qolgan bo'lsa) — pulni qaytaramiz */
         if(r.status === "wait" && r.auto && !r.fzr &&
            Date.now() - new Date(r.at).getTime() > 300000){
-          if(typeof u.balance !== "number") u.balance = 0;
-          u.balance += r.price;
+          const rfT = refundOrder(u, r);
           r.status = "refund"; r.fail = "yuborilmadi";
           changed = true;
-          send(uid, "↩️ Buyurtma yuborilmadi, "+r.price+" so'm balansga qaytarildi.");
+          send(uid, "\u21A9\uFE0F Buyurtma yuborilmadi, "+rfT.amount+" "+rfT.cur+" qaytarildi.");
         }
       });
     });
@@ -3199,11 +3260,11 @@ function handleCb(cq){
       nt = "\u2705 Bajarildi";
       send(p[1], "\u2705 "+r.package+" hisobingizga tushdi!");
     } else {
-      if(typeof uo.balance !== "number") uo.balance = 0;
-      uo.balance += r.price;
+      const rfM = refundOrder(uo, r);
       r.status = "refund"; r.fail = "qo'lda bekor qilindi";
-      nt = "\u274C Bekor \u2014 "+r.price+" qaytarildi";
-      send(p[1], "\u274C Buyurtma bajarilmadi. "+r.price+" so'm balansga qaytarildi.\nJoriy balans: "+uo.balance+" so'm");
+      nt = "\u274C Bekor \u2014 "+rfM.amount+" "+rfM.cur+" qaytarildi";
+      send(p[1], "\u274C Buyurtma bajarilmadi. "+rfM.amount+" "+rfM.cur+
+                 " qaytarildi.\nJoriy qoldiq: "+rfM.left+" "+rfM.cur);
     }
     save(dbo);
     tgCall("answerCallbackQuery", { callback_query_id: cq.id, text: nt });
