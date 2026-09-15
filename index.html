@@ -6032,6 +6032,9 @@ function renderOutCard(){
     <div class="ot-row">
       <div class="ot-in"><input id="ocExp" type="text" inputmode="numeric" placeholder="OO/YY" autocomplete="off" oninput="ocExp(this)"></div>
     </div>
+    <div class="ot-in">
+      <input id="ocName" type="text" placeholder="Karta egasi (ism familiya)" autocomplete="off" oninput="ocCheck()">
+    </div>
     <div class="ot-hint">Karta o'zingizning nomingizda bo'lishi kerak.</div>
     <button class="gr-go" id="ocGo" disabled onclick="ocNext()">Davom etish</button>`;
     return;
@@ -6042,7 +6045,7 @@ function renderOutCard(){
     <button class="act" onclick="ocAll()">Hammasi</button>
   </div>
   <div class="ot-hint">Mavjud: ${fmt(bal)} so'm</div>
-  <button class="gr-go" id="ocGo2" disabled onclick="wlGuard()">Chiqarib olish</button>`;
+  <button class="gr-go" id="ocGo2" disabled onclick="ocSend2()">Chiqarib olish</button>`;
 }
 function ocFmt(s){ return s.replace(/\D/g,'').slice(0,16).replace(/(.{4})/g,'$1 ').trim(); }
 function ocNum(el){ el.value = ocFmt(el.value); ocCheck(); }
@@ -6051,13 +6054,84 @@ function ocExp(el){
   if(s.length > 2) s = s.slice(0,2) + '/' + s.slice(2);
   el.value = s; ocCheck();
 }
+let ocCard = '', ocHolder = '';
 function ocCheck(){
   const n = (document.getElementById('ocNum')||{}).value || '';
   const e = (document.getElementById('ocExp')||{}).value || '';
+  const m = (document.getElementById('ocName')||{}).value || '';
   const g = document.getElementById('ocGo');
-  if(g) g.disabled = !(n.replace(/\s/g,'').length >= 16 && e.length === 5);
+  if(g) g.disabled = !(n.replace(/\s/g,'').length === 16 && e.length === 5 && m.trim().length >= 3);
 }
-function ocNext(){ haptic(); ocStep = 2; renderOutCard(); }
+function ocNext(){
+  haptic();
+  ocCard   = ((document.getElementById('ocNum')||{}).value || '').replace(/\s/g,'');
+  ocHolder = ((document.getElementById('ocName')||{}).value || '').trim();
+  ocStep = 2; renderOutCard();
+}
+/* ---------- Kartaga chiqarish so'rovi ----------
+   Pul so'rov yuborilishi bilan hisobdan yechiladi — shunda kutish
+   davomida uni sarflab bo'lmaydi. Rad etilsa qaytariladi. */
+let ocBusy2 = false;
+function ocSend2(){
+  if(ocBusy2) return;
+  haptic();
+  const el = document.getElementById('ocSum');
+  const amt = parseInt((el && el.value) || '0', 10) || 0;
+  if(!(amt > 0)){ toast('Summani kiriting'); return; }
+  bioAsk(function(){
+    ocBusy2 = true;
+    const g = document.getElementById('ocGo2');
+    if(g){ g.disabled = true; g.textContent = 'Yuborilmoqda…'; }
+    fetch(VBASE + '/som/out', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ initData: tg.initData || '', amount: amt,
+                             card: ocCard, name: ocHolder })
+    }).then(function(r){ return r.json(); }).then(function(d){
+      ocBusy2 = false;
+      if(g){ g.textContent = 'Chiqarib olish'; }
+      if(d && d.ok){
+        setNftSom(d.left);
+        notify('success');
+        nftHistLoad(); nftLoad();
+        ocReceipt(d);
+        return;
+      }
+      if(g) g.disabled = false;
+      if(!d) return toast('Aloqa yo\'q');
+      if(d.error === 'low')  return toast('Mablag\' yetarli emas');
+      if(d.error === 'min')  return toast('Eng kami ' + fmt(d.min) + ' so\'m');
+      if(d.error === 'card') return toast('Karta raqami noto\'g\'ri');
+      if(d.error === 'name') return toast('Karta egasini yozing');
+      if(d.error === 'busy') return toast('Oldingi arizangiz hali ko\'rilmadi');
+      toast('Bajarilmadi');
+    }).catch(function(){
+      ocBusy2 = false;
+      if(g){ g.disabled = false; g.textContent = 'Chiqarib olish'; }
+      toast('Aloqa yo\'q');
+    });
+  });
+}
+/* Ariza qabul qilingani haqida tasdiq — mijozda dalil qolsin */
+function ocReceipt(d){
+  ocStep = 1;
+  app.innerHTML = `<div class="page-title">Ariza qabul qilindi</div>
+  <div class="gr-card" style="text-align:left">
+    <div class="tc-h2" style="margin-bottom:12px">Ariza ${esc(d.no)}</div>
+    <div class="kv" style="display:flex;justify-content:space-between;padding:7px 0">
+      <span style="color:var(--faint)">Summa</span><b>${fmt(d.amount)} so'm</b></div>
+    <div class="kv" style="display:flex;justify-content:space-between;padding:7px 0">
+      <span style="color:var(--faint)">Karta</span><b>${esc(d.card)}</b></div>
+    <div class="kv" style="display:flex;justify-content:space-between;padding:7px 0">
+      <span style="color:var(--faint)">Sana</span><b>${dt(d.at)}</b></div>
+    <div class="kv" style="display:flex;justify-content:space-between;padding:7px 0">
+      <span style="color:var(--faint)">Holat</span><b style="color:#F5B301">Ko'rib chiqilmoqda</b></div>
+  </div>
+  <div class="ot-hint" style="margin-top:14px">
+    To'lov izohida <b>${esc(d.no)}</b> deb yoziladi — bank bildirishnomangizda
+    shuni tekshiring. Pul hisobingizdan allaqachon yechildi.
+  </div>
+  <button class="gr-go" style="margin-top:14px" onclick="go('nft_hist')">Tarixni ko'rish</button>`;
+}
 function ocSum(el){
   el.value = String(el.value).replace(/[^0-9]/g,'');
   const g = document.getElementById('ocGo2');
