@@ -1351,21 +1351,20 @@ body.kb-open .buy-bar{ display:none !important }
   background:var(--blue); color:#fff; font-size:11.5px; font-weight:700; font-family:var(--sys) }
 
 /* ---- "Sovg'alarni qanday qo'shish?" varag'i ---- */
-.hw-sh{ text-align:left; max-height:86vh; overflow-y:auto }
-.hw-sh .hw-img{ margin:0 0 14px; border-radius:16px; overflow:hidden; aspect-ratio:1.84/1;
-  background:var(--card-2) }
-.hw-sh .hw-img img{ width:100%; height:100%; object-fit:cover; display:block }
-.hw-sh .hw-h{ font-size:17px; font-weight:700; letter-spacing:-.3px; font-family:var(--sys);
-  color:var(--text); text-align:center; margin-bottom:5px }
-.hw-sh .hw-un{ font-size:12.5px; color:var(--faint); text-align:center; margin-bottom:16px }
-.hw-sh .hw-un b{ color:var(--blue); font-weight:600; cursor:pointer }
-.hw-sh .hw-un b:active{ opacity:.6 }
+.hw-sh{ text-align:left; height:93dvh; display:flex; flex-direction:column;
+  overflow-y:auto; -webkit-overflow-scrolling:touch }
+/* Rasm chetgacha cho'ziladi — ortiqcha bo'shliq qolmasin */
+.hw-sh .hw-img{ margin:0 -16px 14px; overflow:hidden; background:var(--card-2) }
+.hw-sh .hw-img img{ width:100%; height:auto; display:block }
+.hw-sh .hw-top{ text-align:center }
+.hw-sh .hw-top .s b{ color:var(--blue); font-weight:600; cursor:pointer }
+.hw-sh .hw-top .s b:active{ opacity:.6 }
 .hw-sh .hw-box{ padding:12px 13px; border-radius:15px; margin-bottom:9px;
   background:var(--card-2); border:1px solid var(--stroke-2) }
 .hw-sh .hw-box.warn{ background:rgba(245,179,1,.07); border-color:rgba(245,179,1,.24) }
 .hw-sh .hw-box .t{ font-size:14px; font-weight:600; color:var(--text); line-height:1.35 }
 .hw-sh .hw-box .s{ font-size:12px; color:var(--faint); margin-top:3px; line-height:1.4 }
-.hw-sh .hw-go{ width:100%; height:47px; border-radius:15px; margin-top:6px;
+.hw-sh .hw-go{ width:100%; height:47px; border-radius:15px; margin-top:auto;
   background:var(--blue); color:#fff; font-size:15px; font-weight:600;
   font-family:var(--sys); transition:.14s }
 .hw-sh .hw-go:active{ transform:scale(.99) }
@@ -5662,7 +5661,7 @@ let mgSeg = 'un';      /* un = sotuvda emas, on = sotuvda */
 function setMgTab(t){ haptic(); mgTab = t; renderNftGifts(); }
 function setMgSeg(s){ haptic(); mgSeg = s; renderNftGifts(); }
 /* Sovg'alar shu hisobga yuboriladi. O'zgartirish uchun faqat shu qator. */
-const GIFT_TO = 'minatouz';
+const GIFT_TO = 'minato_bank';
 
 function mgAdd(){ mgHowTo(); }
 function mgOut(){ haptic(); }
@@ -5682,9 +5681,9 @@ function mgHowTo(){
     '<div class="grab"></div>' +
     '<div class="hw-img"><img src="' + IMG('/qoshish-x1.webp') + '" alt="" ' +
       'onerror="this.parentNode.style.display=\'none\'"></div>' +
-    '<div class="hw-h">Quyidagi tugma orqali botga o\'ting</div>' +
-    '<div class="hw-un">Bot username: ' +
-      '<b onclick="mgCopyBot()">@' + esc(GIFT_TO) + '</b></div>' +
+    '<div class="hw-box hw-top"><div class="t">Quyidagi tugma orqali botga o\'ting</div>' +
+      '<div class="s">Bot username: <b onclick="mgCopyBot()">@' + esc(GIFT_TO) + '</b></div>' +
+    '</div>' +
     '<div class="hw-box"><div class="t">Botga sovg\'a yuboring</div>' +
       '<div class="s">Soni cheklanmagan</div></div>' +
     '<div class="hw-box"><div class="t">Sovg\'a &lt;Sotuvda emas&gt; bo\'limida paydo bo\'ladi</div>' +
