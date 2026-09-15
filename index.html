@@ -1350,6 +1350,26 @@ body.kb-open .buy-bar{ display:none !important }
 [data-wal] span.g{ display:inline-block; margin-left:8px; padding:2px 8px; border-radius:8px;
   background:var(--blue); color:#fff; font-size:11.5px; font-weight:700; font-family:var(--sys) }
 
+/* ---- "Sovg'alarni qanday qo'shish?" varag'i ---- */
+.hw-sh{ text-align:left; max-height:86vh; overflow-y:auto }
+.hw-sh .hw-img{ margin:0 0 14px; border-radius:16px; overflow:hidden; aspect-ratio:1.84/1;
+  background:var(--card-2) }
+.hw-sh .hw-img img{ width:100%; height:100%; object-fit:cover; display:block }
+.hw-sh .hw-h{ font-size:17px; font-weight:700; letter-spacing:-.3px; font-family:var(--sys);
+  color:var(--text); text-align:center; margin-bottom:5px }
+.hw-sh .hw-un{ font-size:12.5px; color:var(--faint); text-align:center; margin-bottom:16px }
+.hw-sh .hw-un b{ color:var(--blue); font-weight:600; cursor:pointer }
+.hw-sh .hw-un b:active{ opacity:.6 }
+.hw-sh .hw-box{ padding:12px 13px; border-radius:15px; margin-bottom:9px;
+  background:var(--card-2); border:1px solid var(--stroke-2) }
+.hw-sh .hw-box.warn{ background:rgba(245,179,1,.07); border-color:rgba(245,179,1,.24) }
+.hw-sh .hw-box .t{ font-size:14px; font-weight:600; color:var(--text); line-height:1.35 }
+.hw-sh .hw-box .s{ font-size:12px; color:var(--faint); margin-top:3px; line-height:1.4 }
+.hw-sh .hw-go{ width:100%; height:47px; border-radius:15px; margin-top:6px;
+  background:var(--blue); color:#fff; font-size:15px; font-weight:600;
+  font-family:var(--sys); transition:.14s }
+.hw-sh .hw-go:active{ transform:scale(.99) }
+
 /* ---- Username tekshiruvi natijasi ---- */
 .sp-who{ margin:-4px 0 10px }
 .sp-who .sp-wait{ font-size:12.5px; color:var(--faint); padding:2px 2px }
@@ -5641,10 +5661,60 @@ let mgTab = 'gifts';   /* gifts | offers | history */
 let mgSeg = 'un';      /* un = sotuvda emas, on = sotuvda */
 function setMgTab(t){ haptic(); mgTab = t; renderNftGifts(); }
 function setMgSeg(s){ haptic(); mgSeg = s; renderNftGifts(); }
-function mgAdd(){ haptic(); }
+/* Sovg'alar shu hisobga yuboriladi. O'zgartirish uchun faqat shu qator. */
+const GIFT_TO = 'minatouz';
+
+function mgAdd(){ mgHowTo(); }
 function mgOut(){ haptic(); }
 function mgSend(){ haptic(); }
-function mgHowTo(){ haptic(); }
+/* ---------- "Sovg'alarni qanday qo'shish?" ----------
+   Pastdan chiqadigan qo'llanma: rasm, uch qadam va tugma. */
+function mgHowTo(){
+  haptic();
+  const old = document.getElementById('hwSh'); if(old) old.remove();
+  const oldBg = document.getElementById('hwBg'); if(oldBg) oldBg.remove();
+
+  const bg = document.createElement('div');
+  bg.className = 'sheet-bg'; bg.id = 'hwBg'; bg.onclick = mgHowClose;
+  const sh = document.createElement('div');
+  sh.className = 'sheet hw-sh'; sh.id = 'hwSh';
+  sh.innerHTML =
+    '<div class="grab"></div>' +
+    '<div class="hw-img"><img src="' + IMG('/qoshish-x1.webp') + '" alt="" ' +
+      'onerror="this.parentNode.style.display=\'none\'"></div>' +
+    '<div class="hw-h">Quyidagi tugma orqali botga o\'ting</div>' +
+    '<div class="hw-un">Bot username: ' +
+      '<b onclick="mgCopyBot()">@' + esc(GIFT_TO) + '</b></div>' +
+    '<div class="hw-box"><div class="t">Botga sovg\'a yuboring</div>' +
+      '<div class="s">Soni cheklanmagan</div></div>' +
+    '<div class="hw-box"><div class="t">Sovg\'a &lt;Sotuvda emas&gt; bo\'limida paydo bo\'ladi</div>' +
+      '<div class="s">Ishlov berish 2 daqiqadan oshmaydi</div></div>' +
+    '<div class="hw-box warn"><div class="t">\u26A0\uFE0F Firibgarlardan ehtiyot bo\'ling</div>' +
+      '<div class="s">Shaxsiy xabarlarda yuborilgan havola va ko\'rsatmalarga ' +
+      'e\'tibor bermang.</div></div>' +
+    '<button class="hw-go" onclick="mgGoBot()">Sovg\'a qo\'shish</button>';
+
+  document.body.appendChild(bg); document.body.appendChild(sh);
+  requestAnimationFrame(function(){
+    requestAnimationFrame(function(){ bg.classList.add('on'); sh.classList.add('on'); });
+  });
+}
+function mgHowClose(){
+  const sh = document.getElementById('hwSh'), bg = document.getElementById('hwBg');
+  if(sh) sh.classList.remove('on');
+  if(bg) bg.classList.remove('on');
+  setTimeout(function(){ if(sh) sh.remove(); if(bg) bg.remove(); }, 320);
+}
+function mgCopyBot(){
+  haptic();
+  try{ navigator.clipboard.writeText('@' + GIFT_TO); toast('Nusxalandi'); }
+  catch(e){ toast('Nusxalanmadi'); }
+}
+function mgGoBot(){
+  haptic(); mgHowClose();
+  try{ tg.openTelegramLink('https://t.me/' + GIFT_TO); }
+  catch(e){ window.open('https://t.me/' + GIFT_TO, '_blank'); }
+}
 
 const MG_SEARCH = `<label class="nftm-search">
       <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6"/></svg>
