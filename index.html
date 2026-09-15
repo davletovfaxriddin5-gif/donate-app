@@ -5294,7 +5294,22 @@ let spGram = false;       /* false = so'm, true = GRAM */
 let spMonths = 12;
 const SP_QUICK = [50, 100, 250, 500, 1000, 2500];
 /* Premium narxlari keyin to'ldiriladi */
-const SP_PREM = [ {m:3, t:'3 oy', som:0, gram:0}, {m:6, t:'6 oy', som:0, gram:0}, {m:12, t:'1 yil', som:0, gram:0} ];
+/* Premium narxlari bosh sahifadagi ro'yxatdan olinadi — ikki joyda
+   saqlamaymiz, aks holda biri o'zgarib ikkinchisi eskirib qolardi. */
+function spPremList(){
+  const g = GAMES.find(function(x){ return x.id === 'tgpremium'; });
+  const P = (g && g.packages) || [];
+  return [3,6,12].map(function(m){
+    const p = P.find(function(x){ return x.oid === 'premium_' + m; }) || {};
+    return { m:m, t:(m===12?'1 yil':m+' oy'), oid:'premium_'+m, som:Number(p.p)||0 };
+  });
+}
+/* 1 GRAM necha so'm — serverdan keladi, /nft/balance bilan birga */
+let gramSomRate = 0;
+function somToGram(som){
+  if(!(gramSomRate > 0)) return 0;
+  return Math.ceil((som / gramSomRate) * 1000) / 1000;
+}
 const SP_MIN = 50;
 
 function spSetTab(t){
@@ -5380,8 +5395,9 @@ function spPanel(){
       <div class="sub">O'zingizga yoki do'stlaringizga</div>
       ${pay}
       <div class="sp-prem">
-        ${SP_PREM.map(function(o){
-          const pr = spGram ? (o.gram ? fmtGram(o.gram) + ' GRAM' : '—') : (o.som ? fmt(o.som) + " so'm" : '—');
+        ${spPremList().map(function(o){
+          const g  = somToGram(o.som);
+          const pr = spGram ? (g ? fmtGram(g) + ' GRAM' : '—') : (o.som ? fmt(o.som) + " so'm" : '—');
           return `<button class="${spMonths===o.m?'on':''}" onclick="spSetPrem(${o.m})">
             <span class="sp-rd"><i></i></span>
             <div class="m">${o.t}</div><div class="p">${pr}</div></button>`;
@@ -5405,7 +5421,80 @@ function spPanel(){
     <button class="gr-go" id="spGo" disabled onclick="spBuy()">Stars sotib olish</button>
   </div>`;
 }
-function spBuy(){ haptic(); bioAsk(function(){ toast('Tez orada'); }); }
+/* ---------- NFT bo'limidan Stars / Premium sotib olish ----------
+   Bosh sahifadagi oqimning o'zi, faqat pul NFT hamyonidan yechiladi.
+   To'lov manbai so'rovda "pay" bilan yuboriladi. */
+let spBusy = false;
+function spBuy(){
+  if(spBusy) return;
+  haptic();
+  const u = (document.getElementById('spUser')||{}).value || '';
+  const uname = String(u).trim().replace(/^@/, '');
+  if(uname.length < 4){ toast('Username kiriting'); return; }
+
+  let pkg, som, oid, qty = 0;
+  if(spTab === 'stars'){
+    const n = parseInt((document.getElementById('spAmt')||{}).value || '0', 10) || 0;
+    if(n < SP_MIN){ toast('Eng kami ' + SP_MIN + ' Stars'); return; }
+    som = starPrice(n); pkg = n + ' \u2B50'; oid = ''; qty = n;
+  } else {
+    const o = spPremList().find(function(x){ return x.m === spMonths; });
+    if(!o || !o.som){ toast('Narx topilmadi'); return; }
+    som = o.som; pkg = o.t; oid = o.oid;
+  }
+
+  const gram = spGram ? somToGram(som) : 0;
+  if(spGram){
+    if(!(gram > 0)){ toast('Kurs olinmadi, qayta urining'); return; }
+    if(gram > getGram()){ toast('GRAM yetarli emas'); return; }
+  } else {
+    if(som > getNftSom()){ toast('Mablag\' yetarli emas'); return; }
+  }
+
+  bioAsk(function(){
+    spBusy = true;
+    const b = document.getElementById('spGo');
+    if(b){ b.disabled = true; b.textContent = 'Yuborilmoqda\u2026'; }
+    const order = {
+      id:'MT'+Date.now().toString().slice(-8),
+      game: spTab === 'stars' ? 'TG STARS' : 'TG PREMIUM',
+      gameId: spTab === 'stars' ? 'tgstars' : 'tgpremium',
+      glyph: spTab === 'stars' ? '\u2B50' : '\uD83D\uDC51',
+      package: pkg, price: som, oid: oid, qty: qty,
+      details: { username: '@' + uname },
+      pay: spGram ? 'gram' : 'nftsom', gram: gram,
+      tgUser: tgUser ? { id:tgUser.id, username:tgUser.username, name:tgUser.first_name } : null,
+      status:'wait', createdAt:new Date().toISOString()
+    };
+    fetch(VBASE + '/order', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ order: order, initData: (tg && tg.initData) || '' })
+    }).then(function(r){ return r.json(); }).then(function(d){
+      spBusy = false;
+      if(b){ b.textContent = spTab === 'stars' ? 'Stars sotib olish' : 'Premium sotib olish'; }
+      if(d && d.ok){
+        if(typeof d.nftSom === 'number') setNftSom(d.nftSom);
+        if(typeof d.gram   === 'number') setGram(d.gram);
+        notify('success');
+        toastOk('\u2705 Buyurtma qabul qilindi');
+        nftHistLoad();
+        setTimeout(function(){ go('nft_hist'); }, 700);
+        return;
+      }
+      if(b) b.disabled = false;
+      if(d && d.error === 'balance'){
+        notify('error');
+        return toastErr('Mablag\' yetarli emas');
+      }
+      notify('error');
+      toastErr('Xato: ' + ((d && d.error) || 'yuborilmadi'));
+    }).catch(function(){
+      spBusy = false;
+      if(b){ b.disabled = false; b.textContent = spTab === 'stars' ? 'Stars sotib olish' : 'Premium sotib olish'; }
+      toastErr('Aloqa yo\'q');
+    });
+  });
+}
 
 /* --- Narx chizg'ichi --- */
 function mktRangeToggle(){
@@ -6173,6 +6262,7 @@ function nftLoad(cb){
       if(d && d.ok){
         nftGram = Number(d.gram) || 0;
         nftSom  = Number(d.som)  || 0;
+        if(Number(d.gramSom) > 0) gramSomRate = Number(d.gramSom);
         nftLoaded = true;
         if(isNftView(view)) nftRepaint();
       }
