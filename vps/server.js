@@ -2810,6 +2810,39 @@ function scanQueue(ids){
    Telegram rasmni faqat bot tokeni bilan beradi. Token ilovaga chiqmasligi uchun
    server o'zi olib, bayt sifatida uzatadi. 6 soat keshlanadi. */
 const avCache = new Map();
+/* ---------- Username bo'yicha profil ----------
+   Telegram'dan @username egasining ismini va rasmini olamiz.
+   Topilmasa "yo'q" deb qaytaradi — mijoz xato yozganini darrov ko'radi. */
+const unCache = new Map();
+app.get("/tg/user", async (req,res)=>{
+  const u = String(req.query.u || "").replace(/^@+/, "").trim();
+  if(!/^[A-Za-z0-9_]{4,32}$/.test(u)) return res.json({ ok:false, error:"format" });
+  if(!TOKEN) return res.json({ ok:false, error:"off" });
+  const key = u.toLowerCase();
+  const hit = unCache.get(key);
+  if(hit && Date.now() - hit.at < 3600000) return res.json(hit.v);
+  try{
+    const r = await fetch("https://api.telegram.org/bot" + TOKEN +
+      "/getChat?chat_id=" + encodeURIComponent("@" + u)).then(x=>x.json());
+    if(!r || !r.ok || !r.result){
+      const v = { ok:true, found:false };
+      unCache.set(key, { at:Date.now(), v:v });
+      return res.json(v);
+    }
+    const c = r.result;
+    /* Kanal yoki guruh bo'lsa Stars yuborib bo'lmaydi */
+    if(c.type && c.type !== "private"){
+      const v = { ok:true, found:false, why:"not_user" };
+      unCache.set(key, { at:Date.now(), v:v });
+      return res.json(v);
+    }
+    const name = [c.first_name, c.last_name].filter(Boolean).join(" ") || u;
+    const v = { ok:true, found:true, id:String(c.id||""), name:name, un:u };
+    unCache.set(key, { at:Date.now(), v:v });
+    res.json(v);
+  }catch(e){ res.json({ ok:false, error:"net" }); }
+});
+
 app.get("/avatar", async (req,res)=>{
   const uid = String(req.query.id || "").replace(/\D/g,"");
   if(!uid || !TOKEN) return res.status(404).end();
