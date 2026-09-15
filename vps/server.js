@@ -3590,6 +3590,38 @@ app.post("/webhook", (req,res)=>{
       return;
     }
     /* /gramlar — kutilayotgan GRAM to'ldirishlari va oxirgi kelganlar */
+    /* /nftsom @user 40000  — NFT bo'limidagi SO'M hamyoniga yozish.
+       /toldirish asosiy balansga tegadi, bu esa NFT hisobiga. */
+    if(text.indexOf("/nftsom") === 0){
+      if(ADMIN_ID && fromId !== ADMIN_ID) return;
+      const rawN = text.replace("/nftsom", "").trim();
+      const mN   = rawN.match(/\s+(-?\d+)\s*$/);
+      const amtN = mN ? Number(mN[1]) : NaN;
+      const qN   = (mN ? rawN.slice(0, mN.index) : rawN).trim().replace(/^@/, "").toLowerCase();
+      if(!qN || !mN || !isFinite(amtN)){
+        send(fromId, "Ishlatilishi:\n/nftsom @username 40000\n/nftsom @username -5000\n" +
+                     "/nftsom 123456789 20000\n\n" +
+                     "Bu NFT bo'limidagi so'm hisobiga tegadi.\n" +
+                     "Asosiy balans uchun: /toldirish");
+        return;
+      }
+      const dbN = load();
+      const hitN = findUser(dbN, qN);
+      if(!hitN || !dbN[hitN]){ send(fromId, "\u274C Topilmadi: " + qN); return; }
+      const uN = urec(dbN, hitN);
+      const eskiN = Number(uN.nftSom) || 0;
+      let yangiN = eskiN + amtN;
+      if(yangiN < 0) yangiN = 0;
+      uN.nftSom = Math.round(yangiN);
+      nftLog(uN, amtN > 0 ? "som_in" : "som_out", Math.abs(amtN),
+             { cur:"so'm", note: amtN > 0 ? "Qo'llab-quvvatlash orqali" : "Tuzatish" });
+      save(dbN);
+      send(fromId, "\u2705 " + (uN.nm || hitN) + (uN.un ? " (@" + uN.un + ")" : "") + "\n" +
+                   "NFT so'm: " + eskiN + " \u2192 " + uN.nftSom);
+      if(amtN > 0) send(hitN, "\uD83C\uDF81 NFT hisobingizga " + amtN +
+                        " so'm qo'shildi.\nJoriy qoldiq: " + uN.nftSom + " so'm", null, true);
+      return;
+    }
     if(text.indexOf("/gramlar") === 0){
       if(ADMIN_ID && fromId !== ADMIN_ID) return;
       const dbL = load();
