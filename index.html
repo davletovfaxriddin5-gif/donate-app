@@ -1351,12 +1351,24 @@ body.kb-open .buy-bar{ display:none !important }
   background:var(--blue); color:#fff; font-size:11.5px; font-weight:700; font-family:var(--sys) }
 
 /* ---- "Sovg'alarni qanday qo'shish?" varag'i ---- */
-.hw-sh{ text-align:left; height:87dvh; display:flex; flex-direction:column;
-  overflow-y:auto; -webkit-overflow-scrolling:touch }
-/* Rasm: burchaklari yumaloq, ortiqcha fon yo'q */
-.hw-sh .hw-img{ margin:0 0 16px; border-radius:20px; overflow:hidden;
+/* Bu varaq umumiy qoidalardan chetda: o'z shrifti, o'z o'lchovlari.
+   Yon bo'shliq tirnoqdek, pastga esa yopishadi. */
+.hw-sh, .hw-sh *{ font-family:-apple-system, BlinkMacSystemFont, "SF Pro Display",
+                  sans-serif !important; letter-spacing:-.2px !important }
+.hw-sh{ text-align:left; height:80dvh; display:flex; flex-direction:column;
+  overflow-y:auto; -webkit-overflow-scrolling:touch;
+  left:4px !important; right:4px !important; bottom:0 !important;
+  border-radius:26px 26px 0 0 !important;
+  padding:8px 10px calc(env(safe-area-inset-bottom) + 12px) !important }
+/* Rasm tepaga va yon tomonlarga yopishadi, pastki burchaklari yumaloq */
+.hw-sh .hw-img{ margin:0 -10px 16px; border-radius:22px; overflow:hidden;
   background:transparent; line-height:0 }
-.hw-sh .hw-img img{ width:100%; height:auto; display:block; border-radius:20px }
+.hw-sh .hw-img img{ width:100%; height:auto; display:block; border-radius:22px }
+/* Tutqich — barmoq bilan pastga surib yopish uchun */
+.hw-sh .hw-grab{ padding:6px 0 10px; margin:0 -10px; display:grid; place-items:center;
+  flex-shrink:0; touch-action:none }
+.hw-sh .hw-grab span{ width:40px; height:4px; border-radius:99px;
+  background:var(--stroke-2); display:block }
 .hw-sh .hw-top{ text-align:center }
 .hw-sh .hw-top .s b{ color:var(--blue); font-weight:600; cursor:pointer }
 .hw-sh .hw-top .s b:active{ opacity:.6 }
@@ -5682,7 +5694,8 @@ function mgHowTo(){
   const sh = document.createElement('div');
   sh.className = 'sheet hw-sh'; sh.id = 'hwSh';
   sh.innerHTML =
-    '<div class="grab"></div>' +
+    '<div class="hw-grab" ontouchstart="hwDragStart(event)" ' +
+      'ontouchmove="hwDragMove(event)" ontouchend="hwDragEnd(event)"><span></span></div>' +
     '<div class="hw-img"><img src="' + IMG('/qoshish-x1.webp') + '" alt="" ' +
       'onerror="this.parentNode.style.display=\'none\'"></div>' +
     '<div class="hw-box hw-top"><div class="t">Quyidagi tugma orqali botga o\'ting</div>' +
@@ -5701,6 +5714,23 @@ function mgHowTo(){
   requestAnimationFrame(function(){
     requestAnimationFrame(function(){ bg.classList.add('on'); sh.classList.add('on'); });
   });
+}
+/* Tutqichdan pastga surib yopish */
+let hwY = -1;
+function hwDragStart(e){ hwY = e.touches[0].clientY; }
+function hwDragMove(e){
+  if(hwY < 0) return;
+  const d = e.touches[0].clientY - hwY;
+  const sh = document.getElementById('hwSh');
+  if(sh && d > 0) sh.style.transform = 'translateY(' + d + 'px)';
+}
+function hwDragEnd(e){
+  const sh = document.getElementById('hwSh');
+  if(hwY < 0 || !sh) return;
+  const d = (e.changedTouches[0].clientY - hwY);
+  hwY = -1;
+  sh.style.transform = '';
+  if(d > 90) mgHowClose();
 }
 function mgHowClose(){
   const sh = document.getElementById('hwSh'), bg = document.getElementById('hwBg');
