@@ -1355,17 +1355,21 @@ body.kb-open .buy-bar{ display:none !important }
    Yon bo'shliq tirnoqdek, pastga esa yopishadi. */
 .hw-sh, .hw-sh *{ font-family:-apple-system, BlinkMacSystemFont, "SF Pro Display",
                   sans-serif !important; letter-spacing:-.2px !important }
+/* Ichki bo'shliq nolga tushdi — rasm chetgacha borsin.
+   Qolgan tarkib o'z bo'shlig'ini .hw-pad dan oladi. */
 .hw-sh{ text-align:left; height:80dvh; display:flex; flex-direction:column;
-  overflow-y:auto; -webkit-overflow-scrolling:touch;
   left:4px !important; right:4px !important; bottom:0 !important;
-  border-radius:26px 26px 0 0 !important;
-  padding:8px 10px calc(env(safe-area-inset-bottom) + 12px) !important }
-/* Rasm tepaga va yon tomonlarga yopishadi, pastki burchaklari yumaloq */
-.hw-sh .hw-img{ margin:0 -10px 16px; border-radius:22px; overflow:hidden;
-  background:transparent; line-height:0 }
-.hw-sh .hw-img img{ width:100%; height:auto; display:block; border-radius:22px }
+  border-radius:26px 26px 0 0 !important; overflow:hidden;
+  padding:0 0 calc(env(safe-area-inset-bottom) + 10px) !important }
+.hw-sh.drag{ transition:none !important }
+.hw-sh .hw-scroll{ flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch }
+.hw-sh .hw-pad{ padding:0 12px }
+.hw-sh .hw-foot{ padding-top:10px; flex-shrink:0 }
+/* Rasm: chetdan chetga, o'z nisbatida, kesilmaydi */
+.hw-sh .hw-img{ margin:0 0 14px; line-height:0; background:transparent }
+.hw-sh .hw-img img{ width:100%; height:auto; display:block; border-radius:0 0 20px 20px }
 /* Tutqich — barmoq bilan pastga surib yopish uchun */
-.hw-sh .hw-grab{ padding:6px 0 10px; margin:0 -10px; display:grid; place-items:center;
+.hw-sh .hw-grab{ padding:7px 0 6px; display:grid; place-items:center;
   flex-shrink:0; touch-action:none }
 .hw-sh .hw-grab span{ width:40px; height:4px; border-radius:99px;
   background:var(--stroke-2); display:block }
@@ -1380,7 +1384,7 @@ body.kb-open .buy-bar{ display:none !important }
   font-family:var(--sys); letter-spacing:-.2px }
 .hw-sh .hw-box .s{ font-size:13.5px; color:var(--faint); margin-top:5px; line-height:1.45;
   font-family:var(--sys) }
-.hw-sh .hw-go{ width:100%; height:50px; border-radius:16px; margin-top:auto;
+.hw-sh .hw-go{ width:100%; height:50px; border-radius:25px; margin:0;
   background:var(--blue); color:#fff; font-size:16px; font-weight:600;
   font-family:var(--sys); letter-spacing:-.2px; transition:.14s }
 .hw-sh .hw-go:active{ transform:scale(.99) }
@@ -5696,41 +5700,60 @@ function mgHowTo(){
   sh.innerHTML =
     '<div class="hw-grab" ontouchstart="hwDragStart(event)" ' +
       'ontouchmove="hwDragMove(event)" ontouchend="hwDragEnd(event)"><span></span></div>' +
-    '<div class="hw-img"><img src="' + IMG('/qoshish-x1.webp') + '" alt="" ' +
-      'onerror="this.parentNode.style.display=\'none\'"></div>' +
-    '<div class="hw-box hw-top"><div class="t">Quyidagi tugma orqali botga o\'ting</div>' +
-      '<div class="s">Bot username: <b onclick="mgCopyBot()">@' + esc(GIFT_TO) + '</b></div>' +
+    '<div class="hw-scroll">' +
+      '<div class="hw-img"><img src="' + IMG('/qoshish-x1.webp') + '" alt="" ' +
+        'onerror="this.parentNode.style.display=\'none\'"></div>' +
+      '<div class="hw-pad">' +
+        '<div class="hw-box hw-top"><div class="t">Quyidagi tugma orqali botga o\'ting</div>' +
+          '<div class="s">Bot username: <b onclick="mgCopyBot()">@' + esc(GIFT_TO) + '</b></div>' +
+        '</div>' +
+        '<div class="hw-box"><div class="t">Botga sovg\'a yuboring</div>' +
+          '<div class="s">Soni cheklanmagan</div></div>' +
+        '<div class="hw-box"><div class="t">Sovg\'a &lt;Sotuvda emas&gt; bo\'limida paydo bo\'ladi</div>' +
+          '<div class="s">Ishlov berish 2 daqiqadan oshmaydi</div></div>' +
+        '<div class="hw-box warn"><div class="t">\u26A0\uFE0F Firibgarlardan ehtiyot bo\'ling</div>' +
+          '<div class="s">Shaxsiy xabarlarda yuborilgan havola va ko\'rsatmalarga ' +
+          'e\'tibor bermang.</div></div>' +
+      '</div>' +
     '</div>' +
-    '<div class="hw-box"><div class="t">Botga sovg\'a yuboring</div>' +
-      '<div class="s">Soni cheklanmagan</div></div>' +
-    '<div class="hw-box"><div class="t">Sovg\'a &lt;Sotuvda emas&gt; bo\'limida paydo bo\'ladi</div>' +
-      '<div class="s">Ishlov berish 2 daqiqadan oshmaydi</div></div>' +
-    '<div class="hw-box warn"><div class="t">\u26A0\uFE0F Firibgarlardan ehtiyot bo\'ling</div>' +
-      '<div class="s">Shaxsiy xabarlarda yuborilgan havola va ko\'rsatmalarga ' +
-      'e\'tibor bermang.</div></div>' +
-    '<button class="hw-go" onclick="mgGoBot()">Sovg\'a qo\'shish</button>';
+    '<div class="hw-pad hw-foot">' +
+      '<button class="hw-go" onclick="mgGoBot()">Sovg\'a qo\'shish</button></div>';
 
   document.body.appendChild(bg); document.body.appendChild(sh);
   requestAnimationFrame(function(){
     requestAnimationFrame(function(){ bg.classList.add('on'); sh.classList.add('on'); });
   });
 }
-/* Tutqichdan pastga surib yopish */
-let hwY = -1;
-function hwDragStart(e){ hwY = e.touches[0].clientY; }
+/* Tutqichdan pastga surib yopish.
+   Barmoq bilan birga silliq harakatlanadi: surish paytida animatsiya
+   o'chiriladi (aks holda har harakatda u qarshilik qilib qotardi) va
+   yangilanish kadrga bog'lanadi. */
+let hwY = -1, hwD = 0, hwRaf = 0;
+function hwDragStart(e){
+  const sh = document.getElementById('hwSh'); if(!sh) return;
+  hwY = e.touches[0].clientY; hwD = 0;
+  sh.classList.add('drag');
+}
 function hwDragMove(e){
   if(hwY < 0) return;
-  const d = e.touches[0].clientY - hwY;
-  const sh = document.getElementById('hwSh');
-  if(sh && d > 0) sh.style.transform = 'translateY(' + d + 'px)';
+  hwD = e.touches[0].clientY - hwY;
+  if(hwD < 0) hwD = 0;
+  if(hwRaf) return;
+  hwRaf = requestAnimationFrame(function(){
+    hwRaf = 0;
+    const sh = document.getElementById('hwSh');
+    if(sh) sh.style.transform = 'translateY(' + hwD + 'px)';
+  });
 }
-function hwDragEnd(e){
+function hwDragEnd(){
   const sh = document.getElementById('hwSh');
   if(hwY < 0 || !sh) return;
-  const d = (e.changedTouches[0].clientY - hwY);
   hwY = -1;
+  if(hwRaf){ cancelAnimationFrame(hwRaf); hwRaf = 0; }
+  sh.classList.remove('drag');     /* animatsiya qaytadi — qolgani silliq */
   sh.style.transform = '';
-  if(d > 90) mgHowClose();
+  if(hwD > 90) mgHowClose();
+  hwD = 0;
 }
 function mgHowClose(){
   const sh = document.getElementById('hwSh'), bg = document.getElementById('hwBg');
