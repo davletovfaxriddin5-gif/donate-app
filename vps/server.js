@@ -1976,7 +1976,7 @@ app.get("/nft/gifts", (req,res)=>{
    Narx SO'M da belgilanadi. GRAM narxi jonli kursda hisoblanadi,
    shuning uchun kurs o'zgarsa sotuvchi qayta narxlashi shart emas. */
 const SALE_MIN = Number(process.env.SALE_MIN || 5000);       /* eng kam narx, so'm */
-const SALE_FEE = Number(process.env.SALE_FEE || 5);          /* sotuvdan olinadigan %, */
+const SALE_FEE = Number(process.env.SALE_FEE || 2000);       /* sotuvdan olinadigan haq, so'm */
 
 app.post("/nft/gift/sale", (req,res)=>{
   const who = checkInit(req.body && req.body.initData);
@@ -2081,8 +2081,9 @@ app.post("/nft/gift/buy", (req,res)=>{
     if(cur === "gram") b2.gram = Math.round((Number(b2.gram) - payGram) * 1e9) / 1e9;
     else               b2.nftSom = Math.round(Number(b2.nftSom) - som);
 
-    /* Sotuvchiga yozamiz — komissiya ayirib */
-    const fee  = Math.round(som * SALE_FEE / 100);
+    /* Sotuvchiga yozamiz — belgilangan haq ayirib.
+       Haq narxdan oshmasin: kichik sotuvda sotuvchi minusga tushmasligi kerak. */
+    const fee  = Math.min(SALE_FEE, Math.floor(som / 2));
     const paid = som - fee;
     s2.nftSom = Math.round(Number(s2.nftSom || 0) + paid);
 
@@ -2109,7 +2110,7 @@ app.post("/nft/gift/buy", (req,res)=>{
                               web_app: { url: APP_URL } } ]] });
     sendMd(sid, "\uD83D\uDCB0 [" + g2.name + "](" + lnk + ") sotildi.\n\n" +
       "Siz oldingiz: *" + paid + " so'm*" +
-      (fee ? ("\n(komissiya " + SALE_FEE + "% \u2014 " + fee + " so'm)") : "") +
+      (fee ? ("\n(xizmat haqi " + fee + " so'm)") : "") +
       "\nJoriy qoldiq: " + s2.nftSom + " so'm");
     if(ADMIN_ID) sendMd(ADMIN_ID, "\uD83D\uDD04 [" + g2.name + "](" + lnk + ") sotildi\n\n" +
       "Sotuvchi: " + (s2.nm || sid) + "\nXaridor: " + (b2.nm || who.id) +
