@@ -1867,6 +1867,24 @@ function giftName(g){
   const n = (g.gift && g.gift.num)   ? ("#" + g.gift.num)   : "";
   return (t + " " + n).trim();
 }
+/* NFT havolasi. Telegram bu havolani ko'rsatganda animatsiyasi bilan
+   chiroyli chizadi — shuning uchun rasm yubormaymiz, havola yetadi. */
+function giftLink(slug){
+  return slug ? ("https://t.me/nft/" + String(slug)) : "";
+}
+/* Markdown bilan yuborish: havola ko'rinishi yoqilgan holda */
+function sendMd(chatId, text, markup){
+  if(!TOKEN || !chatId) return;
+  const body = { chat_id: chatId, text: text, parse_mode: "Markdown" };
+  if(markup) body.reply_markup = markup;
+  fetch("https://api.telegram.org/bot" + TOKEN + "/sendMessage", {
+    method:"POST", headers:{"Content-Type":"application/json"},
+    body: JSON.stringify(body)
+  }).then(function(r){ return r.json(); }).then(function(j){
+    if(j && j.ok === false) console.log("SEND(md) rad etildi:", chatId, j.description);
+  }).catch(function(){});
+}
+
 function giftPic(g){
   const s = (g.gift && g.gift.slug) ? String(g.gift.slug) : "";
   return s ? ("https://nft.fragment.com/gift/" + s.toLowerCase() + ".medium.jpg") : "";
@@ -1922,11 +1940,18 @@ async function giftScan(){
       nftLog(u, "gift_in", 0, { cur:"", item: giftName(g), note:"Hisobga qo'shildi" });
       changed = true;
 
-      send(from, "\uD83C\uDF81 " + giftName(g) + " hisobingizga qo'shildi.\n\n" +
-        "U <Sotuvda emas> bo'limida turibdi. Sotuvga qo'yish yoki o'z hisobingizga " +
-        "chiqarib olish uchun ilovani oching.", null, true);
-      if(ADMIN_ID) send(ADMIN_ID, "\uD83C\uDF81 Sovg'a qabul qilindi\n" + giftName(g) +
-        "\nKimdan: " + (u.nm || from) + (u.un ? " (@" + u.un + ")" : ""));
+      const lnk = giftLink(g.gift.slug);
+      const nmG = giftName(g);
+      sendMd(from,
+        "\uD83C\uDF81 [" + nmG + "](" + lnk + ") hisobingizga qo'shildi.\n\n" +
+        "U *Sotuvda emas* bo'limida turibdi \u2014 sotuvga qo'yishingiz yoki " +
+        "o'z hisobingizga chiqarib olishingiz mumkin.",
+        { inline_keyboard: [[ { text: "\uD83C\uDF81 Sovg'alarimni ko'rish",
+                                web_app: { url: APP_URL } } ]] });
+      if(ADMIN_ID) sendMd(ADMIN_ID,
+        "\uD83C\uDF81 [" + nmG + "](" + lnk + ") qabul qilindi\n\n" +
+        "Kimdan: " + (u.nm || from) + (u.un ? " (@" + u.un + ")" : "") +
+        "\nid: " + from + "\nHolati: Sotuvda emas");
     }
     if(changed) save(db);
   }catch(e){
@@ -1982,10 +2007,12 @@ app.post("/nft/gift/out", async (req,res)=>{
     if(i2 >= 0) u2.gifts.splice(i2, 1);
     nftLog(u2, "gift_out", GIFT_FEE, { cur:"GRAM", item:g.name, note:"Hisobga chiqarildi" });
     save(db2);
-    send(who.id, "\u2705 " + g.name + " hisobingizga yuborildi.\n" +
-      "Xizmat haqi: " + GIFT_FEE + " GRAM\nQoldiq: " + u2.gram + " GRAM", null, true);
-    if(ADMIN_ID) send(ADMIN_ID, "\uD83D\uDCE4 Sovg'a chiqarildi\n" + g.name +
-      "\nKimga: " + (u2.nm || who.id) + (u2.un ? " (@" + u2.un + ")" : ""));
+    const lnk2 = giftLink(g.slug);
+    sendMd(who.id, "\u2705 [" + g.name + "](" + lnk2 + ") hisobingizga yuborildi.\n\n" +
+      "Xizmat haqi: " + GIFT_FEE + " GRAM\nQoldiq: " + u2.gram + " GRAM");
+    if(ADMIN_ID) sendMd(ADMIN_ID, "\uD83D\uDCE4 [" + g.name + "](" + lnk2 + ") chiqarildi\n\n" +
+      "Kimga: " + (u2.nm || who.id) + (u2.un ? " (@" + u2.un + ")" : "") +
+      "\nHaq: " + GIFT_FEE + " GRAM");
     res.json({ ok:true, left:u2.gram });
   }catch(e){
     /* Yuborilmadi — haqni qaytaramiz */
