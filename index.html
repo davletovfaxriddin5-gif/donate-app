@@ -5391,7 +5391,7 @@ function nftOpen(id){
   const mine = !!(tgUser && String(n.seller) === String(tgUser.id));
   sh.innerHTML =
     '<div class="grab"></div>' +
-    '<div class="gf-im">' + (n.img
+    '<div class="gf-im" id="gfIm">' + (n.img
       ? '<img src="' + esc(n.img) + '" alt="" onerror="this.style.display=\'none\'">'
       : '\uD83C\uDF81') + '</div>' +
     '<div class="gf-nm">' + esc(n.name || 'NFT') + '</div>' +
@@ -5405,6 +5405,7 @@ function nftOpen(id){
   requestAnimationFrame(function(){
     requestAnimationFrame(function(){ bg.classList.add('on'); sh.classList.add('on'); });
   });
+  lotPlay('gfIm', n.slug);
 }
 function nftBuyGo(cur){
   if(nftBusy || !nftSel) return;
@@ -5889,6 +5890,55 @@ let mgSeg = 'un';      /* un = sotuvda emas, on = sotuvda */
 function setMgTab(t){ haptic(); mgTab = t; renderNftGifts(); }
 function setMgSeg(s){ haptic(); mgSeg = s; renderNftGifts(); }
 
+/* ---------- NFT animatsiyasi ----------
+   Fragment har NFT uchun lottie.json beradi. Kutubxona faqat sovg'a
+   oynasi ochilganda yuklanadi — ro'yxatlarda statik rasm qoladi,
+   shuning uchun ilova sekinlashmaydi. */
+let lotLoading = null;
+function lotLib(){
+  if(window.lottie) return Promise.resolve(true);
+  if(lotLoading) return lotLoading;
+  lotLoading = new Promise(function(res){
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie_light.min.js';
+    s.onload  = function(){ res(!!window.lottie); };
+    s.onerror = function(){ res(false); };
+    document.head.appendChild(s);
+  });
+  return lotLoading;
+}
+function lotUrl(slug){
+  return slug ? ('https://nft.fragment.com/gift/' + String(slug).toLowerCase() + '.lottie.json') : '';
+}
+let lotAnim = null;
+function lotStop(){
+  if(lotAnim){ try{ lotAnim.destroy(); }catch(e){} lotAnim = null; }
+}
+/* Oynadagi rasmni animatsiyaga almashtiradi */
+function lotPlay(boxId, slug){
+  const url = lotUrl(slug); if(!url) return;
+  lotLib().then(function(ok){
+    if(!ok) return;                       /* kutubxona kelmadi — rasm qoladi */
+    const box = document.getElementById(boxId);
+    if(!box) return;
+    fetch(url).then(function(r){ return r.json(); }).then(function(data){
+      const b = document.getElementById(boxId);
+      if(!b) return;
+      lotStop();
+      b.innerHTML = '';
+      lotAnim = window.lottie.loadAnimation({
+        container: b, renderer: 'svg', loop: false, autoplay: true, animationData: data
+      });
+      /* Bosilganda qaytadan o'ynaydi */
+      b.onclick = function(){
+        if(!lotAnim) return;
+        haptic();
+        try{ lotAnim.goToAndPlay(0, true); }catch(e){}
+      };
+    }).catch(function(){});
+  });
+}
+
 /* ---------- NFT profili ----------
    Bosh sahifadagi profildan MUSTAQIL: bu yerda faqat NFT bo'limining
    raqamlari ko'rinadi. Xavfsizlik (Google, Face ID, parol) esa umumiy —
@@ -6037,7 +6087,7 @@ function mgOpen(msgId){
   sh.className = 'sheet gf-sh'; sh.id = 'gfSh';
   sh.innerHTML =
     '<div class="grab"></div>' +
-    '<div class="gf-im">' + (g.pic
+    '<div class="gf-im" id="gfIm">' + (g.pic
       ? '<img src="' + esc(g.pic) + '" alt="" onerror="this.style.display=\'none\'">'
       : '\uD83C\uDF81') + '</div>' +
     '<div class="gf-nm">' + esc(g.name || 'NFT') + '</div>' +
@@ -6053,8 +6103,10 @@ function mgOpen(msgId){
   requestAnimationFrame(function(){
     requestAnimationFrame(function(){ bg.classList.add('on'); sh.classList.add('on'); });
   });
+  lotPlay('gfIm', g.slug);
 }
 function mgClose(){
+  lotStop();
   const sh = document.getElementById('gfSh'), bg = document.getElementById('gfBg');
   if(sh) sh.classList.remove('on');
   if(bg) bg.classList.remove('on');
