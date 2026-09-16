@@ -3914,6 +3914,14 @@ function go(v){
 function onBack(){
   const l = document.getElementById('pwLock');
   if(l && l.classList.contains('on')){ pwClose(); return; }
+  /* NFT profili — qaysi ekrandan kirilgan bo'lsa o'shanga qaytadi */
+  if(view==='nft_profile'){ haptic(); go(pfFrom || 'nft_market'); return; }
+  /* NFT bo'limidan to'lovga o'tilgan bo'lsa, bosh sahifaga emas — hamyonga */
+  if(view==='topup' && topDest === 'nft'){
+    haptic();
+    if(topMethod){ topMethod = null; stConfirm = 0; renderTopup(); return; }
+    go('nft_wallet'); return;
+  }
   if(view==='nft_wallet'){ haptic(); go(walletFrom); return; }
   if(view==='nft_gram'){ haptic(); go(gramFrom); return; }
   if(view==='nft_top'){ haptic(); go('nft_wallet'); return; }
@@ -5900,6 +5908,12 @@ function nftStats(){
   });
   return { orders: getNftOrders().length, sold: sold, spent: Math.round(spent) };
 }
+let pfFrom = 'nft_market';
+function openNftProfile(){
+  haptic();
+  pfFrom = isNftView(view) ? view : 'nft_market';
+  go('nft_profile');
+}
 function renderNftProfile(){
   const st   = nftStats();
   const name = tgUser ? [tgUser.first_name, tgUser.last_name].filter(Boolean).join(' ') : 'Foydalanuvchi';
@@ -6475,7 +6489,7 @@ function renderNftGifts(){
 
   app.innerHTML = `
   <div class="mg-bal">
-    <button class="mg-pf" onclick="go('nft_profile')" aria-label="Profil">${nftAva()}</button>
+    <button class="mg-pf" onclick="openNftProfile()" aria-label="Profil">${nftAva()}</button>
     <button class="chip" onclick="openGram()">${fmtGram(getGram())}<small>GRAM</small></button>
     <button class="chip" onclick="openWallet()">${money(getNftSom(), false)}</button>
   </div>
@@ -6642,7 +6656,7 @@ function renderNftMarket(){
   }
   app.innerHTML = `
   <div class="mg-bal">
-    <button class="mg-pf" onclick="go('nft_profile')" aria-label="Profil">${nftAva()}</button>
+    <button class="mg-pf" onclick="openNftProfile()" aria-label="Profil">${nftAva()}</button>
     <button class="chip" onclick="openGram()">${fmtGram(getGram())}<small>GRAM</small></button>
     <button class="chip" onclick="openWallet()">${money(getNftSom(), false)}</button>
   </div>
