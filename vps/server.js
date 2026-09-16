@@ -1972,6 +1972,157 @@ app.get("/nft/gifts", (req,res)=>{
              fee: GIFT_FEE });
 });
 
+/* ---------- Sotuvga qo'yish va olish ----------
+   Narx SO'M da belgilanadi. GRAM narxi jonli kursda hisoblanadi,
+   shuning uchun kurs o'zgarsa sotuvchi qayta narxlashi shart emas. */
+const SALE_MIN = Number(process.env.SALE_MIN || 5000);       /* eng kam narx, so'm */
+const SALE_FEE = Number(process.env.SALE_FEE || 5);          /* sotuvdan olinadigan %, */
+
+app.post("/nft/gift/sale", (req,res)=>{
+  const who = checkInit(req.body && req.body.initData);
+  if(!who) return res.json({ ok:false, error:"auth" });
+  const msgId = String(req.body.msgId || "").trim();
+  const price = Math.round(Number(req.body.price) || 0);
+  const off   = !!req.body.off;                               /* sotuvdan olish */
+
+  const db = load();
+  const u  = urec(db, who.id);
+  const g  = ((u.gifts)||[]).find(function(x){ return String(x.msgId) === msgId; });
+  if(!g) return res.json({ ok:false, error:"none" });
+  if(g.state === "out") return res.json({ ok:false, error:"busy" });
+
+  if(off){
+    g.state = "idle"; g.price = 0; g.saleAt = null;
+    save(db);
+    return res.json({ ok:true, state:"idle" });
+  }
+  if(price < SALE_MIN) return res.json({ ok:false, error:"min", min:SALE_MIN });
+  if(price > 500000000) return res.json({ ok:false, error:"max" });
+
+  g.state  = "sale";
+  g.price  = price;
+  g.saleAt = new Date().toISOString();
+  g.seller = String(who.id);
+  save(db);
+  res.json({ ok:true, state:"sale", price:price });
+});
+
+/* Bozordagi barcha sovg'alar */
+app.get("/nft/market", (req,res)=>{
+  const db = load();
+  const out = [];
+  Object.keys(db).forEach(function(k){
+    if(!/^\d+$/.test(k)) return;
+    ((db[k].gifts)||[]).forEach(function(g){
+      if(g.state !== "sale") return;
+      out.push({ msgId:g.msgId, name:g.name, slug:g.slug, num:g.num,
+                 pic:g.pic, price:g.price, seller:k,
+                 sellerName:(db[k].nm || ""), at:g.saleAt || g.at });
+    });
+  });
+  out.sort(function(a,b){ return Date.parse(b.at||0) - Date.parse(a.at||0); });
+  gramSom().then(function(rate){
+    res.json({ ok:true, rows: out.slice(0, 200), gramSom: rate || 0 });
+  });
+});
+
+/* ---------- Sovg'ani sotib olish ----------
+   Sovg'a bizning hisobimizda turgani uchun uni jismonan ko'chirish shart
+   emas — faqat egasi o'zgaradi. Shuning uchun amal bir zumda va xavfsiz:
+   pul yechiladi, sovg'a o'tadi, ikkalasi bitta yozuvda saqlanadi. */
+app.post("/nft/gift/buy", (req,res)=>{
+  const who = checkInit(req.body && req.body.initData);
+  if(!who) return res.json({ ok:false, error:"auth" });
+  const msgId = String(req.body.msgId || "").trim();
+  const cur   = (String(req.body.cur) === "gram") ? "gram" : "som";
+
+  const db = load();
+  /* Sotuvchini va sovg'ani topamiz */
+  let sid = "", g = null;
+  Object.keys(db).forEach(function(k){
+    if(!/^\d+$/.test(k) || g) return;
+    const hit = ((db[k].gifts)||[]).find(function(x){
+      return String(x.msgId) === msgId && x.state === "sale"; });
+    if(hit){ sid = k; g = hit; }
+  });
+  if(!g) return res.json({ ok:false, error:"gone" });
+  if(sid === String(who.id)) return res.json({ ok:false, error:"self" });
+
+  const buyer  = urec(db, who.id);
+  const seller = urec(db, sid);
+  const som    = Number(g.price) || 0;
+
+  return (async function(){
+    let payGram = 0;
+    if(cur === "gram"){
+      const rate = await gramSom();
+      if(!(rate > 0)) return res.json({ ok:false, error:"rate" });
+      payGram = Math.ceil((som / rate) * 1000) / 1000;
+      if(Number(buyer.gram || 0) < payGram)
+        return res.json({ ok:false, error:"low", need:payGram, cur:"GRAM" });
+    } else {
+      if(Number(buyer.nftSom || 0) < som)
+        return res.json({ ok:false, error:"low", need:som, cur:"so'm" });
+    }
+
+    /* Sovg'a hali ham sotuvdami — oxirgi tekshiruv */
+    const db2 = load();
+    let sid2 = "", g2 = null;
+    Object.keys(db2).forEach(function(k){
+      if(!/^\d+$/.test(k) || g2) return;
+      const hit = ((db2[k].gifts)||[]).find(function(x){
+        return String(x.msgId) === msgId && x.state === "sale"; });
+      if(hit){ sid2 = k; g2 = hit; }
+    });
+    if(!g2 || sid2 !== sid) return res.json({ ok:false, error:"gone" });
+
+    const b2 = urec(db2, who.id), s2 = urec(db2, sid);
+    /* Xaridordan yechamiz */
+    if(cur === "gram") b2.gram = Math.round((Number(b2.gram) - payGram) * 1e9) / 1e9;
+    else               b2.nftSom = Math.round(Number(b2.nftSom) - som);
+
+    /* Sotuvchiga yozamiz — komissiya ayirib */
+    const fee  = Math.round(som * SALE_FEE / 100);
+    const paid = som - fee;
+    s2.nftSom = Math.round(Number(s2.nftSom || 0) + paid);
+
+    /* Sovg'a egasini almashtiramiz */
+    const idx = s2.gifts.findIndex(function(x){ return String(x.msgId) === msgId; });
+    if(idx >= 0) s2.gifts.splice(idx, 1);
+    if(!Array.isArray(b2.gifts)) b2.gifts = [];
+    b2.gifts.unshift(Object.assign({}, g2, {
+      state:"idle", price:0, saleAt:null, seller:null,
+      at:new Date().toISOString(), boughtFrom:sid, boughtFor:som
+    }));
+
+    nftLog(b2, "nft_buy", cur === "gram" ? payGram : som,
+           { cur: cur === "gram" ? "GRAM" : "so'm", item:g2.name, note:"NFT sotib olindi" });
+    nftLog(s2, "nft_sell", paid,
+           { cur:"so'm", item:g2.name, note:"NFT sotildi (komissiya " + fee + ")" });
+    save(db2);
+
+    const lnk = giftLink(g2.slug);
+    sendMd(who.id, "\uD83D\uDED2 [" + g2.name + "](" + lnk + ") sotib olindi.\n\n" +
+      "To'landi: " + (cur === "gram" ? (payGram + " GRAM") : (som + " so'm")) +
+      "\nSovg'a *Sotuvda emas* bo'limida.",
+      { inline_keyboard: [[ { text: "\uD83C\uDF81 Sovg'alarimni ko'rish",
+                              web_app: { url: APP_URL } } ]] });
+    sendMd(sid, "\uD83D\uDCB0 [" + g2.name + "](" + lnk + ") sotildi.\n\n" +
+      "Siz oldingiz: *" + paid + " so'm*" +
+      (fee ? ("\n(komissiya " + SALE_FEE + "% \u2014 " + fee + " so'm)") : "") +
+      "\nJoriy qoldiq: " + s2.nftSom + " so'm");
+    if(ADMIN_ID) sendMd(ADMIN_ID, "\uD83D\uDD04 [" + g2.name + "](" + lnk + ") sotildi\n\n" +
+      "Sotuvchi: " + (s2.nm || sid) + "\nXaridor: " + (b2.nm || who.id) +
+      "\nNarx: " + som + " so'm  |  komissiya: " + fee);
+
+    res.json({ ok:true, cur:cur, paid: cur === "gram" ? payGram : som,
+               gram:b2.gram, som:b2.nftSom });
+  })().catch(function(e){
+    console.log("NFT sotib olish xato:", e.message);
+    res.json({ ok:false, error:"server" });
+  });
+});
+
 /* Sovg'ani o'z hisobiga chiqarish */
 app.post("/nft/gift/out", async (req,res)=>{
   const who = checkInit(req.body && req.body.initData);
