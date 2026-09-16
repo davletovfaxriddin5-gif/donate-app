@@ -956,11 +956,18 @@ body.nft-mode{ --nav-h:74px }
 body.nft-mode .nav-nft{ display:none }
 
 /* === Sovg'alarim === */
-.mg-bal{ display:flex; justify-content:flex-end; gap:8px; margin:0 0 7px }
-.mg-bal .chip small{ font-size:11.5px; font-weight:600; color:var(--faint); margin-left:5px }
-.mg-bal .chip{ display:inline-flex; align-items:center; height:34px; padding:0 15px; border-radius:999px;
+.mg-bal{ display:flex; align-items:center; justify-content:flex-end; gap:7px; margin:0 0 7px }
+.mg-bal .chip small{ font-size:10.5px; font-weight:600; color:var(--faint); margin-left:4px }
+.mg-bal .chip{ display:inline-flex; align-items:center; height:30px; padding:0 12px; border-radius:999px;
   background:var(--card-2); border:1px solid var(--stroke-2); color:var(--text);
-  font-size:13.5px; font-weight:600; letter-spacing:-.2px; white-space:nowrap }
+  font-size:12.5px; font-weight:600; letter-spacing:-.2px; white-space:nowrap }
+/* Chap tarafdagi profil tugmasi */
+.mg-bal .mg-pf{ margin-right:auto; width:32px; height:32px; border-radius:50%; overflow:hidden;
+  flex-shrink:0; background:var(--card-2); border:1px solid var(--stroke-2);
+  display:grid; place-items:center; font-weight:700; font-size:13px; color:var(--text);
+  transition:.14s }
+.mg-bal .mg-pf img{ width:100%; height:100%; object-fit:cover; display:block }
+.mg-bal .mg-pf:active{ transform:scale(.94) }
 
 .mg-tabs{ display:flex; gap:14px; overflow-x:auto; scrollbar-width:none;
   margin:0 0 11px; padding:0 2px 2px }
@@ -1279,6 +1286,29 @@ body.light .sp-card .sub{ text-shadow:none; color:var(--faint) }
 .nftm-fil button svg{ width:13px; height:13px; stroke:var(--faint); fill:none; stroke-width:2.3;
   stroke-linecap:round; stroke-linejoin:round; flex-shrink:0 }
 .nftm-fil button:active{ transform:scale(.992) }
+/* ---- NFT profili ---- */
+.np-top{ text-align:center; padding:6px 0 16px }
+.np-av{ width:78px; height:78px; border-radius:50%; margin:0 auto 10px; overflow:hidden;
+  background:var(--card-2); border:1px solid var(--stroke-2); display:grid; place-items:center;
+  font-size:30px; font-weight:700; color:var(--text) }
+.np-av img{ width:100%; height:100%; object-fit:cover; display:block }
+.np-nm{ font-size:19px; font-weight:700; letter-spacing:-.4px; color:var(--text) }
+.np-un{ font-size:13px; color:var(--faint); margin-top:2px }
+.np-bal{ display:flex; gap:9px; margin-bottom:9px }
+.np-b{ flex:1; min-width:0; padding:13px 14px; border-radius:17px;
+  background:var(--card); border:1px solid var(--stroke) }
+.np-b .l{ font-size:11.5px; color:var(--faint); margin-bottom:4px }
+.np-b .v{ font-size:18px; font-weight:700; letter-spacing:-.5px; color:var(--text);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+.np-b .v small{ font-size:11px; font-weight:600; color:var(--faint); margin-left:4px }
+.np-st{ display:flex; gap:9px; margin-bottom:18px }
+.np-s{ flex:1; padding:12px 8px; border-radius:17px; text-align:center;
+  background:var(--card); border:1px solid var(--stroke) }
+.np-s .n{ font-size:17px; font-weight:700; letter-spacing:-.4px; color:var(--text) }
+.np-s .l{ font-size:11px; color:var(--faint); margin-top:3px }
+.np-note{ font-size:11.5px; color:var(--faint); line-height:1.45; margin-top:12px;
+  padding:0 2px }
+
 /* NFT bo'limining shrifti — iPhone'da SF Pro, Android'da Roboto.
    body.nft-mode faqat NFT ekranlarida yoqiladi, shuning uchun bosh
    sahifaga va boshqa bo'limlarga tegmaydi. */
@@ -3869,6 +3899,7 @@ function go(v){
   else if(v==='spam') renderSpam();
   else if(v==='chat') renderChat();
   else if(v==='profile'){ pfLoaded = false; renderProfile(); }
+  else if(v==='nft_profile') renderNftProfile();
   else if(v==='nft_wallet') renderWallet();
   else if(v==='nft_gram') renderGram();
   else if(v==='nft_top') renderNftTopup();
@@ -4983,6 +5014,33 @@ document.addEventListener('visibilitychange', function(){
 
 /* ---- Face ID / barmoq izi — Telegram BiometricManager orqali ---- */
 function bioMgr(){ return (tg && tg.BiometricManager) ? tg.BiometricManager : null; }
+/* Xavfsizlik qatorlari — sozlamalarda ham, NFT profilida ham bir xil.
+   Holat umumiy, shuning uchun bir joyda yoqilsa ikkalasida ko'rinadi. */
+function secRows(){ return `
+    <button class="svc" onclick="gTap()">
+      <span class="ic" style="background:#EA4335">
+        <svg viewBox="0 0 24 24"><path d="M21 12.2c0-.7-.06-1.2-.2-1.8H12v3.4h5.2a4.4 4.4 0 0 1-1.9 2.9v2.4h3.1c1.8-1.7 2.6-4.1 2.6-6.9z"/><path d="M12 21c2.5 0 4.6-.8 6.1-2.2l-3-2.3a5.6 5.6 0 0 1-8.3-2.9H3.7v2.4A9 9 0 0 0 12 21z"/><path d="M6.8 13.6a5.4 5.4 0 0 1 0-3.4V7.8H3.7a9 9 0 0 0 0 8.1l3.1-2.3z"/><path d="M12 6.6c1.4 0 2.6.5 3.6 1.4l2.7-2.7A9 9 0 0 0 3.7 7.8l3.1 2.4A5.4 5.4 0 0 1 12 6.6z"/></svg>
+      </span>
+      <span class="txt"><div class="t">Google</div>
+        <div class="s">${gInfo && gInfo.email ? gInfo.email : "Parolni tiklash uchun bog'lash"}</div></span>
+      ${gInfo && gInfo.email ? '<span class="st-on">Ulangan</span>' : '<span class="arw">›</span>'}
+    </button>
+    <button class="svc" onclick="bioToggle()">
+      <span class="ic" style="background:#2F9E62">
+        <svg viewBox="0 0 24 24"><path d="M4 8.5V6a2 2 0 0 1 2-2h2.5M20 8.5V6a2 2 0 0 0-2-2h-2.5M4 15.5V18a2 2 0 0 0 2 2h2.5M20 15.5V18a2 2 0 0 1-2 2h-2.5M9 9.5v1.5M15 9.5v1.5M9 15c1.7 1.3 4.3 1.3 6 0"/></svg>
+      </span>
+      <span class="txt"><div class="t">${bioName()}</div><div class="s">Buyurtma berishda tasdiqlash</div></span>
+      <span class="${bioOn() ? 'st-on' : 'st-off'}">${bioOn() ? 'Yoqilgan' : "O'chiq"}</span>
+    </button>
+    <button class="svc" onclick="pwTap()">
+      <span class="ic" style="background:#3B4DF0">
+        <svg viewBox="0 0 24 24"><rect x="4.5" y="10.5" width="15" height="10" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3M12 14.5v2"/></svg>
+      </span>
+      <span class="txt"><div class="t">Parol</div>
+        <div class="s">${pwInfo && pwInfo.has ? "Parol qo'yilgan" : "Parol qo'yish"}</div></span>
+      ${pwInfo && pwInfo.has ? '<span class="st-on">Yoqilgan</span>' : '<span class="arw">›</span>'}
+    </button>
+`; }
 function bioOn(){ try{ return localStorage.getItem('mt_bio') === '1'; }catch(e){ return false; } }
 function bioSet(v){ try{ localStorage.setItem('mt_bio', v ? '1' : '0'); }catch(e){} }
 function bioName(){
@@ -5222,36 +5280,14 @@ function renderProfile(){
 
   <div class="pf-sec">Xavfsizlik</div>
   <div class="pf-list">
-    <button class="svc" onclick="gTap()">
-      <span class="ic" style="background:#EA4335">
-        <svg viewBox="0 0 24 24"><path d="M21 12.2c0-.7-.06-1.2-.2-1.8H12v3.4h5.2a4.4 4.4 0 0 1-1.9 2.9v2.4h3.1c1.8-1.7 2.6-4.1 2.6-6.9z"/><path d="M12 21c2.5 0 4.6-.8 6.1-2.2l-3-2.3a5.6 5.6 0 0 1-8.3-2.9H3.7v2.4A9 9 0 0 0 12 21z"/><path d="M6.8 13.6a5.4 5.4 0 0 1 0-3.4V7.8H3.7a9 9 0 0 0 0 8.1l3.1-2.3z"/><path d="M12 6.6c1.4 0 2.6.5 3.6 1.4l2.7-2.7A9 9 0 0 0 3.7 7.8l3.1 2.4A5.4 5.4 0 0 1 12 6.6z"/></svg>
-      </span>
-      <span class="txt"><div class="t">Google</div>
-        <div class="s">${gInfo && gInfo.email ? gInfo.email : "Parolni tiklash uchun bog'lash"}</div></span>
-      ${gInfo && gInfo.email ? '<span class="st-on">Ulangan</span>' : '<span class="arw">›</span>'}
-    </button>
-    <button class="svc" onclick="bioToggle()">
-      <span class="ic" style="background:#2F9E62">
-        <svg viewBox="0 0 24 24"><path d="M4 8.5V6a2 2 0 0 1 2-2h2.5M20 8.5V6a2 2 0 0 0-2-2h-2.5M4 15.5V18a2 2 0 0 0 2 2h2.5M20 15.5V18a2 2 0 0 1-2 2h-2.5M9 9.5v1.5M15 9.5v1.5M9 15c1.7 1.3 4.3 1.3 6 0"/></svg>
-      </span>
-      <span class="txt"><div class="t">${bioName()}</div><div class="s">Buyurtma berishda tasdiqlash</div></span>
-      <span class="${bioOn() ? 'st-on' : 'st-off'}">${bioOn() ? 'Yoqilgan' : "O'chiq"}</span>
-    </button>
-    <button class="svc" onclick="pwTap()">
-      <span class="ic" style="background:#3B4DF0">
-        <svg viewBox="0 0 24 24"><rect x="4.5" y="10.5" width="15" height="10" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3M12 14.5v2"/></svg>
-      </span>
-      <span class="txt"><div class="t">Parol</div>
-        <div class="s">${pwInfo && pwInfo.has ? "Parol qo'yilgan" : "Parol qo'yish"}</div></span>
-      ${pwInfo && pwInfo.has ? '<span class="st-on">Yoqilgan</span>' : '<span class="arw">›</span>'}
-    </button>
+${secRows()}
   </div>`;
 }
 
 /* ===== NFT bo'limi — donat xizmatining ikkinchi ekrani =====
    Oddiy foydalanuvchiga "Texnik xizmat" ko'rinadi.
    MAINT_OK ro'yxatidagi ID (admin) uchun bo'lim ochiq. */
-function isNftView(v){ return v==='nft_gifts' || v==='nft_market' || v==='nft_hist' || v==='nft_wallet'
+function isNftView(v){ return v==='nft_profile' || v==='nft_gifts' || v==='nft_market' || v==='nft_hist' || v==='nft_wallet'
   || v==='nft_gram' || v==='nft_top' || v==='nft_out' || v==='nft_out_wallet'
   || v==='nft_out_stars' || v==='nft_out_card'; }
 function nftAdmin(){ return !!(tgUser && MAINT_OK.indexOf(tgUser.id) > -1); }
@@ -5838,6 +5874,60 @@ let mgSeg = 'un';      /* un = sotuvda emas, on = sotuvda */
 function setMgTab(t){ haptic(); mgTab = t; renderNftGifts(); }
 function setMgSeg(s){ haptic(); mgSeg = s; renderNftGifts(); }
 
+/* ---------- NFT profili ----------
+   Bosh sahifadagi profildan MUSTAQIL: bu yerda faqat NFT bo'limining
+   raqamlari ko'rinadi. Xavfsizlik (Google, Face ID, parol) esa umumiy —
+   bosh sahifada ulangan bo'lsa bu yerda ham ulangan turadi. */
+function nftAva(){
+  const p = tgUser && tgUser.photo_url ? tgUser.photo_url : '';
+  const n = tgUser ? String(tgUser.first_name || 'U') : 'U';
+  return p ? `<img src="${esc(p)}" alt="" onerror="this.style.display='none'">`
+           : esc(n.charAt(0).toUpperCase());
+}
+/* NFT bo'limining o'z hisob-kitobi */
+function nftStats(){
+  let spent = 0, sold = 0;
+  (nftHist || []).forEach(function(r){
+    if(r.kind === 'nft_buy'  && (r.cur || "so'm") === "so'm") spent += Number(r.amount) || 0;
+    if(r.kind === 'nft_sell') sold++;
+  });
+  return { orders: getNftOrders().length, sold: sold, spent: Math.round(spent) };
+}
+function renderNftProfile(){
+  const st   = nftStats();
+  const name = tgUser ? [tgUser.first_name, tgUser.last_name].filter(Boolean).join(' ') : 'Foydalanuvchi';
+  const un   = tgUser && tgUser.username ? '@' + tgUser.username : '';
+  app.innerHTML = `
+  <div class="np-top">
+    <div class="np-av">${nftAva()}</div>
+    <div class="np-nm">${esc(name)}</div>
+    ${un ? `<div class="np-un">${esc(un)}</div>` : ''}
+  </div>
+
+  <div class="np-bal">
+    <div class="np-b">
+      <div class="l">Hamyon balansi</div>
+      <div class="v">${money(getNftSom(), false)}</div>
+    </div>
+    <div class="np-b">
+      <div class="l">GRAM hisobi</div>
+      <div class="v">${fmtGram(getGram())}<small>GRAM</small></div>
+    </div>
+  </div>
+
+  <div class="np-st">
+    <div class="np-s"><div class="n">${st.orders}</div><div class="l">Buyurtma</div></div>
+    <div class="np-s"><div class="n">${st.sold}</div><div class="l">NFT sotilgan</div></div>
+    <div class="np-s"><div class="n">${fmt(st.spent)}</div><div class="l">Sarflangan</div></div>
+  </div>
+
+  <div class="pf-sec">Xavfsizlik</div>
+  <div class="svc-box">${secRows()}</div>
+  <div class="np-note">Xavfsizlik sozlamalari butun ilova uchun umumiy \u2014
+    bosh sahifada ulangan bo'lsa bu yerda ham ishlaydi.</div>`;
+  if(!gInfo) gLoad();
+}
+
 /* ---------- Sovg'alar ombori ----------
    @minato_Gifts hisobiga yuborilgan NFT lar serverda saqlanadi. */
 let mgList = [], mgFee = 0.4, mgLoaded = false, mgPick = null;
@@ -6376,6 +6466,7 @@ function renderNftGifts(){
 
   app.innerHTML = `
   <div class="mg-bal">
+    <button class="mg-pf" onclick="go('nft_profile')" aria-label="Profil">${nftAva()}</button>
     <button class="chip" onclick="openGram()">${fmtGram(getGram())}<small>GRAM</small></button>
     <button class="chip" onclick="openWallet()">${money(getNftSom(), false)}</button>
   </div>
@@ -6542,6 +6633,7 @@ function renderNftMarket(){
   }
   app.innerHTML = `
   <div class="mg-bal">
+    <button class="mg-pf" onclick="go('nft_profile')" aria-label="Profil">${nftAva()}</button>
     <button class="chip" onclick="openGram()">${fmtGram(getGram())}<small>GRAM</small></button>
     <button class="chip" onclick="openWallet()">${money(getNftSom(), false)}</button>
   </div>
