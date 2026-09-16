@@ -6066,7 +6066,7 @@ const HW_GIFT = '<svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><pat
 const HW_CHK  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.8 9.4 17.6 19.5 6.6"/></svg>';
 const HW_WARN = '<svg viewBox="0 0 24 24" fill="none" stroke="none"><circle cx="12" cy="12" r="11" fill="#E5484D"/><path d="M12 6.6a1.15 1.15 0 0 1 1.15 1.22l-.34 5.6a.81.81 0 0 1-1.62 0l-.34-5.6A1.15 1.15 0 0 1 12 6.6z" fill="#fff"/><circle cx="12" cy="16.8" r="1.32" fill="#fff"/></svg>';
 
-function mgAdd(){ mgHowTo(); }
+function mgAdd(){ mgHowTo('/qoshish-x2.webp'); }
 /* Yuqoridagi "Chiqarish" tugmasi — qaysi sovg'a ekanini so'raydi */
 function mgOut(){
   haptic();
@@ -6345,8 +6345,9 @@ function mgSendGo(){
 }
 /* ---------- "Sovg'alarni qanday qo'shish?" ----------
    Pastdan chiqadigan qo'llanma: rasm, uch qadam va tugma. */
-function mgHowTo(){
+function mgHowTo(pic){
   haptic();
+  const hwPic = pic || '/qoshish-x1.webp';
   const old = document.getElementById('hwSh'); if(old) old.remove();
   const oldBg = document.getElementById('hwBg'); if(oldBg) oldBg.remove();
 
@@ -6360,7 +6361,7 @@ function mgHowTo(){
   sh.innerHTML =
     '<div class="hw-grab"><span></span></div>' +
     '<div class="hw-scroll">' +
-      '<div class="hw-img"><img src="' + IMG('/qoshish-x1.webp') + '" alt="" ' +
+      '<div class="hw-img"><img src="' + IMG(hwPic) + '" alt="" ' +
         'onerror="this.parentNode.style.display=\'none\'"></div>' +
       '<div class="hw-pad">' +
         '<div class="hw-box"><i class="ic tg">' + HW_TG + '</i><div class="bd">' +
