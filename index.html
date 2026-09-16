@@ -7473,21 +7473,46 @@ function getNftTop(){ try{ return JSON.parse(localStorage.getItem('mt_nft_top')|
 function addNftTop(o){
   try{ const a = getNftTop(); a.unshift(o); localStorage.setItem('mt_nft_top', JSON.stringify(a.slice(0,200))); }catch(e){}
 }
+/* ---------- Hamyon tarixi ----------
+   Hammasi serverdagi yagona ro'yxatdan olinadi (nftHist) va bo'limlarga
+   ajratiladi. Har yozuv qaysi tugmaga tegishli ekani "t" bilan belgilanadi. */
 function walletLog(){
+  const MAP = {
+    som_in:   { t:'top',   ic:'\uD83D\uDCB3', sub:"Hisob to'ldirildi", plus:true  },
+    som_out:  { t:'out',   ic:'\uD83C\uDFE7', sub:'Kartaga yechildi',  plus:false },
+    gram_in:  { t:'top',   ic:'\uD83D\uDC8E', sub:"GRAM to'ldirildi",  plus:true  },
+    gram_out: { t:'out',   ic:'\uD83D\uDC8E', sub:'GRAM yechildi',     plus:false },
+    nft_sell: { t:'gifts', ic:'\uD83C\uDF81', sub:'Sotildi',           plus:true  },
+    nft_buy:  { t:'gifts', ic:'\uD83D\uDED2', sub:'Sotib olindi',      plus:false },
+    gift_in:  { t:'gifts', ic:'\uD83C\uDF81', sub:'Qabul qilindi',     plus:true  },
+    gift_out: { t:'gifts', ic:'\uD83D\uDCE4', sub:'Yuborildi',         plus:false }
+  };
   const out = [];
-  getNftTop().forEach(function(r){ out.push({ t:'top', ic:'💳', nm:r.method||'Karta', sub:"Hisob to'ldirildi",
-    plus:true, amount:r.amount, status:r.status, at:r.at }); });
-  getNftIn().forEach(function(r){ out.push({ t:'sale', ic:'🎁', nm:r.item||"Sovg'a", sub:'Sotildi',
-    plus:true, amount:r.amount, status:r.status, at:r.at }); });
-  getNftOrders().forEach(function(r){ out.push({ t:'buy', ic:'🛍️', nm:r.item||"Sovg'a", sub:'Sotib olindi',
-    plus:false, amount:r.price, status:r.status, at:r.at }); });
-  getPayouts().forEach(function(r){ out.push({ t:'out', ic:'🏧', nm:r.card||'Karta', sub:'Kartaga yechildi',
-    plus:false, amount:r.amount, status:r.status, at:r.at }); });
+  (nftHist || []).forEach(function(r){
+    const m = MAP[r.kind];
+    if(!m) return;
+    out.push({ t:m.t, ic:m.ic, nm: r.item || r.card || r.note || m.sub,
+               sub: r.note || m.sub, plus:m.plus,
+               amount: Number(r.amount) || 0, cur: r.cur || "so'm",
+               status: r.status || 'done', at: r.at });
+  });
+  /* Stars va Premium buyurtmalari — alohida bo'limda */
+  getNftOrders().forEach(function(o){
+    const isTg = (o.gameId === 'tgstars' || o.gameId === 'tgpremium');
+    out.push({ t: isTg ? (o.gameId === 'tgstars' ? 'stars' : 'tg') : 'gifts',
+               ic: o.glyph || '\u2B50',
+               nm: [o.game, o.package].filter(Boolean).join(' \u2014 '),
+               sub: (o.status === 'refund' || o.status === 'cancel') ? 'Bekor qilindi' : 'Sotib olindi',
+               plus:false,
+               amount: (o.pay === 'gram' && o.gram) ? Number(o.gram) : Number(o.price) || 0,
+               cur: (o.pay === 'gram') ? 'GRAM' : "so'm",
+               status: o.status || 'done', at: o.at });
+  });
   return out.sort(function(a,b){ return (Date.parse(b.at)||0) - (Date.parse(a.at)||0); });
 }
 function walletRows(){
   let rows = walletLog();
-  if(wlTab === 'gifts')  rows = rows.filter(function(r){ return r.t === 'buy' || r.t === 'sale'; });
+  if(wlTab === 'gifts')  rows = rows.filter(function(r){ return r.t === 'gifts'; });
   if(wlTab === 'offers') rows = rows.filter(function(r){ return r.t === 'offer'; });
   if(wlTab === 'tg')     rows = rows.filter(function(r){ return r.t === 'tg'; });
   if(wlTab === 'stars')  rows = rows.filter(function(r){ return r.t === 'stars'; });
@@ -7501,12 +7526,16 @@ function walletRows(){
     out += `<div class="mg-row">
       <div class="ic">${r.ic}</div>
       <div class="tx"><div class="nm">${r.nm}</div><div class="sb">${r.sub}</div></div>
-      <div class="pv"${r.plus?' style="color:#4FE0A0"':''}>${r.plus?'+':'-'}${fmt(r.amount||0)}</div>
+      <div class="pv"${r.plus?' style="color:#4FE0A0"':''}>${r.amount
+        ? (r.plus?'+':'-') + (r.cur === 'GRAM' ? (fmtGram(r.amount) + ' GRAM') : fmt(r.amount))
+        : ''}</div>
     </div>`;
   });
   return out;
 }
 function renderWallet(){
+  /* Tarix doim yangi bo'lsin */
+  if(!nftHistLoaded) setTimeout(function(){ try{ nftHistLoad(); }catch(e){} }, 0);
   const cur  = curNow();
   const bal  = getNftSom();
   const main = money(bal, false);
