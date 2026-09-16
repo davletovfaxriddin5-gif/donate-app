@@ -1286,6 +1286,28 @@ body.light .sp-card .sub{ text-shadow:none; color:var(--faint) }
 .nftm-fil button svg{ width:13px; height:13px; stroke:var(--faint); fill:none; stroke-width:2.3;
   stroke-linecap:round; stroke-linejoin:round; flex-shrink:0 }
 .nftm-fil button:active{ transform:scale(.992) }
+/* ---- NFT bo'limiga o'tish pardasi ---- */
+.dr-wrap{ position:fixed; inset:0; z-index:400; pointer-events:none }
+.dr-wrap .dr{ position:absolute; left:0; right:0; height:52%;
+  transition:transform .48s cubic-bezier(.33,.72,.2,1) }
+/* Ranglar ilovaning ko'kidan boshqa — quyuq tunji va oltin chiziq */
+.dr-wrap .dr.t{ top:0; transform:translateY(-101%);
+  background:linear-gradient(180deg, #10142A 0%, #171D3A 78%, #232B57 100%);
+  box-shadow:0 10px 30px -8px rgba(0,0,0,.6) }
+.dr-wrap .dr.b{ bottom:0; transform:translateY(101%);
+  background:linear-gradient(0deg, #10142A 0%, #171D3A 78%, #232B57 100%);
+  box-shadow:0 -10px 30px -8px rgba(0,0,0,.6) }
+/* Tutashgan joyda ingichka yorug' chiziq */
+.dr-wrap .dr.t:after, .dr-wrap .dr.b:after{ content:''; position:absolute; left:0; right:0;
+  height:2px; background:linear-gradient(90deg, transparent, #C9A227 18%, #F2D06B 50%, #C9A227 82%, transparent);
+  opacity:0; transition:opacity .2s .28s }
+.dr-wrap .dr.t:after{ bottom:0 }
+.dr-wrap .dr.b:after{ top:0 }
+.dr-wrap.shut .dr.t, .dr-wrap.shut .dr.b{ transform:translateY(0) }
+.dr-wrap.shut .dr.t:after, .dr-wrap.shut .dr.b:after{ opacity:1 }
+body.light .dr-wrap .dr.t{ background:linear-gradient(180deg,#1B2140 0%,#2A3260 78%,#3A4478 100%) }
+body.light .dr-wrap .dr.b{ background:linear-gradient(0deg,#1B2140 0%,#2A3260 78%,#3A4478 100%) }
+
 /* ---- NFT profili ---- */
 .np-top{ text-align:center; padding:6px 0 16px }
 .np-av{ width:78px; height:78px; border-radius:50%; margin:0 auto 10px; overflow:hidden;
@@ -5306,10 +5328,41 @@ function isNftView(v){ return v==='nft_profile' || v==='nft_gifts' || v==='nft_m
   || v==='nft_gram' || v==='nft_top' || v==='nft_out' || v==='nft_out_wallet'
   || v==='nft_out_stars' || v==='nft_out_card'; }
 function nftAdmin(){ return !!(tgUser && MAINT_OK.indexOf(tgUser.id) > -1); }
-function toggleNft(){ haptic(); if(isNftView(view)) go('home'); else go('nft_gifts'); }
+/* ---------- NFT bo'limiga o'tish: darvoza ----------
+   Ikki qanot tepadan va pastdan kelib o'rtada tutashadi, ekran shu
+   pardaning orqasida almashadi, keyin qanotlar orqaga qaytib ochiladi. */
+function nftDoor(next){
+  const old = document.getElementById('drWrap');
+  if(old) old.remove();
+  const w = document.createElement('div');
+  w.className = 'dr-wrap'; w.id = 'drWrap';
+  w.innerHTML = '<div class="dr t"></div><div class="dr b"></div>';
+  document.body.appendChild(w);
+
+  /* 1. Yopilish */
+  requestAnimationFrame(function(){
+    requestAnimationFrame(function(){ w.classList.add('shut'); });
+  });
+  /* 2. Yopilgach ekranni almashtiramiz */
+  setTimeout(function(){
+    try{ next(); }catch(e){}
+    haptic();
+    /* 3. Ochilish */
+    setTimeout(function(){
+      w.classList.remove('shut');
+      setTimeout(function(){ if(w) w.remove(); }, 560);
+    }, 90);
+  }, 480);
+}
+function toggleNft(){
+  haptic();
+  if(isNftView(view)){ nftDoor(function(){ go('home'); }); return; }
+  nftDoor(function(){ go('nft_gifts'); });
+}
 
 /* NFT / gift buyurtmalari tarixi */
-function getNftOrders(){ try{ return JSON.parse(localStorage.getItem('mt_nft_orders')||'[]'); }catch(e){ return []; } }
+/* Eski, telefonda saqlaydigan nusxa olib tashlandi — u yuqoridagi
+   serverdan oladigan getNftOrders ni bekor qilib qo'yardi. */
 function addNftOrder(o){
   try{ const a=getNftOrders(); a.unshift(o); localStorage.setItem('mt_nft_orders', JSON.stringify(a.slice(0,200))); }catch(e){}
 }
