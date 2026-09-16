@@ -4975,7 +4975,12 @@ function gLoad(){
     method:'POST', headers:{ 'Content-Type':'application/json' },
     body: JSON.stringify({ initData: (tg && tg.initData) || '' })
   }).then(function(r){ return r.json(); }).then(function(d){
-    if(d && d.ok){ gInfo = d; if(view === 'profile') renderProfile(); }
+    if(d && d.ok){
+      gInfo = d;
+      if(view === 'profile') renderProfile();
+      else if(view === 'nft_profile') renderNftProfile();
+      else if(view === 'settings') renderSettings();
+    }
   }).catch(function(){});
 }
 function gTap(){
@@ -5126,6 +5131,8 @@ function pwLoad(){
       pwInfo = d; pwCache(d.has);
       if(!d.has) pwHide();
       if(view === 'profile') renderProfile();
+      else if(view === 'nft_profile') renderNftProfile();
+      else if(view === 'settings') renderSettings();
     }
     return d;
   }).catch(function(){ return null; });
@@ -5925,7 +5932,9 @@ function renderNftProfile(){
   <div class="svc-box">${secRows()}</div>
   <div class="np-note">Xavfsizlik sozlamalari butun ilova uchun umumiy \u2014
     bosh sahifada ulangan bo'lsa bu yerda ham ishlaydi.</div>`;
-  if(!gInfo) gLoad();
+  /* Google va parol holati serverdan keladi — kelgach ekran o'zi yangilanadi */
+  if(!gInfo)  { try{ gLoad(); }catch(e){} }
+  if(!pwInfo) { try{ pwLoad(); }catch(e){} }
 }
 
 /* ---------- Sovg'alar ombori ----------
