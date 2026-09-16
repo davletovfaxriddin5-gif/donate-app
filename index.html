@@ -3828,6 +3828,7 @@ function nftEnsure(){
   try{ nftMigrate(); }catch(e){}
   setTimeout(function(){ try{ nftHistLoad(); }catch(e){} }, 250);
   setTimeout(function(){ try{ mgLoad(); }catch(e){} }, 450);
+  setTimeout(function(){ try{ mktLoad(); }catch(e){} }, 600);
 }
 function go(v){
   /* Ayni shu ekranda turib o'sha tugmani bosish hech narsani o'zgartirmaydi.
@@ -5250,10 +5251,30 @@ function addNftOrder(o){
 /* Savdodagi NFT lar. Bo'sh bo'lsa "Hozircha bo'sh" chiqadi.
    Qo'shish uchun namuna:
    { id:'snoop', name:'Snoop Dogg', num:'517686', price:120000, img:'/snoop.png', glyph:'🐶' } */
-const NFT_ITEMS = [];
+/* Bozordagi NFT lar. Serverdan keladi — sotuvga qo'yilganlar. */
+let NFT_ITEMS = [], mktLoaded = false;
+function mktLoad(cb){
+  fetch(VBASE + '/nft/market')
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if(d && d.ok){
+        NFT_ITEMS = (d.rows || []).map(function(r){
+          return { id:r.msgId, name:r.name, price:Number(r.price)||0,
+                   img:r.pic, slug:r.slug, num:r.num,
+                   seller:r.seller, sellerName:r.sellerName,
+                   collection:'', model:'', bg:'', sym:'' };
+        });
+        if(Number(d.gramSom) > 0) gramSomRate = Number(d.gramSom);
+        mktLoaded = true;
+        if(view === 'nft_market' && mktTab !== 'stars') mktBodyDraw();
+      }
+      if(cb) cb();
+    }).catch(function(){ if(cb) cb(); });
+}
 
 function nftMarketCards(){
   const items = mktFiltered();
+  if(!mktLoaded) return `<div class="empty"><div class="em">\u23F3</div><h3>Yuklanmoqda\u2026</h3></div>`;
   if(!items.length){
     return NFT_ITEMS.length
       ? `<div class="empty"><div class="em">🔍</div><h3>Topilmadi</h3><p>Filtrlarni o'zgartirib ko'ring.</p></div>`
@@ -5262,10 +5283,10 @@ function nftMarketCards(){
   const listy = (mktView === 'list');
   return `<div class="nftm-grid${listy?' list':''}">${items.map(function(n){
     if(listy) return `<div class="nftm-card">
-      <div class="nftm-pic">${n.img ? `<img src="${IMG(n.img)}" alt="" loading="lazy">` : `<span class="gl">${n.glyph||'🎁'}</span>`}</div>
+      <div class="nftm-pic">${n.img ? `<img src="${esc(n.img)}" alt="" loading="lazy">` : `<span class="gl">${n.glyph||'🎁'}</span>`}</div>
       <div class="tx"><div class="nm">${n.name||'NFT'}</div><div class="no">#${n.num||'—'}</div></div>
       <div class="nftm-buy">
-        <button class="pr" onclick="nftBuy()">${n.price ? fmtGram(n.price) + ' 💎' : '—'}</button>
+        <button class="pr" onclick="nftOpen('${esc(n.id)}')">${n.price ? money(n.price, true) : '—'}</button>
         <button class="cart" onclick="nftCart()">
           <svg viewBox="0 0 24 24"><path d="M3 9h18l-1.5 9.3a2 2 0 0 1-2 1.7H6.5a2 2 0 0 1-2-1.7L3 9zM8.5 9L11 4M15.5 9L13 4"/></svg>
         </button>
@@ -5274,13 +5295,13 @@ function nftMarketCards(){
     return ((function(n){
     return `<div class="nftm-card">
       <div class="nftm-pic">
-        ${n.img ? `<img src="${IMG(n.img)}" alt="" loading="lazy">` : `<span class="gl">${n.glyph||'🎁'}</span>`}
+        ${n.img ? `<img src="${esc(n.img)}" alt="" loading="lazy">` : `<span class="gl">${n.glyph||'🎁'}</span>`}
         <span class="nftm-badges"><span>💳</span><span>🍀</span></span>
       </div>
       <div class="nm">${n.name||'NFT'}</div>
       <div class="no">#${n.num||'—'}</div>
       <div class="nftm-buy">
-        <button class="pr" onclick="nftBuy()">${n.price ? fmtGram(n.price) + ' 💎' : '—'}</button>
+        <button class="pr" onclick="nftOpen('${esc(n.id)}')">${n.price ? money(n.price, true) : '—'}</button>
         <button class="cart" onclick="nftCart()">
           <svg viewBox="0 0 24 24"><path d="M3 9h18l-1.5 9.3a2 2 0 0 1-2 1.7H6.5a2 2 0 0 1-2-1.7L3 9zM8.5 9L11 4M15.5 9L13 4"/></svg>
         </button>
@@ -5288,7 +5309,76 @@ function nftMarketCards(){
     </div>`; })(n));
   }).join('')}</div>`;
 }
-function nftBuy(){ haptic(); bioAsk(function(){ toast('Tez orada'); }); }
+/* ---------- Bozordagi NFT: ko'rish va sotib olish ---------- */
+let nftSel = null, nftBusy = false;
+function nftOpen(id){
+  haptic();
+  const n = NFT_ITEMS.find(function(x){ return String(x.id) === String(id); });
+  if(!n) return;
+  nftSel = n;
+  const old = document.getElementById('gfSh'); if(old) old.remove();
+  const ob  = document.getElementById('gfBg'); if(ob) ob.remove();
+  const bg = document.createElement('div');
+  bg.className = 'sheet-bg'; bg.id = 'gfBg'; bg.onclick = mgClose;
+  const sh = document.createElement('div');
+  sh.className = 'sheet gf-sh'; sh.id = 'gfSh';
+  const gram = somToGram(n.price);
+  const mine = !!(tgUser && String(n.seller) === String(tgUser.id));
+  sh.innerHTML =
+    '<div class="grab"></div>' +
+    '<div class="gf-im">' + (n.img
+      ? '<img src="' + esc(n.img) + '" alt="" onerror="this.style.display=\'none\'">'
+      : '\uD83C\uDF81') + '</div>' +
+    '<div class="gf-nm">' + esc(n.name || 'NFT') + '</div>' +
+    '<div class="gf-sb">' + money(n.price, true) +
+      (gram ? (' \u00b7 ' + fmtGram(gram) + ' GRAM') : '') + '</div>' +
+    (mine
+      ? '<div class="gf-fee">Bu sizning sovg\'angiz</div>'
+      : '<button class="gf-b1" onclick="nftBuyGo(\'som\')">So\'m bilan olish</button>' +
+        '<button class="gf-b2" style="margin-top:9px" onclick="nftBuyGo(\'gram\')">GRAM bilan olish</button>');
+  document.body.appendChild(bg); document.body.appendChild(sh);
+  requestAnimationFrame(function(){
+    requestAnimationFrame(function(){ bg.classList.add('on'); sh.classList.add('on'); });
+  });
+}
+function nftBuyGo(cur){
+  if(nftBusy || !nftSel) return;
+  haptic();
+  const n = nftSel;
+  const gram = somToGram(n.price);
+  if(cur === 'gram' && gram > getGram()){ toast('GRAM yetarli emas'); return; }
+  if(cur === 'som'  && n.price > getNftSom()){ toast('Mablag\' yetarli emas'); return; }
+  bioAsk(function(){
+    nftBusy = true;
+    const b = document.querySelector('#gfSh .gf-b1');
+    if(b){ b.disabled = true; b.textContent = 'Olinmoqda\u2026'; }
+    fetch(VBASE + '/nft/gift/buy', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ initData: tg.initData || '', msgId: n.id, cur: cur })
+    }).then(function(r){ return r.json(); }).then(function(d){
+      nftBusy = false;
+      if(d && d.ok){
+        if(typeof d.gram === 'number') setGram(d.gram);
+        if(typeof d.som  === 'number') setNftSom(d.som);
+        notify('success'); toastOk('\u2705 Sotib olindi');
+        mgClose(); mktLoad(); mgLoad(); nftHistLoad();
+        mgSeg = 'un';
+        setTimeout(function(){ go('nft_gifts'); }, 700);
+        return;
+      }
+      if(b){ b.disabled = false; b.textContent = 'So\'m bilan olish'; }
+      notify('error');
+      if(d && d.error === 'gone') return toastErr('Bu sovg\'a allaqachon sotilgan');
+      if(d && d.error === 'low')  return toastErr('Mablag\' yetarli emas');
+      if(d && d.error === 'self') return toastErr('O\'z sovg\'angiz');
+      toastErr('Bajarilmadi');
+    }).catch(function(){
+      nftBusy = false;
+      if(b){ b.disabled = false; b.textContent = 'So\'m bilan olish'; }
+      toastErr('Aloqa yo\'q');
+    });
+  });
+}
 
 /* ---------- Market filtrlari ----------
    NFT yozuvining shakli:
@@ -5842,8 +5932,90 @@ function mgClose(){
   if(bg) bg.classList.remove('on');
   setTimeout(function(){ if(sh) sh.remove(); if(bg) bg.remove(); }, 320);
 }
-function mgSale(){ haptic(); toast('Tez orada'); }
-function mgUnsale(){ haptic(); toast('Tez orada'); }
+/* ---------- Sotuvga qo'yish ----------
+   Narx so'mda kiritiladi, GRAM jonli kursda ko'rsatiladi. */
+function mgSale(){
+  if(!mgPick) return;
+  haptic();
+  const g = mgPick;
+  const sh = document.getElementById('gfSh');
+  if(!sh) return;
+  sh.innerHTML =
+    '<div class="grab"></div>' +
+    '<div class="gf-nm" style="text-align:left;margin-bottom:3px">Narx belgilash</div>' +
+    '<div class="gf-sb" style="text-align:left;margin-bottom:14px">' + esc(g.name) + '</div>' +
+    '<div class="gr-amt" style="margin:6px 0 4px">' +
+      '<input id="slPr" type="text" inputmode="numeric" value="" placeholder="0" oninput="mgSaleIn(this)">' +
+      '<span class="u">so\'m</span>' +
+    '</div>' +
+    '<div class="gf-fee" id="slHint" style="margin:0 0 14px">Eng kami 5 000 so\'m</div>' +
+    '<button class="gf-b1" id="slGo" disabled onclick="mgSaleGo()">Sotuvga qo\'yish</button>' +
+    '<button class="gf-b2" style="margin-top:9px" onclick="mgOpen(\'' + esc(g.msgId) + '\')">Orqaga</button>';
+  setTimeout(function(){ const el = document.getElementById('slPr'); if(el) el.focus(); }, 120);
+}
+function mgSaleIn(el){
+  el.value = String(el.value).replace(/[^0-9]/g, '');
+  const v = parseInt(el.value, 10) || 0;
+  const h = document.getElementById('slHint');
+  const b = document.getElementById('slGo');
+  const gram = somToGram(v);
+  if(h){
+    h.innerHTML = (v >= 5000)
+      ? ('Xaridor uchun: <b>' + fmt(v) + " so'm</b>" +
+         (gram ? (' yoki <b>' + fmtGram(gram) + ' GRAM</b>') : '') +
+         "<br>Sizga tushadi: <b>" + fmt(Math.max(0, v - Math.min(2000, Math.floor(v/2)))) + " so'm</b>")
+      : "Eng kami 5 000 so'm";
+  }
+  if(b) b.disabled = !(v >= 5000);
+}
+function mgSaleGo(){
+  if(!mgPick) return;
+  haptic();
+  const v = parseInt((document.getElementById('slPr')||{}).value || '0', 10) || 0;
+  if(v < 5000){ toast("Eng kami 5 000 so'm"); return; }
+  const b = document.getElementById('slGo');
+  if(b){ b.disabled = true; b.textContent = 'Qo\'yilmoqda\u2026'; }
+  bioAsk(function(){
+    fetch(VBASE + '/nft/gift/sale', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ initData: tg.initData || '', msgId: mgPick.msgId, price: v })
+    }).then(function(r){ return r.json(); }).then(function(d){
+      if(d && d.ok){
+        notify('success'); toastOk('Sotuvga qo\'yildi');
+        mgClose(); mgSeg = 'on'; mgLoad();
+        return;
+      }
+      if(b){ b.disabled = false; b.textContent = 'Sotuvga qo\'yish'; }
+      notify('error');
+      toastErr((d && d.error === 'min') ? ('Eng kami ' + fmt(d.min) + " so'm") : 'Bajarilmadi');
+    }).catch(function(){
+      if(b){ b.disabled = false; b.textContent = 'Sotuvga qo\'yish'; }
+      toastErr('Aloqa yo\'q');
+    });
+  });
+}
+/* Sotuvdan olish */
+function mgUnsale(){
+  if(!mgPick) return;
+  haptic();
+  const b = document.querySelector('#gfSh .gf-b2');
+  if(b){ b.disabled = true; b.textContent = 'Olinmoqda\u2026'; }
+  fetch(VBASE + '/nft/gift/sale', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ initData: tg.initData || '', msgId: mgPick.msgId, off: true })
+  }).then(function(r){ return r.json(); }).then(function(d){
+    if(d && d.ok){
+      notify('success'); toastOk('Sotuvdan olindi');
+      mgClose(); mgSeg = 'un'; mgLoad();
+      return;
+    }
+    if(b){ b.disabled = false; b.textContent = 'Sotuvdan olish'; }
+    toastErr('Bajarilmadi');
+  }).catch(function(){
+    if(b){ b.disabled = false; b.textContent = 'Sotuvdan olish'; }
+    toastErr('Aloqa yo\'q');
+  });
+}
 
 /* Sovg'ani o'z hisobiga chiqarish */
 let mgBusy = false;
