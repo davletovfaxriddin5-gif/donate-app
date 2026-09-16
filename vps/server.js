@@ -1855,6 +1855,152 @@ app.post("/gram/out", async (req,res)=>{
   }
 });
 
+/* ---------- NFT sovg'alari ombori ----------
+   @minato_Gifts hisobiga kelgan sovg'alar kuzatiladi. Kim yuborgani
+   Telegram javobida ko'rinadi, shuning uchun sovg'a avtomatik ravishda
+   o'sha odamning omboriga yoziladi. */
+const GIFT_FEE = Number(process.env.GIFT_FEE || 0.4);   /* chiqarish haqi, GRAM */
+let giftBusy = false;
+
+function giftName(g){
+  const t = (g.gift && g.gift.title) ? String(g.gift.title) : "Sovg'a";
+  const n = (g.gift && g.gift.num)   ? ("#" + g.gift.num)   : "";
+  return (t + " " + n).trim();
+}
+function giftPic(g){
+  const s = (g.gift && g.gift.slug) ? String(g.gift.slug) : "";
+  return s ? ("https://nft.fragment.com/gift/" + s.toLowerCase() + ".medium.jpg") : "";
+}
+
+async function giftScan(){
+  if(giftBusy) return;
+  const cl = await mtpClient();
+  if(!cl) return;
+  giftBusy = true;
+  try{
+    const { Api } = require("telegram/tl");
+    const r = await cl.invoke(new Api.payments.GetSavedStarGifts({
+      peer: "me", offset: "", limit: 50 }));
+    const list = r.gifts || [];
+    if(!list.length){ giftBusy = false; return; }
+
+    const db = load();
+    let changed = false;
+    for(const g of list){
+      if(!g.gift || g.gift.className !== "StarGiftUnique") continue;  /* faqat NFT */
+      const msgId = g.msgId != null ? String(g.msgId) : "";
+      if(!msgId) continue;
+
+      /* Allaqachon yozilganmi? */
+      let known = false;
+      Object.keys(db).forEach(function(k){
+        if(!/^\d+$/.test(k)) return;
+        if(((db[k].gifts)||[]).some(function(x){ return String(x.msgId) === msgId; })) known = true;
+      });
+      if(known) continue;
+
+      const from = (g.fromId && g.fromId.userId) ? String(g.fromId.userId) : "";
+      if(!from || !db[from]){
+        /* Egasi bizda yo'q — adminni xabardor qilamiz, yo'qolib ketmasin */
+        if(ADMIN_ID) send(ADMIN_ID, "\u2757 Sovg'a keldi, lekin yuboruvchi bazada yo'q\n" +
+          giftName(g) + "\nid: " + (from || "noma'lum") + "\nmsgId: " + msgId);
+        continue;
+      }
+      const u = urec(db, from);
+      if(!Array.isArray(u.gifts)) u.gifts = [];
+      u.gifts.unshift({
+        msgId: msgId,
+        name:  giftName(g),
+        slug:  (g.gift.slug || ""),
+        num:   g.gift.num || 0,
+        pic:   giftPic(g),
+        fee:   Number(g.transferStars) || 25,
+        state: "idle",                      /* idle | sale | out */
+        price: 0,
+        at:    new Date().toISOString()
+      });
+      nftLog(u, "gift_in", 0, { cur:"", item: giftName(g), note:"Hisobga qo'shildi" });
+      changed = true;
+
+      send(from, "\uD83C\uDF81 " + giftName(g) + " hisobingizga qo'shildi.\n\n" +
+        "U <Sotuvda emas> bo'limida turibdi. Sotuvga qo'yish yoki o'z hisobingizga " +
+        "chiqarib olish uchun ilovani oching.", null, true);
+      if(ADMIN_ID) send(ADMIN_ID, "\uD83C\uDF81 Sovg'a qabul qilindi\n" + giftName(g) +
+        "\nKimdan: " + (u.nm || from) + (u.un ? " (@" + u.un + ")" : ""));
+    }
+    if(changed) save(db);
+  }catch(e){
+    console.log("Sovg'a kuzatuvi:", String(e.message||e).slice(0,90));
+  }
+  giftBusy = false;
+}
+setInterval(giftScan, 75000);
+setTimeout(giftScan, 20000);
+
+/* Ombordagi sovg'alar */
+app.get("/nft/gifts", (req,res)=>{
+  const id = String(req.query.id||"").trim();
+  if(!id) return res.json({ ok:false, error:"id" });
+  const db = load();
+  const rec = db[id];
+  res.json({ ok:true, gifts: (rec && Array.isArray(rec.gifts)) ? rec.gifts : [],
+             fee: GIFT_FEE });
+});
+
+/* Sovg'ani o'z hisobiga chiqarish */
+app.post("/nft/gift/out", async (req,res)=>{
+  const who = checkInit(req.body && req.body.initData);
+  if(!who) return res.json({ ok:false, error:"auth" });
+  const msgId = String(req.body.msgId || "").trim();
+  if(!msgId) return res.json({ ok:false, error:"id" });
+
+  const db = load();
+  const u  = urec(db, who.id);
+  const gi = ((u.gifts)||[]).findIndex(function(x){ return String(x.msgId) === msgId; });
+  if(gi < 0) return res.json({ ok:false, error:"none" });
+  const g = u.gifts[gi];
+  if(g.state === "out") return res.json({ ok:false, error:"busy" });
+  if(Number(u.gram || 0) < GIFT_FEE)
+    return res.json({ ok:false, error:"fee", need:GIFT_FEE, have:u.gram });
+
+  /* Avval haqni yechamiz va band deb belgilaymiz — ikki marta ketmasin */
+  u.gram  = Math.round((Number(u.gram) - GIFT_FEE) * 1e9) / 1e9;
+  g.state = "out";
+  save(db);
+
+  try{
+    const cl = await mtpClient();
+    if(!cl) throw new Error("ulanish yo'q");
+    const { Api } = require("telegram/tl");
+    const to = await cl.getInputEntity(Number(who.id));
+    await cl.invoke(new Api.payments.TransferStarGift({
+      stargift: new Api.InputSavedStarGiftUser({ msgId: Number(msgId) }),
+      toId: to
+    }));
+    const db2 = load(); const u2 = urec(db2, who.id);
+    const i2  = ((u2.gifts)||[]).findIndex(function(x){ return String(x.msgId) === msgId; });
+    if(i2 >= 0) u2.gifts.splice(i2, 1);
+    nftLog(u2, "gift_out", GIFT_FEE, { cur:"GRAM", item:g.name, note:"Hisobga chiqarildi" });
+    save(db2);
+    send(who.id, "\u2705 " + g.name + " hisobingizga yuborildi.\n" +
+      "Xizmat haqi: " + GIFT_FEE + " GRAM\nQoldiq: " + u2.gram + " GRAM", null, true);
+    if(ADMIN_ID) send(ADMIN_ID, "\uD83D\uDCE4 Sovg'a chiqarildi\n" + g.name +
+      "\nKimga: " + (u2.nm || who.id) + (u2.un ? " (@" + u2.un + ")" : ""));
+    res.json({ ok:true, left:u2.gram });
+  }catch(e){
+    /* Yuborilmadi — haqni qaytaramiz */
+    const db3 = load(); const u3 = urec(db3, who.id);
+    u3.gram = Math.round((Number(u3.gram||0) + GIFT_FEE) * 1e9) / 1e9;
+    const i3 = ((u3.gifts)||[]).findIndex(function(x){ return String(x.msgId) === msgId; });
+    if(i3 >= 0) u3.gifts[i3].state = "idle";
+    save(db3);
+    const msg = String(e.message||e).slice(0,100);
+    if(ADMIN_ID) send(ADMIN_ID, "\u26A0\uFE0F Sovg'a chiqarilmadi\n" + g.name +
+      "\nSabab: " + msg + "\nHaq qaytarildi.");
+    res.json({ ok:false, error:"send", msg:msg });
+  }
+});
+
 /* ---------- NFT bo'limining tarixi ----------
    Barcha kirim va chiqimlar shu yerda. Ilgari ular telefonda turardi —
    nizo chiqsa dalil bo'lmasdi. Endi serverda va zaxiraga tushadi.
