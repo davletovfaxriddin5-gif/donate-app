@@ -2124,6 +2124,104 @@ app.post("/nft/gift/buy", (req,res)=>{
   });
 });
 
+/* ---------- Sovg'ani boshqa odamga yuborish ----------
+   Qabul qiluvchi bizning mijozimiz bo'lsa — sovg'a shu yerda egasini
+   o'zgartiradi: bir zumda va Telegram'ga yulduz to'lanmaydi.
+   Tashqi odam bo'lsa — Telegram orqali ko'chiriladi. */
+app.post("/nft/gift/send", (req,res)=>{
+  const who = checkInit(req.body && req.body.initData);
+  if(!who) return res.json({ ok:false, error:"auth" });
+  const msgId = String(req.body.msgId || "").trim();
+  const un    = String(req.body.to || "").replace(/^@+/, "").trim();
+  if(!msgId || !/^[A-Za-z0-9_]{4,32}$/.test(un))
+    return res.json({ ok:false, error:"addr" });
+
+  const db = load();
+  const u  = urec(db, who.id);
+  const g  = ((u.gifts)||[]).find(function(x){ return String(x.msgId) === msgId; });
+  if(!g) return res.json({ ok:false, error:"none" });
+  if(g.state === "out")  return res.json({ ok:false, error:"busy" });
+  if(g.state === "sale") return res.json({ ok:false, error:"onsale" });
+  if(Number(u.gram || 0) < GIFT_FEE)
+    return res.json({ ok:false, error:"fee", need:GIFT_FEE, have:u.gram });
+  if(u.un && un.toLowerCase() === String(u.un).toLowerCase())
+    return res.json({ ok:false, error:"self" });
+
+  /* Qabul qiluvchi bizda bormi? */
+  let toId = "";
+  Object.keys(db).forEach(function(k){
+    if(!/^\d+$/.test(k) || toId) return;
+    if(db[k].un && String(db[k].un).toLowerCase() === un.toLowerCase()) toId = k;
+  });
+
+  /* Haqni oldindan yechamiz va band qilamiz */
+  u.gram  = Math.round((Number(u.gram) - GIFT_FEE) * 1e9) / 1e9;
+  g.state = "out";
+  save(db);
+
+  const lnk = giftLink(g.slug);
+
+  /* --- 1. Ichkarida: egasini almashtiramiz --- */
+  if(toId){
+    const db2 = load();
+    const u2 = urec(db2, who.id), r2 = urec(db2, toId);
+    const i2 = ((u2.gifts)||[]).findIndex(function(x){ return String(x.msgId) === msgId; });
+    if(i2 < 0) return res.json({ ok:false, error:"none" });
+    const moved = u2.gifts.splice(i2, 1)[0];
+    moved.state = "idle"; moved.price = 0; moved.saleAt = null;
+    moved.at = new Date().toISOString(); moved.giftFrom = String(who.id);
+    if(!Array.isArray(r2.gifts)) r2.gifts = [];
+    r2.gifts.unshift(moved);
+    nftLog(u2, "gift_out", GIFT_FEE, { cur:"GRAM", item:g.name, note:"@" + un + " ga yuborildi" });
+    nftLog(r2, "gift_in", 0, { cur:"", item:g.name,
+                               note:"@" + (u2.un || who.id) + " dan keldi" });
+    save(db2);
+    sendMd(who.id, "\u2705 [" + g.name + "](" + lnk + ") @" + un + " ga yuborildi.\n\n" +
+      "Xizmat haqi: " + GIFT_FEE + " GRAM\nQoldiq: " + u2.gram + " GRAM");
+    sendMd(toId, "\uD83C\uDF81 [" + g.name + "](" + lnk + ") sizga yuborildi!\n\n" +
+      "Kimdan: " + (u2.nm || ("@" + (u2.un || who.id))) + "\nU *Sotuvda emas* bo'limida.",
+      { inline_keyboard: [[ { text: "\uD83C\uDF81 Sovg'alarimni ko'rish",
+                              web_app: { url: APP_URL } } ]] });
+    if(ADMIN_ID) sendMd(ADMIN_ID, "\uD83D\uDD01 [" + g.name + "](" + lnk + ") yuborildi\n\n" +
+      "Kimdan: " + (u2.nm || who.id) + "\nKimga: @" + un + " (ichkarida)");
+    return res.json({ ok:true, inside:true, left:u2.gram });
+  }
+
+  /* --- 2. Tashqariga: Telegram orqali --- */
+  (async function(){
+    try{
+      const cl = await mtpClient();
+      if(!cl) throw new Error("ulanish yo'q");
+      const { Api } = require("telegram/tl");
+      const to = await cl.getInputEntity(un);
+      await cl.invoke(new Api.payments.TransferStarGift({
+        stargift: new Api.InputSavedStarGiftUser({ msgId: Number(msgId) }),
+        toId: to
+      }));
+      const db3 = load(); const u3 = urec(db3, who.id);
+      const i3 = ((u3.gifts)||[]).findIndex(function(x){ return String(x.msgId) === msgId; });
+      if(i3 >= 0) u3.gifts.splice(i3, 1);
+      nftLog(u3, "gift_out", GIFT_FEE, { cur:"GRAM", item:g.name, note:"@" + un + " ga yuborildi" });
+      save(db3);
+      sendMd(who.id, "\u2705 [" + g.name + "](" + lnk + ") @" + un + " ga yuborildi.\n\n" +
+        "Xizmat haqi: " + GIFT_FEE + " GRAM\nQoldiq: " + u3.gram + " GRAM");
+      if(ADMIN_ID) sendMd(ADMIN_ID, "\uD83D\uDCE4 [" + g.name + "](" + lnk + ") yuborildi\n\n" +
+        "Kimdan: " + (u3.nm || who.id) + "\nKimga: @" + un + " (tashqariga)");
+      res.json({ ok:true, inside:false, left:u3.gram });
+    }catch(e){
+      const db4 = load(); const u4 = urec(db4, who.id);
+      u4.gram = Math.round((Number(u4.gram||0) + GIFT_FEE) * 1e9) / 1e9;
+      const i4 = ((u4.gifts)||[]).findIndex(function(x){ return String(x.msgId) === msgId; });
+      if(i4 >= 0) u4.gifts[i4].state = "idle";
+      save(db4);
+      const msg = String(e.message||e).slice(0,100);
+      if(ADMIN_ID) send(ADMIN_ID, "\u26A0\uFE0F Sovg'a yuborilmadi\n" + g.name +
+        "\nKimga: @" + un + "\nSabab: " + msg + "\nHaq qaytarildi.");
+      res.json({ ok:false, error:"send", msg:msg });
+    }
+  })();
+});
+
 /* Sovg'ani o'z hisobiga chiqarish */
 app.post("/nft/gift/out", async (req,res)=>{
   const who = checkInit(req.body && req.body.initData);
