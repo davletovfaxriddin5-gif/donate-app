@@ -5870,7 +5870,7 @@ function mgCards(){
         ? `<img src="${esc(g.pic)}" alt="" loading="lazy" onerror="this.style.display='none'">`
         : '\uD83C\uDF81'}</div>
       <div class="nm">${esc(g.name || 'NFT')}</div>
-      ${g.state === 'sale' ? `<div class="pr">${fmtGram(g.price||0)} GRAM</div>`
+      ${g.state === 'sale' ? `<div class="pr">${money(g.price||0, true)}</div>`
                            : `<div class="sb">Sotuvda emas</div>`}
       ${busy ? '<div class="ov">Yuborilmoqda\u2026</div>' : ''}
     </button>`;
@@ -5915,7 +5915,7 @@ function mgOpen(msgId){
       : '\uD83C\uDF81') + '</div>' +
     '<div class="gf-nm">' + esc(g.name || 'NFT') + '</div>' +
     '<div class="gf-sb">' + (g.state === 'sale'
-      ? ('Sotuvda \u00b7 ' + fmtGram(g.price||0) + ' GRAM') : 'Sotuvda emas') + '</div>' +
+      ? ('Sotuvda \u00b7 ' + money(g.price||0, true)) : 'Sotuvda emas') + '</div>' +
     (g.state === 'sale'
       ? '<button class="gf-b2" onclick="mgUnsale()">Sotuvdan olish</button>'
       : '<button class="gf-b1" onclick="mgSale()">Sotuvga qo\'yish</button>' +
@@ -6407,6 +6407,8 @@ function mktBanner(){
 }
 
 function renderNftMarket(){
+  /* Bozor doim yangi bo'lsin: boshqa odam sotuvga qo'ygani darrov ko'rinsin */
+  setTimeout(function(){ try{ mktLoad(); }catch(e){} }, 0);
   /* Karuselni qayta qurmaymiz — eski elementni saqlab qolib, yangi
      sahifaga o'zini qo'yamiz. Shunda rasm ham, joyi ham, yurishi ham
      buzilmaydi: miltillash va boshiga qaytish bo'lmaydi. */
