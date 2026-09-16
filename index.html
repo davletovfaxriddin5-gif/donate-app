@@ -1279,6 +1279,16 @@ body.light .sp-card .sub{ text-shadow:none; color:var(--faint) }
 .nftm-fil button svg{ width:13px; height:13px; stroke:var(--faint); fill:none; stroke-width:2.3;
   stroke-linecap:round; stroke-linejoin:round; flex-shrink:0 }
 .nftm-fil button:active{ transform:scale(.992) }
+/* NFT bo'limining shrifti — iPhone'da SF Pro, Android'da Roboto.
+   body.nft-mode faqat NFT ekranlarida yoqiladi, shuning uchun bosh
+   sahifaga va boshqa bo'limlarga tegmaydi. */
+body.nft-mode, body.nft-mode *{
+  font-family:-apple-system, BlinkMacSystemFont, "SF Pro Display",
+              "Segoe UI", Roboto, system-ui, sans-serif !important }
+body.nft-mode .sheet, body.nft-mode .sheet *{
+  font-family:-apple-system, BlinkMacSystemFont, "SF Pro Display",
+              "Segoe UI", Roboto, system-ui, sans-serif !important }
+
 /* Hamyon tarixi tugmalari: tanlangani ko'k bo'lib yonadi.
    Faqat #wlTabs ichida — bo'limdagi boshqa tugmalarga tegmaydi. */
 #wlTabs button.on{ background:var(--blue); border-color:var(--blue); color:#fff }
@@ -3846,7 +3856,7 @@ function go(v){
   const sub = (v==='game' || v==='topup' || v==='spam' || v==='chat' || v==='lang' || v==='profile' || isNftView(v));
   if(tg&&tg.BackButton){ sub ? tg.BackButton.show() : tg.BackButton.hide(); }
   document.querySelector('.nav').style.display = (v==='game'||v==='chat') ? 'none' : 'flex';
-  document.body.classList.toggle('nft-mode', isNftView(v));
+  document.body.classList.toggle('nft-mode', isNftView(v) || (v === 'topup' && topDest === 'nft'));
   if(isNftView(v)) nftEnsure();
   const _nb=document.getElementById('navNft'); if(_nb) _nb.classList.toggle('on', isNftView(v));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('on', n.dataset.tab===v));
@@ -6693,6 +6703,7 @@ let topDest = 'main';
 function nftPick(k){
   haptic();
   topDest = 'nft';
+  document.body.classList.add('nft-mode');   /* to'lov ekrani ham NFT uslubida */
   topMethod = null; stConfirm = 0; stBusy = false; topPend = null;
   view = 'topup';
   renderTopup();
@@ -7495,6 +7506,11 @@ function walletLog(){
   (nftHist || []).forEach(function(r){
     const m = MAP[r.kind];
     if(!m) return;
+    /* Stars va Premium xaridlari ham nft_buy deb yoziladi, lekin ular
+       "Sovg'alar" emas — o'z bo'limlarida ko'rinishi kerak. Buyurtmalar
+       ro'yxatida allaqachon bor, shuning uchun bu yerda o'tkazib yuboramiz. */
+    const it = String(r.item || '').toUpperCase();
+    if(r.kind === 'nft_buy' && (it.indexOf('TG STARS') > -1 || it.indexOf('TG PREMIUM') > -1)) return;
     out.push({ t:m.t, ic:m.ic, nm: r.item || r.card || r.note || m.sub,
                sub: r.note || m.sub, plus:m.plus,
                amount: Number(r.amount) || 0, cur: r.cur || "so'm",
