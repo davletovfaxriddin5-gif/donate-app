@@ -5919,8 +5919,9 @@ function mgOpen(msgId){
     (g.state === 'sale'
       ? '<button class="gf-b2" onclick="mgUnsale()">Sotuvdan olish</button>'
       : '<button class="gf-b1" onclick="mgSale()">Sotuvga qo\'yish</button>' +
-        '<button class="gf-b2" onclick="mgTake()">Hisobga chiqarish</button>' +
-        '<div class="gf-fee">Chiqarish haqi: ' + fmtGram(mgFee) + ' GRAM</div>');
+        '<button class="gf-b2" style="margin-top:9px" onclick="mgTake()">Hisobga chiqarish</button>' +
+        '<button class="gf-b2" style="margin-top:9px" onclick="mgSendForm()">Boshqa odamga yuborish</button>' +
+        '<div class="gf-fee">Chiqarish va yuborish haqi: ' + fmtGram(mgFee) + ' GRAM</div>');
   document.body.appendChild(bg); document.body.appendChild(sh);
   requestAnimationFrame(function(){
     requestAnimationFrame(function(){ bg.classList.add('on'); sh.classList.add('on'); });
@@ -6053,7 +6054,111 @@ function mgTake(){
     });
   });
 }
-function mgSend(){ haptic(); }
+/* ---------- Sovg'ani boshqa odamga yuborish ---------- */
+function mgSend(){
+  haptic();
+  const rows = mgList.filter(function(g){ return g.state === 'idle'; });
+  if(!rows.length){ toast("Yuboriladigan sovg'a yo'q"); return; }
+  if(rows.length === 1){ mgOpen(rows[0].msgId); setTimeout(mgSendForm, 320); return; }
+  toast("Sovg'ani tanlang");
+}
+let sgOk = false, sgLast = '', sgT = null, sgBusy = false;
+function mgSendForm(){
+  if(!mgPick) return;
+  const sh = document.getElementById('gfSh'); if(!sh) return;
+  const g = mgPick;
+  sgOk = false; sgLast = '';
+  sh.innerHTML =
+    '<div class="grab"></div>' +
+    '<div class="gf-nm" style="text-align:left;margin-bottom:3px">Sovg\'a yuborish</div>' +
+    '<div class="gf-sb" style="text-align:left;margin-bottom:14px">' + esc(g.name) + '</div>' +
+    '<div class="ot-in"><input id="sgUser" type="text" placeholder="@ Telegram username" ' +
+      'autocomplete="off" spellcheck="false" oninput="sgIn()"></div>' +
+    '<div id="sgWho" class="sp-who"></div>' +
+    '<button class="gf-b1" id="sgGo" disabled onclick="mgSendGo()">Yuborish</button>' +
+    '<button class="gf-b2" style="margin-top:9px" onclick="mgOpen(\'' + esc(g.msgId) + '\')">Orqaga</button>' +
+    '<div class="gf-fee">Xizmat haqi: ' + fmtGram(mgFee) + ' GRAM</div>';
+  setTimeout(function(){ const el = document.getElementById('sgUser'); if(el) el.focus(); }, 120);
+}
+function sgBox(x){ const b = document.getElementById('sgWho'); if(b) b.innerHTML = x; }
+function sgSync(){
+  const b = document.getElementById('sgGo');
+  if(b) b.disabled = !sgOk;
+}
+function sgIn(){
+  const raw = ((document.getElementById('sgUser')||{}).value || '').trim().replace(/^@+/, '');
+  sgOk = false; clearTimeout(sgT);
+  if(!raw){ sgBox(''); sgLast = ''; sgSync(); return; }
+  if(!/^[A-Za-z0-9_]{4,32}$/.test(raw)){
+    sgBox('<div class="sp-bad">Username kamida 4 ta belgi, faqat harf, raqam va _</div>');
+    sgLast = ''; sgSync(); return;
+  }
+  sgBox('<div class="sp-wait">Tekshirilmoqda\u2026</div>');
+  sgT = setTimeout(function(){ sgGo(raw); }, 550);
+  sgSync();
+}
+function sgGo(u){
+  fetch(VBASE + '/tg/user?u=' + encodeURIComponent(u))
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      const now = ((document.getElementById('sgUser')||{}).value || '').trim().replace(/^@+/, '');
+      if(now.toLowerCase() !== u.toLowerCase()) return;
+      if(d && d.ok && d.found){
+        sgOk = true; sgLast = u;
+        const av = d.id ? (VBASE + '/avatar?id=' + encodeURIComponent(d.id)) : '';
+        sgBox('<div class="sp-ok">' +
+          (av ? '<img src="' + av + '" alt="" onerror="this.style.display=\'none\'">'
+              : '<span class="ph">' + esc(d.name.slice(0,1).toUpperCase()) + '</span>') +
+          '<div class="tx"><b>' + esc(d.name) + '</b><small>Sovg\'a shu odamga ketadi</small></div></div>');
+      } else if(d && (d.why === 'not_user' || d.why === 'is_bot')){
+        sgOk = false; sgLast = '';
+        sgBox('<div class="sp-bad">Bu foydalanuvchi emas</div>');
+      } else if(d && d.why === 'none'){
+        sgOk = false; sgLast = '';
+        sgBox('<div class="sp-bad">Bunday foydalanuvchi topilmadi</div>');
+      } else {
+        sgOk = true; sgLast = u;
+        sgBox('<div class="sp-warn">Tekshirib bo\'lmadi \u2014 username to\'g\'riligiga ' +
+              'ishonch hosil qiling.</div>');
+      }
+      sgSync();
+    }).catch(function(){ sgBox(''); sgSync(); });
+}
+function mgSendGo(){
+  if(sgBusy || !mgPick) return;
+  haptic();
+  const u = ((document.getElementById('sgUser')||{}).value || '').trim().replace(/^@+/, '');
+  if(!sgOk || u.toLowerCase() !== sgLast.toLowerCase()){ toast('Avval username tekshirilsin'); return; }
+  if(getGram() < mgFee){ toast('GRAM yetarli emas \u2014 ' + fmtGram(mgFee) + ' kerak'); return; }
+  bioAsk(function(){
+    sgBusy = true;
+    const b = document.getElementById('sgGo');
+    if(b){ b.disabled = true; b.textContent = 'Yuborilmoqda\u2026'; }
+    fetch(VBASE + '/nft/gift/send', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ initData: tg.initData || '', msgId: mgPick.msgId, to: u })
+    }).then(function(r){ return r.json(); }).then(function(d){
+      sgBusy = false;
+      if(d && d.ok){
+        setGram(d.left);
+        notify('success'); toastOk('\u2705 Yuborildi');
+        mgClose(); mgLoad(); nftHistLoad();
+        return;
+      }
+      if(b){ b.disabled = false; b.textContent = 'Yuborish'; }
+      notify('error');
+      if(d && d.error === 'fee')    return toastErr('GRAM yetarli emas');
+      if(d && d.error === 'self')   return toastErr('O\'zingizga yubora olmaysiz');
+      if(d && d.error === 'onsale') return toastErr('Avval sotuvdan oling');
+      if(d && d.error === 'send')   return toastErr('Yuborilmadi, haq qaytarildi');
+      toastErr('Bajarilmadi');
+    }).catch(function(){
+      sgBusy = false;
+      if(b){ b.disabled = false; b.textContent = 'Yuborish'; }
+      toastErr('Aloqa yo\'q');
+    });
+  });
+}
 /* ---------- "Sovg'alarni qanday qo'shish?" ----------
    Pastdan chiqadigan qo'llanma: rasm, uch qadam va tugma. */
 function mgHowTo(){
