@@ -1289,7 +1289,7 @@ body.light .sp-card .sub{ text-shadow:none; color:var(--faint) }
 /* ---- NFT bo'limiga o'tish pardasi ---- */
 .dr-wrap{ position:fixed; inset:0; z-index:400; pointer-events:none }
 .dr-wrap .dr{ position:absolute; left:0; right:0; height:52%;
-  transition:transform .48s cubic-bezier(.33,.72,.2,1) }
+  transition:transform .9s cubic-bezier(.34,.7,.18,1) }
 /* Ranglar ilovaning ko'kidan boshqa — quyuq tunji va oltin chiziq */
 .dr-wrap .dr.t{ top:0; transform:translateY(-101%);
   background:linear-gradient(180deg, #10142A 0%, #171D3A 78%, #232B57 100%);
@@ -1307,6 +1307,65 @@ body.light .sp-card .sub{ text-shadow:none; color:var(--faint) }
 .dr-wrap.shut .dr.t:after, .dr-wrap.shut .dr.b:after{ opacity:1 }
 body.light .dr-wrap .dr.t{ background:linear-gradient(180deg,#1B2140 0%,#2A3260 78%,#3A4478 100%) }
 body.light .dr-wrap .dr.b{ background:linear-gradient(0deg,#1B2140 0%,#2A3260 78%,#3A4478 100%) }
+
+/* ---- Parda ortidagi sahna ---- */
+.dr-stage{ position:absolute; inset:0; opacity:0; transition:opacity .25s;
+  pointer-events:none }
+.dr-wrap.act .dr-stage{ opacity:1; pointer-events:auto }
+
+/* ---- O'rtadagi olmos: chiziladi, to'ladi, yaltiraydi ---- */
+.dr-core{ position:absolute; left:50%; top:50%; width:150px; height:150px;
+  transform:translate(-50%,-50%); display:grid; place-items:center }
+.dr-gem{ width:118px; height:118px; overflow:visible;
+  filter:drop-shadow(0 6px 26px rgba(120,110,255,.45)) }
+/* Chiziqlar o'zini chizadi */
+.dr-gem .gem-line{ fill:none; stroke:#F2D06B; stroke-width:2.4;
+  stroke-linejoin:round; stroke-dasharray:260; stroke-dashoffset:260 }
+.dr-gem .gem-line.d{ stroke-width:1.5; stroke-opacity:.72; stroke-dasharray:300; stroke-dashoffset:300 }
+.dr-wrap.act .dr-gem .gem-line{ animation:gemDraw .62s cubic-bezier(.4,.1,.2,1) .05s forwards }
+.dr-wrap.act .dr-gem .gem-line.d{ animation:gemDraw .5s cubic-bezier(.4,.1,.2,1) .40s forwards }
+@keyframes gemDraw{ to{ stroke-dashoffset:0 } }
+/* Ichiga suyuqlikdek quyiladi */
+.dr-gem .gem-fill{ transform:translateY(100%); opacity:.9 }
+.dr-wrap.act .dr-gem .gem-fill{ animation:gemPour .7s cubic-bezier(.35,.85,.3,1) .38s forwards }
+@keyframes gemPour{ to{ transform:translateY(0) } }
+/* Yuzasidan yorug'lik o'tadi */
+.dr-gem .gem-shine{ opacity:0 }
+.dr-wrap.act .dr-gem .gem-shine{ animation:gemShine .75s ease-out 1.02s forwards }
+@keyframes gemShine{
+  0%  { opacity:0; transform:translateX(0) skewX(-14deg) }
+  25% { opacity:.65 }
+  100%{ opacity:0; transform:translateX(165px) skewX(-14deg) }
+}
+/* Tarqaladigan to'lqinlar */
+.dr-core .rg{ position:absolute; left:50%; top:50%; width:118px; height:118px;
+  margin:-59px 0 0 -59px; border-radius:50%; opacity:0;
+  border:1.5px solid rgba(180,170,255,.55) }
+.dr-wrap.act .dr-core .rg{ animation:ripple 1.25s cubic-bezier(.2,.7,.3,1) forwards }
+.dr-wrap.act .dr-core .r1{ animation-delay:.92s }
+.dr-wrap.act .dr-core .r2{ animation-delay:1.06s }
+.dr-wrap.act .dr-core .r3{ animation-delay:1.20s }
+@keyframes ripple{
+  0%  { opacity:.75; transform:scale(.55) }
+  100%{ opacity:0;   transform:scale(2.5) }
+}
+/* Uchqunlar */
+.dr-core .sp{ position:absolute; left:50%; top:50%; width:5px; height:5px;
+  margin:-2.5px 0 0 -2.5px; border-radius:50%; background:#F2D06B; opacity:0;
+  box-shadow:0 0 10px rgba(242,208,107,.9) }
+.dr-wrap.act .dr-core .sp{ animation:spark .9s ease-out 1.0s forwards }
+.dr-core .s1{ --x: 62px;  --y:-46px }
+.dr-core .s2{ --x:-58px;  --y:-52px }
+.dr-core .s3{ --x: 70px;  --y: 40px }
+.dr-core .s4{ --x:-66px;  --y: 44px }
+.dr-core .s5{ --x:  4px;  --y:-76px }
+.dr-core .s6{ --x: -8px;  --y: 78px }
+@keyframes spark{
+  0%  { opacity:0; transform:translate(0,0) scale(.4) }
+  22% { opacity:1; transform:translate(calc(var(--x)*.4), calc(var(--y)*.4)) scale(1.1) }
+  100%{ opacity:0; transform:translate(var(--x), var(--y)) scale(.3) }
+}
+@media (prefers-reduced-motion: reduce){ .dr-core{ display:none } }
 
 /* ---- NFT profili ---- */
 .np-top{ text-align:center; padding:6px 0 16px }
@@ -5336,23 +5395,45 @@ function nftDoor(next){
   if(old) old.remove();
   const w = document.createElement('div');
   w.className = 'dr-wrap'; w.id = 'drWrap';
-  w.innerHTML = '<div class="dr t"></div><div class="dr b"></div>';
+  w.innerHTML = '<div class="dr t"></div><div class="dr b"></div>' +
+    '<div class="dr-stage"><div class="dr-core">' +
+      '<span class="rg r1"></span><span class="rg r2"></span><span class="rg r3"></span>' +
+      '<svg class="dr-gem" viewBox="0 0 120 120">' +
+        '<defs>' +
+          '<linearGradient id="gemF" x1="0" y1="0" x2="1" y2="1">' +
+            '<stop offset="0%" stop-color="#F2D06B"/>' +
+            '<stop offset="52%" stop-color="#8E7BFF"/>' +
+            '<stop offset="100%" stop-color="#3B4DF0"/>' +
+          '</linearGradient>' +
+          '<linearGradient id="gemS" x1="0" y1="1" x2="0" y2="0">' +
+            '<stop offset="0%" stop-color="#F2D06B" stop-opacity="0"/>' +
+            '<stop offset="100%" stop-color="#F2D06B" stop-opacity=".9"/>' +
+          '</linearGradient>' +
+          '<clipPath id="gemC"><path d="M60 14 104 50 60 108 16 50z"/></clipPath>' +
+        '</defs>' +
+        '<g clip-path="url(#gemC)"><rect class="gem-fill" x="0" y="0" width="120" height="120" fill="url(#gemF)"/>' +
+          '<rect class="gem-shine" x="-40" y="0" width="34" height="120" fill="url(#gemS)" opacity=".55"/></g>' +
+        '<path class="gem-line" d="M60 14 104 50 60 108 16 50z"/>' +
+        '<path class="gem-line d" d="M16 50h88M60 14 44 50l16 58M60 14l16 36-16 58"/>' +
+      '</svg>' +
+      '<span class="sp s1"></span><span class="sp s2"></span><span class="sp s3"></span>' +
+      '<span class="sp s4"></span><span class="sp s5"></span><span class="sp s6"></span>' +
+    '</div></div>';
   document.body.appendChild(w);
 
   /* 1. Yopilish */
   requestAnimationFrame(function(){
     requestAnimationFrame(function(){ w.classList.add('shut'); });
   });
-  /* 2. Yopilgach ekranni almashtiramiz */
+  /* 2. Qanotlar tutashgach o'rtada olmos chiziladi */
+  setTimeout(function(){ w.classList.add('act'); haptic(); }, 880);
+  /* 3. Ekran parda ortida almashadi */
+  setTimeout(function(){ try{ next(); }catch(e){} }, 1650);
+  /* 4. Qanotlar ochiladi */
   setTimeout(function(){
-    try{ next(); }catch(e){}
-    haptic();
-    /* 3. Ochilish */
-    setTimeout(function(){
-      w.classList.remove('shut');
-      setTimeout(function(){ if(w) w.remove(); }, 560);
-    }, 90);
-  }, 480);
+    w.classList.remove('shut'); w.classList.remove('act');
+    setTimeout(function(){ if(w) w.remove(); }, 1000);
+  }, 2150);
 }
 function toggleNft(){
   haptic();
