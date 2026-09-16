@@ -1357,10 +1357,11 @@ body.kb-open .buy-bar{ display:none !important }
                   sans-serif !important; letter-spacing:-.2px !important }
 /* Ichki bo'shliq nolga tushdi — rasm chetgacha borsin.
    Qolgan tarkib o'z bo'shlig'ini .hw-pad dan oladi. */
-.hw-sh{ text-align:left; height:80dvh; display:flex; flex-direction:column;
+.hw-sh{ text-align:left; height:89dvh; display:flex; flex-direction:column;
   left:4px !important; right:4px !important; bottom:0 !important;
   border-radius:26px 26px 0 0 !important; overflow:hidden;
   padding:0 0 calc(env(safe-area-inset-bottom) + 10px) !important }
+/* Hamma narsa bir qarashda sig'sin — pastga surib qidirishga hojat qolmasin */
 .hw-sh.drag{ transition:none !important }
 /* Varaq ochiq turganda orqadagi sahifa qimirlamaydi */
 body.sheet-lock{ overflow:hidden; touch-action:none }
@@ -1368,7 +1369,7 @@ body.sheet-lock{ overflow:hidden; touch-action:none }
 .hw-sh .hw-pad{ padding:0 12px }
 .hw-sh .hw-foot{ padding-top:10px; flex-shrink:0 }
 /* Rasm: chetdan chetga, o'z nisbatida, kesilmaydi */
-.hw-sh .hw-img{ margin:0 0 14px; line-height:0; background:transparent }
+.hw-sh .hw-img{ margin:0 0 12px; line-height:0; background:transparent }
 .hw-sh .hw-img img{ width:100%; height:auto; display:block; border-radius:18px 18px 20px 20px }
 /* Tutqich — barmoq bilan pastga surib yopish uchun */
 /* Tutqich ixcham, rasm esa unga yaqin turadi. Varaq burchagida
@@ -1381,7 +1382,7 @@ body.sheet-lock{ overflow:hidden; touch-action:none }
 .hw-sh .hw-top .s b{ color:var(--blue); font-weight:600; cursor:pointer }
 .hw-sh .hw-top .s b:active{ opacity:.6 }
 /* Kattaroq kutilar, tizim shrifti — iPhone'da SF Pro, Android'da Roboto */
-.hw-sh .hw-box{ padding:15px 16px; border-radius:18px; margin-bottom:11px;
+.hw-sh .hw-box{ padding:14px 16px; border-radius:18px; margin-bottom:9px;
   background:var(--card-2); border:1px solid var(--stroke-2) }
 .hw-sh .hw-box.warn{ background:rgba(245,179,1,.07); border-color:rgba(245,179,1,.24) }
 .hw-sh .hw-box .t{ font-size:16px; font-weight:600; color:var(--text); line-height:1.35;
