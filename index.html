@@ -1293,25 +1293,21 @@ body.light .sp-card .sub{ text-shadow:none; color:var(--faint) }
 /* Ranglar ilovaning ko'kidan boshqa — quyuq tunji va oltin chiziq */
 /* Chetlari yupqa qora, o'rtaga borgan sari sariq kuchayadi */
 .dr-wrap .dr.t{ top:0; transform:translateY(-101%);
-  background:linear-gradient(180deg,
-    #14161F 0%, #1C1E2C 16%, #35301F 40%, #6A5C34 66%, #9C8A4E 86%, #C4B074 100%);
+  background:linear-gradient(180deg, #8F5E05 0%, #D79A20 25%, #FFE08A 50%, #D29A22 70%, #704704 88%, #171004 100%);
   box-shadow:0 10px 30px -8px rgba(0,0,0,.6) }
 .dr-wrap .dr.b{ bottom:0; transform:translateY(101%);
-  background:linear-gradient(0deg,
-    #14161F 0%, #1C1E2C 16%, #35301F 40%, #6A5C34 66%, #9C8A4E 86%, #C4B074 100%);
+  background:linear-gradient(0deg, #8F5E05 0%, #D79A20 25%, #FFE08A 50%, #D29A22 70%, #704704 88%, #171004 100%);
   box-shadow:0 -10px 30px -8px rgba(0,0,0,.6) }
 /* Tutashgan joyda ingichka yorug' chiziq */
 .dr-wrap .dr.t:after, .dr-wrap .dr.b:after{ content:''; position:absolute; left:0; right:0;
-  height:2px; background:linear-gradient(90deg, transparent, #C9B678 16%, #F0E3B8 50%, #C9B678 84%, transparent);
+  height:2px; background:linear-gradient(90deg, transparent, #D79A20 16%, #FFE08A 50%, #D79A20 84%, transparent);
   opacity:0; transition:opacity .2s .28s }
 .dr-wrap .dr.t:after{ bottom:0 }
 .dr-wrap .dr.b:after{ top:0 }
 .dr-wrap.shut .dr.t, .dr-wrap.shut .dr.b{ transform:translateY(0) }
 .dr-wrap.shut .dr.t:after, .dr-wrap.shut .dr.b:after{ opacity:1 }
-body.light .dr-wrap .dr.t{ background:linear-gradient(180deg,
-  #1A1C26 0%, #24273A 16%, #423B27 40%, #7E6F42 66%, #B4A063 86%, #D9C88E 100%) }
-body.light .dr-wrap .dr.b{ background:linear-gradient(0deg,
-  #1A1C26 0%, #24273A 16%, #423B27 40%, #7E6F42 66%, #B4A063 86%, #D9C88E 100%) }
+body.light .dr-wrap .dr.t{ background:linear-gradient(180deg, #8F5E05 0%, #D79A20 25%, #FFE08A 50%, #D29A22 70%, #704704 88%, #171004 100%) }
+body.light .dr-wrap .dr.b{ background:linear-gradient(0deg, #8F5E05 0%, #D79A20 25%, #FFE08A 50%, #D29A22 70%, #704704 88%, #171004 100%) }
 
 /* ---- Parda ortidagi sahna ---- */
 .dr-stage{ position:absolute; inset:0; opacity:0; transition:opacity .25s;
@@ -1348,7 +1344,7 @@ body.light .dr-wrap .dr.b{ background:linear-gradient(0deg,
 /* Tarqaladigan to'lqinlar */
 .dr-core .rg{ position:absolute; left:50%; top:50%; width:118px; height:118px;
   margin:-59px 0 0 -59px; border-radius:50%; opacity:0;
-  border:1.5px solid rgba(240,205,120,.55) }
+  border:1.5px solid rgba(255,224,138,.6) }
 .dr-wrap.act .dr-core .rg{ animation:ripple 1.25s cubic-bezier(.2,.7,.3,1) forwards }
 .dr-wrap.act .dr-core .r1{ animation-delay:.60s }
 .dr-wrap.act .dr-core .r2{ animation-delay:.74s }
@@ -1695,7 +1691,7 @@ body.light .tc-sh .tc-addr .cp svg{ color:rgba(16,24,40,.55) }
     <span class="lb">NFT</span>
   </button>
   <div class="nav-row">
-    <button class="nav-back" id="navBack" onclick="go('home')">
+    <button class="nav-back" id="navBack" onclick="nftDoor(function(){ go('home'); })">
       <span class="ic">
         <svg class="cv" viewBox="0 0 24 24"><path d="M14.5 6l-6 6 6 6"/></svg>
         <svg viewBox="0 0 24 24"><path d="M4 8h16M4 8l1.5 11a2 2 0 0 0 2 1.7h9a2 2 0 0 0 2-1.7L20 8M8 8V6a4 4 0 0 1 8 0v2"/></svg>
