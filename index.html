@@ -5929,9 +5929,14 @@ function lotPlay(boxId, slug){
       lotAnim = window.lottie.loadAnimation({
         container: b, renderer: 'svg', loop: false, autoplay: true, animationData: data
       });
-      /* Bosilganda qaytadan o'ynaydi */
+      /* Bosilganda qaytadan o'ynaydi — lekin faqat animatsiya
+         TUGAGANDAN keyin. O'ynayotganda bosilsa e'tiborsiz qoladi,
+         aks holda u har bosishda boshiga qaytib oxiriga yetmasdi. */
+      let lotRun = true;
+      lotAnim.addEventListener('complete', function(){ lotRun = false; });
       b.onclick = function(){
-        if(!lotAnim) return;
+        if(!lotAnim || lotRun) return;
+        lotRun = true;
         haptic();
         try{ lotAnim.goToAndPlay(0, true); }catch(e){}
       };
