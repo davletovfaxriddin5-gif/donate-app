@@ -1812,6 +1812,24 @@ app.post("/gram/out", async (req,res)=>{
     if(!w) throw new Error("hamyon ochilmadi");
     const { internal, toNano } = require("@ton/ton");
     const c = w.client.open(w.wallet);
+
+    /* YUBORISHDAN OLDIN hamyonda pul yetarlimi — tekshiramiz.
+       TON'da yuborish buyrug'i xato bermaydi: xabar tarmoqqa uzatiladi
+       va pul yetmasa tranzaksiya blokcheynda ag'daradi. Shuning uchun
+       keyin emas, oldin tekshirish shart. */
+    let haveNano = 0;
+    try{ haveNano = Number(await c.getBalance()); }
+    catch(e1){
+      try{ haveNano = Number(await w.client.getBalance(w.wallet.address)); }
+      catch(e2){ haveNano = -1; }
+    }
+    const needNano = Math.round(amt * 1e9) + 60000000;   /* + tarmoq haqi zaxirasi */
+    if(haveNano >= 0 && haveNano < needNano){
+      const er = new Error("yuboruvchi hamyonda mablag' yetarli emas: " +
+        (haveNano / 1e9).toFixed(4) + " bor, " + (needNano / 1e9).toFixed(4) + " kerak");
+      er.lowWallet = true;
+      throw er;
+    }
     /* Tugun band bo'lsa (429) biroz kutib qayta urinamiz */
     let seqno = 0, lastErr = null;
     for(let i = 0; i < 4; i++){
@@ -1848,10 +1866,22 @@ app.post("/gram/out", async (req,res)=>{
     const r3 = ((u3.nftHist)||[]).find(function(x){ return x.id === rec.id; });
     if(r3){ r3.status = "cancel"; r3.note = "Yuborilmadi, pul qaytarildi"; }
     save(db3);
-    if(ADMIN_ID) send(ADMIN_ID, "\u26A0\uFE0F GRAM chiqarilmadi\n" +
-      (u3.nm || who.id) + "\nSabab: " + String(e.message||e).slice(0,120) +
-      "\nPul qaytarildi.");
-    res.json({ ok:false, error:"send", msg:String(e.message||e).slice(0,80) });
+    const msg = String(e.message||e).slice(0,120);
+    /* Mijozga tushunarli xabar — pul qaytarilgani aniq aytiladi */
+    send(who.id, "\u21A9\uFE0F Chiqarish amalga oshmadi.\n\n" +
+      need + " GRAM hisobingizga qaytarildi.\n" +
+      "Joriy qoldiq: " + u3.gram + " GRAM\n\n" +
+      "Texnik nosozlik yuz berdi. 10 daqiqadan keyin qayta urinib ko'ring.", null, true);
+    if(ADMIN_ID) send(ADMIN_ID,
+      (e.lowWallet ? "\uD83D\uDD34 YUBORUVCHI HAMYONDA PUL TUGADI\n\n"
+                   : "\u26A0\uFE0F GRAM chiqarilmadi\n\n") +
+      "Mijoz: " + (u3.nm || who.id) + (u3.un ? " (@" + u3.un + ")" : "") +
+      "\nSo'ragan: " + amt + " GRAM" +
+      "\nSabab: " + msg +
+      "\n\nPul mijozga qaytarildi." +
+      (e.lowWallet ? "\n\n\u2757 TON yuboruvchi hamyonga pul soling \u2014 aks holda " +
+                     "boshqa mijozlar ham chiqara olmaydi." : ""));
+    res.json({ ok:false, error: e.lowWallet ? "wallet" : "send", msg:msg.slice(0,80) });
   }
 });
 
