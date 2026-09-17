@@ -2879,7 +2879,11 @@ async function tonCheck(){
       if(a.type !== "TonTransfer" || a.status !== "ok") continue;
       const tt = a.TonTransfer || {};
       const nano = Number(tt.amount || 0);
-      if(!(nano > 0)) continue;
+      /* Chang miqdoridagi o'tkazmalarni e'tiborsiz qoldiramiz.
+         Ular tarmoq ichidagi xizmat harakatlaridan qoladi va ular
+         haqida xabar berish faqat chalg'itardi. 0.01 GRAM dan kam
+         bo'lsa jimgina o'tkazib yuboramiz. */
+      if(!(nano >= 10000000)) continue;
       /* Manzilni solishtirmaymiz: hodisalar allaqachon BIZNING hisobimizdan
          olinyapti. Formatlar (raw / UQ / EQ) har xil bo'lgani uchun solishtirish
          noto'g'ri rad etardi. Chiqib ketgan pulni esa yo'nalish bo'yicha ajratamiz. */
