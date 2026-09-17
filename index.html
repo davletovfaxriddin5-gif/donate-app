@@ -7145,7 +7145,12 @@ function ocSend(){
       if(d.error === 'day')  return toast('Kunlik chegara: ' + d.day + ' GRAM');
       if(d.error === 'addr') return toast('Manzil noto\'g\'ri');
       if(d.error === 'off')  return toast('Chiqarish vaqtincha yopiq');
-      if(d.error === 'send') return toast('Yuborilmadi, pul qaytarildi');
+      if(d.error === 'wallet' || d.error === 'send'){
+        notify('error');
+        nftLoad();          /* qaytarilgan pul darrov ko'rinsin */
+        return toastErr('Chiqarish amalga oshmadi \u2014 pul qaytarildi. ' +
+                        '10 daqiqadan keyin urinib ko\'ring.');
+      }
       toast('Bajarilmadi');
     }).catch(function(){
       ocBusy = false;
