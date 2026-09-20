@@ -4905,7 +4905,15 @@ function buy(){
       toastErr('❌ Balans yetarli emas — ' + fmt(d.balance||0) + " so'm bor");
       buyDone();
     } else {
-      notify('error'); toastErr("⚠️ Xato: " + ((d && d.error) || 'yuborilmadi'));
+      notify('error');
+      toastErr(
+        d && d.error === 'login' ? "❌ Bunday Steam login topilmadi. Loginni tekshiring."
+      : d && d.error === 'busy'  ? "⚠️ Yetkazib beruvchi javob bermadi. Bir daqiqadan keyin urinib ko'ring."
+      : d && d.error === 'qty'   ? "Summa chegaradan chiqdi" + (d.min ? " (" + d.min + "–" + d.max + " $)" : "")
+      : d && d.error === 'rate'  ? "⚠️ Bu mahsulot vaqtincha sotuvda yo'q"
+      : d && d.error === 'maint' ? "⚠️ Bu o'yinda texnik ish ketyapti"
+      : d && d.error === 'fields'? "Ma'lumotlarni to'liq kiriting"
+      : "⚠️ Xato: " + ((d && d.error) || 'yuborilmadi'));
       buyDone();
     }
   }).catch(function(){ notify('error'); toastErr("⚠️ Aloqa yo'q"); buyDone(); });
