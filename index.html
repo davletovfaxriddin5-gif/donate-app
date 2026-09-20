@@ -4433,16 +4433,25 @@ function renderGame(){
         : '')
   +   '<div id="idForm">' + fldHtml
   +     (flds.length === 1 && !g.noCheck
-        ? '<button class="check-btn" style="width:100%;margin-top:14px;padding:13px" onclick="checkId()">Tekshirish</button>'
+        ? '<button class="check-btn" style="width:100%;margin-top:14px;padding:13px" onclick="'
+          + (g.custom === 'steam' ? 'steamCheck()' : 'checkId()') + '">Tekshirish</button>'
         : '')
   +   '</div>'
   +   '<div id="idOkBox" style="display:none"></div>'
   +   '<div id="idRes" class="id-res"></div>'
   + '</div>'
   + '<div class="sec-lbl" style="margin-top:0">'
-  +   (g.custom==='stars' ? 'Ixtiyoriy summa' : 'Mahsulotni tanlang') + '</div>'
+  +   ((g.custom==='stars' || g.custom==='steam') ? 'Ixtiyoriy summa' : 'Mahsulotni tanlang') + '</div>'
   + tabs
-  + (g.custom==='stars'
+  + (g.custom==='steam'
+      ? '<div class="form-card">'
+        + '<div class="lbl">Summani kiriting (\u0024)</div>'
+        + '<div class="inp-wrap"><input class="inp" id="stmQty" inputmode="numeric" placeholder="0" autocomplete="off" oninput="onStm()"><span class="info-i">\u0024</span></div>'
+        + '<div class="lbl" style="margin-top:14px">Narx</div>'
+        + '<div class="inp-wrap"><input class="inp" id="stmSum" readonly value="\u2014" style="opacity:.85"></div>'
+        + '<div id="stmHint" style="margin-top:11px;font-size:12.5px;line-height:1.6"></div>'
+        + '</div>'
+    : g.custom==='stars'
       ? '<div class="form-card">'
         + '<div class="lbl">Summani kiriting (\u2b50)</div>'
         + '<div class="inp-wrap"><input class="inp" id="starQty" inputmode="numeric" placeholder="0" autocomplete="off" oninput="onQty()"><span class="info-i">\u2b50</span></div>'
@@ -4458,6 +4467,7 @@ function renderGame(){
     if(el && !el.value) el.value = '@' + tgUser.username;
   }
   if(g.custom === 'stars'){ starN = 0; onQty(); }
+  if(g.custom === 'steam'){ stmN = 0; onStm(); }
   syncPromo();
 }
 /* 2x paketlarning sariq yonishi bir vaqtda bo'lsin.
@@ -4475,6 +4485,61 @@ function syncPromo(){
 }
 
 /* Miqdor kiritilganda narxni jonli hisoblaymiz */
+/* ===== Steam: ixtiyoriy summa va login tekshiruvi ===== */
+let stmN = 0;
+function stmCfg(){ const c = (curGame && curGame.steam) || {};
+  return { rate: Number(c.rate) || 13000, min: Number(c.min) || 1, max: Number(c.max) || 150 }; }
+function stmPrice(n){ return Math.round(n * stmCfg().rate); }
+function onStm(){
+  const el = document.getElementById('stmQty');
+  if(!el) return;
+  let v = String(el.value||'').replace(/[^0-9]/g,'').replace(/^0+/,'');
+  if(v.length > 4) v = v.slice(0,4);
+  if(el.value !== v) el.value = v;
+  const c = stmCfg();
+  const n = parseInt(v,10) || 0;
+  const price = n ? stmPrice(n) : 0;
+  stmN = (n >= c.min && n <= c.max) ? n : 0;
+  const sum = document.getElementById('stmSum');
+  if(sum) sum.value = n ? (money(price,true) + (somSub(price)?'  ('+somSub(price)+')':'')) : '\u2014';
+  const h = document.getElementById('stmHint');
+  if(h){
+    const mx = Math.floor(balance / c.rate);
+    let warn = '';
+    if(n && n < c.min) warn = `<div style="color:var(--gold)">Eng kami ${c.min} \u0024</div>`;
+    else if(n > c.max) warn = `<div style="color:var(--gold)">Eng ko'pi ${c.max} \u0024</div>`;
+    else if(n && price > balance) warn = `<div style="color:var(--gold)">Balans yetarli emas \u2014 ${money(balance,false)} bor</div>`;
+    h.innerHTML = warn
+      + `<div style="color:var(--dim)">1 \u0024 = ${fmt(c.rate)} so'm</div>`
+      + (mx >= c.min
+          ? `<div style="color:var(--dim)">Balansga sig'adi: ${fmt(mx)} \u0024 (${fmt(stmPrice(mx))} so'm)</div>`
+          : `<div style="color:var(--dim)">Eng kichik buyurtma ${c.min} \u0024 \u2014 ${fmt(stmPrice(c.min))} so'm</div>`)
+      + `<div style="color:var(--dim)">Pul Steam hisobiga dollarda tushadi</div>`;
+  }
+  syncBuy();
+}
+/* Login yetkazuvchida tekshiriladi: noto'g'ri loginga ketgan pul qaytmaydi */
+function steamCheck(){
+  const el = document.getElementById('fld_steamLogin');
+  const lg = String((el && el.value) || '').trim();
+  if(lg.length < 3){ idOk = false; setRes('bad', "Steam loginini kiriting"); syncBuy(); return; }
+  idOk = false; setRes('wait', 'Tekshirilmoqda\u2026'); syncBuy();
+  fetch(VBASE + '/steam/check', { method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ login: lg }) })
+   .then(function(r){ return r.json(); })
+   .then(function(d){
+     if(d && d.ok && d.valid){
+       idOk = true; idName = lg;
+       setRes('ok', "\u2705 Login qabul qilindi \u2014 pul aynan <b>" + esc(lg) + "</b> hisobiga tushadi");
+     } else if(d && d.reason === 'busy'){
+       idOk = false; setRes('bad', "\u26A0\uFE0F Hozir tekshirib bo'lmadi. Bir daqiqadan keyin urinib ko'ring.");
+     } else {
+       idOk = false; setRes('bad', "\u274C Bunday login topilmadi. Steam loginini tekshiring.");
+     }
+     syncBuy();
+   })
+   .catch(function(){ idOk = false; setRes('bad', "\u26A0\uFE0F Aloqa yo'q"); syncBuy(); });
+}
 function onQty(){
   const el = document.getElementById('starQty');
   if(!el) return;
@@ -4559,6 +4624,7 @@ function syncBuy(){
   const b = document.getElementById('buyBtn');
   if(!b) return;
   if(curGame && curGame.custom === 'stars'){ b.disabled = !(idOk && starN > 0); return; }
+  if(curGame && curGame.custom === 'steam'){ b.disabled = !(idOk && stmN > 0); return; }
   b.disabled = !(selPkg !== null && (idOk || noIdGame()));
 }
 function resetCheck(){
@@ -4793,12 +4859,20 @@ function buy(){
   buyAuthed = false;
   const g=curGame;
   const custom = g && g.custom === 'stars';
-  if(custom){
+  const steam  = g && g.custom === 'steam';
+  if(steam){
+    const c = stmCfg();
+    if(!stmN){ notify('error'); toastErr("Summani kiriting (" + c.min + "\u2013" + c.max + " \u0024)"); return; }
+    if(stmPrice(stmN) > balance){ notify('error'); toastErr("\u274C Balans yetarli emas \u2014 " + money(balance,false) + " bor"); return; }
+  } else if(custom){
     if(!starN){ notify('error'); toastErr("Yulduzlar sonini kiriting ("+STAR_MIN+"–"+fmt(STAR_MAX)+")"); return; }
     if(starPrice(starN) > balance){ notify('error'); toastErr("❌ Balans yetarli emas — "+money(balance,false)+" bor"); return; }
   } else if(selPkg===null){ notify('error'); toastErr('Paketni tanlang'); return; }
+  if(steam && !idOk){ notify('error'); toastErr("Avval loginni tekshiring"); return; }
   if(!idOk && !noIdGame()){ notify('error'); toastErr("Avval ID ni tekshiring"); return; }
-  const p = custom ? { a:String(starN), c:'⭐', p:starPrice(starN), oid:'' } : activePkgs()[selPkg];
+  const p = custom ? { a:String(starN), c:'⭐', p:starPrice(starN), oid:'' }
+          : steam  ? { a:String(stmN), c:'$', p:stmPrice(stmN), oid:'' }
+          : activePkgs()[selPkg];
   const details={};
   for(const f of curFields()){ const v=(document.getElementById('fld_'+f.key)?.value||'').trim();
     if(!v){ notify('error'); toastErr(f.label+' kiriting'); return; } details[f.key]=v; }
@@ -4806,7 +4880,7 @@ function buy(){
   const order={ id:'MT'+Date.now().toString().slice(-8), game:g.name, gameId:g.id, glyph:g.glyph, img:g.img||'',
     package:(p.a+(p.c&&p.c.length<=2?' '+p.c:'')), price:p.p, details, region:g.region?curRegion:null, nick:idName||'', accRegion:idRegion||'',
     cat: (g.cats && g.cats.length) ? (activeCat()||{}).cat : (g.cat||''), oid:p.oid||'',
-    qty: custom ? starN : 0,
+    qty: custom ? starN : steam ? stmN : 0,
     tgUser: tgUser?{id:tgUser.id,username:tgUser.username,name:tgUser.first_name}:null,
     status:'wait', createdAt:new Date().toISOString() };
   if(buyBusy) return;
@@ -8178,6 +8252,7 @@ function loadDynGames(){
     }).map(function(g){
       return { id:g.id, name:g.name, glyph:g.glyph || '\uD83C\uDFAE', img:g.img || '', vid:g.vid || '', bg:g.bg || '', peek:g.peek || '', hicon:g.hicon || '', hbg:g.hbg || '', maint:!!g.maint,
                cur:'', region:false, star:'', badge:'AVTO',
+               custom:g.custom || '', steam:g.steam || null, redeem:g.redeem || '',
                cats:g.cats, idFields:[], packages:[] };
     });
     if(!add.length) return;
