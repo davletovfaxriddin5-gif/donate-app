@@ -1293,21 +1293,21 @@ body.light .sp-card .sub{ text-shadow:none; color:var(--faint) }
 /* Ranglar ilovaning ko'kidan boshqa — quyuq tunji va oltin chiziq */
 /* Chetlari yupqa qora, o'rtaga borgan sari sariq kuchayadi */
 .dr-wrap .dr.t{ top:0; transform:translateY(-101%);
-  background:linear-gradient(180deg, #181209 0%, #261B0B 7%, #674B1A 27%, #B28831 54%, #DEBD6B 73%, #EED789 85%, #F6E194 95%);
-  box-shadow:0 10px 30px -8px rgba(255,226,140,.45) }
+  background:linear-gradient(180deg, #121219 0%, #1C1C23 7%, #4E4F54 27%, #8E8E90 54%, #C2C1BF 73%, #DAD8D4 85%, #E8E6E2 95%);
+  box-shadow:0 10px 30px -8px rgba(228,230,238,.5) }
 .dr-wrap .dr.b{ bottom:0; transform:translateY(101%);
-  background:linear-gradient(0deg, #181209 0%, #261B0B 7%, #674B1A 27%, #B28831 54%, #DEBD6B 73%, #EED789 85%, #F6E194 95%);
-  box-shadow:0 -10px 30px -8px rgba(255,226,140,.45) }
+  background:linear-gradient(0deg, #121219 0%, #1C1C23 7%, #4E4F54 27%, #8E8E90 54%, #C2C1BF 73%, #DAD8D4 85%, #E8E6E2 95%);
+  box-shadow:0 -10px 30px -8px rgba(228,230,238,.5) }
 /* Tutashgan joyda ingichka yorug' chiziq */
 .dr-wrap .dr.t:after, .dr-wrap .dr.b:after{ content:''; position:absolute; left:0; right:0;
-  height:2px; background:linear-gradient(90deg, #FAE294, #FBE9A0 22%, #FEF9D5 50%, #FBE9A0 78%, #FAE294);
+  height:2px; background:linear-gradient(90deg, #EDEBE7, #F5F4F1 22%, #FFFFFF 50%, #F5F4F1 78%, #EDEBE7);
   opacity:0; transition:opacity .2s .28s }
 .dr-wrap .dr.t:after{ bottom:0 }
 .dr-wrap .dr.b:after{ top:0 }
 .dr-wrap.shut .dr.t, .dr-wrap.shut .dr.b{ transform:translateY(0) }
 .dr-wrap.shut .dr.t:after, .dr-wrap.shut .dr.b:after{ opacity:1 }
-body.light .dr-wrap .dr.t{ background:linear-gradient(180deg, #181209 0%, #261B0B 7%, #674B1A 27%, #B28831 54%, #DEBD6B 73%, #EED789 85%, #F6E194 95%) }
-body.light .dr-wrap .dr.b{ background:linear-gradient(0deg, #181209 0%, #261B0B 7%, #674B1A 27%, #B28831 54%, #DEBD6B 73%, #EED789 85%, #F6E194 95%) }
+body.light .dr-wrap .dr.t{ background:linear-gradient(180deg, #121219 0%, #1C1C23 7%, #4E4F54 27%, #8E8E90 54%, #C2C1BF 73%, #DAD8D4 85%, #E8E6E2 95%) }
+body.light .dr-wrap .dr.b{ background:linear-gradient(0deg, #121219 0%, #1C1C23 7%, #4E4F54 27%, #8E8E90 54%, #C2C1BF 73%, #DAD8D4 85%, #E8E6E2 95%) }
 
 /* ---- Parda ortidagi sahna ---- */
 .dr-stage{ position:absolute; inset:0; opacity:0; transition:opacity .25s;
@@ -1344,7 +1344,7 @@ body.light .dr-wrap .dr.b{ background:linear-gradient(0deg, #181209 0%, #261B0B 
 /* Tarqaladigan to'lqinlar */
 .dr-core .rg{ position:absolute; left:50%; top:50%; width:118px; height:118px;
   margin:-59px 0 0 -59px; border-radius:50%; opacity:0;
-  border:1.5px solid rgba(140,94,24,.5) }
+  border:1.5px solid rgba(72,76,88,.42) }
 .dr-wrap.act .dr-core .rg{ animation:ripple 1.25s cubic-bezier(.2,.7,.3,1) forwards }
 .dr-wrap.act .dr-core .r1{ animation-delay:.60s }
 .dr-wrap.act .dr-core .r2{ animation-delay:.74s }
@@ -1356,7 +1356,7 @@ body.light .dr-wrap .dr.b{ background:linear-gradient(0deg, #181209 0%, #261B0B 
 /* Uchqunlar */
 .dr-core .sp{ position:absolute; left:50%; top:50%; width:5px; height:5px;
   margin:-2.5px 0 0 -2.5px; border-radius:50%; background:#FFFFFF; opacity:0;
-  box-shadow:0 0 10px rgba(170,105,20,.95) }
+  box-shadow:0 0 10px rgba(58,62,76,.9) }
 .dr-wrap.act .dr-core .sp{ animation:spark .9s ease-out .68s forwards }
 .dr-core .s1{ --x: 62px;  --y:-46px }
 .dr-core .s2{ --x:-58px;  --y:-52px }
@@ -3847,11 +3847,11 @@ const GAMES = [
       {a:'Weekly Elite Pack', c:'', p:10100, txt:true, oid:'weekly_elite_pack', im:'/IMG_4446.png'},
       {a:'Monthly Elite Pack', c:'', p:46112, txt:true, oid:'monthly_elite_pack', im:'/IMG_4429.png'},
     ]},
-  { id:'tgstars', name:'TG STARS', glyph:'⭐', star:'on', badge:'AVTO', img:'/stars-x1.webp',
+  { id:'tgstars', name:'TG STARS', glyph:'⭐', star:'on', badge:'AVTO', img:'/stars-x7.webp',
     cur:'⭐', region:false, custom:'stars',
     idFields:[{key:'username',label:'KIMGA (@username)',ph:'@username'}],
     packages:[] },
-  { id:'tgpremium', name:'TG PREMIUM', glyph:'👑', star:'on', badge:'AVTO', img:'/premium-x1.webp',
+  { id:'tgpremium', name:'TG PREMIUM', glyph:'👑', star:'on', badge:'AVTO', img:'/premium-x7.webp',
     cur:'', region:false,
     idFields:[{key:'username',label:'KIMGA (@username)',ph:'@username'}],
     packages:[
@@ -5514,13 +5514,12 @@ function nftDoor(next){
   if(old) old.remove();
   const w = document.createElement('div');
   w.className = 'dr-wrap'; w.id = 'drWrap';
+  /* O'rtadagi to'lqin halqalari va uchqunlar olib tashlandi - faqat logotip qoladi.
+     Ularning uslublari .rg / .sp da turibdi, kerak bo'lsa qaytarish oson. */
   w.innerHTML = '<div class="dr t"></div><div class="dr b"></div>' +
     '<div class="dr-stage"><div class="dr-core">' +
-      '<span class="rg r1"></span><span class="rg r2"></span><span class="rg r3"></span>' +
       '<div class="dr-logo"><img src="' + IMG('/minato-logo.webp') + '" alt="" ' +
         'onerror="this.closest(\'.dr-logo\').classList.add(\'off\')"><i class="gl"></i></div>' +
-      '<span class="sp s1"></span><span class="sp s2"></span><span class="sp s3"></span>' +
-      '<span class="sp s4"></span><span class="sp s5"></span><span class="sp s6"></span>' +
     '</div></div>';
   document.body.appendChild(w);
 
