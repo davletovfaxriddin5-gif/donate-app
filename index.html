@@ -4425,6 +4425,12 @@ function renderGame(){
           return '<button class="chip" onclick="fillId(\'' + v + '\')">' + esc(v) + '</button>'; }).join('')
       + '</div>' : '')
   + '<div class="form-card">'
+  +   (flds.length === 0
+        ? '<div class="lbl" style="margin:0 0 7px">\uD83C\uDF81 Kod bilan beriladi</div>'
+          + '<div style="font-size:13px;line-height:1.65;opacity:.75">ID kerak emas. Xariddan keyin kod '
+          + 'shu yerdagi tarixda va botda chiqadi \u2014 uni <b>' + esc(g.redeem || 'roblox.com/redeem')
+          + '</b> saytida ishlatasiz.</div>'
+        : '')
   +   '<div id="idForm">' + fldHtml
   +     (flds.length === 1 && !g.noCheck
         ? '<button class="check-btn" style="width:100%;margin-top:14px;padding:13px" onclick="checkId()">Tekshirish</button>'
@@ -4553,6 +4559,9 @@ function syncBuy(){
 }
 function resetCheck(){
   idOk = false; idName = ''; idRegion = '';
+  /* ID so'ramaydigan mahsulot (sovg'a kartasi): tekshiradigan narsa yo'q \u2014
+     "Sotib olish" paket tanlangan zahoti ochiladi */
+  if(curGame && curFields().length === 0){ idOk = true; setRes('', ''); syncBuy(); return; }
   /* Tekshiruvsiz o'yin (masalan Standoff 2): tugma yo'q, shuning uchun
      ID yozilgan zahoti "Sotib olish" ochiladi. */
   if(curGame && curGame.noCheck){
@@ -4789,7 +4798,7 @@ function buy(){
   const details={};
   for(const f of curFields()){ const v=(document.getElementById('fld_'+f.key)?.value||'').trim();
     if(!v){ notify('error'); toastErr(f.label+' kiriting'); return; } details[f.key]=v; }
-  saveId(g.id, Object.values(details).join(' '));
+  if(Object.keys(details).length) saveId(g.id, Object.values(details).join(' '));
   const order={ id:'MT'+Date.now().toString().slice(-8), game:g.name, gameId:g.id, glyph:g.glyph, img:g.img||'',
     package:(p.a+(p.c&&p.c.length<=2?' '+p.c:'')), price:p.p, details, region:g.region?curRegion:null, nick:idName||'', accRegion:idRegion||'',
     cat: (g.cats && g.cats.length) ? (activeCat()||{}).cat : (g.cat||''), oid:p.oid||'',
@@ -4850,7 +4859,13 @@ function loadOrders(cb){
      if(d && d.ok && Array.isArray(d.orders)){
        let loc = getOrders(); const map = {};
        d.orders.forEach(function(x){ map[x.id] = x; });
-       loc.forEach(function(x){ if(map[x.id]) x.status = map[x.id].status; });
+       loc.forEach(function(x){
+         const sv = map[x.id];
+         if(!sv) return;
+         x.status = sv.status;
+         if(sv.code) x.code = sv.code;        /* sovg'a kartasining kodi */
+         if(sv.redeem) x.redeem = sv.redeem;
+       });
        const ghostLim = Date.now() - 5*60*1000;
        loc = loc.filter(function(x){
          if(map[x.id]) return true;
@@ -4966,7 +4981,9 @@ function renderHistory(){
         <div class="price">-${(function(v){var i=v.lastIndexOf(" ");return i>0?v.slice(0,i)+"<small>"+v.slice(i+1)+"</small>":v;})(money(o.price,true))}</div>
       </div>
       <div class="sep"></div>
-      <div class="kv"><span class="k">O'yinchi ID</span><span class="v">${idVal}</span></div>
+      ${o.code
+        ? `<div class="kv"><span class="k">Kod</span><span class="v" style="color:var(--gold)">${esc(String(o.code).split('\n')[0])}</span></div>`
+        : (idVal ? `<div class="kv"><span class="k">O'yinchi ID</span><span class="v">${idVal}</span></div>` : '')}
       <div class="kv"><span class="k">Holat</span><span class="badge-st ${st[0]}">${st[1]}</span></div>
       <div class="date">${date}</div>
     </div>`;
@@ -5036,7 +5053,10 @@ function openOrderSheet(id){
       ${shRow('Holat', '<span style="color:'+(st[0]==='done'?'#4FE0A0':'var(--gold)')+'">'+st[1]+'</span>')}
       ${shRow('Yaratilgan', shDate(o.createdAt || o.at))}
       ${shRow('Bajarilgan', done)}
+      ${o.code ? shRow('Kod', '<span style="color:var(--gold);font-weight:700">' + esc(String(o.code)).replace(/\n/g,'<br>') + '</span>') : ''}
     </div>
+    ${o.code ? '<div style="font-size:12.5px;line-height:1.6;opacity:.75;margin:12px 2px 0">Kodni <b>' + esc(o.redeem || 'roblox.com/redeem') + '</b> saytida ishlatasiz.</div>'
+      + '<button class="sh-close" style="background:var(--gold);color:#241a06;font-weight:800" data-c="' + esc(String(o.code).replace(/"/g,'')) + '" onclick="copyCode(this.dataset.c)">Kodni nusxalash</button>' : ''}
     <button class="sh-close" onclick="closeSheet()">Yopish</button>`;
   document.body.appendChild(bg);
   document.body.appendChild(sh);
@@ -8870,6 +8890,7 @@ function watchBalance(){
 function pickPay(m){ haptic(); topMethod=m; stConfirm=0; stBusy=false; renderTopup(); }
 /* To'lov usulini almashtirish — bosh sahifaga chiqmasdan kartalar ro'yxatiga qaytadi */
 function backToPays(){ haptic(); topMethod=null; stConfirm=0; stBusy=false; renderTopup(); }
+function copyCode(t){ haptic(); try{ navigator.clipboard.writeText(String(t)); }catch(e){} notify('success'); toastOk('Kod nusxalandi'); }
 function copyCard(n){ haptic(); try{ navigator.clipboard.writeText(String(n).replace(/\s/g,'')); }catch(e){} notify('success'); toastOk('Nusxalandi'); }
 
 /* "To'ladim" \u2014 to'lov kelganini 2 daqiqagacha kutamiz */
