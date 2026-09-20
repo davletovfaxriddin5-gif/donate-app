@@ -1293,21 +1293,21 @@ body.light .sp-card .sub{ text-shadow:none; color:var(--faint) }
 /* Ranglar ilovaning ko'kidan boshqa — quyuq tunji va oltin chiziq */
 /* Chetlari yupqa qora, o'rtaga borgan sari sariq kuchayadi */
 .dr-wrap .dr.t{ top:0; transform:translateY(-101%);
-  background:linear-gradient(180deg, #6E5326 0%, #A88A46 28%, #D9C185 52%, #A0834A 72%, #5B4A2A 88%, #2A2418 100%);
-  box-shadow:0 10px 30px -8px rgba(0,0,0,.6) }
+  background:linear-gradient(180deg, #181209 0%, #261B0B 7%, #674B1A 27%, #B28831 54%, #DEBD6B 73%, #EED789 85%, #F6E194 95%);
+  box-shadow:0 10px 30px -8px rgba(255,226,140,.45) }
 .dr-wrap .dr.b{ bottom:0; transform:translateY(101%);
-  background:linear-gradient(0deg, #6E5326 0%, #A88A46 28%, #D9C185 52%, #A0834A 72%, #5B4A2A 88%, #2A2418 100%);
-  box-shadow:0 -10px 30px -8px rgba(0,0,0,.6) }
+  background:linear-gradient(0deg, #181209 0%, #261B0B 7%, #674B1A 27%, #B28831 54%, #DEBD6B 73%, #EED789 85%, #F6E194 95%);
+  box-shadow:0 -10px 30px -8px rgba(255,226,140,.45) }
 /* Tutashgan joyda ingichka yorug' chiziq */
 .dr-wrap .dr.t:after, .dr-wrap .dr.b:after{ content:''; position:absolute; left:0; right:0;
-  height:2px; background:linear-gradient(90deg, transparent, #B99B58 16%, #E6D3A0 50%, #B99B58 84%, transparent);
+  height:2px; background:linear-gradient(90deg, #FAE294, #FBE9A0 22%, #FEF9D5 50%, #FBE9A0 78%, #FAE294);
   opacity:0; transition:opacity .2s .28s }
 .dr-wrap .dr.t:after{ bottom:0 }
 .dr-wrap .dr.b:after{ top:0 }
 .dr-wrap.shut .dr.t, .dr-wrap.shut .dr.b{ transform:translateY(0) }
 .dr-wrap.shut .dr.t:after, .dr-wrap.shut .dr.b:after{ opacity:1 }
-body.light .dr-wrap .dr.t{ background:linear-gradient(180deg, #6E5326 0%, #A88A46 28%, #D9C185 52%, #A0834A 72%, #5B4A2A 88%, #2A2418 100%) }
-body.light .dr-wrap .dr.b{ background:linear-gradient(0deg, #6E5326 0%, #A88A46 28%, #D9C185 52%, #A0834A 72%, #5B4A2A 88%, #2A2418 100%) }
+body.light .dr-wrap .dr.t{ background:linear-gradient(180deg, #181209 0%, #261B0B 7%, #674B1A 27%, #B28831 54%, #DEBD6B 73%, #EED789 85%, #F6E194 95%) }
+body.light .dr-wrap .dr.b{ background:linear-gradient(0deg, #181209 0%, #261B0B 7%, #674B1A 27%, #B28831 54%, #DEBD6B 73%, #EED789 85%, #F6E194 95%) }
 
 /* ---- Parda ortidagi sahna ---- */
 .dr-stage{ position:absolute; inset:0; opacity:0; transition:opacity .25s;
@@ -1344,7 +1344,7 @@ body.light .dr-wrap .dr.b{ background:linear-gradient(0deg, #6E5326 0%, #A88A46 
 /* Tarqaladigan to'lqinlar */
 .dr-core .rg{ position:absolute; left:50%; top:50%; width:118px; height:118px;
   margin:-59px 0 0 -59px; border-radius:50%; opacity:0;
-  border:1.5px solid rgba(222,200,150,.45) }
+  border:1.5px solid rgba(140,94,24,.5) }
 .dr-wrap.act .dr-core .rg{ animation:ripple 1.25s cubic-bezier(.2,.7,.3,1) forwards }
 .dr-wrap.act .dr-core .r1{ animation-delay:.60s }
 .dr-wrap.act .dr-core .r2{ animation-delay:.74s }
@@ -1355,8 +1355,8 @@ body.light .dr-wrap .dr.b{ background:linear-gradient(0deg, #6E5326 0%, #A88A46 
 }
 /* Uchqunlar */
 .dr-core .sp{ position:absolute; left:50%; top:50%; width:5px; height:5px;
-  margin:-2.5px 0 0 -2.5px; border-radius:50%; background:#F2D06B; opacity:0;
-  box-shadow:0 0 10px rgba(242,208,107,.9) }
+  margin:-2.5px 0 0 -2.5px; border-radius:50%; background:#FFFFFF; opacity:0;
+  box-shadow:0 0 10px rgba(170,105,20,.95) }
 .dr-wrap.act .dr-core .sp{ animation:spark .9s ease-out .68s forwards }
 .dr-core .s1{ --x: 62px;  --y:-46px }
 .dr-core .s2{ --x:-58px;  --y:-52px }
