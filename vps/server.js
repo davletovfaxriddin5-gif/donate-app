@@ -866,6 +866,138 @@ function loadGames(){
 }
 loadGames();
 
+/* ---------- Sovg'a kartalari (Roblox) - kod bilan yetkaziladi ----------
+   Bu yo'l o'yin to'ldirishdan boshqacha:
+     GET  /giftcards/cards?category_id=...  -> paketlar (card_id, price_usd, stock)
+     POST /giftcards/order {category_id, card_id, quantity} -> buyurtma
+     kod esa buyurtma bajarilgach GET /orders/<id> javobida keladi.
+   Narxlar shu yerda turadi - ilovadan kelgan narxga ishonilmaydi. */
+const GIFT_RATE = 12300;              /* bufer kurs, tannarx hisobi uchun */
+const GIFTS = [{
+  id: "roblox", name: "Roblox", glyph: "\uD83C\uDFAE", img: "",
+  cat: "roblox_global", label: "Global", redeem: "roblox.com/redeem",
+  items: [
+    { oid: "50_robux",    name: "50 Robux",    price: 14000,   usd: 0.8680 },
+    { oid: "100_robux",   name: "100 Robux",   price: 22500,   usd: 1.5711 },
+    { oid: "800_robux",   name: "800 Robux",   price: 121000,  usd: 9.0675 },
+    { oid: "1000_robux",  name: "1000 Robux",  price: 145500,  usd: 11.0825 },
+    { oid: "2000_robux",  name: "2000 Robux",  price: 282000,  usd: 22.1650 },
+    { oid: "2500_robux",  name: "2500 Robux",  price: 360500,  usd: 28.0647 },
+    { oid: "4500_robux",  name: "4500 Robux",  price: 599000,  usd: 47.4515 },
+    { oid: "10000_robux", name: "10000 Robux", price: 1255000, usd: 100.4540 }
+  ]
+}];
+const GIFT_IDX = {};   /* "gift:<cat>|<card_id>" -> narx, tannarx, maydonlar */
+const GIFT_ST  = {};   /* "<cat>|<card_id>" -> yetkazuvchidagi zaxira */
+const GIFT_REF = {};   /* o'yin id -> ilovaga ketadigan paketlar ro'yxati */
+function giftCat(c){ return String(c || "").indexOf("gift:") === 0 ? String(c).slice(5) : ""; }
+function giftFill(g){
+  const arr = GIFT_REF[g.id];
+  if(!arr) return;
+  arr.length = 0;
+  g.items.forEach(function(it){
+    if(GIFT_ST[g.cat + "|" + it.oid] === 0) return;        /* tugagani ko'rinmaydi */
+    arr.push({ oid: it.oid, name: it.name, price: it.price, im: it.im || "", grp: "Robux" });
+  });
+}
+function loadGiftGames(){
+  GIFTS.forEach(function(g){
+    g.items.forEach(function(it){
+      GIFT_IDX["gift:" + g.cat + "|" + it.oid] = {
+        price: it.price, cost: Math.round(it.usd * GIFT_RATE), usd: it.usd,
+        fields: [], gift: g.cat, redeem: g.redeem, name: it.name
+      };
+    });
+    const offers = [];
+    GIFT_REF[g.id] = offers;
+    APPGAMES.push({
+      id: g.id, name: g.name, glyph: g.glyph, img: g.img || "", vid: "", bg: "", peek: "",
+      hicon: "", hbg: "", maint: false, gift: 1,
+      cats: [{ cat: "gift:" + g.cat, label: g.label, fields: [], offers: offers }]
+    });
+    giftFill(g);
+  });
+  console.log("Sovg'a kartalari: " + GIFTS.length + " o'yin, " + Object.keys(GIFT_IDX).length + " paket");
+}
+loadGiftGames();
+
+/* Zaxira va tannarxni yetkazuvchidan yangilab turamiz. Tannarx sotuv narxiga
+   yetib qolsa paket YOPILADI - zarariga sotilmasin. */
+async function giftSync(){
+  if(!FZR_KEY) return;
+  for(const g of GIFTS){
+    try{
+      const ac = new AbortController();
+      const tm = setTimeout(function(){ ac.abort(); }, 20000);
+      let j = {};
+      try{
+        const r = await fetch(FZR_BASE + "/api/v2/giftcards/cards?category_id=" + encodeURIComponent(g.cat),
+          { headers: { "X-API-Key": FZR_KEY }, signal: ac.signal });
+        j = await r.json().catch(function(){ return {}; });
+      } finally { clearTimeout(tm); }
+      if(!j || !j.ok || !Array.isArray(j.offers)) continue;
+      const live = {};
+      j.offers.forEach(function(o){ live[String(o.card_id)] = o; });
+      g.items.forEach(function(it){
+        const o = live[it.oid];
+        const st = o ? Number(o.stock) : 0;
+        const cost = o ? Math.round(Number(o.price_usd) * GIFT_RATE) : 0;
+        const qimmat = cost > 0 && cost >= it.price;
+        GIFT_ST[g.cat + "|" + it.oid] = (!o || qimmat) ? 0 : (isFinite(st) ? st : 0);
+        if(qimmat && ADMIN_ID) tgCall("sendMessage", { chat_id: ADMIN_ID,
+          text: "\u26A0\uFE0F " + g.name + " " + it.name + ": tannarx " + cost + " so'm, sotuv narxi " +
+                it.price + " so'm. Paket vaqtincha yopildi, narxni ko'taring." });
+      });
+      giftFill(g);
+      console.log("giftSync " + g.cat + ": " + GIFT_REF[g.id].length + " paket ochiq");
+    }catch(e){ console.log("giftSync xato:", e.message); }
+  }
+}
+setTimeout(giftSync, 5000);
+setInterval(giftSync, 6*3600*1000);
+
+/* Sovg'a kartasi buyurtmasi. Idempotency-Key - qayta yuborilsa ikkinchi karta olinmaydi. */
+async function fzrGift(cat, cardId, idem){
+  const ac = new AbortController();
+  const tm = setTimeout(function(){ ac.abort(); }, 25000);
+  try{
+    const h = { "Content-Type": "application/json", "X-API-Key": FZR_KEY };
+    if(idem) h["Idempotency-Key"] = String(idem).slice(0, 255);
+    const r = await fetch(FZR_BASE + "/api/v2/giftcards/order", {
+      method: "POST", headers: h,
+      body: JSON.stringify({ category_id: cat, card_id: cardId, quantity: 1 }),
+      signal: ac.signal
+    });
+    const j = await r.json().catch(function(){ return {}; });
+    if(r.ok && j.ok && j.order && j.order.id) return { ok: true, id: String(j.order.id) };
+    console.log("GIFT order rad:", r.status, JSON.stringify(j).slice(0, 300));
+    return { ok: false, why: String(j.error || ("HTTP " + r.status)) };
+  }catch(e){
+    console.log("GIFT order xato:", e.message);
+    return { ok: false, why: "network" };
+  } finally { clearTimeout(tm); }
+}
+
+/* Buyurtma javobidan kodni ajratamiz. Kod qaysi maydonda kelishi hujjatda
+   yozilmagan, shuning uchun code/pin/serial kabi kalitlar qidiriladi
+   (card_id, category_id kabilar tushib qolmasligi uchun nom aniq tekshiriladi). */
+function giftCodes(ord){
+  const out = [];
+  const nom = function(k){ return /(^|_)(code|codes|pin|serial|voucher|secret|key)s?$/i.test(String(k || "")); };
+  const walk = function(v, k){
+    if(v === null || v === undefined) return;
+    if(typeof v === "string" || typeof v === "number"){
+      const t = String(v);
+      if(nom(k) && t.length >= 4 && t.length <= 128 && !/^https?:/i.test(t) && out.indexOf(t) < 0) out.push(t);
+      return;
+    }
+    if(Array.isArray(v)){ v.forEach(function(x){ walk(x, k); }); return; }
+    if(typeof v === "object"){ Object.keys(v).forEach(function(kk){ walk(v[kk], kk); }); }
+  };
+  walk(ord && ord.payload !== undefined ? ord.payload : ord, "");
+  return out;
+}
+
 app.get("/games", (req,res)=>{
   res.json({ ok:true, games: APPGAMES });
 });
@@ -2551,7 +2683,8 @@ app.post("/order", async (req,res)=>{
 
     /* Yangi o'yinlar: ilova cat (kategoriya) yuboradi, narx games.json dan olinadi */
     const ncat = String(o.cat || "");
-    const nEnt = ncat ? GIDX[ncat + "|" + oid] : null;
+    /* "gift:" bilan boshlansa sovg'a kartasi - narx GIFT_IDX dan olinadi */
+    const nEnt = ncat ? (GIFT_IDX[ncat + "|" + oid] || GIDX[ncat + "|" + oid]) : null;
 
     /* TG Stars: paket emas, mijoz kiritgan miqdor */
     let stars = 0;
@@ -2650,8 +2783,8 @@ app.post("/order", async (req,res)=>{
       nick: String(o.nick||""), accRegion: String(o.accRegion||""),
       oid: oid, cat: auto ? off.cat : "", auto: auto, pay: pay, gram: gram,
       /* tannarx — foyda hisobi uchun. usd: yetkazuvchi narxi, cost: o'sha paytdagi so'm */
-      usd: auto ? orderUsd(tg, off.cat, oid, tgn) : 0,
-      cost: auto ? Math.round(orderUsd(tg, off.cat, oid, tgn) * COST_RATE) : 0,
+      usd: auto ? (nEnt && nEnt.gift ? nEnt.usd : orderUsd(tg, off.cat, oid, tgn)) : 0,
+      cost: auto ? Math.round((nEnt && nEnt.gift ? nEnt.usd : orderUsd(tg, off.cat, oid, tgn)) * COST_RATE) : 0,
       fzr: "", status: "wait", at: new Date().toISOString()
     };
     u.orders.unshift(rec); u.orders = u.orders.slice(0,100);
@@ -2674,7 +2807,10 @@ app.post("/order", async (req,res)=>{
 
     /* Yetkazib beruvchiga yuboramiz \u2014 coindrop yoki FazerCards */
     const cdGame = CD_GAMES[game];
-    const r = cdGame
+    const gCat = giftCat(rec.cat);          /* sovg'a kartasi bo'lsa - o'z manzili */
+    const r = gCat
+      ? await fzrGift(gCat, rec.oid, "mt-" + rec.id)
+      : cdGame
       ? await cdCreate(cdGame, rec.oid, rec.pid, rec.id)
       : (tg ? await fzrTg(tg, tgu, tgn)
             : await fzrCreate(rec.cat, rec.oid, fields, "mt-" + rec.id));
@@ -2685,12 +2821,15 @@ app.post("/order", async (req,res)=>{
 
     if(r.ok){
       rec2.fzr = r.id; rec2.status = "sent";
+      if(gCat){ rec2.gift = 1; rec2.redeem = (nEnt && nEnt.redeem) || ""; }
       if(cdGame) rec2.cd = 1;                    /* kim yuborganini eslab qolamiz */
       save(db2);
       /* id kelmasa sweep uni kuzata olmaydi \u2014 pulni QAYTARMAYMIZ (buyurtma qabul qilingan) */
       if(!r.id && ADMIN_ID) tgCall("sendMessage", { chat_id: ADMIN_ID,
         text: "\u2757 "+rec.id+" yuborildi, lekin FZR id qaytarmadi.\n"+rec.package+" \u2014 "+rec.pid+"\nPanelda qo'lda tekshiring." });
-      send(uid, "⏳ Buyurtma yuborildi: "+rec.package+"\nOdatda 1-2 daqiqada tushadi.\nQoldiq balans: "+u2.balance+" so'm");
+      send(uid, gCat
+        ? ("\u23F3 Buyurtma yuborildi: " + rec.package + "\nKod tayyor bo'lgach shu yerga yuboriladi.\nQoldiq balans: " + u2.balance + " so'm")
+        : ("\u23F3 Buyurtma yuborildi: " + rec.package + "\nOdatda 1-2 daqiqada tushadi.\nQoldiq balans: " + u2.balance + " so'm"));
       return res.json({ ok:true, balance:u2.balance, nftSom:u2.nftSom, gram:u2.gram, pay:pay, order:rec2 });
     }
 
@@ -2761,6 +2900,24 @@ async function checkOne(uid, ordId){
 
   if(s === "completed"){
     r.status = "done"; r.doneAt = new Date().toISOString();
+    if(r.gift){
+      /* Sovg'a kartasi: mijozga hisobga emas, KOD yuboriladi */
+      const kodlar = giftCodes(st);
+      r.code = kodlar.join("\n");
+      save(db);
+      if(r.code){
+        send(uid, "\uD83C\uDF81 " + r.package + " tayyor!\n\nKod: " + r.code +
+                  "\n\nIshlatish: " + (r.redeem || "roblox.com/redeem") +
+                  " saytiga kiring, hisobingizga kirib kodni kiriting.\nKod tarixda ham saqlanadi.");
+      } else {
+        /* kod kutilgan joyda kelmadi - mijoz pulini yo'qotmaydi, admin ko'radi */
+        send(uid, "\uD83C\uDF81 " + r.package + " tayyor. Kod tez orada yuboriladi.");
+        if(ADMIN_ID) tgCall("sendMessage", { chat_id: ADMIN_ID,
+          text: "\uD83C\uDF81 KOD TOPILMADI " + r.fzr + " (id " + uid + ")\n" +
+                JSON.stringify(st).slice(0, 1200) });
+      }
+      return;
+    }
     save(db);
     send(uid, "✅ "+r.package+" hisobingizga tushdi!\nID: "+(r.pid || r.gameId || ""));
     return;
