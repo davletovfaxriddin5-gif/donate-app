@@ -882,7 +882,7 @@ const GIFTS = [{
     { oid: "800_robux",   name: "800 Robux",   price: 121000,  usd: 9.0675 },
     { oid: "1000_robux",  name: "1000 Robux",  price: 145500,  usd: 11.0825 },
     { oid: "2000_robux",  name: "2000 Robux",  price: 282000,  usd: 22.1650 },
-    { oid: "2500_robux",  name: "2500 Robux",  price: 360500,  usd: 28.0647 },
+    { oid: "2500_robux",  name: "2500 Robux",  price: 379500,  usd: 29.6098 },
     { oid: "4500_robux",  name: "4500 Robux",  price: 599000,  usd: 47.4515 },
     { oid: "10000_robux", name: "10000 Robux", price: 1255000, usd: 100.4540 }
   ]
@@ -949,6 +949,14 @@ async function giftSync(){
                 it.price + " so'm. Paket vaqtincha yopildi, narxni ko'taring." });
       });
       giftFill(g);
+      /* har paketning holati logga yozilsin - narxni qachon ko'tarish kerakligi ko'rinib tursin */
+      g.items.forEach(function(it){
+        const o2 = live[it.oid];
+        const c2 = o2 ? Math.round(Number(o2.price_usd) * GIFT_RATE) : 0;
+        console.log("  " + it.oid + ": tannarx " + c2 + " | narx " + it.price + " | foyda " +
+          (c2 ? (it.price - c2) : "?") + " | zaxira " + (o2 ? o2.stock : 0) +
+          (GIFT_ST[g.cat + "|" + it.oid] === 0 ? " | YOPIQ" : ""));
+      });
       console.log("giftSync " + g.cat + ": " + GIFT_REF[g.id].length + " paket ochiq");
     }catch(e){ console.log("giftSync xato:", e.message); }
   }
