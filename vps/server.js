@@ -1012,7 +1012,7 @@ function steamLoginOf(o){
 }
 function loadSteamGame(){
   APPGAMES.push({
-    id: "steam", name: "Steam", glyph: "\uD83C\uDFAE", img: "", vid: "", bg: "", peek: "",
+    id: "steam", name: "Steam", glyph: "\uD83C\uDFAE", img: "/steam-x1.webp", vid: "", bg: "", peek: "",
     hicon: "", hbg: "", maint: false, custom: "steam",
     steam: { rate: STEAM_RATE, min: STEAM_MIN, max: STEAM_MAX },
     cats: [{ cat: STEAM_CAT, label: "USD",
@@ -1070,12 +1070,18 @@ async function fzrSteam(login, usd, idem){
   } finally { clearTimeout(tm); }
 }
 
-/* Ilova xariddan oldin shu manzilga murojaat qiladi */
+/* Ilova xariddan oldin shu manzilga murojaat qiladi.
+   Daqiqasiga 60 ta yangi login - yetkazuvchining chegarasi behuda sarflanmasin
+   (bir xil login 5 daqiqa keshdan olinadi, u hisobga kirmaydi). */
+let sMin = 0, sCnt = 0;
 async function steamCheckRoute(req, res){
   try{
     const b = req.body || {};
     const login = String(b.login || b.steamLogin || req.query.login || "").trim();
     if(login.length < 3) return res.json({ ok:false, reason:"bad_login" });
+    const m = Math.floor(Date.now() / 60000);
+    if(m !== sMin){ sMin = m; sCnt = 0; }
+    if(!sChk[login.toLowerCase()] && ++sCnt > 60) return res.json({ ok:false, reason:"busy" });
     const c = await fzrSteamCheck(login);
     if(!c.ok) return res.json({ ok:false, reason:"busy" });
     return res.json({ ok:true, valid: !!c.can, unverified: !!c.unv });
