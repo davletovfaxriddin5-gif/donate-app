@@ -954,6 +954,33 @@ async function giftSync(){
   }
 }
 setTimeout(giftSync, 5000);
+
+/* Kodi yozilmay qolgan sovg'a buyurtmalarini tiklaymiz: yetkazuvchidan qayta
+   so'rab, kodni yozamiz va mijozga yuboramiz. Bir marta, ishga tushgandan keyin. */
+async function giftFix(){
+  try{
+    const db = load();
+    let n = 0;
+    for(const uid of Object.keys(db)){
+      const u = db[uid];
+      if(!u || !Array.isArray(u.orders)) continue;
+      for(const r of u.orders){
+        if(!r || !r.gift || r.code || !r.fzr) continue;
+        if(r.status !== "done" && r.status !== "sent") continue;
+        const st = await fzrStatus(r.fzr);
+        if(!st) continue;
+        const kod = giftCodes(st).join("\n");
+        if(!kod) continue;
+        r.code = kod; r.status = "done"; n++;
+        send(uid, "\uD83C\uDF81 " + r.package + " kodi:\n" + kod +
+                  "\n\nIshlatish: " + (r.redeem || "roblox.com/redeem") +
+                  " saytiga kiring, hisobingizga kirib kodni kiriting.\nKechikkani uchun uzr.");
+      }
+    }
+    if(n){ save(db); console.log("giftFix: " + n + " ta kod tiklandi"); }
+  }catch(e){ console.log("giftFix xato:", e.message); }
+}
+setTimeout(giftFix, 12000);
 setInterval(giftSync, 6*3600*1000);
 
 /* Sovg'a kartasi buyurtmasi. Idempotency-Key - qayta yuborilsa ikkinchi karta olinmaydi. */
@@ -983,7 +1010,7 @@ async function fzrGift(cat, cardId, idem){
    (card_id, category_id kabilar tushib qolmasligi uchun nom aniq tekshiriladi). */
 function giftCodes(ord){
   const out = [];
-  const nom = function(k){ return /(^|_)(code|codes|pin|serial|voucher|secret|key)s?$/i.test(String(k || "")); };
+  const nom = function(k){ return /(^|_)(code|card|pin|serial|voucher|secret|key|token)s?$/i.test(String(k || "")); };
   const walk = function(v, k){
     if(v === null || v === undefined) return;
     if(typeof v === "string" || typeof v === "number"){
