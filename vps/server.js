@@ -874,17 +874,17 @@ loadGames();
    Narxlar shu yerda turadi - ilovadan kelgan narxga ishonilmaydi. */
 const GIFT_RATE = 12300;              /* bufer kurs, tannarx hisobi uchun */
 const GIFTS = [{
-  id: "roblox", name: "Roblox", glyph: "\uD83C\uDFAE", img: "",
+  id: "roblox", name: "Roblox", glyph: "\uD83C\uDFAE", img: "/roblox-1.webp",
   cat: "roblox_global", label: "Global", redeem: "roblox.com/redeem",
   items: [
-    { oid: "50_robux",    name: "50 Robux",    price: 14000,   usd: 0.8680 },
-    { oid: "100_robux",   name: "100 Robux",   price: 22500,   usd: 1.5711 },
-    { oid: "800_robux",   name: "800 Robux",   price: 121000,  usd: 9.0675 },
-    { oid: "1000_robux",  name: "1000 Robux",  price: 145500,  usd: 11.0825 },
-    { oid: "2000_robux",  name: "2000 Robux",  price: 285000,  usd: 22.1650 },
-    { oid: "2500_robux",  name: "2500 Robux",  price: 384000,  usd: 29.6098 },
-    { oid: "4500_robux",  name: "4500 Robux",  price: 611000,  usd: 47.8563 },
-    { oid: "10000_robux", name: "10000 Robux", price: 1275000, usd: 100.4540 }
+    { oid: "50_robux",    name: "50 Robux",    price: 14000,   usd: 0.8680 , im: "/roblox-x2.webp" },
+    { oid: "100_robux",   name: "100 Robux",   price: 22500,   usd: 1.5711 , im: "/roblox-x3.webp" },
+    { oid: "800_robux",   name: "800 Robux",   price: 121000,  usd: 9.0675 , im: "/roblox-x4.webp" },
+    { oid: "1000_robux",  name: "1000 Robux",  price: 145500,  usd: 11.0825 , im: "/roblox-x5.webp" },
+    { oid: "2000_robux",  name: "2000 Robux",  price: 285000,  usd: 22.1650 , im: "/roblox-x6.webp" },
+    { oid: "2500_robux",  name: "2500 Robux",  price: 384000,  usd: 29.6098 , im: "/roblox-x7.webp" },
+    { oid: "4500_robux",  name: "4500 Robux",  price: 611000,  usd: 47.8563 , im: "/roblox-x8.webp" },
+    { oid: "10000_robux", name: "10000 Robux", price: 1275000, usd: 100.4540 , im: "/roblox-x9.webp" }
   ]
 }];
 const GIFT_IDX = {};   /* "gift:<cat>|<card_id>" -> narx, tannarx, maydonlar */
