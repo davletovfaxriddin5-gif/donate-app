@@ -874,7 +874,7 @@ loadGames();
    Narxlar shu yerda turadi - ilovadan kelgan narxga ishonilmaydi. */
 const GIFT_RATE = 12300;              /* bufer kurs, tannarx hisobi uchun */
 const GIFTS = [{
-  id: "roblox", name: "Roblox", glyph: "\uD83C\uDFAE", img: "/roblox-1.webp",
+  id: "roblox", name: "Roblox", glyph: "\uD83C\uDFAE", img: "/roblox-x1.webp",
   cat: "roblox_global", label: "Global", redeem: "roblox.com/redeem",
   items: [
     { oid: "50_robux",    name: "50 Robux",    price: 14000,   usd: 0.8680 , im: "/roblox-x2.webp" },
