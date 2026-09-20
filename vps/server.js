@@ -912,7 +912,7 @@ function loadGiftGames(){
     GIFT_REF[g.id] = offers;
     APPGAMES.push({
       id: g.id, name: g.name, glyph: g.glyph, img: g.img || "", vid: "", bg: "", peek: "",
-      hicon: "", hbg: "", maint: false, gift: 1,
+      hicon: "", hbg: "", maint: false, gift: 1, redeem: g.redeem,
       cats: [{ cat: "gift:" + g.cat, label: g.label, fields: [], offers: offers }]
     });
     giftFill(g);
