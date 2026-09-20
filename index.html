@@ -3851,7 +3851,7 @@ const GAMES = [
     cur:'⭐', region:false, custom:'stars',
     idFields:[{key:'username',label:'KIMGA (@username)',ph:'@username'}],
     packages:[] },
-  { id:'tgpremium', name:'TG PREMIUM', glyph:'👑', star:'on', badge:'AVTO', img:'/premium-x7.webp',
+  { id:'tgpremium', name:'TG PREMIUM', glyph:'👑', star:'on', badge:'AVTO', img:'/premium-x7.webp', zoom:1.14,
     cur:'', region:false,
     idFields:[{key:'username',label:'KIMGA (@username)',ph:'@username'}],
     packages:[
@@ -4269,7 +4269,7 @@ function profileRow(){
 
 function renderHome(){
   app.innerHTML = profileRow() + `
-  <div class="balance">
+  <div class="balance" style="background-image:linear-gradient(90deg,#2B2FE8 0%,rgba(43,47,232,.97) 22%,rgba(45,44,236,.74) 40%,rgba(52,46,238,.5) 56%,rgba(58,50,240,.34) 76%,rgba(60,52,242,.26) 100%),url('${IMG('/banner-x9.webp')}'),linear-gradient(150deg,#2B2FE8 0%,#3D33EE 55%,#4A3BF2 100%);background-size:cover,auto 108%,cover;background-position:center,right -30px center,center;background-repeat:no-repeat,no-repeat,no-repeat">
     <div class="lbl">Balans</div>
     <div class="amt">${money(balance,false)}</div>
     <div class="bal-actions">
@@ -4287,7 +4287,7 @@ function renderHome(){
     ${GAMES.map(g=>`
       <button class="game" onclick="openGame('${g.id}')">
         <div class="tile">
-          ${g.img ? `<img src="${IMG(g.img)}" alt="">` : `<span class="glyph">${g.glyph}</span>`}
+          ${g.img ? `<img src="${IMG(g.img)}" alt=""${g.zoom ? ` style="transform:scale(${g.zoom})"` : ''}>` : `<span class="glyph">${g.glyph}</span>`}
           ${g.star ? `<span class="star ${g.star}">★</span>` : ''}
           ${g.badge ? `<span class="badge">${g.badge}</span>` : ''}
           ${g.maint ? `<span class="maint"><span>TEXNIK ISH</span></span>` : ''}
