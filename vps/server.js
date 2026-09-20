@@ -881,10 +881,10 @@ const GIFTS = [{
     { oid: "100_robux",   name: "100 Robux",   price: 22500,   usd: 1.5711 },
     { oid: "800_robux",   name: "800 Robux",   price: 121000,  usd: 9.0675 },
     { oid: "1000_robux",  name: "1000 Robux",  price: 145500,  usd: 11.0825 },
-    { oid: "2000_robux",  name: "2000 Robux",  price: 282000,  usd: 22.1650 },
-    { oid: "2500_robux",  name: "2500 Robux",  price: 379500,  usd: 29.6098 },
-    { oid: "4500_robux",  name: "4500 Robux",  price: 599000,  usd: 47.4515 },
-    { oid: "10000_robux", name: "10000 Robux", price: 1255000, usd: 100.4540 }
+    { oid: "2000_robux",  name: "2000 Robux",  price: 285000,  usd: 22.1650 },
+    { oid: "2500_robux",  name: "2500 Robux",  price: 384000,  usd: 29.6098 },
+    { oid: "4500_robux",  name: "4500 Robux",  price: 611000,  usd: 47.8563 },
+    { oid: "10000_robux", name: "10000 Robux", price: 1275000, usd: 100.4540 }
   ]
 }];
 const GIFT_IDX = {};   /* "gift:<cat>|<card_id>" -> narx, tannarx, maydonlar */
