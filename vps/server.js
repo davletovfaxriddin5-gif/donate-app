@@ -989,6 +989,101 @@ async function giftFix(){
   }catch(e){ console.log("giftFix xato:", e.message); }
 }
 setTimeout(giftFix, 12000);
+
+/* ---------- Steam hamyoni: login orqali, ixtiyoriy summa ----------
+   FazerCards:
+     POST /steam-topup/check-login {steamLogin}            -> {ok, can_refill}
+     POST /steam-topup/order {steamLogin, currency, amount} -> {ok, order:{id}}
+   Paket yo'q: mijoz dollarda summa yozadi, narx kurs bilan hisoblanadi.
+   Kurs va chegaralarni .env dan o'zgartirsa bo'ladi, kod tegmaydi. */
+const STEAM_CAT  = "steam:wallet";
+const STEAM_RATE = Number(process.env.STEAM_RATE || 13000);  /* 1$ = shuncha so'm */
+const STEAM_MIN  = Number(process.env.STEAM_MIN  || 1);      /* eng kam, $ */
+const STEAM_MAX  = Number(process.env.STEAM_MAX  || 150);    /* eng ko'p, $ */
+const STEAM_DISC = Number(process.env.STEAM_DISC || 0.975);  /* tarif chegirmasi: $1 bizga $0.975 */
+function steamPrice(usd){ return Math.round(usd * STEAM_RATE); }
+function steamQty(o){
+  const v = Number((o && (o.qty || o.usd || o.amount)) || 0);
+  return isFinite(v) && v > 0 ? Math.round(v) : 0;
+}
+function steamLoginOf(o){
+  const d = (o && o.details) || {};
+  return String(d.steamLogin || d.steam_login || d.login || (o && o.steamLogin) || "").trim();
+}
+function loadSteamGame(){
+  APPGAMES.push({
+    id: "steam", name: "Steam", glyph: "\uD83C\uDFAE", img: "", vid: "", bg: "", peek: "",
+    hicon: "", hbg: "", maint: false, custom: "steam",
+    steam: { rate: STEAM_RATE, min: STEAM_MIN, max: STEAM_MAX },
+    cats: [{ cat: STEAM_CAT, label: "USD",
+      fields: [{ key: "steamLogin", label: "Steam login", type: "text" }], offers: [] }]
+  });
+  console.log("Steam: kurs " + STEAM_RATE + " so'm/$, chegara " + STEAM_MIN + "-" + STEAM_MAX + " $");
+}
+loadSteamGame();
+
+/* Login tekshiruvi. Javob 5 daqiqa saqlanadi - bitta login bir necha marta
+   yozilganda yetkazuvchiga ortiqcha so'rov ketmasin. */
+const sChk = {};
+async function fzrSteamCheck(login){
+  const key = String(login).toLowerCase();
+  const c = sChk[key];
+  if(c && Date.now() - c.at < 5*60*1000) return c;
+  const ac = new AbortController();
+  const tm = setTimeout(function(){ ac.abort(); }, 20000);
+  const out = { ok:false, can:false, unv:false, at:Date.now() };
+  try{
+    const r = await fetch(FZR_BASE + "/api/v2/steam-topup/check-login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-API-Key": FZR_KEY },
+      body: JSON.stringify({ steamLogin: login }),
+      signal: ac.signal
+    });
+    const j = await r.json().catch(function(){ return {}; });
+    if(r.ok && j && j.ok){ out.ok = true; out.can = j.can_refill !== false; out.unv = !!j.unverified; }
+    else { console.log("STEAM check rad:", r.status, JSON.stringify(j).slice(0, 200)); out.ok = r.status < 500; }
+  }catch(e){ console.log("STEAM check xato:", e.message); }
+  finally{ clearTimeout(tm); }
+  sChk[key] = out;
+  return out;
+}
+
+/* Steam buyurtmasi */
+async function fzrSteam(login, usd, idem){
+  const ac = new AbortController();
+  const tm = setTimeout(function(){ ac.abort(); }, 25000);
+  try{
+    const h = { "Content-Type": "application/json", "X-API-Key": FZR_KEY };
+    if(idem) h["Idempotency-Key"] = String(idem).slice(0, 255);
+    const r = await fetch(FZR_BASE + "/api/v2/steam-topup/order", {
+      method: "POST", headers: h,
+      body: JSON.stringify({ steamLogin: login, currency: "USD", amount: usd }),
+      signal: ac.signal
+    });
+    const j = await r.json().catch(function(){ return {}; });
+    if(r.ok && j.ok && j.order && j.order.id) return { ok: true, id: String(j.order.id) };
+    console.log("STEAM order rad:", r.status, JSON.stringify(j).slice(0, 300));
+    return { ok: false, why: String(j.error || ("HTTP " + r.status)) };
+  }catch(e){
+    console.log("STEAM order xato:", e.message);
+    return { ok: false, why: "network" };
+  } finally { clearTimeout(tm); }
+}
+
+/* Ilova xariddan oldin shu manzilga murojaat qiladi */
+async function steamCheckRoute(req, res){
+  try{
+    const b = req.body || {};
+    const login = String(b.login || b.steamLogin || req.query.login || "").trim();
+    if(login.length < 3) return res.json({ ok:false, reason:"bad_login" });
+    const c = await fzrSteamCheck(login);
+    if(!c.ok) return res.json({ ok:false, reason:"busy" });
+    return res.json({ ok:true, valid: !!c.can, unverified: !!c.unv });
+  }catch(e){ return res.json({ ok:false, reason:"error" }); }
+}
+app.get("/steam/check", steamCheckRoute);
+app.post("/steam/check", steamCheckRoute);
+
 setInterval(giftSync, 6*3600*1000);
 
 /* Sovg'a kartasi buyurtmasi. Idempotency-Key - qayta yuborilsa ikkinchi karta olinmaydi. */
@@ -2721,6 +2816,15 @@ app.post("/order", async (req,res)=>{
     /* "gift:" bilan boshlansa sovg'a kartasi - narx GIFT_IDX dan olinadi */
     const nEnt = ncat ? (GIFT_IDX[ncat + "|" + oid] || GIDX[ncat + "|" + oid]) : null;
 
+    /* Steam: paket emas, mijoz kiritgan dollar miqdori */
+    let sUsd = 0;
+    if(ncat === STEAM_CAT){
+      sUsd = steamQty(o);
+      if(!sUsd) return res.json({ ok:false, error:"fields" });
+      if(sUsd < STEAM_MIN || sUsd > STEAM_MAX)
+        return res.json({ ok:false, error:"qty", min:STEAM_MIN, max:STEAM_MAX });
+    }
+
     /* TG Stars: paket emas, mijoz kiritgan miqdor */
     let stars = 0;
     if(game === "tgstars" && !nEnt){
@@ -2734,6 +2838,8 @@ app.post("/order", async (req,res)=>{
     }
     const off = nEnt
       ? { cat: ncat, price: nEnt.price, srv:false, tg:"" }
+      : sUsd
+        ? { cat: STEAM_CAT, price: steamPrice(sUsd), srv:false, tg:"" }
       : stars
         ? { cat:"telegram_stars", price: starsPrice(stars), srv:false, tg:"stars" }
         : resolveOffer(game, oid, acc);
@@ -2745,6 +2851,7 @@ app.post("/order", async (req,res)=>{
     if(!(price > 0)) return res.json({ ok:false, error:"price" });
 
     const fields = nEnt ? catFields(nEnt.fields, o).fields
+                 : sUsd ? { steamLogin: steamLoginOf(o) }
                  : tg   ? {}
                         : fzrFields(game, o);
     let tgu = "", tgn = 0;
@@ -2756,6 +2863,17 @@ app.post("/order", async (req,res)=>{
         console.log("YANGI O'YIN narx past:", ncat, oid, price, "<", nEnt.cost);
         return res.json({ ok:false, error:"rate" });
       }
+    } else if(sUsd){
+      /* Login xariddan OLDIN tekshiriladi: noto'g'ri loginga ketgan pul qaytmaydi */
+      const lg = fields.steamLogin || "";
+      if(lg.length < 3) return res.json({ ok:false, error:"fields" });
+      if(price < Math.round(sUsd * STEAM_DISC * GIFT_RATE)){
+        console.log("STEAM narx past:", sUsd, price);
+        return res.json({ ok:false, error:"rate" });
+      }
+      const ck = await fzrSteamCheck(lg);
+      if(!ck.ok)  return res.json({ ok:false, error:"busy" });
+      if(!ck.can) return res.json({ ok:false, error:"login" });
     } else if(tg){
       tgu = tgUser(o, who);
       if(!tgu) return res.json({ ok:false, error:"username" });
@@ -2818,8 +2936,8 @@ app.post("/order", async (req,res)=>{
       nick: String(o.nick||""), accRegion: String(o.accRegion||""),
       oid: oid, cat: auto ? off.cat : "", auto: auto, pay: pay, gram: gram,
       /* tannarx — foyda hisobi uchun. usd: yetkazuvchi narxi, cost: o'sha paytdagi so'm */
-      usd: auto ? (nEnt && nEnt.gift ? nEnt.usd : orderUsd(tg, off.cat, oid, tgn)) : 0,
-      cost: auto ? Math.round((nEnt && nEnt.gift ? nEnt.usd : orderUsd(tg, off.cat, oid, tgn)) * COST_RATE) : 0,
+      usd: auto ? (nEnt && nEnt.gift ? nEnt.usd : sUsd ? sUsd * STEAM_DISC : orderUsd(tg, off.cat, oid, tgn)) : 0,
+      cost: auto ? Math.round((nEnt && nEnt.gift ? nEnt.usd : sUsd ? sUsd * STEAM_DISC : orderUsd(tg, off.cat, oid, tgn)) * COST_RATE) : 0,
       fzr: "", status: "wait", at: new Date().toISOString()
     };
     u.orders.unshift(rec); u.orders = u.orders.slice(0,100);
@@ -2843,7 +2961,9 @@ app.post("/order", async (req,res)=>{
     /* Yetkazib beruvchiga yuboramiz \u2014 coindrop yoki FazerCards */
     const cdGame = CD_GAMES[game];
     const gCat = giftCat(rec.cat);          /* sovg'a kartasi bo'lsa - o'z manzili */
-    const r = gCat
+    const r = sUsd
+      ? await fzrSteam(fields.steamLogin, sUsd, "mt-" + rec.id)
+      : gCat
       ? await fzrGift(gCat, rec.oid, "mt-" + rec.id)
       : cdGame
       ? await cdCreate(cdGame, rec.oid, rec.pid, rec.id)
@@ -2857,6 +2977,7 @@ app.post("/order", async (req,res)=>{
     if(r.ok){
       rec2.fzr = r.id; rec2.status = "sent";
       if(gCat){ rec2.gift = 1; rec2.redeem = (nEnt && nEnt.redeem) || ""; }
+      if(sUsd){ rec2.steam = 1; rec2.usdQty = sUsd; }
       if(cdGame) rec2.cd = 1;                    /* kim yuborganini eslab qolamiz */
       save(db2);
       /* id kelmasa sweep uni kuzata olmaydi \u2014 pulni QAYTARMAYMIZ (buyurtma qabul qilingan) */
@@ -2954,7 +3075,11 @@ async function checkOne(uid, ordId){
       return;
     }
     save(db);
-    send(uid, "✅ "+r.package+" hisobingizga tushdi!\nID: "+(r.pid || r.gameId || ""));
+    if(r.steam){
+      send(uid, "\u2705 " + r.package + " Steam hisobingizga tushdi!\nLogin: " + (r.pid || ""));
+      return;
+    }
+    send(uid, "\u2705 "+r.package+" hisobingizga tushdi!\nID: "+(r.pid || r.gameId || ""));
     return;
   }
   if(s === "failed" || s === "cancelled" || s === "canceled" || s === "refunded"){
