@@ -4551,11 +4551,15 @@ function setRes(cls, html){
   const r = document.getElementById('idRes');
   if(r){ r.className = 'id-res ' + (cls||''); r.innerHTML = html || ''; }
 }
+/* ID so'ramaydigan mahsulot (sovg'a kartasi): tekshiradigan narsa yo'q.
+   Shu yerda hal qilinadi \u2014 resetCheck faqat katakka yozilganda ishlaydi,
+   katak yo'q o'yinda esa uni hech kim chaqirmaydi. */
+function noIdGame(){ return !!(curGame && curFields().length === 0); }
 function syncBuy(){
   const b = document.getElementById('buyBtn');
   if(!b) return;
   if(curGame && curGame.custom === 'stars'){ b.disabled = !(idOk && starN > 0); return; }
-  b.disabled = !(selPkg !== null && idOk);
+  b.disabled = !(selPkg !== null && (idOk || noIdGame()));
 }
 function resetCheck(){
   idOk = false; idName = ''; idRegion = '';
@@ -4793,7 +4797,7 @@ function buy(){
     if(!starN){ notify('error'); toastErr("Yulduzlar sonini kiriting ("+STAR_MIN+"–"+fmt(STAR_MAX)+")"); return; }
     if(starPrice(starN) > balance){ notify('error'); toastErr("❌ Balans yetarli emas — "+money(balance,false)+" bor"); return; }
   } else if(selPkg===null){ notify('error'); toastErr('Paketni tanlang'); return; }
-  if(!idOk){ notify('error'); toastErr("Avval ID ni tekshiring"); return; }
+  if(!idOk && !noIdGame()){ notify('error'); toastErr("Avval ID ni tekshiring"); return; }
   const p = custom ? { a:String(starN), c:'⭐', p:starPrice(starN), oid:'' } : activePkgs()[selPkg];
   const details={};
   for(const f of curFields()){ const v=(document.getElementById('fld_'+f.key)?.value||'').trim();
