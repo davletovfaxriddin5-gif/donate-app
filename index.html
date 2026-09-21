@@ -9312,6 +9312,99 @@ function hideSplash(){
 }
 window.addEventListener('load', hideSplash);
 setTimeout(hideSplash, 3400);
+
+/* ===== Tortib yangilash (pull to refresh) =====
+   iPhone da sahifa eng tepada pastga tortilsa "cho'ziladi" - window.scrollY manfiy
+   bo'ladi. Shuni AYLANISH hodisasi orqali kuzatamiz. Hujjatga barmoq tinglovchisi
+   ATAYLAB qo'shilmaydi: u iOS da butun ilovadagi eski :active qoidalarini yoqib
+   yuboradi (bindTap izohiga qarang). Aylanish tinglovchisi bunga ta'sir qilmaydi.
+   - faqat ma'lumot ko'rsatadigan ekranlarda; forma va to'lov ekranlarida emas;
+   - tez silkitib tepaga chiqilganda (inersiya) ishga tushmaydi - sahifa kamida
+     0.25 s tepada turgan bo'lishi shart;
+   - belgi Telegram tugmalari qatorining o'rtasida aylanadi, kontentga tegmaydi;
+   - kamida 0.8 s aylanadi (lip etib o'chmasin), ko'pi bilan 6 s.
+   Android da sahifa cho'zilmaydi - u yerda bu imkoniyat shunchaki ko'rinmaydi. */
+const PTR_VIEWS = { home:1, history:1, settings:1,
+                    nft_market:1, nft_gifts:1, nft_wallet:1, nft_profile:1, nft_hist:1 };
+const PTR_PULL = 64;                 /* shuncha piksel tortilganda yangilanadi */
+let ptrEl = null, ptrSvg = null, ptrAnim = null;
+let ptrBusy = false, ptrEnding = false, ptrEp = 0, ptrT0 = 0, ptrCap = 0;
+let ptrRestT = (window.scrollY || 0) <= 0 ? Date.now() : 0;
+
+function ptrMake(){
+  if(ptrEl) return;
+  ptrEl = document.createElement('div');
+  ptrEl.id = 'ptr';
+  ptrEl.setAttribute('aria-hidden', 'true');
+  const s = ptrEl.style;
+  s.position = 'fixed'; s.left = '50%'; s.width = '26px'; s.height = '26px'; s.marginLeft = '-13px';
+  s.top = 'calc(env(safe-area-inset-top) + (var(--tg-top, 46px) - 36px) / 2)';
+  s.zIndex = '150'; s.pointerEvents = 'none'; s.opacity = '0'; s.transition = 'opacity .18s';
+  let sp = '';
+  for(let i = 0; i < 8; i++){
+    sp += '<line x1="12" y1="2.6" x2="12" y2="7.4" stroke="currentColor" stroke-width="2.4" ' +
+          'stroke-linecap="round" opacity="' + (1 - i * 0.11).toFixed(2) + '" transform="rotate(' + (-i * 45) + ' 12 12)"/>';
+  }
+  ptrEl.innerHTML = '<svg viewBox="0 0 24 24" width="26" height="26" style="display:block;color:#8E97A8">' + sp + '</svg>';
+  document.body.appendChild(ptrEl);
+  ptrSvg = ptrEl.firstChild;
+}
+function ptrShow(p){                 /* p: 0..1 - qanchalik tortildi */
+  ptrMake();
+  const q = Math.min(1, Math.max(0, p));
+  ptrEl.style.opacity = String(Math.min(1, q * 1.2));
+  if(!ptrAnim) ptrSvg.style.transform = 'rotate(' + Math.round(q * 270) + 'deg) scale(' + (0.55 + 0.45 * q).toFixed(3) + ')';
+}
+function ptrHide(){
+  if(ptrEl) ptrEl.style.opacity = '0';
+  if(ptrAnim){ try{ ptrAnim.cancel(); }catch(e){} ptrAnim = null; }
+  if(ptrSvg) ptrSvg.style.transform = '';
+}
+function ptrBlocked(){
+  if(document.getElementById('shBox') || document.getElementById('drWrap')) return true;
+  const lk = document.getElementById('pwLock');
+  if(lk && lk.classList.contains('on')) return true;
+  const a = document.activeElement;
+  return !!(a && (a.tagName === 'INPUT' || a.tagName === 'TEXTAREA'));
+}
+function ptrStart(){
+  if(ptrBusy) return;
+  ptrBusy = true; ptrEnding = false; ptrT0 = Date.now();
+  haptic('medium');
+  ptrShow(1);
+  try{ ptrAnim = ptrSvg.animate([{ transform:'rotate(0deg)' }, { transform:'rotate(360deg)' }],
+                                { duration:800, iterations:Infinity, easing:'steps(8)' }); }catch(e){}
+  let left = 1;
+  const one = function(){ if(--left <= 0) ptrEnd(); };
+  const add = function(fn){ left++; try{ fn(one); }catch(e){ one(); } };
+  try{ loadBalance(); }catch(e){}
+  if(view === 'history')    add(function(cb){ loadOrders(function(){ try{ if(view === 'history') renderHistory(); }catch(e){} cb(); }); });
+  if(view === 'settings'){  try{ loadPhone(); }catch(e){} }
+  if(isNftView(view))       add(function(cb){ nftLoad(cb); });
+  if(view === 'nft_market') add(function(cb){ mktLoad(cb); });
+  one();
+  clearTimeout(ptrCap);
+  ptrCap = setTimeout(ptrEnd, 6000);     /* tarmoq osilsa ham abadiy aylanmasin */
+}
+function ptrEnd(){
+  if(!ptrBusy || ptrEnding) return;
+  ptrEnding = true;
+  clearTimeout(ptrCap);
+  setTimeout(function(){ ptrBusy = false; ptrEnding = false; ptrHide(); },
+             Math.max(0, 800 - (Date.now() - ptrT0)));
+}
+function ptrScroll(){
+  const y = window.scrollY || window.pageYOffset || 0;
+  if(y > 0){ ptrRestT = 0; ptrEp = 0; if(!ptrBusy) ptrHide(); return; }
+  if(!ptrRestT) ptrRestT = Date.now();             /* tepaga hozir keldi */
+  if(y === 0){ ptrEp = 0; if(!ptrBusy) ptrHide(); return; }
+  /* y < 0: sahifa cho'zilyapti. Bu tortish to'g'rimi yoki inersiyami - bir marta hal qilinadi */
+  if(ptrEp === 0) ptrEp = (PTR_VIEWS[view] && Date.now() - ptrRestT >= 250 && !ptrBlocked()) ? 1 : 2;
+  if(ptrEp !== 1 || ptrBusy) return;
+  ptrShow(-y / PTR_PULL);
+  if(-y >= PTR_PULL) ptrStart();
+}
+window.addEventListener('scroll', ptrScroll, { passive:true });
 </script>
 </body>
 </html>
