@@ -4386,6 +4386,38 @@ app.post("/sms", (req,res)=>{
     if(all.length === 0 && sb.length === 0 && tk.length === 0){
       return res.json({ ok:true, parsed:false });
     }
+
+    /* YUBORUVCHI TEKSHIRUVI.
+       Tinkoff avtomatikasi iPhone da "istalgan yuboruvchi" + "Пополнение" bilan
+       ishlaydi (T-Bank ni kontakt qilib tanlab bo'lmaydi). Demak:
+       - matnda "пополнение" bo'lsa, u FAQAT Tinkoff to'ldirishini tasdiqlay oladi
+         va faqat qisqa buyruq yuboruvchini "T-Bank" deb bersa ("from" maydoni).
+         Bunday matndagi HUMO/Sber/Visa shakli soxta hisoblanadi - haqiqiy HUMO
+         lotincha "popolnenie" yozadi, Sber "Перевод".
+       - boshqa avtomatikalar ham "from" yuborsa, har bir shakl o'z yuboruvchisidan
+         kelgan bo'lishi shart (qo'shimcha himoya, yubormasa eskicha ishlaydi). */
+    const sender  = String(b.from || b.sender || "").trim();
+    const viaTink = /\u043F\u043E\u043F\u043E\u043B\u043D\u0435\u043D\u0438\u0435/i.test(txt);
+    if(viaTink){
+      const tinkOk = /t\W?bank|tinkoff|\u0442\W?\u0431\u0430\u043D\u043A|\u0442\u0438\u043D\u044C\u043A\u043E\u0444\u0444/i.test(sender);
+      const had = fresh.length;
+      for(let i = fresh.length - 1; i >= 0; i--){
+        if(fresh[i].bank !== "Tinkoff" || !tinkOk) fresh.splice(i, 1);
+      }
+      if(had && !fresh.length){
+        if(ADMIN_ID) send(ADMIN_ID, "\u26A0\uFE0F Tinkoff ko'rinishidagi SMS keldi, lekin yuboruvchi tasdiqlanmadi (" +
+          (sender || "noma'lum") + "). Avtomatik tasdiqlanmadi \u2014 pul haqiqatan kelgan bo'lsa \u2705 bilan qo'lda tasdiqlang.\n\n" +
+          txt.slice(0, 300));
+        return res.json({ ok:true, rejected:"sender" });
+      }
+    } else if(sender){
+      const FROM = { Humo:/humo/i, TBC:/humo/i, Sberbank:/^\+?900$|sber/i };
+      for(let i = fresh.length - 1; i >= 0; i--){
+        const re = FROM[fresh[i].bank];
+        if(re && !re.test(sender)) fresh.splice(i, 1);
+      }
+    }
+
     if(fresh.length === 0){
       return res.json({ ok:true, stale:true });
     }
