@@ -4411,10 +4411,22 @@ app.post("/sms", (req,res)=>{
         return res.json({ ok:true, rejected:"sender" });
       }
     } else if(sender){
-      const FROM = { Humo:/humo/i, TBC:/humo/i, Sberbank:/^\+?900$|sber/i };
+      /* "from" kelgan - demak bu istalgan yuboruvchi avtomatikasi (masalan
+         Tinkoff "RUB" kalit so'zi bilan). Har bir shakl FAQAT o'z bankining
+         nomidan kelgandagina o'tadi; nomi noma'lum shakl umuman o'tmaydi. */
+      const FROM_OK = { Humo:/humo/i, TBC:/humo/i, Sberbank:/^\+?900$|sber/i, Visa:/hamkor/i,
+                        Tinkoff:/t\W?bank|tinkoff|\u0442\W?\u0431\u0430\u043D\u043A|\u0442\u0438\u043D\u044C\u043A\u043E\u0444\u0444/i };
+      const had = fresh.length;
       for(let i = fresh.length - 1; i >= 0; i--){
-        const re = FROM[fresh[i].bank];
-        if(re && !re.test(sender)) fresh.splice(i, 1);
+        const h = fresh[i];
+        const src = h.bank || ((h.cur === "usd" || h.cur === "visa-som") ? "Visa" : "");
+        const re = FROM_OK[src];
+        if(!re || !re.test(sender)) fresh.splice(i, 1);
+      }
+      if(had && !fresh.length){
+        if(ADMIN_ID) send(ADMIN_ID, "\u26A0\uFE0F To'lov ko'rinishidagi SMS keldi, lekin yuboruvchi mos emas (" + sender +
+          "). Avtomatik tasdiqlanmadi \u2014 pul haqiqatan kelgan bo'lsa \u2705 bilan qo'lda tasdiqlang.\n\n" + txt.slice(0, 300));
+        return res.json({ ok:true, rejected:"sender" });
       }
     }
 
