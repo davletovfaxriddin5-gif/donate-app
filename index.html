@@ -1396,6 +1396,82 @@ body.light .dr-wrap .dr.b{ background:linear-gradient(0deg, #121219 0%, #1C1C23 
 .np-note{ font-size:11.5px; color:var(--faint); line-height:1.45; margin-top:12px;
   padding:0 2px }
 
+/* ===== NFT profili — yangi ko'rinish (pf2) va menyu (nm) ===== */
+.pf2-bar{ display:flex; align-items:center; margin:0 0 12px }
+.pf2-menu{ width:42px; height:42px; border-radius:14px; display:grid; place-items:center;
+  background:var(--card-2); border:1px solid var(--stroke-2) }
+.pf2-menu svg{ width:20px; height:20px; stroke:var(--text); fill:none; stroke-width:2.1; stroke-linecap:round }
+.pf2-card{ background:linear-gradient(165deg,var(--card-2) 0%,var(--card) 100%); border:1px solid var(--stroke-2);
+  border-radius:22px; padding:15px 14px 13px; margin-bottom:12px }
+.pf2-id{ display:flex; align-items:center; gap:13px }
+.pf2-av{ width:62px; height:62px; border-radius:19px; overflow:hidden; flex-shrink:0; display:grid; place-items:center;
+  background:var(--blue-grad); color:#fff; font-size:24px; font-weight:700;
+  box-shadow:0 0 0 2px var(--card-2), 0 0 0 3.5px rgba(110,124,255,.55) }
+.pf2-av img{ width:100%; height:100%; object-fit:cover; display:block }
+.pf2-who{ min-width:0; flex:1 }
+.pf2-nm{ font-size:18px; font-weight:700; letter-spacing:-.4px; color:var(--text);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+.pf2-un{ font-size:12.5px; color:var(--faint); margin-top:1px }
+.pf2-chip{ display:inline-flex; align-items:center; gap:5px; margin-top:7px; padding:4px 10px 4px 8px;
+  border-radius:99px; background:rgba(110,124,255,.15); color:#B7C0FF; font-size:12px; font-weight:600 }
+.pf2-chip svg{ width:13px; height:13px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round }
+body.light .pf2-chip{ color:#4453D6 }
+.pf2-stats{ display:grid; grid-template-columns:1fr 1fr 1fr; margin-top:14px; padding-top:12px;
+  border-top:1px solid var(--stroke-2) }
+.pf2-stat{ text-align:center; padding:0 4px; min-width:0 }
+.pf2-stat + .pf2-stat{ border-left:1px solid var(--stroke-2) }
+.pf2-stat .n{ font-size:16px; font-weight:700; letter-spacing:-.4px; color:var(--text); white-space:nowrap }
+.pf2-stat .n small{ font-size:10.5px; font-weight:600; color:var(--faint); margin-left:3px }
+.pf2-stat .l{ font-size:10.5px; color:var(--faint); margin-top:3px; line-height:1.25 }
+.pf2-season{ position:relative; overflow:hidden; display:flex; align-items:center; gap:13px; width:100%;
+  padding:15px 16px; border-radius:20px; margin-bottom:22px; text-align:left; color:#fff;
+  background:linear-gradient(120deg,#3B2CB8 0%,#6A3FE0 55%,#B45AE8 100%) }
+.pf2-season::after{ content:""; position:absolute; right:-34px; top:-46px; width:160px; height:160px; border-radius:50%;
+  background:radial-gradient(circle,rgba(255,255,255,.24),rgba(255,255,255,0) 66%); pointer-events:none }
+.pf2-season .ic{ width:46px; height:46px; border-radius:14px; background:rgba(255,255,255,.16);
+  display:grid; place-items:center; flex-shrink:0 }
+.pf2-season .ic svg{ width:24px; height:24px; stroke:#fff; fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round }
+.pf2-season .t{ font-size:11.5px; letter-spacing:1.5px; font-weight:700; opacity:.82 }
+.pf2-season .v{ font-size:17px; font-weight:700; margin-top:2px }
+.pf2-season .go{ margin-left:auto; position:relative; z-index:1; font-size:12px; font-weight:600;
+  padding:6px 11px; border-radius:99px; background:rgba(255,255,255,.18) }
+.pf2-sec{ font-size:12px; font-weight:700; letter-spacing:1.2px; color:var(--faint); text-transform:uppercase; margin:0 4px 9px }
+.pf2-ref{ display:flex; gap:12px; align-items:flex-start; padding:14px; border-radius:18px;
+  background:var(--card); border:1px solid var(--stroke-2); margin-bottom:10px }
+.pf2-ref .ic{ width:36px; height:36px; border-radius:11px; background:rgba(79,224,160,.15);
+  display:grid; place-items:center; flex-shrink:0 }
+.pf2-ref .ic svg{ width:19px; height:19px; stroke:#4FE0A0; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round }
+.pf2-ref .a{ font-size:15px; font-weight:600; color:var(--text) }
+.pf2-ref .b{ font-size:12.5px; color:var(--dim); margin-top:3px; line-height:1.45 }
+.pf2-inv{ width:100%; height:50px; border-radius:16px; background:var(--blue-grad); color:#fff;
+  font-size:15.5px; font-weight:700; display:flex; align-items:center; justify-content:center; gap:8px }
+.pf2-inv svg{ width:19px; height:19px; stroke:#fff; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round }
+.pf2-copy{ width:100%; margin:8px 0 12px; height:40px; border-radius:14px; background:var(--card-2); color:var(--dim);
+  font-size:13.5px; font-weight:600; display:flex; align-items:center; justify-content:center; gap:7px }
+.pf2-copy svg{ width:16px; height:16px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round }
+.pf2-refs{ margin-bottom:22px }
+.pf2-empty{ text-align:center; padding:18px 12px; border-radius:16px; background:var(--card);
+  border:1px dashed var(--stroke-2); color:var(--faint); font-size:12.5px }
+.nm-h{ display:flex; align-items:center; justify-content:space-between; margin:4px 2px 4px }
+.nm-h .t{ font-size:24px; font-weight:800; letter-spacing:-.6px; color:var(--text) }
+.nm-x{ width:34px; height:34px; border-radius:50%; background:var(--card-2); display:grid; place-items:center }
+.nm-x svg{ width:14px; height:14px; stroke:var(--dim); fill:none; stroke-width:2.4; stroke-linecap:round }
+.nm-l{ font-size:11.5px; font-weight:700; letter-spacing:1.2px; color:var(--faint); text-transform:uppercase; margin:16px 4px 8px }
+.nm-langs{ display:grid; grid-template-columns:repeat(4,1fr); gap:7px }
+.nm-lg{ height:40px; border-radius:13px; background:var(--card-2); border:1px solid var(--stroke-2);
+  display:flex; align-items:center; justify-content:center; gap:6px; font-size:13px; font-weight:700; color:var(--text) }
+.nm-lg .f{ font-size:16px; line-height:1 }
+.nm-lg.on{ background:var(--blue); border-color:var(--blue); color:#fff }
+.nm-chk{ display:flex; align-items:flex-start; gap:11px; padding:11px 16px 13px; width:100%; text-align:left;
+  color:var(--dim); font-size:12.5px; line-height:1.4; border-top:1px solid var(--stroke) }
+.nm-chk .b{ width:20px; height:20px; border-radius:6px; border:1.5px solid var(--stroke-2); flex-shrink:0;
+  display:grid; place-items:center; margin-top:1px }
+.nm-chk .b svg{ width:13px; height:13px; stroke:#fff; fill:none; stroke-width:3; stroke-linecap:round; stroke-linejoin:round; opacity:0 }
+.nm-chk.on .b{ background:var(--blue); border-color:var(--blue) }
+.nm-chk.on .b svg{ opacity:1 }
+.nm-sup{ width:100%; height:50px; margin-top:18px; border-radius:16px; background:var(--blue); color:#fff;
+  font-size:15.5px; font-weight:700 }
+
 /* NFT bo'limining shrifti — iPhone'da SF Pro, Android'da Roboto.
    body.nft-mode faqat NFT ekranlarida yoqiladi, shuning uchun bosh
    sahifaga va boshqa bo'limlarga tegmaydi. */
@@ -1785,8 +1861,11 @@ if(tg){
   tgUser = tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user : null;
   tg.onEvent('backButtonClicked', onBack);
 }
-function haptic(t){ try{ tg && tg.HapticFeedback && tg.HapticFeedback.impactOccurred(t||'light'); }catch(e){} }
-function notify(t){ try{ tg && tg.HapticFeedback && tg.HapticFeedback.notificationOccurred(t||'success'); }catch(e){} }
+/* Tebranish NFT menyusidan o'chirilishi mumkin (mt_vib = '0'). Standart - yoqilgan. */
+var _vibOff = null;
+function vibOff(){ if(_vibOff == null){ try{ _vibOff = localStorage.getItem('mt_vib') === '0'; }catch(e){ _vibOff = false; } } return _vibOff; }
+function haptic(t){ if(vibOff()) return; try{ tg && tg.HapticFeedback && tg.HapticFeedback.impactOccurred(t||'light'); }catch(e){} }
+function notify(t){ if(vibOff()) return; try{ tg && tg.HapticFeedback && tg.HapticFeedback.notificationOccurred(t||'success'); }catch(e){} }
 function openLink(url){
   haptic();
   if(url.indexOf('t.me')>-1){
@@ -5235,26 +5314,46 @@ document.addEventListener('visibilitychange', function(){
 function bioMgr(){ return (tg && tg.BiometricManager) ? tg.BiometricManager : null; }
 /* Xavfsizlik qatorlari — sozlamalarda ham, NFT profilida ham bir xil.
    Holat umumiy, shuning uchun bir joyda yoqilsa ikkalasida ko'rinadi. */
-function secRows(){ return `
-    <button class="svc" onclick="gTap()">
-      <span class="ic" style="background:#EA4335">
+/* nft = true bo'lsa - NFT profilining yangi ikonkalari. Bosh sahifa (nft yo'q) avvalgidek. */
+function secRows(nft){
+  const gIc = nft ? '<span class="ic" style="background:#fff;box-shadow:inset 0 0 0 1px rgba(0,0,0,.06)">' +
+    '<svg viewBox="0 0 48 48" style="stroke:none">' +
+    '<path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>' +
+    '<path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>' +
+    '<path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>' +
+    '<path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>' +
+    '</svg></span>'
+    : `<span class="ic" style="background:#EA4335">
         <svg viewBox="0 0 24 24"><path d="M21 12.2c0-.7-.06-1.2-.2-1.8H12v3.4h5.2a4.4 4.4 0 0 1-1.9 2.9v2.4h3.1c1.8-1.7 2.6-4.1 2.6-6.9z"/><path d="M12 21c2.5 0 4.6-.8 6.1-2.2l-3-2.3a5.6 5.6 0 0 1-8.3-2.9H3.7v2.4A9 9 0 0 0 12 21z"/><path d="M6.8 13.6a5.4 5.4 0 0 1 0-3.4V7.8H3.7a9 9 0 0 0 0 8.1l3.1-2.3z"/><path d="M12 6.6c1.4 0 2.6.5 3.6 1.4l2.7-2.7A9 9 0 0 0 3.7 7.8l3.1 2.4A5.4 5.4 0 0 1 12 6.6z"/></svg>
-      </span>
+      </span>`;
+  const bIc = nft ? '<span class="ic" style="background:linear-gradient(140deg,#22C58A,#0E8F66)">' +
+    '<svg viewBox="0 0 24 24" style="width:21px;height:21px;stroke-width:1.6">' +
+    '<path d="M2 12C2 6.5 6.5 2 12 2a10 10 0 0 1 8 4"/><path d="M5 19.5C5.5 18 6 15 6 12c0-.7.12-1.37.34-2"/>' +
+    '<path d="M17.29 21.02c.12-.6.43-2.3.5-3.02"/><path d="M12 10a2 2 0 0 0-2 2c0 1.02-.1 2.51-.26 4"/>' +
+    '<path d="M8.65 22c.21-.66.45-1.32.57-2"/><path d="M14 13.12c0 2.38 0 6.38-1 8.88"/><path d="M2 16h.01"/>' +
+    '<path d="M21.8 16c.2-2 .131-5.354 0-6"/><path d="M9 6.8a6 6 0 0 1 9 5.2c0 .47 0 1.17-.02 2"/></svg></span>'
+    : `<span class="ic" style="background:#2F9E62">
+        <svg viewBox="0 0 24 24"><path d="M4 8.5V6a2 2 0 0 1 2-2h2.5M20 8.5V6a2 2 0 0 0-2-2h-2.5M4 15.5V18a2 2 0 0 0 2 2h2.5M20 15.5V18a2 2 0 0 1-2 2h-2.5M9 9.5v1.5M15 9.5v1.5M9 15c1.7 1.3 4.3 1.3 6 0"/></svg>
+      </span>`;
+  const pIc = nft ? '<span class="ic" style="background:linear-gradient(140deg,#7C6BFF,#4A34E0)">' +
+    '<svg viewBox="0 0 24 24"><circle cx="8" cy="15.5" r="4.2"/><path d="M11 12.5L19.5 4M16.3 7.2l2.6 2.6M13.9 9.6l2 2"/></svg></span>'
+    : `<span class="ic" style="background:#3B4DF0">
+        <svg viewBox="0 0 24 24"><rect x="4.5" y="10.5" width="15" height="10" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3M12 14.5v2"/></svg>
+      </span>`;
+  return `
+    <button class="svc" onclick="gTap()">
+      ${gIc}
       <span class="txt"><div class="t">Google</div>
         <div class="s">${gInfo && gInfo.email ? gInfo.email : "Parolni tiklash uchun bog'lash"}</div></span>
       ${gInfo && gInfo.email ? '<span class="st-on">Ulangan</span>' : '<span class="arw">›</span>'}
     </button>
     <button class="svc" onclick="bioToggle()">
-      <span class="ic" style="background:#2F9E62">
-        <svg viewBox="0 0 24 24"><path d="M4 8.5V6a2 2 0 0 1 2-2h2.5M20 8.5V6a2 2 0 0 0-2-2h-2.5M4 15.5V18a2 2 0 0 0 2 2h2.5M20 15.5V18a2 2 0 0 1-2 2h-2.5M9 9.5v1.5M15 9.5v1.5M9 15c1.7 1.3 4.3 1.3 6 0"/></svg>
-      </span>
+      ${bIc}
       <span class="txt"><div class="t">${bioName()}</div><div class="s">Buyurtma berishda tasdiqlash</div></span>
       <span class="${bioOn() ? 'st-on' : 'st-off'}">${bioOn() ? 'Yoqilgan' : "O'chiq"}</span>
     </button>
     <button class="svc" onclick="pwTap()">
-      <span class="ic" style="background:#3B4DF0">
-        <svg viewBox="0 0 24 24"><rect x="4.5" y="10.5" width="15" height="10" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3M12 14.5v2"/></svg>
-      </span>
+      ${pIc}
       <span class="txt"><div class="t">Parol</div>
         <div class="s">${pwInfo && pwInfo.has ? "Parol qo'yilgan" : "Parol qo'yish"}</div></span>
       ${pwInfo && pwInfo.has ? '<span class="st-on">Yoqilgan</span>' : '<span class="arw">›</span>'}
@@ -6220,12 +6319,22 @@ function nftAva(){
 }
 /* NFT bo'limining o'z hisob-kitobi */
 function nftStats(){
-  let spent = 0, sold = 0;
+  let spent = 0, sold = 0, bought = 0, gram = 0, som = 0;
   (nftHist || []).forEach(function(r){
-    if(r.kind === 'nft_buy'  && (r.cur || "so'm") === "so'm") spent += Number(r.amount) || 0;
+    const cur = r.cur || "so'm";
+    if(r.kind === 'nft_buy'){
+      if(cur === "so'm"){ spent += Number(r.amount) || 0; som += Number(r.amount) || 0; }
+      else gram += Number(r.amount) || 0;
+      /* TG Stars / Premium ham shu hamyondan olinadi, lekin ular NFT emas */
+      const it = String(r.item || '').toUpperCase();
+      if(it.indexOf('TG STARS') < 0 && it.indexOf('TG PREMIUM') < 0) bought++;
+    }
     if(r.kind === 'nft_sell') sold++;
   });
-  return { orders: getNftOrders().length, sold: sold, spent: Math.round(spent) };
+  /* so'mda qilingan xaridlar bugungi kurs bilan GRAM ga aylantiriladi - shuning uchun "≈" */
+  const conv = som > 0 ? somToGram(som) : 0;
+  return { orders: getNftOrders().length, sold: sold, spent: Math.round(spent),
+           bought: bought, spentGram: Math.round((gram + conv) * 100) / 100, approx: conv > 0 };
 }
 let pfFrom = 'nft_market';
 function openNftProfile(){
@@ -6237,37 +6346,169 @@ function renderNftProfile(){
   const st   = nftStats();
   const name = tgUser ? [tgUser.first_name, tgUser.last_name].filter(Boolean).join(' ') : 'Foydalanuvchi';
   const un   = tgUser && tgUser.username ? '@' + tgUser.username : '';
+  const uid  = tgUser && tgUser.id ? tgUser.id : '';
+  /* bosh sahifadagi "Do'stlarni taklif qilish" bilan AYNAN bir xil havola -
+     shuning uchun qaysi joydan taklif qilinsa ham ikkala ro'yxatda ko'rinadi */
+  const link = uid ? `https://t.me/${BOT_USERNAME}?start=ref_${uid}` : `https://t.me/${BOT_USERNAME}`;
+  const spent = st.spentGram > 0 ? (st.approx ? '\u2248' : '') + fmtGram(st.spentGram) : '0';
+  /* qayta chizilganda ro'yxat bir lahzaga bo'sh ko'rinmasin */
+  const ob = document.getElementById('refBox');
+  const keep = (ob && ob.className === 'ref-list') ? ob.innerHTML : '';
   app.innerHTML = `
-  <div class="np-top">
-    <div class="np-av">${nftAva()}</div>
-    <div class="np-nm">${esc(name)}</div>
-    ${un ? `<div class="np-un">${esc(un)}</div>` : ''}
+  <div class="pf2-bar">
+    <button class="pf2-menu" onclick="openNftMenu()" aria-label="Menyu"><svg viewBox="0 0 24 24"><path d="M5 8.5h14M5 15.5h14"/></svg></button>
   </div>
 
-  <div class="np-bal">
-    <div class="np-b">
-      <div class="l">Hamyon balansi</div>
-      <div class="v">${money(getNftSom(), false)}</div>
+  <div class="pf2-card">
+    <div class="pf2-id">
+      <div class="pf2-av">${nftAva()}</div>
+      <div class="pf2-who">
+        <div class="pf2-nm">${esc(name)}</div>
+        ${un ? `<div class="pf2-un">${esc(un)}</div>` : ''}
+        <div class="pf2-chip"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="3"/><path d="M16 12.5h2"/><path d="M3 10h18"/></svg>${money(getNftSom(), false)}</div>
+      </div>
     </div>
-    <div class="np-b">
-      <div class="l">GRAM hisobi</div>
-      <div class="v">${fmtGram(getGram())}<small>GRAM</small></div>
+    <div class="pf2-stats">
+      <div class="pf2-stat"><div class="n">${fmtGram(getGram())}<small>GRAM</small></div><div class="l">GRAM hisobi</div></div>
+      <div class="pf2-stat"><div class="n">${st.bought}/${st.sold}</div><div class="l">Olindi / Sotildi</div></div>
+      <div class="pf2-stat"><div class="n">${spent}<small>GRAM</small></div><div class="l">Jami sarflangan</div></div>
     </div>
   </div>
 
-  <div class="np-st">
-    <div class="np-s"><div class="n">${st.orders}</div><div class="l">Buyurtma</div></div>
-    <div class="np-s"><div class="n">${st.sold}</div><div class="l">NFT sotilgan</div></div>
-    <div class="np-s"><div class="n">${fmt(st.spent)}</div><div class="l">Sarflangan</div></div>
+  <button class="pf2-season" onclick="pf2Season()">
+    <span class="ic"><svg viewBox="0 0 24 24"><path d="M8 4h8v5a4 4 0 0 1-8 0V4z"/><path d="M8 6H5.5a2.5 2.5 0 0 0 2.6 3.9M16 6h2.5a2.5 2.5 0 0 1-2.6 3.9"/><path d="M12 13v3.5M8.5 20h7M10 16.5h4"/></svg></span>
+    <span><div class="t">MAVSUM #1</div><div class="v">Tez orada</div></span>
+    <span class="go">Batafsil</span>
+  </button>
+
+  <div class="pf2-sec">Do'stlarni taklif qiling va bonus oling</div>
+  <div class="pf2-ref">
+    <span class="ic"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg></span>
+    <span><div class="a">Har bir to'lovdan 1% bonus</div>
+      <div class="b">Havolangiz orqali qo'shilgan do'stlaringiz shu yerda va bosh sahifadagi taklif bo'limida bir xil ko'rinadi.</div></span>
   </div>
+  <button class="pf2-inv" onclick="shareRef('${link}')"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>Do'stlarni taklif qilish</button>
+  <button class="pf2-copy" onclick="copyRef('${link}')"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2.5"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Havolani nusxalash</button>
+  <div class="pf2-refs"><div id="refBox" class="${keep ? 'ref-list' : 'pf2-empty'}">${keep || "Hali hech kim taklif qilinmagan"}</div></div>
 
   <div class="pf-sec">Xavfsizlik</div>
-  <div class="svc-box">${secRows()}</div>
+  <div class="svc-box">${secRows(true)}</div>
   <div class="np-note">Xavfsizlik sozlamalari butun ilova uchun umumiy \u2014
     bosh sahifada ulangan bo'lsa bu yerda ham ishlaydi.</div>`;
   /* Google va parol holati serverdan keladi — kelgach ekran o'zi yangilanadi */
   if(!gInfo)  { try{ gLoad(); }catch(e){} }
   if(!pwInfo) { try{ pwLoad(); }catch(e){} }
+  try{ loadRefs(); }catch(e){}
+  /* statistika uchun NFT tarixi - bir marta so'raladi (xato bo'lsa qayta-qayta emas) */
+  if(!nftHistLoaded && !pf2HistTry){
+    pf2HistTry = true;
+    nftHistLoad(function(){ if(view === 'nft_profile') renderNftProfile(); });
+  }
+}
+var pf2HistTry = false;
+function pf2Season(){ haptic(); toast('Mavsum tez orada boshlanadi'); }
+
+/* ===== NFT menyusi (profil tepasidagi ikki chiziqli tugma) ===== */
+function nmPref(k, def){ try{ const v = localStorage.getItem(k); return v === null ? def : v === '1'; }catch(e){ return def; } }
+function nmHtml(){
+  const langs = LANGS.map(function(L){
+    return '<button class="nm-lg' + (L.code === currentLang ? ' on' : '') + '" onclick="nmLang(\'' + L.code + '\')">' +
+           '<span class="f">' + L.flag + '</span>' + L.code.toUpperCase() + '</button>';
+  }).join('');
+  const animOn = !document.body.classList.contains('reduce-motion');
+  return `<div class="nm-h"><div class="t">Menyu</div>
+      <button class="nm-x" onclick="closeSheet()" aria-label="Yopish"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div class="nm-l">Til</div>
+    <div class="nm-langs">${langs}</div>
+    <div class="nm-l">Bildirishnomalar</div>
+    <div class="svc-box">
+      <button class="svc" onclick="nmSw('mt_ntf', this)">
+        <span class="ic" style="background:linear-gradient(140deg,#FF7A59,#E0493A)"><svg viewBox="0 0 24 24"><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 1.5h-15z"/><path d="M10 20.5a2.2 2.2 0 0 0 4 0"/></svg></span>
+        <span class="txt"><div class="t">Bildirishnomalar</div><div class="s">Takliflar va sotuvlar haqida</div></span>
+        <span class="switch ${nmPref('mt_ntf', true) ? 'on' : ''}"></span>
+      </button>
+      <button class="nm-chk ${nmPref('mt_half', false) ? 'on' : ''}" onclick="nmHalf(this)">
+        <span class="b"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
+        <span>Faqat eng past narxning kamida 50% iga teng takliflarni ko'rsatish</span>
+      </button>
+    </div>
+    <div class="nm-l">Qurilma</div>
+    <div class="svc-box">
+      <button class="svc" onclick="nmSw('mt_vib', this)">
+        <span class="ic" style="background:linear-gradient(140deg,#4FA3FF,#2B6BE0)"><svg viewBox="0 0 24 24"><rect x="8" y="3.5" width="8" height="17" rx="2.2"/><path d="M4.5 8v8M19.5 8v8"/></svg></span>
+        <span class="txt"><div class="t">Tebranish</div><div class="s">Bosilganda yengil tebranish</div></span>
+        <span class="switch ${vibOff() ? '' : 'on'}"></span>
+      </button>
+      <button class="svc" onclick="nmSw('mt_anim', this)">
+        <span class="ic" style="background:linear-gradient(140deg,#B26BFF,#7A3BE8)"><svg viewBox="0 0 24 24"><path d="M12 3.5l1.9 5.1 5.1 1.9-5.1 1.9-1.9 5.1-1.9-5.1-5.1-1.9 5.1-1.9z"/><path d="M18.5 16.5l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/></svg></span>
+        <span class="txt"><div class="t">Animatsiyalar</div><div class="s">Darvoza va o'tish effektlari</div></span>
+        <span class="switch ${animOn ? 'on' : ''}"></span>
+      </button>
+    </div>
+    <div class="nm-l">Havolalar</div>
+    <div class="svc-box">
+      <button class="svc" onclick="nmGo('web')">
+        <span class="ic" style="background:linear-gradient(140deg,#3F55F6,#5A43F2)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.3 2.4 3.4 5.2 3.4 8.5s-1.1 6.1-3.4 8.5c-2.3-2.4-3.4-5.2-3.4-8.5s1.1-6.1 3.4-8.5z"/></svg></span>
+        <span class="txt"><div class="t">Minato Web</div><div class="s">minatoh.uz</div></span>
+        <span class="arw">\u203A</span>
+      </button>
+      <button class="svc" onclick="nmGo('gifts')">
+        <span class="ic" style="background:linear-gradient(140deg,#FFB547,#F08A1C)"><svg viewBox="0 0 24 24"><rect x="3.5" y="9" width="17" height="11" rx="2"/><path d="M12 9v11M3.5 13h17M12 9c-1.5-3.5-5.5-4-5.5-1.5S12 9 12 9zm0 0c1.5-3.5 5.5-4 5.5-1.5S12 9 12 9z"/></svg></span>
+        <span class="txt"><div class="t">Sovg'a hisobi</div><div class="s">@minato_Gifts</div></span>
+        <span class="arw">\u203A</span>
+      </button>
+      <button class="svc" onclick="nmGo('channel')">
+        <span class="ic" style="background:linear-gradient(140deg,#2AABEE,#1C8ED0)"><svg viewBox="0 0 24 24"><path d="M4 10.5v3a1.5 1.5 0 0 0 1.5 1.5H7l6 4.5V4.5L7 9H5.5A1.5 1.5 0 0 0 4 10.5z"/><path d="M17 8.5a5 5 0 0 1 0 7"/></svg></span>
+        <span class="txt"><div class="t">Minato kanali</div><div class="s">@minatoh_uz</div></span>
+        <span class="arw">\u203A</span>
+      </button>
+    </div>
+    <button class="nm-sup" onclick="nmGo('support')">Qo'llab-quvvatlash</button>`;
+}
+function openNftMenu(){
+  haptic('medium');
+  closeSheet();
+  const bg = document.createElement('div'); bg.className='sheet-bg'; bg.id='shBg'; bg.onclick=closeSheet;
+  const sh = document.createElement('div'); sh.className='sheet'; sh.id='shBox';
+  sh.innerHTML = nmHtml();
+  document.body.appendChild(bg);
+  document.body.appendChild(sh);
+  try{ applyLang(); }catch(e){}
+  requestAnimationFrame(function(){ bg.classList.add('on'); sh.classList.add('on'); });
+}
+/* kalitlar: mt_ntf va mt_half - saqlanadi (bildirishnomalar va takliflar ulanganda ishlatiladi),
+   mt_vib - haptic() ni o'chiradi, mt_anim - bosh sahifadagi "Animatsiyalarni kamaytirish" bilan umumiy */
+function nmSw(k, el){
+  haptic();
+  const sw = el.querySelector('.switch');
+  const on = !(sw && sw.classList.contains('on'));
+  if(sw) sw.classList.toggle('on', on);
+  try{ localStorage.setItem(k, on ? '1' : '0'); }catch(e){}
+  if(k === 'mt_vib'){ _vibOff = !on; if(on) haptic('medium'); }
+  if(k === 'mt_anim') document.body.classList.toggle('reduce-motion', !on);
+}
+function nmHalf(el){
+  haptic();
+  const on = !el.classList.contains('on');
+  el.classList.toggle('on', on);
+  try{ localStorage.setItem('mt_half', on ? '1' : '0'); }catch(e){}
+}
+/* Til almashtirilganda NFT bo'limidan chiqib ketmaydi (setLang esa sozlamalarga o'tadi) */
+function nmLang(l){
+  haptic();
+  if(l === currentLang){ closeSheet(); return; }
+  const old = currentLang;
+  if(old !== 'uz' && DICT[old]) applyMap(revOf(old));
+  currentLang = l;
+  try{ localStorage.setItem('mt_lang', l); }catch(e){}
+  const back = function(){ closeSheet(); go('nft_profile'); };
+  if(!FXR) loadFx(back); else back();
+}
+function nmGo(k){
+  if(k === 'web')     { openLink('https://www.minatoh.uz'); return; }
+  if(k === 'gifts')   { openTg('minato_Gifts'); return; }
+  if(k === 'channel') { openTg('minatoh_uz'); return; }
+  if(k === 'support') { openTg('minatoh'); return; }
 }
 
 /* ---------- Sovg'alar ombori ----------
@@ -7628,6 +7869,7 @@ function nftRepaint(){
   else if(view === 'nft_wallet') renderWallet();
   else if(view === 'nft_gram')   renderGram();
   else if(view === 'nft_hist')   renderNft('nft_hist');
+  else if(view === 'nft_profile') renderNftProfile();
 }
 function fmtGram(v){
   const n = Number(v) || 0;
@@ -8509,7 +8751,7 @@ function shareRef(link){
   openLink("https://t.me/share/url?url=" + encodeURIComponent(link) + "&text=" + encodeURIComponent(txt));
 }
    
-function toggleMotion(el){ haptic(); const on=document.body.classList.toggle('reduce-motion'); el.querySelector('.switch').classList.toggle('on', on); }
+function toggleMotion(el){ haptic(); const on=document.body.classList.toggle('reduce-motion'); el.querySelector('.switch').classList.toggle('on', on); try{ localStorage.setItem('mt_anim', on ? '0' : '1'); }catch(e){} }
   function applyTheme(){
   const light = document.body.classList.contains('light');
   const c = light ? '#EEF1F8' : '#0B1120';
@@ -9312,6 +9554,8 @@ function hideSplash(){
 }
 window.addEventListener('load', hideSplash);
 setTimeout(hideSplash, 3400);
+/* Animatsiyalar o'chirilgan bo'lsa (bosh sahifa yoki NFT menyusidan) - eslab qolinadi */
+try{ if(localStorage.getItem('mt_anim') === '0') document.body.classList.add('reduce-motion'); }catch(e){}
 
 /* ===== Tortib yangilash (pull to refresh) =====
    iPhone da sahifa eng tepada pastga tortilsa "cho'ziladi" - window.scrollY manfiy
