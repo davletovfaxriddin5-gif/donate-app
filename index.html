@@ -1819,6 +1819,10 @@ const CARDS = {
   uz:   { num:'9860 1606 3393 9915', hold:'Faxriddin Davlatov', bank:'Humo',     cur:"so'm", icon:'/hamkor-ex-em2.jpg'},
   ru:   { num:'2202 2085 6718 5823', hold:'Фахриддин Давлатов', bank:'Sberbank', cur:'rubl', icon:'/sber-ex-em3.jpg'},
 visa: { num:'4231 2000 7429 0288', hold:'Faxriddin Davlatov',       bank:'Visa',     cur:'usd',  icon:'/visa-ex-em1.jpg'},
+  /* raqam bo'sh bo'lsa karta to'lov ro'yxatida ko'rinmaydi */
+  tinkoff: { num:'2200 7021 8586 4951', hold:'Фахриддин Давлатов', bank:'Tinkoff', cur:'rubl', icon:'/tinkof-x1.webp'},
+  /* TBC: boshqa kartaga o'tkazishda bank 1.99% oladi - komissiya mijozning summasiga qo'shiladi */
+  tbc:     { num:'9860 3566 4404 8874', hold:'FAKHRIDDIN DAVLATOV', bank:'TBC',     cur:"so'm", icon:'/tbc-x1.webp', fee:0.0199},
 };
 const CARD_NUMBER = CARDS.uz.num, CARD_HOLDER = CARDS.uz.hold, CARD_BANK = CARDS.uz.bank;
 const CARD2_NUMBER = CARDS.ru.num, CARD2_HOLDER = CARDS.ru.hold, CARD2_BANK = CARDS.ru.bank;
@@ -7093,7 +7097,7 @@ function renderNftTopup(){
   <p style="color:var(--dim);font-size:13.5px;margin:-6px 2px 6px">To'lov usulini tanlang</p>
   <div class="ot-hint" style="margin:0 2px 16px">Bu pul NFT bo'limi hisobiga tushadi va shu yerdan chiqariladi.</div>
   <div class="pay-grid">
-    ${Object.keys(CARDS).map(function(k){
+    ${Object.keys(CARDS).filter(function(k){ return CARDS[k].num; }).map(function(k){
       const c = CARDS[k];
       const ic = c.icon.indexOf('/') === 0
         ? `<img src="${IMG(c.icon)}" style="width:100%;height:46px;object-fit:contain">` : c.icon;
@@ -8615,9 +8619,10 @@ function renderTopup(){
     <div id="topClock" style="text-align:center;font-weight:800;font-size:27px;letter-spacing:1px;margin:2px 0 16px">10:00</div>
     <div style="background:var(--card);border:1px solid var(--stroke);border-radius:var(--radius);padding:16px;margin-bottom:12px">
       <div class="lbl" style="margin-bottom:8px">AYNAN SHU SUMMANI O'TKAZING</div>
-      <div style="font-weight:800;font-size:26px;letter-spacing:1px">${payAmount(topPend.base, topPend.pay, c.cur).txt} ${c.cur}</div>
+      <div style="font-weight:800;font-size:26px;letter-spacing:1px">${topPend.send ? fmt(topPend.send) : payAmount(topPend.base, topPend.pay, c.cur).txt} ${c.cur}</div>
+      ${topPend.send ? `<div style="color:var(--gold);font-size:12.5px;margin-top:6px">Bunga TBC komissiyasi ${(c.fee*100).toFixed(2)}% qo'shilgan</div>` : ''}
       <span>Balansingizga qo'shiladi:</span> ${fmt(topPend.pay)} so'm</div>
-      <button class="big-btn" style="margin:12px 0 0;justify-content:center;background:var(--card-2)" onclick="copyCard('${payAmount(topPend.base, topPend.pay, c.cur).raw}')">Summani nusxalash</button>
+      <button class="big-btn" style="margin:12px 0 0;justify-content:center;background:var(--card-2)" onclick="copyCard('${topPend.send ? topPend.send : payAmount(topPend.base, topPend.pay, c.cur).raw}')">Summani nusxalash</button>
     </div>
     <div style="background:var(--card);border:1px solid var(--stroke);border-radius:var(--radius);padding:16px;margin-bottom:12px">
       <div class="lbl" style="margin-bottom:8px">${c.bank}</div>
@@ -8643,7 +8648,7 @@ function renderTopup(){
     <div class="page-title">Hisobni to'ldirish</div>
     <p style="color:var(--dim);font-size:13.5px;margin:-6px 2px 18px">To'lov usulini tanlang</p>
     <div class="pay-grid">
-     ${Object.keys(CARDS).map(k=>`<button class="pay" onclick="pickPay('${k}')"><span class="box"style="background:${CARDS[k].bg};font-size:20px;width:100%;height:46px">${CARDS[k].icon.indexOf('/')===0 ? `<img src="${IMG(CARDS[k].icon)}" style="width:100%;height:46px;object-fit:contain">` : CARDS[k].icon}</span><span class="nm">${CARDS[k].bank}</span></button>`).join('')}
+     ${Object.keys(CARDS).filter(k=>CARDS[k].num).map(k=>`<button class="pay" onclick="pickPay('${k}')"><span class="box"style="background:${CARDS[k].bg};font-size:20px;width:100%;height:46px">${CARDS[k].icon.indexOf('/')===0 ? `<img src="${IMG(CARDS[k].icon)}" style="width:100%;height:46px;object-fit:contain">` : CARDS[k].icon}</span><span class="nm">${CARDS[k].bank}</span></button>`).join('')}
      <button class="pay" onclick="pickPay('stars')"><span class="box" style="font-size:30px;width:100%;height:46px">⭐</span><span class="nm">Telegram Stars</span></button>
      <button class="pay" onclick="pickPay('usdt')"><span class="box" style="font-size:27px;width:100%;height:46px"><img src="https://api.minatoh.uz/img/ton-x1.webp" style="width:100%;height:46px;object-fit:contain" onerror="this.replaceWith(document.createTextNode('💵'))"></span><span class="nm">USDT (TON)</span></button>
     </div>
@@ -8722,6 +8727,7 @@ function renderTopup(){
   <div class="form-card">
     <div class="lbl">BALANSGA TUSHADI (so'm)</div>
     <div class="inp-wrap"><input class="inp" id="topAmount" inputmode="numeric" placeholder="Masalan: 50000" oninput="onTopSom()"></div>
+    ${c.fee ? `<div style="color:var(--gold);font-size:12.5px;margin-top:10px;line-height:1.5">${c.bank} orqali o'tkazmada bank ${(c.fee*100).toFixed(2)}% komissiya oladi \u2014 u o'tkaziladigan summaga qo'shiladi, balansingizga esa to'liq summa tushadi. Komissiyasiz to'lash uchun Humo ni tanlang.</div>` : ''}
     ${c.cur === "so'm" ? '' : `
     <div class="lbl" style="margin-top:14px">TO'LAYSIZ (${curSym(c.cur)})</div>
     <div class="inp-wrap"><input class="inp" id="topForeign" inputmode="decimal" placeholder="0.00" oninput="onTopForeign()"></div>
@@ -9054,7 +9060,8 @@ function sendTopup(){
         topPend = { id: d.id, base: amt, m: topMethod, memo: d.memo,
                     usdt: d.usdt, addr: d.addr };
       } else {
-        topPend = { id: d.id, pay: d.pay, base: amt, m: topMethod, until: Date.now() + 600000 };
+        topPend = { id: d.id, pay: d.pay, base: amt, m: topMethod, until: Date.now() + 600000,
+                    send: d.send || 0 };          /* TBC: komissiya bilan o'tkaziladigan summa */
       }
       renderTopup();
     } else {
