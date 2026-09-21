@@ -1629,8 +1629,14 @@ const USDT_JETTON = "0:b113a994b5024a16719f69139328eb759596c38a25f59028b146fecdc
 const USDT_DEC    = 1000000;          /* 6 kasrli: "2000000" = 2 USDT */
 const TON_MIN     = 4;               /* eng kam to'lov, USDT */
 const TON_RATE    = 11500;            /* 1 USDT = shuncha so'm (index.html bilan bir xil) */
-const CARD_CUR = { "Humo":"so'm", "Sberbank":"rubl", "Visa":"usd" };
+const CARD_CUR = { "Humo":"so'm", "Sberbank":"rubl", "Visa":"usd", "Tinkoff":"rubl", "TBC":"so'm" };
+/* TBC: boshqa kartaga o'tkazishda bank 1.99% oladi. Shu komissiyani mijoz
+   to'laydi - u ko'proq o'tkazadi, balansiga esa to'liq summa tushadi. */
+const TBC_FEE  = Number(process.env.TBC_FEE || 0.0199);
+const TBC_TAIL = String(process.env.TBC_TAIL || "8874");   /* TBC kartaning oxirgi 4 raqami */
+function tbcSend(pay){ return Math.ceil(pay * (1 + TBC_FEE) / 100) * 100; }
 function payText(base, pay, bank){
+  if(bank === "TBC") return tbcSend(pay) + " so'm  (TBC, " + (TBC_FEE*100).toFixed(2) + "% bilan; " + pay + " so'm balansga)";
   const cur = CARD_CUR[bank] || "so'm";
   const r = RATES[cur] || 1;
   if(r === 1) return pay + " so'm";
@@ -3364,7 +3370,11 @@ function usedAmounts(db){
   const set = new Set();
   Object.keys(db).forEach(function(k){
     const t = db[k] && db[k].topups;
-    if(Array.isArray(t)) t.forEach(function(x){ if(x.status === "wait" && !x.memo) set.add(x.amount); });
+    if(Array.isArray(t)) t.forEach(function(x){
+      if(x.status !== "wait" || x.memo) return;
+      set.add(x.amount);
+      if(x.send) set.add(x.send);          /* TBC ning o'tkaziladigan summasi ham band */
+    });
   });
   return set;
 }
@@ -3834,13 +3844,22 @@ app.post("/topup", (req,res)=>{
     const used = usedAmounts(db);
     let pay = 0;
     /* Noyob farq 100 so'mlik qadamlar bilan \u2014 bank SMS'ida aniq ko'rinadi */
-    for(let n = 1; n <= 60; n++){ if(!used.has(base + n*100)){ pay = base + n*100; break; } }
+    const isTbc = String(b.method || "") === "TBC";
+    for(let n = 1; n <= 60; n++){
+      const p = base + n*100;
+      if(used.has(p)) continue;
+      if(isTbc && used.has(tbcSend(p))) continue;
+      pay = p; break;
+    }
     if(!pay) return res.json({ ok:false, error:"busy" });
+    const send = isTbc ? tbcSend(pay) : 0;
 
     const id = "TP"+Date.now().toString().slice(-8);
-    u.topups.unshift({ id:id, amount:pay, base:base, method:String(b.method||""),
-                       status:"wait", dest:dest, at:new Date().toISOString(),
-                       who:who2(who) });
+    const rec = { id:id, amount:pay, base:base, method:String(b.method||""),
+                  status:"wait", dest:dest, at:new Date().toISOString(),
+                  who:who2(who) };
+    if(send) rec.send = send;
+    u.topups.unshift(rec);
     u.topups = u.topups.slice(0,60);
     save(db);
 
@@ -3856,7 +3875,7 @@ app.post("/topup", (req,res)=>{
         { text:"❌ Rad etish",  callback_data:"tp_no:"+uid+":"+id }
       ]] } });
 
-    res.json({ ok:true, id:id, pay:pay });
+    res.json(send ? { ok:true, id:id, pay:pay, send:send, fee:TBC_FEE } : { ok:true, id:id, pay:pay });
   }catch(e){ console.log("TOPUP XATO:", e.message); res.json({ ok:false, error:"server" }); }
 });
 
@@ -4216,6 +4235,7 @@ const smsSeen = [];   /* takroriy SMS'larni to'sish uchun */
 /* Kutilayotgan to'lov summasi \u2014 payText bilan bir xil hisob.
    so'm karta uchun o'sha summaning o'zi, valyuta kartalar uchun tiyinli qiymat. */
 function expectFor(t){
+  if(t.send) return { cur: "so'm", v: t.send };          /* TBC: komissiya bilan o'tkazilgan summa */
   const cur = CARD_CUR[String(t.method || "")] || "so'm";
   const r = RATES[cur] || 1;
   if(r === 1) return { cur: "so'm", v: t.amount };
@@ -4311,6 +4331,32 @@ function sberFresh(h){
   return false;
 }
 
+/* TINKOFF: "Пополнение, счет RUB. 160 ₽. Фахриддин Д. Доступно 1113,53 ₽"
+   Sana ham, soat ham yo'q - SMS kelgan zahoti yangi deb olinadi (bir xil matn
+   ikki marta kelsa smsSeen ushlaydi, "Доступно" har safar boshqacha).
+   Faqat "Пополнение, счет RUB" - boshqa xabarlar tegilmaydi. */
+function tinkHits(txt){
+  const s = String(txt || "");
+  const out = [];
+  const re = /\u041F\u043E\u043F\u043E\u043B\u043D\u0435\u043D\u0438\u0435,?\s*\u0441\u0447[\u0435\u0451]\u0442\s*RUB\.?\s*([0-9][0-9\s]{0,9}(?:[.,][0-9]{1,2})?)\s*\u20BD/gi;
+  let m;
+  while((m = re.exec(s))){
+    const amt = parseFloat(m[1].replace(/\s/g,"").replace(/,/g,"."));
+    if(isFinite(amt) && amt > 0) out.push({ amount: Math.round(amt*100)/100 });
+  }
+  return out;
+}
+/* Qaysi kartaga kelgan pul qaysi to'ldirishga tegishli.
+   Hamkor Humo va TBC ikkalasi ham HUMO nomidan yozadi - TBC ni kartaning
+   oxirgi raqamlari (*8874) ajratadi. Sber va Tinkoff ikkalasi rublda. */
+function bankOk(hit, method){
+  if(hit === "TBC")      return method === "TBC";
+  if(hit === "Humo")     return method !== "TBC";
+  if(hit === "Tinkoff")  return method === "Tinkoff";
+  if(hit === "Sberbank") return method !== "Tinkoff";
+  return true;
+}
+
 app.post("/sms", (req,res)=>{
   try{
     const b = req.body || {};
@@ -4325,15 +4371,19 @@ app.post("/sms", (req,res)=>{
 
     const all   = smsHits(txt);
     const fresh = all.filter(function(h){ return Math.abs(Date.now() - h.ms) < 30*60*1000; });
+    const tbcCard = new RegExp("\\*\\s?" + TBC_TAIL + "\\b").test(txt);
+    fresh.forEach(function(h){ if(h.cur === "so'm") h.bank = tbcCard ? "TBC" : "Humo"; });
 
     /* Sber: sanasi yo'q, shuning uchun soat bo'yicha filtrlanadi.
        Kirim ("... от Ism") bo'lsa umumiy oqimga qo'shiladi. */
     const sb = sberHits(txt);
     sb.forEach(function(h){
-      if(sberFresh(h)) fresh.push({ cur:"rubl", amount:h.amount, from:h.from, ms:Date.now() });
+      if(sberFresh(h)) fresh.push({ cur:"rubl", amount:h.amount, from:h.from, ms:Date.now(), bank:"Sberbank" });
     });
+    const tk = tinkHits(txt);
+    tk.forEach(function(h){ fresh.push({ cur:"rubl", amount:h.amount, ms:Date.now(), bank:"Tinkoff" }); });
 
-    if(all.length === 0 && sb.length === 0){
+    if(all.length === 0 && sb.length === 0 && tk.length === 0){
       return res.json({ ok:true, parsed:false });
     }
     if(fresh.length === 0){
@@ -4346,6 +4396,7 @@ app.post("/sms", (req,res)=>{
     }
     const cur    = fresh[0].cur;
     const amount = fresh[0].amount;
+    const bank   = fresh[0].bank || "";
     const label  = (cur === "so'm")     ? (amount + " so'm")
                  : (cur === "visa-som") ? (amount + " so'm (Visa kartaga)")
                  : (amount.toFixed(2) + " " + cur);
@@ -4360,6 +4411,7 @@ app.post("/sms", (req,res)=>{
         if(t.status !== "wait" || new Date(t.at).getTime() <= lim) return;
         if(t.memo) return;              /* USDT to'lovi \u2014 bank SMS'i unga tegmasin */
         const e = expectFor(t);
+        if(!bankOk(bank, String(t.method || ""))) return;     /* boshqa kartaning to'ldirishi */
         if(cur === "visa-som"){
           /* Visa kartaga so'mda tushgan pul \u2014 faqat Visa to'ldirishlari bilan,
              va USD emas, NOYOB SO'M summasi (t.amount) bilan solishtiriladi. */
