@@ -1140,15 +1140,17 @@ body.light .sp-card .sub{ text-shadow:none; color:var(--faint) }
   display:grid; place-items:center; margin-left:1px }
 
 .nftm-rb.on{ background:#fff; border-color:#fff; color:#0F1626 }
-.mkt-range{ display:flex; align-items:center; gap:13px; padding:10px 15px; margin-bottom:9px;
-  background:var(--card-2); border:1px solid var(--stroke-2); border-radius:15px }
-.mkt-range input{ flex:1; min-width:0; -webkit-appearance:none; appearance:none; height:4px;
-  border-radius:99px; background:var(--stroke-2); outline:none }
-.mkt-range input::-webkit-slider-thumb{ -webkit-appearance:none; width:20px; height:20px;
+.mkt-range{ display:flex; align-items:center; gap:10px; padding:5px 12px; margin-bottom:8px;
+  background:var(--card-2); border:1px solid var(--stroke-2); border-radius:13px }
+/* surgichning o'zi baland (barmoq bilan ushlash oson), chizig'i esa ingichka */
+.mkt-range input{ flex:1; min-width:0; -webkit-appearance:none; appearance:none; height:30px;
+  background:transparent; outline:none; margin:0 }
+.mkt-range input::-webkit-slider-runnable-track{ height:4px; border-radius:99px; background:var(--stroke-2) }
+.mkt-range input::-webkit-slider-thumb{ -webkit-appearance:none; width:22px; height:22px; margin-top:-9px;
   border-radius:50%; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,.4) }
-.mkt-range .v{ text-align:right; flex-shrink:0; border-left:1px solid var(--stroke-2); padding-left:13px }
-.mkt-range .v .a{ font-size:15px; font-weight:700; color:var(--text); white-space:nowrap }
-.mkt-range .v .b{ font-size:11.5px; color:var(--faint); margin-top:1px; white-space:nowrap }
+.mkt-range .v{ text-align:right; flex-shrink:0; border-left:1px solid var(--stroke-2); padding-left:10px }
+.mkt-range .v .a{ font-size:14px; font-weight:700; color:var(--text); white-space:nowrap }
+.mkt-range .v .b{ font-size:11px; color:var(--faint); margin-top:0; white-space:nowrap }
 
 /* ro'yxat ko'rinishi */
 .nftm-grid.list{ display:block }
@@ -6122,10 +6124,20 @@ function mktRangeToggle(){
   if(!mktRangeOn) mktMax = 0;
   renderNftMarket();
 }
+/* Ro'yxatni har millimetr surishda qayta chizish surgichni qotirardi.
+   Endi surish paytida faqat raqam va soni yangilanadi, ro'yxat esa barmoq
+   to'xtagach (yoki qo'yib yuborilganda darhol) bir marta chiziladi. */
+let mktRangeT = 0;
 function mktRangeIn(el){
   mktMax = Number(el.value) || 0;
   const v = document.getElementById('mktRangeV');
   if(v) v.innerHTML = `<div class="a">${fmtGram(mktMax)} GRAM</div><div class="b">${mktFiltered().length} ta</div>`;
+  clearTimeout(mktRangeT);
+  mktRangeT = setTimeout(mktRefresh, 140);
+}
+function mktRangeDone(el){
+  clearTimeout(mktRangeT);
+  mktMax = Number(el.value) || 0;
   mktRefresh();
 }
 /* --- Ko'rinishni almashtirish --- */
@@ -6989,7 +7001,7 @@ function renderNftMarket(){
     <button class="nftm-rb ${mktRangeOn?'on':''}" onclick="mktRangeToggle()"><svg viewBox="0 0 24 24"><path d="${mktRangeOn?'M6 14.5l6-6 6 6':'M6 9.5l6 6 6-6'}"/></svg></button>
   </div>
   ${mktRangeOn ? `<div class="mkt-range">
-      <input type="range" min="0" max="${mktMaxPrice()}" step="0.1" value="${mktMax}" oninput="mktRangeIn(this)">
+      <input type="range" min="0" max="${mktMaxPrice()}" step="0.1" value="${mktMax}" oninput="mktRangeIn(this)" onchange="mktRangeDone(this)">
       <div class="v" id="mktRangeV"><div class="a">${fmtGram(mktMax)} GRAM</div><div class="b">${mktFiltered().length} ta</div></div>
     </div>` : ''}
   <div class="nftm-fil" id="mktFil">${mktChips()}</div>
@@ -7631,8 +7643,9 @@ function grSize(el){
   el.style.width = n + 'ch';
 }
 function grIn(el){
-  /* faqat raqam va bitta nuqta */
-  let s = String(el.value).replace(/[^0-9.]/g,'');
+  /* raqam va bitta o'nlik belgi. iPhone ning o'nlik klaviaturasi mintaqaga qarab
+     nuqta emas VERGUL chiqaradi - uni ham qabul qilib, nuqtaga aylantiramiz */
+  let s = String(el.value).replace(/,/g,'.').replace(/[^0-9.]/g,'');
   const i = s.indexOf('.');
   if(i > -1) s = s.slice(0, i + 1) + s.slice(i + 1).replace(/\./g,'');
   if(s.length > 1 && s[0] === '0' && s[1] !== '.') s = s.replace(/^0+/,'') || '0';
