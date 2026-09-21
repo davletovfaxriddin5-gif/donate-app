@@ -5751,6 +5751,18 @@ function mgViewToggle(){ haptic(); mktView = (mktView === 'list') ? 'grid' : 'li
 
 /* --- Filtr oynasi --- */
 let fsField = 'collection', fsTmp = [], fsQ = '';
+/* Klaviatura ochilganda Telegram ko'rinadigan maydonni qisqartiradi va pastga
+   yopishgan oyna klaviatura ustiga ko'tariladi - "Tozalash / Qo'llash" ham u bilan
+   chiqib ketardi. Yozish paytida tugmalar yashiriladi, klaviatura yopilgach
+   joyiga qaytadi (biroz kechikib - ro'yxatdagi bosilgan qator siljimasin). */
+let fsKbT = 0;
+function fsKb(on){
+  clearTimeout(fsKbT);
+  const b = document.querySelector('#shBox .fs-btns');
+  if(!b) return;
+  if(on) b.style.display = 'none';
+  else fsKbT = setTimeout(function(){ b.style.display = ''; }, 220);
+}
 function mktOpen(field){
   haptic();
   fsField = field; fsTmp = mktSel[field].slice(); fsQ = '';
@@ -5764,7 +5776,7 @@ function mktOpen(field){
     <div class="nftm-top" style="margin-bottom:4px">
       <label class="nftm-search">
         <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6"/></svg>
-        <input type="text" placeholder="Tezkor qidiruv" autocomplete="off" oninput="fsSearch(this)">
+        <input type="text" placeholder="Tezkor qidiruv" autocomplete="off" oninput="fsSearch(this)" onfocus="fsKb(1)" onblur="fsKb(0)">
       </label>
     </div>
     <div class="fs-sort"><span>${MKT_FIELDS[field].title}</span><span>Min. narx</span></div>
@@ -7987,7 +7999,7 @@ function renderWallet(){
     <span class="arw">›</span>
   </button>
 
-  <div class="wl-card">
+  <div class="wl-card" style="background-image:linear-gradient(90deg,#3F55F6 0%,#3F55F6 32%,rgba(63,85,246,.93) 40%,rgba(70,78,245,.62) 52%,rgba(82,70,243,.4) 66%,rgba(90,67,242,.28) 100%),url('${IMG('/banner-x9.webp')}'),linear-gradient(135deg,#3F55F6 0%,#5A43F2 100%);background-size:cover,auto 112%,cover;background-position:center,right -34px center,center;background-repeat:no-repeat,no-repeat,no-repeat">
     <div class="lb">Hamyon balansi</div>
     <div class="amt">${big}</div>
     ${cur.c !== 'UZS' ? `<div class="sub">${som}</div>` : ''}
