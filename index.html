@@ -1822,6 +1822,11 @@ body.kb-open .buy-bar{ display:none !important }
 
 /* ---- Sovg'alar to'ri ---- */
 .mg-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px; padding:0 0 8px }
+.mg-grid.list{ display:block }
+.mg-grid.list .mg-card{ display:flex; align-items:center; gap:12px; padding:9px 11px; margin-bottom:9px; text-align:left }
+.mg-grid.list .mg-card .im{ width:52px; height:52px; flex:0 0 52px; aspect-ratio:auto; border-radius:13px; margin:0 }
+.mg-grid.list .mg-card .nm{ flex:1; min-width:0; margin:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+.mg-grid.list .mg-card .pr, .mg-grid.list .mg-card .sb{ margin:0; flex-shrink:0 }
 .mg-card{ position:relative; background:var(--card); border:1px solid var(--stroke);
   border-radius:18px; padding:10px; text-align:center; transition:.14s }
 .mg-card:active{ transform:scale(.985) }
@@ -4308,6 +4313,7 @@ function nftEnsure(){
   setTimeout(function(){ try{ mktLoad(); }catch(e){} }, 600);
 }
 function go(v){
+  try{ kbSync(); }catch(e){}
   /* Ayni shu ekranda turib o'sha tugmani bosish hech narsani o'zgartirmaydi.
      Qayta chizsak — karusel uziladi va ro'yxat bir lahza yo'qoladi. */
   if(v === view && (v === 'nft_market' || v === 'nft_gifts' || v === 'nft_hist')){
@@ -6804,7 +6810,14 @@ function mktRefresh(){
 }
 function mktSearch(el){ mktQ = el.value; mktRefresh(); }
 /* Sovg'alarim bo'limi ham shu filtrlardan foydalanadi */
-function mgSearch(el){ mktQ = el.value; renderNftGifts(); }
+/* Butun ekranni qayta chizsak, yozilayotgan maydon o'chib, klaviatura tushib
+   ketardi va "klaviatura ochiq" belgisi osilib qolib, pastki menyu yo'qolardi.
+   Endi faqat ro'yxat yangilanadi. */
+function mgSearch(el){
+  mktQ = el.value;
+  const box = document.getElementById('mgBody');
+  if(box) box.innerHTML = mgCards(); else renderNftGifts();
+}
 function mgViewToggle(){ haptic(); mktView = (mktView === 'list') ? 'grid' : 'list'; renderNftGifts(); }
 
 /* --- Filtr oynasi --- */
@@ -7526,7 +7539,7 @@ function mgCards(){
          <p>Ularni botimiz orqali qo'shing</p>
          <button class="cta" onclick="mgHowTo()">Sovg'alarni qanday qo'shish?</button></div>`;
   }
-  return '<div class="mg-grid">' + rows.map(function(g){
+  return '<div class="mg-grid' + (mktView === 'list' ? ' list' : '') + '">' + rows.map(function(g){
     const busy = g.state === 'out';
     return `<button class="mg-card${busy?' busy':''}" onclick="mgOpen('${esc(g.msgId)}')">
       <div class="im">${g.pic
@@ -8145,7 +8158,7 @@ function renderNftGifts(){
           : '<svg viewBox="0 0 24 24"><path d="M5 9.5h14M5 14.5h14"/></svg>'}</button>
     </div>
     <div class="nftm-fil" id="mgFil">${mktChips()}</div>
-    ${mgCards()}`;
+    <div id="mgBody">${mgCards()}</div>`;
   }
 
   app.innerHTML = `
@@ -10651,6 +10664,13 @@ document.addEventListener('click', function(e){
   haptic('light');
 }, true);
 
+/* Fokusdagi maydon DOM dan o'chirilsa, "fokusdan chiqdi" hodisasi bo'lmaydi va
+   kb-open belgisi osilib qoladi - pastki menyu butun ilovada yo'qoladi. Shuning
+   uchun ekran almashganda majburan tekshiramiz. */
+function kbSync(){
+  const a = document.activeElement;
+  if(!(a && (a.tagName === 'INPUT' || a.tagName === 'TEXTAREA'))) document.body.classList.remove('kb-open');
+}
 /* Klaviatura ochilib-yopilganini kuzatamiz */
 (function(){
   const isField = function(el){ return el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA'); };
