@@ -8042,7 +8042,12 @@ function mhItems(){
     else if(k === 'offer_hold'){ type = 'offer'; st = 'Taklif \u2014 pul bloklandi'; sign = -1; }
     else if(k === 'offer_back'){ type = 'offer'; st = 'Taklif \u2014 pul qaytdi'; sign = 1; }
     else return;
-    out.push({ type: type, at: Date.parse(r.at) || 0, name: r.item || 'NFT', img: '', glyph: MH_IC[k] || '\uD83C\uDF81',
+    /* tarix yozuvida faqat nom bor - rasmni sovg'alarim yoki bozor ro'yxatidan topamiz */
+    const nm = String(r.item || '');
+    const g  = (mgList || []).find(function(x){ return String(x.name) === nm; }) ||
+               (NFT_ITEMS || []).find(function(x){ return String(x.name) === nm; });
+    out.push({ type: type, at: Date.parse(r.at) || 0, name: r.item || 'NFT',
+      img: (g && g.pic) ? g.pic : '', glyph: MH_IC[k] || '\uD83C\uDF81',
       amt: sign ? (Number(r.amount) || 0) : 0, cur: r.cur || "so'm", sign: sign, st: st });
   });
   return out;
