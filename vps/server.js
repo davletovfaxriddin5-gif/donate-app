@@ -2193,6 +2193,43 @@ function giftPic(g){
   const s = (g.gift && g.gift.slug) ? String(g.gift.slug) : "";
   return s ? ("https://nft.fragment.com/gift/" + s.toLowerCase() + ".medium.jpg") : "";
 }
+/* NFT xususiyatlari: model, belgi (naqsh), fon, noyobligi, nechta chiqarilgani.
+   GramJS maydon nomlari Telegram qatlamiga qarab farq qiladi - shuning uchun
+   ehtiyotkor o'qiladi: topilmagan narsa shunchaki bo'sh qoladi. */
+function giftTitle(g){ return (g.gift && g.gift.title) ? String(g.gift.title) : ""; }
+function gRar(a){
+  if(!a) return null;
+  if(typeof a.rarityPermille === "number") return { pm: a.rarityPermille };
+  const r = a.rarity;
+  if(r){
+    if(typeof r.permille === "number") return { pm: r.permille };
+    const m = String(r.className || "").match(/Rarity([A-Za-z]+)$/);
+    if(m) return { tier: m[1] };               /* Uncommon, Rare, Epic, Legendary */
+  }
+  return null;
+}
+function gHex(n){ return (typeof n === "number" && n >= 0) ? ("#" + ("000000" + n.toString(16)).slice(-6)) : ""; }
+function giftAttrs(g){
+  const G = (g && g.gift) || {};
+  const out = { model:null, sym:null, bg:null, avail:null, crafted:false };
+  (G.attributes || []).forEach(function(a){
+    const cn = String((a && a.className) || "");
+    const r  = gRar(a);
+    const b  = { n: String((a && a.name) || "") };
+    if(r && r.pm != null) b.pm = r.pm;
+    if(r && r.tier) b.tier = r.tier;
+    if(cn.indexOf("Model") > -1) out.model = b;
+    else if(cn.indexOf("Pattern") > -1) out.sym = b;
+    else if(cn.indexOf("Backdrop") > -1){ b.c1 = gHex(a.centerColor); b.c2 = gHex(a.edgeColor); out.bg = b; }
+  });
+  if(G.availabilityTotal) out.avail = { i: Number(G.availabilityIssued) || 0, t: Number(G.availabilityTotal) || 0 };
+  /* Telegram "craft" tizimida yangilangan sovg'a: modelning noyobligi foiz emas,
+     daraja bilan beriladi (Uncommon...) yoki sovg'ada "craft" nomli maydon bor */
+  out.crafted = !!(out.model && out.model.tier) ||
+                Object.keys(G).some(function(k){ return /craft/i.test(k) && !!G[k]; });
+  return out;
+}
+function giftAttrsSafe(g){ try{ return giftAttrs(g); }catch(e){ console.log("NFT XUSUSIYAT XATO:", e.message); return null; } }
 
 async function giftScan(){
   if(giftBusy) return;
@@ -2213,13 +2250,22 @@ async function giftScan(){
       const msgId = g.msgId != null ? String(g.msgId) : "";
       if(!msgId) continue;
 
-      /* Allaqachon yozilganmi? */
-      let known = false;
+      /* Allaqachon yozilganmi? Yozilgan bo'lsa-yu xususiyatlari yo'q bo'lsa
+         (bu funksiya qo'shilishidan oldin kelgan) - bir marta to'ldiramiz */
+      let known = null;
       Object.keys(db).forEach(function(k){
-        if(!/^\d+$/.test(k)) return;
-        if(((db[k].gifts)||[]).some(function(x){ return String(x.msgId) === msgId; })) known = true;
+        if(known || !/^\d+$/.test(k)) return;
+        const hit = ((db[k].gifts)||[]).find(function(x){ return String(x.msgId) === msgId; });
+        if(hit) known = hit;
       });
-      if(known) continue;
+      if(known){
+        if(!known.attrs){
+          const at = giftAttrsSafe(g);
+          if(at){ known.attrs = at; changed = true; }
+          if(!known.title){ known.title = giftTitle(g); changed = true; }
+        }
+        continue;
+      }
 
       const from = (g.fromId && g.fromId.userId) ? String(g.fromId.userId) : "";
       if(!from || !db[from]){
@@ -2235,6 +2281,8 @@ async function giftScan(){
         name:  giftName(g),
         slug:  (g.gift.slug || ""),
         num:   g.gift.num || 0,
+        title: giftTitle(g),
+        attrs: giftAttrsSafe(g),
         pic:   giftPic(g),
         fee:   Number(g.transferStars) || 25,
         state: "idle",                      /* idle | sale | out */
@@ -2320,6 +2368,7 @@ app.get("/nft/market", (req,res)=>{
     ((db[k].gifts)||[]).forEach(function(g){
       if(g.state !== "sale") return;
       out.push({ msgId:g.msgId, name:g.name, slug:g.slug, num:g.num,
+                 title:g.title || "", attrs:g.attrs || null,
                  pic:g.pic, price:g.price, seller:k,
                  sellerName:(db[k].nm || ""), at:g.saleAt || g.at });
     });
