@@ -1733,12 +1733,14 @@ function profitReport(days){
       const t = x.at ? Date.parse(x.at) : 0;
       if(!t || t < from) return;
       if(String(x.status) !== "ok") return;
+      if(x.dest === "nft") return;              /* NFT hamyoni to'ldirishi - /nftfoyda da */
       topN++; topSum += Number(x.amount)||0;
     });
     (u.orders||[]).forEach(function(o){
       const t = o.at ? Date.parse(o.at) : 0;
       if(!t) return;
       if(DEAD.indexOf(String(o.status)) > -1) return;
+      if(o.pay === "nftsom" || o.pay === "gram") return;   /* NFT hamyonidan - /nftfoyda da */
       const pr = Number(o.price)||0, co = Number(o.cost)||0;
       if(canCompare && t >= prevFrom && t < from){ pn++; psum += pr; return; }
       if(t < from) return;
@@ -1762,7 +1764,7 @@ function profitReport(days){
     const u = db[uid] || {};
     const older = (u.orders||[]).some(function(o){
       const t = o.at ? Date.parse(o.at) : 0;
-      return t && t < from && DEAD.indexOf(String(o.status)) < 0;
+      return t && t < from && DEAD.indexOf(String(o.status)) < 0 && o.pay !== "nftsom" && o.pay !== "gram";
     });
     if(!older) fresh++;
   });
@@ -1839,6 +1841,7 @@ function profitReport(days){
     t += (i+1) + ". " + (u.nm || uid) + (u.un ? " (@" + u.un + ")" : "") +
          " \u2014 " + n0(buyers[uid]) + " so'm\n";
   });
+  t += "\n\u2500\u2500\nNFT bo'limi bu hisobotga kirmaydi \u2014 u alohida: /nftfoyda\n";
   return t;
 }
 
@@ -1849,6 +1852,90 @@ function profitReport(days){
 const COSTS_FILE = "/root/donate-app/fzr-costs.json";
 const COST_RATE  = Number(process.env.COST_RATE || 11800);   /* 1 USD = shuncha so'm */
 const PROFIT_FROM = String(process.env.PROFIT_FROM || "2026-09-13");  /* shu kundan sanaydi */
+const NFT_FROM    = String(process.env.NFT_FROM    || "2026-09-22");  /* NFT bo'limi hamma uchun ochilgan kun */
+
+/* ---------- NFT BO'LIMI HISOBOTI (/nftfoyda) ----------
+   Bosh sahifa hisobotidan (/foyda) BUTUNLAY alohida. Sanoq NFT bo'limi hamma
+   uchun ochilgan kundan (NFT_FROM) - undan oldingi admin sinovlari kirmaydi.
+   Daromad: bozor komissiyasi (sotuv va taklif), sovg'ani chiqarish/yuborish
+   haqi va NFT hamyonidan olingan Stars/Premium foydasi. GRAM ni hamyonga
+   chiqarish haqi tarmoq to'lovini qoplaydi - daromadga qo'shilmaydi. */
+function nftReport(days){
+  const db = load();
+  const now = Date.now();
+  const startAt = Date.parse(NFT_FROM + "T00:00:00Z");
+  const from = Math.max(now - days * 864e5, startAt);
+  const inP = function(at){ const t = at ? Date.parse(at) : 0; return !!t && t >= from; };
+  const DEAD = ["cancel","refund","expired"];
+  const g3 = function(v){ return String(Math.round((Number(v) || 0) * 1000) / 1000); };
+  let sN=0, sSum=0, sFeeS=0, sFeeG=0, sOff=0;
+  (db._sales || []).forEach(function(x){
+    if(x.old || !inP(x.at)) return;
+    sN++; sSum += Number(x.som) || 0;
+    if(x.via === "offer") sOff++;
+    if(x.fc === "gram") sFeeG += Number(x.fee) || 0; else sFeeS += Number(x.fee) || 0;
+  });
+  let gN=0, gFee=0, tsN=0, tsSum=0, tgN=0, tgSum=0, wsN=0, wsSum=0, wsW=0, wgN=0, wgSum=0, wgFee=0, wgW=0;
+  let oN=0, oSum=0, oCn=0, oCsum=0, oCost=0, hN=0, hS=0, hG=0;
+  Object.keys(db).forEach(function(uid){
+    if(!/^\d+$/.test(uid)) return;
+    const u = db[uid] || {};
+    const hs = Number(u.nftSom) || 0, hg = Number(u.gram) || 0;
+    if(hs > 0 || hg > 0){ hN++; hS += hs; hG += hg; }
+    (u.topups || []).forEach(function(x){
+      if(x.dest !== "nft" || String(x.status) !== "ok" || !inP(x.at)) return;
+      tsN++; tsSum += Number(x.amount) || 0;
+    });
+    (u.nftHist || []).forEach(function(r){
+      if(!r || !inP(r.at)) return;
+      if(r.kind === "gift_out"){ gN++; gFee += Number(r.amount) || 0; }
+      else if(r.kind === "gram_in" && /Hamyondan/i.test(String(r.note || ""))){ tgN++; tgSum += Number(r.amount) || 0; }
+      else if(r.kind === "som_out" && r.status !== "cancel"){ wsN++; wsSum += Number(r.amount) || 0; if(r.status === "wait") wsW++; }
+      else if(r.kind === "gram_out" && r.status !== "cancel"){ wgN++; wgSum += Number(r.amount) || 0; wgFee += Number(r.fee) || 0; if(r.status === "wait") wgW++; }
+    });
+    (u.orders || []).forEach(function(o){
+      if(o.pay !== "nftsom" && o.pay !== "gram") return;
+      if(DEAD.indexOf(String(o.status)) > -1 || !inP(o.at)) return;
+      const pr = Number(o.price) || 0, co = Number(o.cost) || 0;
+      oN++; oSum += pr;
+      if(co > 0){ oCn++; oCsum += pr; oCost += co; }
+    });
+  });
+  let fN=0, fS=0, fG=0;
+  (db._offers || []).forEach(function(o){ if(o.status === "wait"){ fN++; if(o.cur === "gram") fG += o.amt; else fS += o.amt; } });
+  const oProf = oCsum - oCost;
+  let t = "\uD83D\uDDBC NFT BO'LIMI \u2014 HISOBOT \u2014 " + days + " kun\n";
+  t += "(" + new Date(from).toISOString().slice(0,10) + " \u2192 bugun)\n";
+  t += "Sanoq " + NFT_FROM + " dan \u2014 NFT hamma uchun ochilgan kun.\n";
+  t += "Bosh sahifa hisobotidan alohida (u \u2014 /foyda).\n\n";
+  t += "\u2500\u2500 BOZOR \u2500\u2500\n";
+  t += "Sotilgan NFT: " + sN + " ta" + (sOff ? " (shundan " + sOff + " tasi taklif orqali)" : "") + "\n";
+  t += "Savdo hajmi: " + n0(sSum) + " so'm\n";
+  t += "Komissiya: " + n0(sFeeS) + " so'm" + (sFeeG ? " + " + g3(sFeeG) + " GRAM" : "") + "\n";
+  t += "\n\u2500\u2500 XIZMAT HAQLARI \u2500\u2500\n";
+  t += "Sovg'a chiqarish/yuborish: " + gN + " ta \u00B7 " + g3(gFee) + " GRAM\n";
+  t += "   (tashqariga yuborishda Telegram'ga to'lanadigan yulduz ayrilmagan)\n";
+  t += "\n\u2500\u2500 STARS / PREMIUM (NFT hamyonidan) \u2500\u2500\n";
+  if(!oN) t += "Bu davrda yo'q.\n";
+  else {
+    t += oN + " ta buyurtma \u00B7 " + n0(oSum) + " so'm\n";
+    t += oCn ? ("Sizga qoldi: " + n0(oProf) + " so'm" + (oCn < oN ? " (faqat " + oCn + " ta bo'yicha)" : "") + "\n")
+             : "Sizga qoldi: hisoblanmadi (tannarx yo'q)\n";
+  }
+  t += "\n\u2500\u2500 JAMI DAROMAD \u2500\u2500\n";
+  t += n0(sFeeS + oProf) + " so'm + " + g3(sFeeG + gFee) + " GRAM\n";
+  t += "\n\u2500\u2500 HAMYONLAR HARAKATI \u2500\u2500\n";
+  t += "So'm to'ldirildi: " + tsN + " ta \u00B7 " + n0(tsSum) + " so'm\n";
+  t += "GRAM kirdi: " + tgN + " ta \u00B7 " + g3(tgSum) + " GRAM\n";
+  t += "Kartaga yechildi: " + wsN + " ta \u00B7 " + n0(wsSum) + " so'm" + (wsW ? " (" + wsW + " tasi kutilmoqda)" : "") + "\n";
+  t += "GRAM yechildi: " + wgN + " ta \u00B7 " + g3(wgSum) + " GRAM" + (wgW ? " (" + wgW + " tasi kutilmoqda)" : "") + "\n";
+  if(wgFee) t += "   yechish haqi " + g3(wgFee) + " GRAM \u2014 tarmoq to'lovini qoplaydi\n";
+  t += "\n\u2500\u2500 MIJOZLAR PULI (qarzingiz) \u2500\u2500\n";
+  t += hN + " ta mijozning NFT hamyonida: " + n0(hS) + " so'm + " + g3(hG) + " GRAM\n";
+  t += "Takliflarda bloklangan: " + fN + " ta \u00B7 " + n0(fS) + " so'm" + (fG ? " + " + g3(fG) + " GRAM" : "") + "\n";
+  t += "(bu daromad emas \u2014 mijozlar hisobidagi pul)\n";
+  return t;
+}
 let FZR_COST = {};
 function loadCosts(){
   try{
@@ -2616,7 +2703,7 @@ app.post("/nft/offer/act", (req,res)=>{
     o.status = "acc"; o.doneAt = new Date().toISOString(); o.fee = fee;
     const curTxt = o.cur === "gram" ? "GRAM" : "so'm";
     saleRec(db, { t: g.title || saleTitle(o.name), n: g.num || saleNum(o.name), slug: o.slug || "",
-                  som: o.cur === "gram" ? Math.round(o.amt * rate) : o.amt, via: "offer" });
+                  som: o.cur === "gram" ? Math.round(o.amt * rate) : o.amt, via: "offer", fee: fee, fc: o.cur === "gram" ? "gram" : "som" });
     nftLog(b, "nft_buy",  o.amt, { cur: curTxt, item: o.name, note: "Taklif qabul qilindi" });
     nftLog(s, "nft_sell", paid,  { cur: curTxt, item: o.name, note: "Taklif orqali sotildi (komissiya " + fee + ")" });
     /* shu NFT ga boshqa takliflar - pul qaytadi */
@@ -2701,7 +2788,7 @@ app.post("/nft/gift/buy", (req,res)=>{
       at:new Date().toISOString(), boughtFrom:sid, boughtFor:som
     }));
 
-    saleRec(db2, { t: g2.title || saleTitle(g2.name), n: g2.num || saleNum(g2.name), slug: g2.slug || "", som: som, via: "buy" });
+    saleRec(db2, { t: g2.title || saleTitle(g2.name), n: g2.num || saleNum(g2.name), slug: g2.slug || "", som: som, via: "buy", fee: fee, fc: "som" });
     nftLog(b2, "nft_buy", cur === "gram" ? payGram : som,
            { cur: cur === "gram" ? "GRAM" : "so'm", item:g2.name, note:"NFT sotib olindi" });
     nftLog(s2, "nft_sell", paid,
@@ -4419,6 +4506,12 @@ function handleCb(cq){
     catch(e){ send(from, "\u274C Hisobot xatosi: " + e.message); }
     return;
   }
+  if(d.indexOf("nf:") === 0){
+    tgCall("answerCallbackQuery", { callback_query_id: cq.id, text: "Hisoblanmoqda\u2026" });
+    try{ send(from, nftReport(Number(d.slice(3)) || 30)); }
+    catch(e){ send(from, "\u274C NFT hisobot xatosi: " + e.message); }
+    return;
+  }
   if(d === "bc_ok" || d === "bc_no" || d === "bc_del"){
     tgCall("answerCallbackQuery", { callback_query_id: cq.id });
     if(d === "bc_no"){ bcastReset(); send(ADMIN_ID, "\u274C Bekor qilindi"); return; }
@@ -4967,6 +5060,16 @@ app.post("/webhook", (req,res)=>{
         [{ text:"7 kun",  callback_data:"pf:7"  }, { text:"15 kun", callback_data:"pf:15" }],
         [{ text:"1 oy",   callback_data:"pf:30" }, { text:"3 oy",   callback_data:"pf:90" }],
         [{ text:"6 oy",   callback_data:"pf:180"}, { text:"1 yil",  callback_data:"pf:365"}]
+      ]});
+      return;
+    }
+    /* /nftfoyda - NFT bo'limi hisoboti, bosh sahifadan ALOHIDA */
+    if(text.indexOf("/nftfoyda") === 0){
+      if(ADMIN_ID && fromId !== ADMIN_ID) return;
+      send(fromId, "\uD83D\uDDBC NFT bo'limi \u2014 qaysi davr uchun?\n(sanoq " + NFT_FROM + " dan)", { inline_keyboard: [
+        [{ text:"1 kun",  callback_data:"nf:1"  }, { text:"7 kun",  callback_data:"nf:7"  }],
+        [{ text:"1 oy",   callback_data:"nf:30" }, { text:"3 oy",   callback_data:"nf:90" }],
+        [{ text:"6 oy",   callback_data:"nf:180"}, { text:"1 yil",  callback_data:"nf:365"}]
       ]});
       return;
     }
