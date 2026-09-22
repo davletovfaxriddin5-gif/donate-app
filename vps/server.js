@@ -2383,6 +2383,58 @@ app.get("/nft/market", (req,res)=>{
    Sovg'a bizning hisobimizda turgani uchun uni jismonan ko'chirish shart
    emas — faqat egasi o'zgaradi. Shuning uchun amal bir zumda va xavfsiz:
    pul yechiladi, sovg'a o'tadi, ikkalasi bitta yozuvda saqlanadi. */
+/* ===== NFT SOTUVLARI JURNALI =====
+   Grafik va tarix uchun har bir yakunlangan sotuv shu yerga yoziladi: oddiy
+   sotib olish (savatcha ham shu yo'ldan o'tadi) va qabul qilingan taklif.
+   O'tgan sotuvlar mijozlarning xarid tarixidan BIR MARTA tiklanadi. Tiklash
+   birinchi yangi yozuvdan OLDIN ishlaydi - aks holda o'sha sotuv tarixdan ham,
+   jurnaldan ham kelib, ikki marta sanalardi. */
+function saleTitle(name){ return String(name || "").replace(/\s*#\d+\s*$/, "").trim(); }
+function saleNum(name){ const m = String(name || "").match(/#(\d+)\s*$/); return m ? Number(m[1]) : 0; }
+function salesInit(db){
+  if(db._salesInit) return false;
+  if(!Array.isArray(db._sales)) db._sales = [];
+  const old = [];
+  Object.keys(db).forEach(function(k){
+    if(!/^\d+$/.test(k)) return;
+    (db[k].nftHist || []).forEach(function(r){
+      if(!r || r.kind !== "nft_buy") return;
+      const it = String(r.item || "");
+      if(/TG STARS|TG PREMIUM/i.test(it)) return;          /* NFT emas */
+      const t = saleTitle(it); if(!t) return;
+      const rec = { at: r.at, t: t, n: saleNum(it), via: /Taklif/i.test(String(r.note || "")) ? "offer" : "buy", old: 1 };
+      if(String(r.cur) === "GRAM") rec.g = Number(r.amount) || 0; else rec.som = Number(r.amount) || 0;
+      old.push(rec);
+    });
+  });
+  db._sales = db._sales.concat(old)
+    .sort(function(a, b){ return (Date.parse(b.at) || 0) - (Date.parse(a.at) || 0); }).slice(0, 3000);
+  db._salesInit = true;
+  return true;
+}
+function saleRec(db, rec){
+  salesInit(db);                                           /* avval eskilari, keyin yangisi */
+  db._sales.unshift(Object.assign({ at: new Date().toISOString() }, rec));
+  if(db._sales.length > 3000) db._sales.length = 3000;
+}
+app.get("/nft/sales", (req,res)=>{
+  const t = String(req.query.t || "").trim().slice(0, 80);
+  if(!t) return res.json({ ok:false });
+  return (async function(){
+    let rate = 0; try{ rate = await gramSom(); }catch(e){}
+    const db = load();
+    if(salesInit(db)) save(db);
+    const tl = t.toLowerCase();
+    const rows = (db._sales || []).filter(function(x){ return String(x.t || "").toLowerCase() === tl; })
+      .slice(0, 300).map(function(x){
+        /* eski GRAM xaridlarining so'mdagi narxi noma'lum - bugungi kurs bilan, "taxminiy" belgisi bilan */
+        const som = x.som != null ? x.som : ((rate > 0 && x.g) ? Math.round(x.g * rate) : 0);
+        return { at: x.at, n: x.n || 0, som: som, via: x.via || "buy", est: x.som == null ? 1 : 0 };
+      }).filter(function(x){ return x.som > 0; });
+    res.json({ ok:true, rows: rows });
+  })().catch(function(){ res.json({ ok:false }); });
+});
+
 /* ===== NFT TAKLIFLARI (offer) =====
    Xaridor sotuvdagi NFT ga o'z narxini taklif qiladi. Summa darhol uning
    hamyonidan yechilib, taklif ichida saqlanadi (bloklangan pul).
@@ -2563,6 +2615,8 @@ app.post("/nft/offer/act", (req,res)=>{
       at:new Date().toISOString(), boughtFrom:uid, boughtFor:o.amt, boughtCur:o.cur }));
     o.status = "acc"; o.doneAt = new Date().toISOString(); o.fee = fee;
     const curTxt = o.cur === "gram" ? "GRAM" : "so'm";
+    saleRec(db, { t: g.title || saleTitle(o.name), n: g.num || saleNum(o.name), slug: o.slug || "",
+                  som: o.cur === "gram" ? Math.round(o.amt * rate) : o.amt, via: "offer" });
     nftLog(b, "nft_buy",  o.amt, { cur: curTxt, item: o.name, note: "Taklif qabul qilindi" });
     nftLog(s, "nft_sell", paid,  { cur: curTxt, item: o.name, note: "Taklif orqali sotildi (komissiya " + fee + ")" });
     /* shu NFT ga boshqa takliflar - pul qaytadi */
@@ -2647,6 +2701,7 @@ app.post("/nft/gift/buy", (req,res)=>{
       at:new Date().toISOString(), boughtFrom:sid, boughtFor:som
     }));
 
+    saleRec(db2, { t: g2.title || saleTitle(g2.name), n: g2.num || saleNum(g2.name), slug: g2.slug || "", som: som, via: "buy" });
     nftLog(b2, "nft_buy", cur === "gram" ? payGram : som,
            { cur: cur === "gram" ? "GRAM" : "so'm", item:g2.name, note:"NFT sotib olindi" });
     nftLog(s2, "nft_sell", paid,
