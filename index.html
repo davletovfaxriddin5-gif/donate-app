@@ -1473,41 +1473,53 @@ body.light .pf2-chip{ color:#4453D6 }
   font-size:15.5px; font-weight:700 }
 
 /* ===== NFT oynasi va batafsil sahifa (nd) ===== */
-.gf-sh.nd{ text-align:left; padding-top:12px }
-.nd-top{ display:flex; justify-content:flex-end; margin-bottom:6px }
-.nd-x{ width:32px; height:32px; border-radius:50%; background:var(--card-2); display:grid; place-items:center }
-.nd-x svg{ width:13px; height:13px; stroke:var(--dim); fill:none; stroke-width:2.4; stroke-linecap:round }
-.nd-hero{ display:grid; grid-template-columns:46px 1fr 46px; gap:12px; align-items:start; margin-bottom:14px }
-.nd-side{ display:flex; flex-direction:column; gap:9px }
-.nd-sq{ width:46px; height:46px; border-radius:14px; background:var(--card-2); border:1px solid var(--stroke-2);
+.gf-sh.nd{ text-align:left; padding-top:8px }
+.nd-top{ display:flex; justify-content:flex-end; margin-bottom:2px }
+.nd-x{ width:30px; height:30px; border-radius:50%; background:transparent; display:grid; place-items:center }
+.nd-x svg{ width:15px; height:15px; stroke:var(--faint); fill:none; stroke-width:2.2; stroke-linecap:round }
+.nd-hero{ display:grid; grid-template-columns:40px 1fr 40px; gap:14px; align-items:start; margin-bottom:12px }
+.nd-side{ display:flex; flex-direction:column; gap:8px }
+.nd-sq{ width:40px; height:40px; border-radius:12px; background:var(--card-2); border:1px solid var(--stroke-2);
   display:grid; place-items:center }
-.nd-sq svg{ width:20px; height:20px; stroke:var(--text); fill:none; stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round }
+.nd-sq svg{ width:19px; height:19px; fill:var(--text); stroke:none }
 .nd-sq.info{ background:var(--blue-grad); border-color:transparent }
-.nd-sq.info svg{ stroke:#fff }
-.nd-card{ position:relative; border-radius:20px; overflow:hidden; background:var(--card-2); border:1px solid var(--stroke-2) }
+.nd-sq.info svg{ fill:#fff }
+.nd-card{ width:100%; max-width:196px; justify-self:center; position:relative; border-radius:18px; overflow:hidden; background:var(--card-2); border:1px solid var(--stroke-2) }
 .nd-im{ aspect-ratio:1/1; display:grid; place-items:center; background:var(--card); font-size:54px; overflow:hidden }
 .nd-im img{ width:100%; height:100%; object-fit:cover; display:block }
 .nd-badge{ position:absolute; top:9px; right:9px; width:34px; height:34px; border-radius:11px;
   background:rgba(0,0,0,.3); -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px); display:grid; place-items:center }
 .nd-badge svg{ width:18px; height:18px; stroke:#FFD54A; fill:none; stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round }
-.nd-meta{ padding:10px 12px 11px }
-.nd-nm{ font-size:17px; font-weight:700; letter-spacing:-.3px; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+.nd-meta{ padding:9px 11px 10px }
+.nd-nm{ font-size:16px; font-weight:600; letter-spacing:-.3px; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
 .nd-no{ font-size:12.5px; color:var(--faint); margin-top:1px }
-.nd-rows{ display:flex; flex-direction:column; gap:7px; margin-bottom:12px }
-.nd-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; width:100%; padding:12px 14px;
-  border-radius:15px; background:var(--card-2); border:1px solid var(--stroke-2); text-align:left }
-.nd-row .k{ display:flex; flex-direction:column; gap:2px; font-size:11.5px; font-weight:700; letter-spacing:1px;
-  text-transform:uppercase; color:var(--faint); flex-shrink:0 }
-.nd-row .k small{ font-size:11px; font-weight:500; letter-spacing:0; text-transform:none; color:var(--dim) }
-.nd-row .v{ display:flex; align-items:center; gap:7px; font-size:14px; font-weight:600; color:var(--text); min-width:0; text-align:right }
-.nd-row .v i{ font-style:normal; font-size:11.5px; font-weight:700; padding:3px 7px; border-radius:8px;
-  background:rgba(255,196,0,.14); color:#FFC93C; flex-shrink:0 }
+.nd-rows{ display:flex; flex-direction:column; gap:6px; margin-bottom:12px }
+.nd-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; width:100%; height:44px;
+  padding:0 13px; border-radius:12px; background:var(--card-2); border:1px solid var(--stroke-2); text-align:left }
+.nd-row .k{ display:flex; align-items:baseline; gap:7px; font-size:11.5px; font-weight:700; letter-spacing:.7px;
+  text-transform:uppercase; color:var(--faint); min-width:0; overflow:hidden; flex:0 1 auto }
+.nd-row .k small{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+.nd-row .v .t{ min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+.nd-row .k small{ font-size:11.5px; font-weight:500; letter-spacing:0; text-transform:none; color:var(--dim) }
+.nd-row .v{ display:flex; align-items:center; gap:6px; font-size:13px; font-weight:600; color:var(--text);
+  min-width:0; max-width:72%; flex:0 0 auto; overflow:hidden; white-space:nowrap }
+.nd-row .v i{ font-style:normal; font-size:10.5px; font-weight:700; padding:2px 5px; border-radius:6px;
+  background:rgba(255,196,0,.15); color:#FFC93C; flex-shrink:0 }
 .nd-row .v i.t{ background:rgba(79,224,160,.14); color:#4FE0A0 }
-.nd-row .v svg{ width:14px; height:14px; stroke:var(--dim); fill:none; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; flex-shrink:0 }
-.nd-price{ text-align:center; font-size:13px; color:var(--dim); margin:2px 0 10px }
-.nd-price b{ color:var(--text); font-size:15px }
-.nd-buy{ display:flex; gap:9px }
-.nd-buy button{ flex:1; margin:0 !important }
+.nd-row .v svg{ width:13px; height:13px; stroke:var(--faint); fill:none; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; flex-shrink:0 }
+.nd-cur{ display:flex; gap:6px; padding:4px; border-radius:14px; background:var(--card-2); margin:2px 0 9px }
+.nd-cur button{ flex:1; min-width:0; height:38px; border-radius:11px; font-size:13px; font-weight:600; color:var(--dim);
+  display:flex; align-items:center; justify-content:center; gap:5px; font-family:var(--sys); white-space:nowrap }
+.nd-cur button b{ font-size:14.5px; font-weight:800; color:var(--dim) }
+.nd-cur button.on{ background:var(--card); color:var(--text); box-shadow:0 1px 4px rgba(0,0,0,.28) }
+.nd-cur button.on b{ color:var(--text) }
+.nd-act{ display:flex; gap:8px; align-items:center }
+.nd-ib{ width:46px; height:46px; flex:0 0 46px; border-radius:13px; background:var(--card-2); border:1px solid var(--stroke-2);
+  display:grid; place-items:center; color:var(--dim) }
+.nd-ib svg{ width:20px; height:20px; fill:currentColor }
+.nd-ib.in{ color:#8C9BFF; border-color:rgba(110,124,255,.5); background:rgba(110,124,255,.12) }
+.nd-act .gf-b1{ flex:1; min-width:0; height:46px; margin:0 !important; border-radius:13px; font-size:15px; font-weight:700 }
+.nd-mine{ text-align:center; font-size:13px; color:var(--faint); padding:10px 0 2px }
 .nd-page .gf-b1{ width:100%; height:48px; border-radius:15px; background:var(--blue); color:#fff; font-size:15px; font-weight:600; font-family:var(--sys) }
 .nd-page .gf-b2{ width:100%; height:48px; border-radius:15px; background:var(--card); border:1px solid var(--stroke-2);
   color:var(--text); font-size:15px; font-weight:600; font-family:var(--sys) }
@@ -1739,26 +1751,26 @@ body.nft-mode .sheet, body.nft-mode .sheet *{
 #wlTabs button.on svg{ stroke:#fff }
 
 .nftm-grid{ display:grid; grid-template-columns:1fr 1fr; gap:11px }
-.nftm-card{ background:var(--card); border:1px solid var(--stroke); border-radius:20px;
+.nftm-card{ background:var(--card); border:1px solid var(--stroke); border-radius:18px;
   padding:9px 9px 11px; text-align:left; min-width:0 }
-.nftm-pic{ position:relative; width:100%; aspect-ratio:1/1; border-radius:15px; overflow:hidden;
+.nftm-pic{ position:relative; width:100%; aspect-ratio:1/1; border-radius:14px; overflow:hidden;
   background:var(--card-2); display:grid; place-items:center }
 .nftm-pic img{ width:100%; height:100%; object-fit:cover; display:block }
 .nftm-pic .gl{ font-size:46px; line-height:1 }
-.nftm-badges{ position:absolute; top:8px; left:8px; display:flex; gap:6px }
-.nftm-badges span{ width:26px; height:26px; border-radius:50%; display:grid; place-items:center;
-  font-size:12px; background:rgba(10,14,24,.42); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px) }
-.nftm-card .nm{ font-size:14px; font-weight:600; letter-spacing:-.2px; color:var(--text);
+.nftm-badges{ position:absolute; top:8px; right:8px; display:flex; flex-direction:column; gap:6px }
+.nftm-badges span{ width:30px; height:30px; border-radius:9px; display:grid; place-items:center;
+  background:rgba(255,255,255,.2); -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px) }
+.nftm-card .nm{ font-size:15.5px; font-weight:600; letter-spacing:-.2px; color:var(--text);
   margin:10px 2px 1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
-.nftm-card .no{ font-size:12.5px; font-weight:400; color:var(--faint); margin:0 2px 10px }
+.nftm-card .no{ font-size:13px; font-weight:400; color:var(--faint); margin:1px 2px 9px }
 .nftm-buy{ display:flex; gap:7px }
-.nftm-buy .pr{ flex:1; min-width:0; height:38px; border-radius:999px; background:var(--blue); color:#fff;
-  font-size:13.5px; font-weight:600; display:flex; align-items:center; justify-content:center;
-  white-space:nowrap; overflow:hidden; transition:.14s }
-.nftm-buy .cart{ width:38px; height:38px; border-radius:50%; flex-shrink:0; display:grid; place-items:center;
-  background:var(--card-2); border:1px solid var(--stroke-2); color:var(--dim); transition:.14s }
-.nftm-buy .cart svg{ width:17px; height:17px; stroke:currentColor; fill:none; stroke-width:1.9;
-  stroke-linecap:round; stroke-linejoin:round }
+.nftm-buy .pr{ flex:1; min-width:0; height:40px; border-radius:12px; background:var(--card-2);
+  border:1px solid var(--stroke-2); color:var(--text); font-size:13px; font-weight:700; font-family:var(--sys);
+  letter-spacing:-.2px; display:flex; align-items:center; justify-content:center; gap:5px;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; padding:0 8px }
+.nftm-buy .cart{ width:40px; height:40px; border-radius:12px; flex-shrink:0; display:grid; place-items:center;
+  background:var(--card-2); border:1px solid var(--stroke-2); color:var(--dim) }
+.nftm-buy .cart svg{ width:18px; height:18px; fill:currentColor; stroke:none }
 .nftm-buy button:active{ transform:scale(.991) }
 
 /* === Profil ekrani === */
@@ -5967,12 +5979,10 @@ function nftMarketCards(){
   return `<div class="nftm-grid${listy?' list':''}">${items.map(function(n){
     if(listy) return `<div class="nftm-card">
       <div class="nftm-pic" onclick="nftOpen('${esc(n.id)}')">${n.img ? `<img src="${esc(n.img)}" alt="" loading="lazy">` : `<span class="gl">${n.glyph||'🎁'}</span>`}</div>
-      <div class="tx"><div class="nm">${n.name||'NFT'}</div><div class="no">#${n.num||'—'}</div></div>
+      <div class="tx"><div class="nm">${esc(nftTitle(n))}</div><div class="no">#${n.num||'—'}</div></div>
       <div class="nftm-buy">
         <button class="pr" onclick="nftOpen('${esc(n.id)}')">${n.price ? money(n.price, true) : '—'}</button>
-        <button class="cart" onclick="ctAdd('${esc(n.id)}')">
-          <svg viewBox="0 0 24 24"><path d="M3 9h18l-1.5 9.3a2 2 0 0 1-2 1.7H6.5a2 2 0 0 1-2-1.7L3 9zM8.5 9L11 4M15.5 9L13 4"/></svg>
-        </button>
+        <button class="cart" onclick="ctAdd('${esc(n.id)}')" aria-label="Savatchaga">${ND_CART}</button>
       </div>
     </div>`;
     return ((function(n){
@@ -5981,13 +5991,11 @@ function nftMarketCards(){
         ${n.img ? `<img src="${esc(n.img)}" alt="" loading="lazy">` : `<span class="gl">${n.glyph||'🎁'}</span>`}
         ${n.attrs && n.attrs.crafted ? `<span class="nftm-badges"><span>${ND_ANVIL}</span></span>` : ''}
       </div>
-      <div class="nm">${n.name||'NFT'}</div>
+      <div class="nm">${esc(nftTitle(n))}</div>
       <div class="no">#${n.num||'—'}</div>
       <div class="nftm-buy">
         <button class="pr" onclick="nftOpen('${esc(n.id)}')">${n.price ? money(n.price, true) : '—'}</button>
-        <button class="cart" onclick="ctAdd('${esc(n.id)}')">
-          <svg viewBox="0 0 24 24"><path d="M3 9h18l-1.5 9.3a2 2 0 0 1-2 1.7H6.5a2 2 0 0 1-2-1.7L3 9zM8.5 9L11 4M15.5 9L13 4"/></svg>
-        </button>
+        <button class="cart" onclick="ctAdd('${esc(n.id)}')" aria-label="Savatchaga">${ND_CART}</button>
       </div>
     </div>`; })(n));
   }).join('')}</div>`;
@@ -5999,11 +6007,23 @@ let nftSel = null, nftBusy = false;
    O'rtada: rasm (animatsiya), fon rangi NFT ning o'z foni. O'ngda: batafsil sahifa.
    Xususiyat qatorlari bosilsa Market shu bo'yicha filtrlanadi. */
 const ND_ANVIL = '<svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:#FFD54A;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round"><path d="M4 8.5h11.5l4.5-2v3.5c0 1.7-1.3 3-3 3h-2.2l1.2 4H8l1.2-4H8a4 4 0 0 1-4-4V8.5z"/><path d="M7 20h10"/></svg>';
+/* To'la ikonkalar - chiziqli emas; kichik o'lchamda aniqroq ko'rinadi */
+const ND_TG   = '<svg viewBox="0 0 24 24"><path d="M22 2.6 1.7 10.4c-.9.3-.9 1.6 0 1.9l5 1.6 1.9 5.9c.3.8 1.3 1 1.8.3l2.6-3 5 3.7c.6.4 1.4.1 1.6-.6L22.9 3.6c.2-.7-.4-1.3-.9-1zM9.6 14.3l8.3-6.7-6.6 7.5-.4 3.3-1.3-4.1z"/></svg>';
+const ND_SHR  = '<svg viewBox="0 0 24 24"><path d="M14 3.5v3.7C7.9 7.9 4.2 12 3.3 19.4c-.1.7.8 1 1.2.5 2.3-3.2 5.3-4.6 9.5-4.6v3.7c0 .8 1 1.2 1.6.7l6.8-6.2c.4-.4.4-1 0-1.4l-6.8-6.2c-.6-.5-1.6-.1-1.6.7z"/></svg>';
+const ND_INF  = '<svg viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1.2 15.4h-2.4v-7.2h2.4v7.2zm0-8.9h-2.4V6.2h2.4v2.3z"/></svg>';
+const ND_PCT  = '<svg viewBox="0 0 24 24"><path fill-rule="evenodd" d="M4.8 2h14.4A2.8 2.8 0 0 1 22 4.8v14.4a2.8 2.8 0 0 1-2.8 2.8H4.8A2.8 2.8 0 0 1 2 19.2V4.8A2.8 2.8 0 0 1 4.8 2zm3.9 4.6a2.1 2.1 0 1 0 0 4.2 2.1 2.1 0 0 0 0-4.2zm6.6 6.6a2.1 2.1 0 1 0 0 4.2 2.1 2.1 0 0 0 0-4.2zm1.6-6.9L6.2 16.7l1.5 1.5L18.4 7.8l-1.5-1.5z"/></svg>';
+const ND_CART = '<svg viewBox="0 0 24 24"><path d="M7.5 18.8a1.7 1.7 0 1 0 0 3.4 1.7 1.7 0 0 0 0-3.4zm9.3 0a1.7 1.7 0 1 0 0 3.4 1.7 1.7 0 0 0 0-3.4zM2 3.2c0-.6.5-1.1 1.1-1.1h2c.5 0 1 .4 1.1.9l.4 2h15c.7 0 1.2.7 1 1.4l-2.2 7.2c-.2.8-1 1.3-1.8 1.3H8.2c-.8 0-1.6-.6-1.8-1.4L4.2 4.3H3.1C2.5 4.3 2 3.8 2 3.2z"/></svg>';
+var ndCurSel = 'som';
 const ND_ARW = '<svg viewBox="0 0 24 24"><path d="M8 16L16 8M9.5 8H16v6.5"/></svg>';
 function nftGramTxt(som){
   if(!(Number(som) > 0)) return '0 GRAM';
   const g = somToGram(som);
   return g ? fmtGram(g) + ' GRAM' : money(som, true);
+}
+/* qatorda joy tor - "GRAM" so'zisiz, faqat son (valyuta pastda ko'rinib turadi) */
+function nftFloorShort(som){
+  const g = somToGram(som);
+  return g ? fmtGram(g) : money(som, false);
 }
 function nftFloor(field, key){
   let m = 0;
@@ -6025,9 +6045,9 @@ function nftRow(label, val, rar, floor, field){
   if(!val) return '';
   const tier = rar && !/%$/.test(rar);
   return '<button class="nd-row"' + (field ? ' data-f="' + field + '" data-v="' + esc(val) + '" onclick="nftFilterBy(this)"' : '') + '>' +
-    '<span class="k">' + label + (floor ? '<small>eng past: ' + nftGramTxt(floor) + '</small>' : '') + '</span>' +
-    '<span class="v">' + (rar ? '<i class="' + (tier ? 't' : '') + '">' + esc(rar) + '</i>' : '') + esc(val) +
-    (field ? ND_ARW : '') + '</span></button>';
+    '<span class="k">' + label + (floor ? '<small>eng past ' + nftFloorShort(floor) + '</small>' : '') + '</span>' +
+    '<span class="v">' + (rar ? '<i class="' + (tier ? 't' : '') + '">' + esc(rar) + '</i>' : '') +
+    '<span class="t">' + esc(val) + '</span>' + (field ? ND_ARW : '') + '</span></button>';
 }
 function nftRows(n){
   const A = n.attrs || {};
@@ -6044,12 +6064,25 @@ function nftTitle(n){ return n.collection || String(n.name || 'NFT').replace(/\s
 const CT_SVG = '<svg viewBox="0 0 24 24"><path d="M3 5h2l2.2 10.2a1.8 1.8 0 0 0 1.8 1.4h8.3a1.8 1.8 0 0 0 1.8-1.4L21 8H6"/><circle cx="9.5" cy="20" r="1.3"/><circle cx="17" cy="20" r="1.3"/></svg>';
 function nftBuyBtns(n){
   const mine = !!(tgUser && String(n.seller) === String(tgUser.id));
-  if(mine) return '<div class="gf-fee">Bu sizning sovg\'angiz</div>';
-  const inCt = ctHas(n.id);
-  return '<div class="nd-buy"><button class="gf-b1" onclick="nftBuyGo(\'som\')">So\'m bilan olish</button>' +
-         '<button class="gf-b2" onclick="nftBuyGo(\'gram\')">GRAM bilan olish</button></div>' +
-         '<div class="nd-acts2"><button class="nd-a2 nd-of" onclick="offOpen()">' + OF_ICON + 'Taklif qilish</button>' +
-         '<button class="nd-a2 nd-ct' + (inCt ? ' in' : '') + '" onclick="ctAdd()">' + CT_SVG + (inCt ? 'Savatchada' : 'Savatchaga') + '</button></div>';
+  if(mine) return '<div class="nd-mine">Bu sizning sovg\'angiz</div>';
+  const gram = somToGram(n.price);
+  if(ndCurSel === 'gram' && !gram) ndCurSel = 'som';
+  return '<div class="nd-cur">' +
+      '<button class="' + (ndCurSel === 'som' ? 'on' : '') + '" onclick="ndCur(\'som\')"><b>' + fmt(n.price) + '</b>so\'m</button>' +
+      '<button class="' + (ndCurSel === 'gram' ? 'on' : '') + '" onclick="ndCur(\'gram\')"><b>' + (gram ? fmtGram(gram) : '\u2014') + '</b>GRAM</button>' +
+    '</div>' +
+    '<div class="nd-act">' +
+      '<button class="nd-ib" onclick="offOpen()" aria-label="Taklif qilish">' + ND_PCT + '</button>' +
+      '<button class="nd-ib nd-ct' + (ctHas(n.id) ? ' in' : '') + '" onclick="ctAdd()" aria-label="Savatchaga">' + ND_CART + '</button>' +
+      '<button class="gf-b1" onclick="nftBuyGo(ndCurSel)">Sotib olish</button>' +
+    '</div>';
+}
+/* qaysi valyuta bilan olish - "Sotib olish" tugmasi shuni ishlatadi */
+function ndCur(c){
+  if(c === 'gram' && !(gramSomRate > 0)){ toast('GRAM kursi hali olinmadi'); return; }
+  haptic();
+  ndCurSel = c;
+  document.querySelectorAll('.nd-cur button').forEach(function(b, i){ b.classList.toggle('on', (i === 0) === (c === 'som')); });
 }
 function nftOpen(id){
   haptic();
@@ -6067,8 +6100,8 @@ function nftOpen(id){
     '<div class="nd-top"><button class="nd-x" onclick="mgClose()" aria-label="Yopish"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>' +
     '<div class="nd-hero">' +
       '<div class="nd-side">' +
-        '<button class="nd-sq" onclick="nftTgView()" aria-label="Telegram"><svg viewBox="0 0 24 24"><path d="M21.2 4.2L3.3 11.1c-.9.4-.9 1 0 1.3l4.5 1.4 1.7 5.3c.2.6.5.7 1 .3l2.6-2.4 4.8 3.5c.8.5 1.3.2 1.5-.7l2.9-13.9c.3-1.1-.3-1.6-1.1-1.3z"/><path d="M7.8 13.8l9.4-6"/></svg></button>' +
-        '<button class="nd-sq" onclick="nftShare()" aria-label="Ulashish"><svg viewBox="0 0 24 24"><path d="M14 4.5l6.5 6.5-6.5 6.5"/><path d="M20.5 11H11a7 7 0 0 0-7 7v1.5"/></svg></button>' +
+        '<button class="nd-sq" onclick="nftTgView()" aria-label="Telegram">' + ND_TG + '</button>' +
+        '<button class="nd-sq" onclick="nftShare()" aria-label="Ulashish">' + ND_SHR + '</button>' +
       '</div>' +
       '<div class="nd-card">' +
         '<div class="nd-im" id="gfIm" style="' + nftBgStyle(n) + '">' + (n.img
@@ -6076,10 +6109,9 @@ function nftOpen(id){
         (n.attrs && n.attrs.crafted ? '<button class="nd-badge" onclick="nftCrafted()" aria-label="Craft">' + ND_ANVIL + '</button>' : '') +
         '<div class="nd-meta"><div class="nd-nm">' + esc(nftTitle(n)) + '</div><div class="nd-no">#' + esc(String(n.num || '\u2014')) + '</div></div>' +
       '</div>' +
-      '<div class="nd-side"><button class="nd-sq info" onclick="nftInfo()" aria-label="Batafsil"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.6v.2"/></svg></button></div>' +
+      '<div class="nd-side"><button class="nd-sq info" onclick="nftInfo()" aria-label="Batafsil">' + ND_INF + '</button></div>' +
     '</div>' +
     '<div class="nd-rows">' + nftRows(n) + '</div>' +
-    '<div class="nd-price"><b>' + money(n.price, true) + '</b>' + (gram ? (' \u00b7 ' + fmtGram(gram) + ' GRAM') : '') + '</div>' +
     nftBuyBtns(n);
   document.body.appendChild(bg); document.body.appendChild(sh);
   requestAnimationFrame(function(){
@@ -6148,8 +6180,8 @@ function renderNftItem(){
   app.innerHTML = '<div class="nd-page">' +
     '<div class="nd-phero">' +
       '<div class="nd-side">' +
-        '<button class="nd-sq" onclick="nftTgView()" aria-label="Telegram"><svg viewBox="0 0 24 24"><path d="M21.2 4.2L3.3 11.1c-.9.4-.9 1 0 1.3l4.5 1.4 1.7 5.3c.2.6.5.7 1 .3l2.6-2.4 4.8 3.5c.8.5 1.3.2 1.5-.7l2.9-13.9c.3-1.1-.3-1.6-1.1-1.3z"/><path d="M7.8 13.8l9.4-6"/></svg></button>' +
-        '<button class="nd-sq" onclick="nftShare()" aria-label="Ulashish"><svg viewBox="0 0 24 24"><path d="M14 4.5l6.5 6.5-6.5 6.5"/><path d="M20.5 11H11a7 7 0 0 0-7 7v1.5"/></svg></button>' +
+        '<button class="nd-sq" onclick="nftTgView()" aria-label="Telegram">' + ND_TG + '</button>' +
+        '<button class="nd-sq" onclick="nftShare()" aria-label="Ulashish">' + ND_SHR + '</button>' +
       '</div>' +
       '<div class="nd-pwrap"><div class="nd-pim" id="ndIm" style="' + nftBgStyle(n) + '">' + (n.img
         ? '<img src="' + esc(n.img) + '" alt="" onerror="this.style.display=\'none\'">' : '\uD83C\uDF81') + '</div>' +
@@ -6159,9 +6191,7 @@ function renderNftItem(){
     '</div>' +
     '<div class="nd-ttl">' + esc(nftTitle(n)) + '</div>' +
     '<div class="nd-chip">#' + esc(String(n.num || '\u2014')) + '</div>' +
-    '<div class="nd-box"><div class="l">Sotuvda</div>' +
-      '<div class="p">' + money(n.price, true) + (gram ? '<small>\u2248 ' + fmtGram(gram) + ' GRAM</small>' : '') + '</div>' +
-      nftBuyBtns(n) + '</div>' +
+    '<div class="nd-box"><div class="l">Sotuvda</div>' + nftBuyBtns(n) + '</div>' +
     '<div class="nd-rows">' + nftRows(n) + '</div>' +
     (A.avail && A.avail.t ? '<div class="nd-kv"><span>Chiqarilgan</span><b>' + fmt(A.avail.i) + ' / ' + fmt(A.avail.t) + '</b></div>' : '') +
     (n.sellerName ? '<div class="nd-kv"><span>Sotuvchi</span><b>' + esc(n.sellerName) + '</b></div>' : '') +
@@ -6502,7 +6532,10 @@ function ctAdd(id){
   if(a.indexOf(id) > -1){ toast('Bu NFT savatchada bor'); return; }
   a.unshift(id); ctSet(a);
   notify('success'); toastOk("\uD83D\uDED2 Savatchaga qo'shildi");
-  document.querySelectorAll('.nd-ct').forEach(function(b){ b.classList.add('in'); b.innerHTML = CT_SVG + 'Savatchada'; });
+  document.querySelectorAll('.nd-ct').forEach(function(b){
+    b.classList.add('in');
+    if(!b.classList.contains('nd-ib')) b.innerHTML = CT_SVG + 'Savatchada';
+  });
 }
 function openCart(){ haptic(); ctSel = null; go('nft_cart'); }
 function ctItemGram(n){ return gramSomRate > 0 ? Math.ceil((Number(n.price) / gramSomRate) * 1000) / 1000 : 0; }
@@ -6697,7 +6730,7 @@ function nftBuyGo(cur){
         setTimeout(function(){ go('nft_gifts'); }, 700);
         return;
       }
-      if(b){ b.disabled = false; b.textContent = 'So\'m bilan olish'; }
+      if(b){ b.disabled = false; b.textContent = 'Sotib olish'; }
       notify('error');
       if(d && d.error === 'gone') return toastErr('Bu sovg\'a allaqachon sotilgan');
       if(d && d.error === 'low')  return toastErr('Mablag\' yetarli emas');
@@ -6705,7 +6738,7 @@ function nftBuyGo(cur){
       toastErr('Bajarilmadi');
     }).catch(function(){
       nftBusy = false;
-      if(b){ b.disabled = false; b.textContent = 'So\'m bilan olish'; }
+      if(b){ b.disabled = false; b.textContent = 'Sotib olish'; }
       toastErr('Aloqa yo\'q');
     });
   });
