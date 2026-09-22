@@ -5860,12 +5860,14 @@ ${secRows()}
 }
 
 /* ===== NFT bo'limi — donat xizmatining ikkinchi ekrani =====
-   Oddiy foydalanuvchiga "Texnik xizmat" ko'rinadi.
-   MAINT_OK ro'yxatidagi ID (admin) uchun bo'lim ochiq. */
+   Bo'lim HAMMA uchun ochiq (NFT_OPEN = true). Qayta yopish kerak bo'lsa,
+   NFT_OPEN = false qilinadi: oddiy foydalanuvchiga yana "Texnik xizmat"
+   ko'rinadi, MAINT_OK ro'yxatidagi adminlar esa kiraveradi. */
+var NFT_OPEN = true;
 function isNftView(v){ return v==='nft_cart' || v==='nft_item' || v==='nft_profile' || v==='nft_gifts' || v==='nft_market' || v==='nft_hist' || v==='nft_wallet'
   || v==='nft_gram' || v==='nft_top' || v==='nft_out' || v==='nft_out_wallet'
   || v==='nft_out_stars' || v==='nft_out_card'; }
-function nftAdmin(){ return !!(tgUser && MAINT_OK.indexOf(tgUser.id) > -1); }
+function nftAdmin(){ return NFT_OPEN === true || !!(tgUser && MAINT_OK.indexOf(tgUser.id) > -1); }
 /* ---------- NFT bo'limiga o'tish: darvoza ----------
    Ikki qanot tepadan va pastdan kelib o'rtada tutashadi, ekran shu
    pardaning orqasida almashadi, keyin qanotlar orqaga qaytib ochiladi. */
@@ -8353,10 +8355,35 @@ function nftHistLoad(cb){
       if(cb) cb();
     }).catch(function(){ if(cb) cb(); });
 }
+/* Bosh sahifadagi refreshStatus() bilan bir xil his: tugma darhol "Tekshirilmoqda"
+   ga o'tadi va ikonka aylanadi, kamida 0.6 s turadi, keyin yangilangan ro'yxat.
+   Holat bayroqda saqlanadi - ma'lumot kelib sahifa oraliqda qayta chizilsa ham
+   tugma vaqtidan oldin "o'chib" qolmaydi. */
+var nftRefBusy = false;
 function nftRefresh(){
-  haptic();
-  nftHistLoad(function(){ toastOk('Yangilandi'); });
-  nftLoad();
+  if(nftRefBusy) return;
+  haptic('medium');
+  nftRefBusy = true;
+  const b = document.querySelector('#app .refresh-btn');
+  if(b){
+    b.classList.add('busy');
+    const t = b.childNodes[b.childNodes.length - 1];
+    if(t && t.nodeType === 3) t.nodeValue = tr("Tekshirilmoqda");
+  }
+  const t0 = Date.now();
+  let left = 2, fin = false;
+  const end = function(){
+    if(fin) return; fin = true;
+    setTimeout(function(){
+      nftRefBusy = false;
+      notify('success');
+      if(view === 'nft_hist') renderNft('nft_hist');
+    }, Math.max(0, 600 - (Date.now() - t0)));
+  };
+  const one = function(){ if(--left <= 0) end(); };
+  nftHistLoad(one);
+  nftLoad(one);
+  setTimeout(end, 9000);          /* tarmoq osilsa ham tugma abadiy aylanmasin */
 }
 
 function nftMoneyRows(){
@@ -9362,8 +9389,10 @@ function renderNft(v){
       <button class="${nftHTab==='in'?'on':''}" onclick="setNftHTab('in')">Kirimlar</button>
       <button class="${nftHTab==='out'?'on':''}" onclick="setNftHTab('out')">Yechimlar</button>
     </div>
-    <button class="refresh-btn" onclick="nftRefresh()"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.6-6.4M21 4v5h-5"/></svg>Statusni yangilash</button>
+    <button class="refresh-btn${nftRefBusy ? ' busy' : ''}" onclick="nftRefresh()"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.6-6.4M21 4v5h-5"/></svg>${nftRefBusy ? 'Tekshirilmoqda' : 'Statusni yangilash'}</button>
     <div id="nftList">${nftMoneyRows()}</div>`;
+    /* qayta chizilgan tugmaga bosilish effekti yana ulanadi (go() faqat ekranga kirganda ulaydi) */
+    try{ bindTap(document.querySelector('#app .refresh-btn')); }catch(e){}
   }
 }
 
