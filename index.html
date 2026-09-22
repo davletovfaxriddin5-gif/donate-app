@@ -1625,6 +1625,28 @@ body.light .of-info{ color:#7A5A00 }
 .ct-go{ width:100%; height:50px; border-radius:15px; background:var(--blue); color:#fff; font-size:15.5px; font-weight:700; margin-top:10px }
 .ct-go:disabled{ opacity:.45 }
 .ct-go.top{ background:linear-gradient(135deg,#FFB547,#F08A1C) }
+/* ===== Narx grafigi va sotuvlar (sl) ===== */
+.sl-box{ margin-top:16px; padding:14px; border-radius:18px; background:var(--card-2); border:1px solid var(--stroke-2) }
+.sl-top{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:12px; flex-wrap:wrap }
+.sl-tabs{ display:flex; gap:3px; padding:3px; border-radius:12px; background:var(--card) }
+.sl-tabs button{ height:31px; padding:0 12px; border-radius:9px; font-size:13px; font-weight:600; color:var(--dim) }
+.sl-tabs button.on{ background:var(--card-2); color:var(--text) }
+.sl-per{ display:flex; gap:3px }
+.sl-per button{ height:29px; padding:0 9px; border-radius:9px; font-size:12px; font-weight:700; color:var(--faint);
+  border:1px solid transparent }
+.sl-per button.on{ color:var(--text); border-color:var(--stroke-2); background:var(--card) }
+.sl-svg{ width:100%; height:auto; display:block }
+.sl-stats{ display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin-top:10px }
+.sl-stats div{ padding:8px 4px; border-radius:11px; background:var(--card); text-align:center; min-width:0 }
+.sl-stats b{ display:block; font-size:13px; font-weight:800; color:var(--text); white-space:nowrap }
+.sl-stats span{ display:block; font-size:10.5px; color:var(--faint); margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+.sl-row{ display:flex; justify-content:space-between; align-items:center; gap:10px; padding:10px 2px; border-bottom:1px solid var(--stroke) }
+.sl-row:last-child{ border-bottom:0 }
+.sl-row .a{ font-size:13.5px; font-weight:600; color:var(--text) }
+.sl-row .b{ font-size:11.5px; color:var(--faint); margin-top:2px }
+.sl-row .p{ font-size:14px; font-weight:800; color:var(--text); white-space:nowrap }
+.sl-empty{ text-align:center; padding:22px 10px; color:var(--faint); font-size:12.5px; line-height:1.55 }
+.sl-note{ font-size:11px; color:var(--faint); margin-top:8px; line-height:1.4 }
 
 /* NFT bo'limining shrifti — iPhone'da SF Pro, Android'da Roboto.
    body.nft-mode faqat NFT ekranlarida yoqiladi, shuning uchun bosh
@@ -6052,8 +6074,103 @@ function renderNftItem(){
     (A.avail && A.avail.t ? '<div class="nd-kv"><span>Chiqarilgan</span><b>' + fmt(A.avail.i) + ' / ' + fmt(A.avail.t) + '</b></div>' : '') +
     (n.sellerName ? '<div class="nd-kv"><span>Sotuvchi</span><b>' + esc(n.sellerName) + '</b></div>' : '') +
     '<div class="nd-kv"><span>Telegram da ko\'rish</span><b><a onclick="nftTgView()" style="color:var(--blue)">t.me/nft/' + esc(n.slug || '') + '</a></b></div>' +
+    '<div class="sl-box" id="ndSales"></div>' +
     '</div>';
   lotPlay('ndIm', n.slug);
+  slDraw();
+  slLoad(nftTitle(n));
+}
+/* ===== Narx grafigi va sotuvlar tarixi (batafsil sahifa) =====
+   Ma'lumot serverdagi sotuvlar jurnalidan: kolleksiya bo'yicha, so'mda.
+   Grafik - kunlik o'rtacha sotuv narxi. Tashqi kutubxonasiz, oddiy SVG. */
+var slTab = 'chart', slPer = 30, slCache = {};
+function slShort(v){
+  v = Number(v) || 0;
+  if(v >= 1e6) return (Math.round(v / 1e4) / 100) + 'M';
+  if(v >= 1e3) return (Math.round(v / 100) / 10) + 'K';
+  return String(Math.round(v));
+}
+function slDate(ms, full){
+  const d = new Date(ms), p = function(n){ return String(n).padStart(2, '0'); };
+  return p(d.getDate()) + '.' + p(d.getMonth() + 1) + (full ? '.' + d.getFullYear() + ' ' + p(d.getHours()) + ':' + p(d.getMinutes()) : '');
+}
+function slLoad(t){
+  const c = slCache[t];
+  if(c && Date.now() - c.at < 60000){ slDraw(); return; }
+  fetch(VBASE + '/nft/sales?t=' + encodeURIComponent(t)).then(function(r){ return r.json(); }).then(function(d){
+    slCache[t] = { at: Date.now(), rows: (d && d.ok && Array.isArray(d.rows)) ? d.rows : [] };
+    slDraw();
+  }).catch(function(){ slCache[t] = { at: Date.now(), rows: [], err: 1 }; slDraw(); });
+}
+function slSetTab(t){ haptic(); slTab = t; slDraw(); }
+function slSetPer(p){ haptic(); slPer = p; slDraw(); }
+function slDraw(){
+  const box = document.getElementById('ndSales'), n = nftItem;
+  if(!box || !n) return;
+  const t = nftTitle(n), c = slCache[t];
+  const head = '<div class="sl-top"><div class="sl-tabs">' +
+    '<button class="' + (slTab === 'chart' ? 'on' : '') + '" onclick="slSetTab(\'chart\')">Grafik</button>' +
+    '<button class="' + (slTab === 'list' ? 'on' : '') + '" onclick="slSetTab(\'list\')">Sotuvlar</button></div>' +
+    (slTab === 'chart' ? '<div class="sl-per">' + [[7, '7 kun'], [30, '30 kun'], [0, 'Hammasi']].map(function(p){
+      return '<button class="' + (slPer === p[0] ? 'on' : '') + '" onclick="slSetPer(' + p[0] + ')">' + p[1] + '</button>'; }).join('') + '</div>' : '') +
+    '</div>';
+  if(!c){ box.innerHTML = head + '<div class="sl-empty">Yuklanmoqda\u2026</div>'; return; }
+  const now = Date.now();
+  const rows = c.rows.map(function(r){ return { ms: Date.parse(r.at), som: Number(r.som) || 0, n: r.n, via: r.via, est: r.est }; })
+                     .filter(function(r){ return r.ms && r.som > 0; });
+  if(!rows.length){
+    box.innerHTML = head + '<div class="sl-empty">' + (c.err ? "Ma'lumot yuklanmadi, keyinroq qayta oching."
+      : esc(t) + " kolleksiyasida hali sotuv bo'lmagan.<br>Birinchi sotuvlardan keyin grafik shu yerda paydo bo'ladi.") + '</div>';
+    return;
+  }
+  const estNote = rows.some(function(r){ return r.est; })
+    ? '<div class="sl-note">\u2248 belgili narxlar GRAM da qilingan eski xaridlar \u2014 bugungi kurs bilan hisoblangan.</div>' : '';
+  if(slTab === 'list'){
+    box.innerHTML = head + rows.slice(0, 60).map(function(r){
+      return '<div class="sl-row"><div><div class="a">' + esc(t) + (r.n ? ' #' + r.n : '') + '</div>' +
+        '<div class="b">' + slDate(r.ms, true) + (r.via === 'offer' ? ' \u00b7 taklif orqali' : '') + '</div></div>' +
+        '<div class="p">' + (r.est ? '\u2248 ' : '') + money(r.som, false) + '</div></div>';
+    }).join('') + estNote;
+    return;
+  }
+  const from = slPer ? now - slPer * 864e5 : Math.min.apply(null, rows.map(function(r){ return r.ms; }));
+  const inP = rows.filter(function(r){ return r.ms >= from; });
+  if(!inP.length){ box.innerHTML = head + '<div class="sl-empty">Bu davrda sotuv bo\'lmagan \u2014 "Hammasi" ni tanlang.</div>'; return; }
+  /* kunlik o'rtacha */
+  const day = {};
+  inP.forEach(function(r){ const d = new Date(r.ms); const k = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime(); (day[k] = day[k] || []).push(r.som); });
+  const pts = Object.keys(day).map(Number).sort(function(a, b){ return a - b; })
+    .map(function(k){ return { x: k, y: day[k].reduce(function(s, v){ return s + v; }, 0) / day[k].length }; });
+  const W = 340, H = 170, L = 38, R = 8, T = 10, B = 24;
+  const x0 = slPer ? from : pts[0].x, x1 = Math.max(now, pts[pts.length - 1].x + 1);
+  let yMin = Math.min.apply(null, pts.map(function(p){ return p.y; })), yMax = Math.max.apply(null, pts.map(function(p){ return p.y; }));
+  if(yMax === yMin){ yMax = yMax * 1.1 + 1; yMin = yMin * 0.9; }
+  const pad = (yMax - yMin) * 0.12; yMax += pad; yMin = Math.max(0, yMin - pad);
+  const X = function(v){ return L + (W - L - R) * (v - x0) / ((x1 - x0) || 1); };
+  const Y = function(v){ return T + (H - T - B) * (1 - (v - yMin) / ((yMax - yMin) || 1)); };
+  const line = pts.map(function(p, i){ return (i ? 'L' : 'M') + X(p.x).toFixed(1) + ' ' + Y(p.y).toFixed(1); }).join(' ');
+  const area = line + ' L' + X(pts[pts.length - 1].x).toFixed(1) + ' ' + (H - B) + ' L' + X(pts[0].x).toFixed(1) + ' ' + (H - B) + ' Z';
+  const grid = [0, 0.5, 1].map(function(f){
+    const v = yMin + (yMax - yMin) * f, y = Y(v);
+    return '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + y.toFixed(1) + '" y2="' + y.toFixed(1) + '" stroke="currentColor" stroke-opacity=".12"/>' +
+           '<text x="' + (L - 6) + '" y="' + (y + 3.5).toFixed(1) + '" text-anchor="end" font-size="9.5" fill="currentColor" fill-opacity=".55">' + slShort(v) + '</text>';
+  }).join('');
+  const xl = [x0, (x0 + x1) / 2, x1].map(function(v, i){
+    return '<text x="' + X(v).toFixed(1) + '" y="' + (H - 6) + '" text-anchor="' + (i === 0 ? 'start' : i === 2 ? 'end' : 'middle') +
+           '" font-size="9.5" fill="currentColor" fill-opacity=".55">' + slDate(v) + '</text>';
+  }).join('');
+  const dots = pts.map(function(p){ return '<circle cx="' + X(p.x).toFixed(1) + '" cy="' + Y(p.y).toFixed(1) + '" r="2.6" fill="#8C9BFF"/>'; }).join('');
+  const svg = '<svg class="sl-svg" viewBox="0 0 ' + W + ' ' + H + '" style="color:var(--text)"><defs><linearGradient id="slG" x1="0" y1="0" x2="0" y2="1">' +
+    '<stop offset="0" stop-color="#6E7CFF" stop-opacity=".35"/><stop offset="1" stop-color="#6E7CFF" stop-opacity="0"/></linearGradient></defs>' +
+    grid + '<path d="' + area + '" fill="url(#slG)"/><path d="' + line + '" fill="none" stroke="#8C9BFF" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>' +
+    dots + xl + '</svg>';
+  const vals = inP.map(function(r){ return r.som; });
+  const avg = vals.reduce(function(s, v){ return s + v; }, 0) / vals.length;
+  box.innerHTML = head + svg + '<div class="sl-stats">' +
+    '<div><b>' + slShort(avg) + '</b><span>O\'rtacha</span></div>' +
+    '<div><b>' + slShort(Math.min.apply(null, vals)) + '</b><span>Eng past</span></div>' +
+    '<div><b>' + slShort(Math.max.apply(null, vals)) + '</b><span>Eng yuqori</span></div>' +
+    '<div><b>' + vals.length + '</b><span>Sotuv</span></div></div>' + estNote;
 }
 /* ===== Takliflar =====
    Xaridor narx taklif qiladi - summa server tomonida bloklanadi. Egasi
