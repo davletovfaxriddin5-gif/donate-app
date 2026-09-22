@@ -1658,6 +1658,70 @@ body.light .of-info{ color:#7A5A00 }
 .mh-opt svg{ width:18px; height:18px; stroke:#8C9BFF; fill:none; stroke-width:2.6; stroke-linecap:round; stroke-linejoin:round }
 .mh-clr{ display:block; margin:10px auto 0; height:38px; padding:0 16px; border-radius:12px; background:var(--card-2);
   color:var(--dim); font-size:13.5px; font-weight:600 }
+/* ===== Sovg'a oynasi va uning ichki oynalari (mg2) ===== */
+.gf-sh.mg2{ text-align:left; padding-top:12px }
+.mg2-hero{ position:relative; width:176px; margin:0 auto 14px }
+.mg2-im{ width:176px; height:176px; border-radius:26px; overflow:hidden; display:grid; place-items:center; background:var(--card-2);
+  font-size:64px; box-shadow:0 18px 40px -18px rgba(0,0,0,.7), inset 0 0 0 1px rgba(255,255,255,.07) }
+.mg2-im img{ width:100%; height:100%; object-fit:cover; display:block }
+.mg2-nm{ text-align:center; font-size:21px; font-weight:800; letter-spacing:-.5px; color:var(--text) }
+.mg2-nm span{ color:var(--faint); font-weight:700 }
+.mg2-st{ display:flex; align-items:center; justify-content:center; gap:7px; margin:6px auto 14px; font-size:13px; font-weight:600; color:var(--dim) }
+.mg2-st i{ width:7px; height:7px; border-radius:50%; background:var(--faint) }
+.mg2-st.on{ color:#4FE0A0 }
+.mg2-st.on i{ background:#4FE0A0; box-shadow:0 0 0 4px rgba(79,224,160,.16) }
+.mg2-chips{ display:grid; grid-template-columns:repeat(3,1fr); gap:7px; margin-bottom:14px }
+.mg2-chip{ padding:9px 6px; border-radius:13px; background:var(--card-2); border:1px solid var(--stroke-2); text-align:center; min-width:0 }
+.mg2-chip span{ display:block; font-size:10px; font-weight:700; letter-spacing:.8px; text-transform:uppercase; color:var(--faint) }
+.mg2-chip b{ display:block; font-size:12.5px; font-weight:700; color:var(--text); margin-top:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+.mg2-chip i{ display:inline-block; margin-top:4px; font-style:normal; font-size:10.5px; font-weight:700; padding:1px 6px; border-radius:6px;
+  background:rgba(255,196,0,.14); color:#FFC93C }
+.mg2-chip i.t{ background:rgba(79,224,160,.14); color:#4FE0A0 }
+.mg2-pri{ width:100%; height:52px; border-radius:16px; background:var(--blue-grad); color:#fff; font-size:16px; font-weight:700;
+  display:flex; align-items:center; justify-content:center; gap:9px; box-shadow:0 10px 24px -12px rgba(63,85,246,.85); font-family:var(--sys) }
+.mg2-pri svg{ width:19px; height:19px; stroke:#fff; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round }
+.mg2-pri:disabled{ opacity:.45; box-shadow:none }
+.mg2-grid{ display:grid; grid-template-columns:1fr 1fr; gap:9px; margin-top:9px }
+.mg2-tile{ display:flex; align-items:center; gap:10px; padding:12px 11px; border-radius:16px; background:var(--card-2);
+  border:1px solid var(--stroke-2); text-align:left; color:var(--text); font-family:var(--sys); min-width:0 }
+.mg2-tile.wide{ width:100% }
+.mg2-tile .ic{ width:36px; height:36px; border-radius:11px; display:grid; place-items:center; flex-shrink:0; background:rgba(110,124,255,.15) }
+.mg2-tile .ic svg{ width:18px; height:18px; stroke:#8C9BFF; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round }
+.mg2-tile.red .ic{ background:rgba(255,107,107,.13) }
+.mg2-tile.red .ic svg{ stroke:#FF8A8A }
+.mg2-tile b{ display:block; font-size:13.5px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+.mg2-tile small{ display:block; font-size:11.5px; color:var(--faint); margin-top:1px }
+.mg2-tile span{ min-width:0 }
+.mg2-fee{ display:flex; gap:9px; align-items:flex-start; margin-top:12px; padding:11px 12px; border-radius:13px; background:var(--card-2);
+  font-size:12px; line-height:1.45; color:var(--dim) }
+.mg2-fee svg{ width:16px; height:16px; flex-shrink:0; margin-top:1px; stroke:var(--faint); fill:none; stroke-width:2; stroke-linecap:round }
+.mg2-fee b{ color:var(--text) }
+.mg2-hd{ display:flex; align-items:center; gap:10px; margin:2px 0 14px }
+.mg2-hd .t{ font-size:20px; font-weight:800; letter-spacing:-.4px; color:var(--text) }
+.mg2-back{ width:34px; height:34px; border-radius:50%; background:var(--card-2); display:grid; place-items:center; flex-shrink:0 }
+.mg2-back svg{ width:16px; height:16px; stroke:var(--text); fill:none; stroke-width:2.4; stroke-linecap:round; stroke-linejoin:round }
+.mg2-mini{ display:flex; align-items:center; gap:12px; padding:11px; border-radius:16px; background:var(--card-2);
+  border:1px solid var(--stroke-2); margin-bottom:16px }
+.mg2-mini .im{ width:52px; height:52px; border-radius:13px; overflow:hidden; flex-shrink:0; display:grid; place-items:center; background:var(--card); font-size:24px }
+.mg2-mini .im img{ width:100%; height:100%; object-fit:cover; display:block }
+.mg2-mini .nm{ font-size:15px; font-weight:700; color:var(--text) }
+.mg2-mini .nm span{ color:var(--faint) }
+.mg2-mini .sb{ font-size:12px; color:var(--faint); margin-top:2px }
+.mg2-lbl{ font-size:11.5px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--faint); margin:0 4px 7px }
+.mg2-in{ display:flex; align-items:center; gap:8px; height:54px; padding:0 16px; border-radius:16px; background:var(--card-2);
+  border:1.5px solid var(--stroke-2); transition:border-color .15s }
+.mg2-in:focus-within{ border-color:rgba(110,124,255,.7) }
+.mg2-in input{ flex:1; min-width:0; background:transparent; border:0; outline:none; color:var(--text); font-size:18px; font-weight:700; font-family:inherit }
+.mg2-in span{ font-size:14px; font-weight:700; color:var(--faint) }
+.mg2-in .pre{ font-size:18px; color:#8C9BFF }
+.mg2-hint{ font-size:12px; color:var(--faint); margin:7px 4px 0 }
+.mg2 .sp-who{ margin-top:8px }
+.mg2 .mg2-pri.go{ margin-top:14px }
+/* profil: uzun do'stlar ro'yxati qisqartiriladi */
+.pf2-refs.clip #refBox{ max-height:340px; overflow:hidden;
+  -webkit-mask-image:linear-gradient(#000 76%, transparent); mask-image:linear-gradient(#000 76%, transparent) }
+.pf2-more{ display:block; margin:0 auto 24px; height:38px; padding:0 18px; border-radius:12px; background:var(--card-2);
+  border:1px solid var(--stroke-2); color:var(--text); font-size:13.5px; font-weight:600 }
 
 /* NFT bo'limining shrifti — iPhone'da SF Pro, Android'da Roboto.
    body.nft-mode faqat NFT ekranlarida yoqiladi, shuning uchun bosh
@@ -7239,6 +7303,11 @@ function renderNftProfile(){
     <span class="go">Batafsil</span>
   </button>
 
+  <div class="pf-sec">Xavfsizlik</div>
+  <div class="svc-box">${secRows(true)}</div>
+  <div class="np-note" style="margin-bottom:22px">Xavfsizlik sozlamalari butun ilova uchun umumiy \u2014
+    bosh sahifada ulangan bo'lsa bu yerda ham ishlaydi.</div>
+
   <div class="pf2-sec">Do'stlarni taklif qiling va bonus oling</div>
   <div class="pf2-ref">
     <span class="ic"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg></span>
@@ -7247,23 +7316,37 @@ function renderNftProfile(){
   </div>
   <button class="pf2-inv" onclick="shareRef('${link}')"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>Do'stlarni taklif qilish</button>
   <button class="pf2-copy" onclick="copyRef('${link}')"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2.5"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Havolani nusxalash</button>
-  <div class="pf2-refs"><div id="refBox" class="${keep ? 'ref-list' : 'pf2-empty'}">${keep || "Hali hech kim taklif qilinmagan"}</div></div>
-
-  <div class="pf-sec">Xavfsizlik</div>
-  <div class="svc-box">${secRows(true)}</div>
-  <div class="np-note">Xavfsizlik sozlamalari butun ilova uchun umumiy \u2014
-    bosh sahifada ulangan bo'lsa bu yerda ham ishlaydi.</div>`;
+  <div class="pf2-refs${pf2Open ? '' : ' clip'}" id="pf2Refs"><div id="refBox" class="${keep ? 'ref-list' : 'pf2-empty'}">${keep || "Hali hech kim taklif qilinmagan"}</div></div>
+  <button class="pf2-more" id="pf2More" style="display:none" onclick="pf2More()">Hammasini ko'rish</button>
+`;
   /* Google va parol holati serverdan keladi — kelgach ekran o'zi yangilanadi */
   if(!gInfo)  { try{ gLoad(); }catch(e){} }
   if(!pwInfo) { try{ pwLoad(); }catch(e){} }
   try{ loadRefs(); }catch(e){}
+  /* ro'yxat to'lganda "Hammasini ko'rish" tugmasi kerakmi - tekshiramiz */
+  const rb = document.getElementById('refBox');
+  if(rb && window.MutationObserver){ try{ new MutationObserver(pf2Clip).observe(rb, { childList:true, subtree:true }); }catch(e){} }
+  pf2Clip();
   /* statistika uchun NFT tarixi - bir marta so'raladi (xato bo'lsa qayta-qayta emas) */
   if(!nftHistLoaded && !pf2HistTry){
     pf2HistTry = true;
     nftHistLoad(function(){ if(view === 'nft_profile') renderNftProfile(); });
   }
 }
-var pf2HistTry = false;
+var pf2HistTry = false, pf2Open = false;
+function pf2Clip(){
+  const w = document.getElementById('pf2Refs'), b = document.getElementById('pf2More'), rb = document.getElementById('refBox');
+  if(!w || !b || !rb) return;
+  if(pf2Open || !w.classList.contains('clip')){ b.style.display = 'none'; return; }
+  const h = rb.querySelector('.ref-head span');
+  b.textContent = "Hammasini ko'rish" + (h ? ' (' + h.textContent + ')' : '');
+  b.style.display = rb.scrollHeight > 345 ? '' : 'none';
+}
+function pf2More(){
+  haptic(); pf2Open = true;
+  const w = document.getElementById('pf2Refs'); if(w) w.classList.remove('clip');
+  pf2Clip();
+}
 function pf2Season(){ haptic(); toast('Mavsum tez orada boshlanadi'); }
 
 /* ===== NFT menyusi (profil tepasidagi ikki chiziqli tugma) ===== */
@@ -7440,6 +7523,38 @@ function mgOut(){
 }
 
 /* ---------- Sovg'a oynasi ---------- */
+/* ---------- Sovg'a oynasi (mg2) ----------
+   Dizayn yangilandi; tugmalar ortidagi mantiq (mgSale, mgTake, mgSendForm,
+   mgUnsale) o'zgarmagan. mgTake va mgUnsale tugmani id orqali topadi. */
+const MG2 = {
+  x:    '<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  back: '<svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>',
+  tag:  '<svg viewBox="0 0 24 24"><path d="M3.5 12.2V4.5a1 1 0 0 1 1-1h7.7l8.3 8.3a1.5 1.5 0 0 1 0 2.1l-6.2 6.2a1.5 1.5 0 0 1-2.1 0z"/><circle cx="8" cy="8" r="1.4"/></svg>',
+  out:  '<svg viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-8.5 8.5"/><path d="M18 13.5V18a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4.5"/></svg>',
+  gift: '<svg viewBox="0 0 24 24"><rect x="3.5" y="9" width="17" height="11" rx="2"/><path d="M12 9v11M3.5 13h17M12 9c-1.5-3.5-5.5-4-5.5-1.5S12 9 12 9zm0 0c1.5-3.5 5.5-4 5.5-1.5S12 9 12 9z"/></svg>',
+  send: '<svg viewBox="0 0 24 24"><path d="M21.2 4.2L3.3 11.1c-.9.4-.9 1 0 1.3l4.5 1.4 1.7 5.3c.2.6.5.7 1 .3l2.6-2.4 4.8 3.5c.8.5 1.3.2 1.5-.7l2.9-13.9c.3-1.1-.3-1.6-1.1-1.3z"/><path d="M7.8 13.8l9.4-6"/></svg>',
+  info: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.6v.2"/></svg>'
+};
+function mg2Title(g){ return g.title || String(g.name || 'NFT').replace(/\s*#\d+\s*$/, ''); }
+function mg2Num(g){ return g.num || (String(g.name || '').match(/#(\d+)/) || [])[1] || ''; }
+function mg2Bg(g){ const b = g.attrs && g.attrs.bg; return (b && b.c1) ? 'background:radial-gradient(circle at 50% 42%,' + b.c1 + ' 0%,' + (b.c2 || b.c1) + ' 100%)' : ''; }
+function mg2Img(g){ return g.pic ? '<img src="' + esc(g.pic) + '" alt="" onerror="this.style.display=\'none\'">' : '\uD83C\uDF81'; }
+function mg2Mini(g){
+  return '<div class="mg2-mini"><div class="im" style="' + mg2Bg(g) + '">' + mg2Img(g) + '</div><div>' +
+    '<div class="nm">' + esc(mg2Title(g)) + (mg2Num(g) ? ' <span>#' + esc(String(mg2Num(g))) + '</span>' : '') + '</div>' +
+    '<div class="sb">' + (g.state === 'sale' ? 'Sotuvda \u00b7 ' + money(g.price || 0, true) : 'Sotuvda emas') + '</div></div></div>';
+}
+function mg2Head(g, title){
+  return '<div class="mg2-hd"><button class="mg2-back" onclick="mgOpen(\'' + esc(g.msgId) + '\')" aria-label="Orqaga">' + MG2.back + '</button>' +
+         '<div class="t">' + title + '</div></div>';
+}
+/* xato bo'lsa plitka ikonkasi va izohi bilan tiklanadi (oddiy matn emas) */
+function mg2Reset(b){
+  if(!b) return;
+  if(b.id === 'mgTakeBtn') b.innerHTML = '<span class="ic">' + MG2.out + '</span><span><b>Chiqarish</b><small>Telegram\'ingizga</small></span>';
+  else if(b.id === 'mgUnBtn') b.innerHTML = '<span class="ic">' + MG2.x + '</span><span><b>Sotuvdan olish</b><small>Sovg\'a "Sotuvda emas" bo\'limiga qaytadi</small></span>';
+  else b.textContent = 'Hisobga chiqarish';
+}
 function mgOpen(msgId){
   haptic();
   const g = mgList.find(function(x){ return String(x.msgId) === String(msgId); });
@@ -7452,21 +7567,32 @@ function mgOpen(msgId){
   const bg = document.createElement('div');
   bg.className = 'sheet-bg'; bg.id = 'gfBg'; bg.onclick = mgClose;
   const sh = document.createElement('div');
-  sh.className = 'sheet gf-sh'; sh.id = 'gfSh';
+  sh.className = 'sheet gf-sh mg2'; sh.id = 'gfSh';
+  const A = g.attrs || {}, sale = g.state === 'sale';
+  const chips = [['Model', A.model], ['Fon', A.bg], ['Belgi', A.sym]].filter(function(x){ return x[1] && x[1].n; }).map(function(x){
+    const r = nftRar(x[1]);
+    return '<div class="mg2-chip"><span>' + x[0] + '</span><b>' + esc(x[1].n) + '</b>' +
+      (r ? '<i class="' + (/%$/.test(r) ? '' : 't') + '">' + esc(r) + '</i>' : '') + '</div>';
+  }).join('');
   sh.innerHTML =
-    '<div class="grab"></div>' +
-    '<div class="gf-im" id="gfIm">' + (g.pic
-      ? '<img src="' + esc(g.pic) + '" alt="" onerror="this.style.display=\'none\'">'
-      : '\uD83C\uDF81') + '</div>' +
-    '<div class="gf-nm">' + esc(g.name || 'NFT') + '</div>' +
-    '<div class="gf-sb">' + (g.state === 'sale'
-      ? ('Sotuvda \u00b7 ' + money(g.price||0, true)) : 'Sotuvda emas') + '</div>' +
-    (g.state === 'sale'
-      ? '<button class="gf-b2" onclick="mgUnsale()">Sotuvdan olish</button>'
-      : '<button class="gf-b1" onclick="mgSale()">Sotuvga qo\'yish</button>' +
-        '<button class="gf-b2" style="margin-top:9px" onclick="mgTake()">Hisobga chiqarish</button>' +
-        '<button class="gf-b2" style="margin-top:9px" onclick="mgSendForm()">Boshqa odamga yuborish</button>' +
-        '<div class="gf-fee">Chiqarish va yuborish haqi: ' + fmtGram(mgFee) + ' GRAM</div>');
+    '<div class="nd-top"><button class="nd-x" onclick="mgClose()" aria-label="Yopish">' + MG2.x + '</button></div>' +
+    '<div class="mg2-hero"><div class="mg2-im" id="gfIm" style="' + mg2Bg(g) + '">' + mg2Img(g) + '</div>' +
+      (A.crafted ? '<button class="nd-badge" onclick="nftCrafted()" aria-label="Craft">' + ND_ANVIL + '</button>' : '') + '</div>' +
+    '<div class="mg2-nm">' + esc(mg2Title(g)) + (mg2Num(g) ? ' <span>#' + esc(String(mg2Num(g))) + '</span>' : '') + '</div>' +
+    '<div class="mg2-st' + (sale ? ' on' : '') + '"><i></i>' + (sale ? 'Sotuvda \u00b7 ' + money(g.price || 0, true) : 'Sotuvda emas') + '</div>' +
+    (chips ? '<div class="mg2-chips">' + chips + '</div>' : '') +
+    (sale
+      ? '<button class="mg2-tile wide red" id="mgUnBtn" onclick="mgUnsale()"><span class="ic">' + MG2.x + '</span>' +
+          '<span><b>Sotuvdan olish</b><small>Sovg\'a "Sotuvda emas" bo\'limiga qaytadi</small></span></button>'
+      : '<button class="mg2-pri" onclick="mgSale()">' + MG2.tag + 'Sotuvga qo\'yish</button>' +
+        '<div class="mg2-grid">' +
+          '<button class="mg2-tile" id="mgTakeBtn" onclick="mgTake()"><span class="ic">' + MG2.out + '</span>' +
+            '<span><b>Chiqarish</b><small>Telegram\'ingizga</small></span></button>' +
+          '<button class="mg2-tile" onclick="mgSendForm()"><span class="ic">' + MG2.gift + '</span>' +
+            '<span><b>Yuborish</b><small>Boshqa odamga</small></span></button>' +
+        '</div>' +
+        '<div class="mg2-fee">' + MG2.info + '<span>Chiqarish va yuborish haqi <b>' + fmtGram(mgFee) + ' GRAM</b>' +
+          ' \u00b7 balansingizda ' + fmtGram(getGram()) + ' GRAM</span></div>');
   document.body.appendChild(bg); document.body.appendChild(sh);
   requestAnimationFrame(function(){
     requestAnimationFrame(function(){ bg.classList.add('on'); sh.classList.add('on'); });
@@ -7489,16 +7615,12 @@ function mgSale(){
   const sh = document.getElementById('gfSh');
   if(!sh) return;
   sh.innerHTML =
-    '<div class="grab"></div>' +
-    '<div class="gf-nm" style="text-align:left;margin-bottom:3px">Narx belgilash</div>' +
-    '<div class="gf-sb" style="text-align:left;margin-bottom:14px">' + esc(g.name) + '</div>' +
-    '<div class="gr-amt" style="margin:6px 0 4px">' +
-      '<input id="slPr" type="text" inputmode="numeric" value="" placeholder="0" oninput="mgSaleIn(this)">' +
-      '<span class="u">so\'m</span>' +
-    '</div>' +
-    '<div class="gf-fee" id="slHint" style="margin:0 0 14px">Eng kami 5 000 so\'m</div>' +
-    '<button class="gf-b1" id="slGo" disabled onclick="mgSaleGo()">Sotuvga qo\'yish</button>' +
-    '<button class="gf-b2" style="margin-top:9px" onclick="mgOpen(\'' + esc(g.msgId) + '\')">Orqaga</button>';
+    mg2Head(g, 'Sotuvga qo\'yish') + mg2Mini(g) +
+    '<div class="mg2-lbl">Narx</div>' +
+    '<div class="mg2-in"><input id="slPr" type="text" inputmode="numeric" value="" placeholder="0" oninput="mgSaleIn(this)"><span>so\'m</span></div>' +
+    '<div class="mg2-hint" id="slHint">Eng kami 5 000 so\'m</div>' +
+    '<div class="mg2-fee">' + MG2.info + '<span>GRAM narxi jonli kurs bo\'yicha o\'zi hisoblanadi. Sotilganda pul so\'m hamyoningizga bozor komissiyasi ayirib tushadi.</span></div>' +
+    '<button class="mg2-pri go" id="slGo" disabled onclick="mgSaleGo()">' + MG2.tag + 'Sotuvga qo\'yish</button>';
   setTimeout(function(){ const el = document.getElementById('slPr'); if(el) el.focus(); }, 120);
 }
 function mgSaleIn(el){
@@ -7546,7 +7668,7 @@ function mgSaleGo(){
 function mgUnsale(){
   if(!mgPick) return;
   haptic();
-  const b = document.querySelector('#gfSh .gf-b2');
+  const b = document.getElementById('mgUnBtn') || document.querySelector('#gfSh .gf-b2');
   if(b){ b.disabled = true; b.textContent = 'Olinmoqda\u2026'; }
   fetch(VBASE + '/nft/gift/sale', {
     method:'POST', headers:{'Content-Type':'application/json'},
@@ -7557,10 +7679,10 @@ function mgUnsale(){
       mgClose(); mgSeg = 'un'; mgLoad();
       return;
     }
-    if(b){ b.disabled = false; b.textContent = 'Sotuvdan olish'; }
+    if(b){ b.disabled = false; mg2Reset(b); }
     toastErr('Bajarilmadi');
   }).catch(function(){
-    if(b){ b.disabled = false; b.textContent = 'Sotuvdan olish'; }
+    if(b){ b.disabled = false; mg2Reset(b); }
     toastErr('Aloqa yo\'q');
   });
 }
@@ -7574,7 +7696,7 @@ function mgTake(){
   if(getGram() < mgFee){ toast('GRAM yetarli emas \u2014 ' + fmtGram(mgFee) + ' kerak'); return; }
   bioAsk(function(){
     mgBusy = true;
-    const b = document.querySelector('#gfSh .gf-b2');
+    const b = document.getElementById('mgTakeBtn') || document.querySelector('#gfSh .gf-b2');
     if(b){ b.disabled = true; b.textContent = 'Yuborilmoqda\u2026'; }
     fetch(VBASE + '/nft/gift/out', {
       method:'POST', headers:{'Content-Type':'application/json'},
@@ -7588,7 +7710,7 @@ function mgTake(){
         mgClose(); mgLoad(); nftHistLoad();
         return;
       }
-      if(b){ b.disabled = false; b.textContent = 'Hisobga chiqarish'; }
+      if(b){ b.disabled = false; mg2Reset(b); }
       notify('error');
       if(d && d.error === 'fee')  return toastErr('GRAM yetarli emas');
       if(d && d.error === 'busy') return toastErr('Allaqachon yuborilmoqda');
@@ -7596,7 +7718,7 @@ function mgTake(){
       toastErr('Bajarilmadi');
     }).catch(function(){
       mgBusy = false;
-      if(b){ b.disabled = false; b.textContent = 'Hisobga chiqarish'; }
+      if(b){ b.disabled = false; mg2Reset(b); }
       toastErr('Aloqa yo\'q');
     });
   });
@@ -7616,15 +7738,14 @@ function mgSendForm(){
   const g = mgPick;
   sgOk = false; sgLast = '';
   sh.innerHTML =
-    '<div class="grab"></div>' +
-    '<div class="gf-nm" style="text-align:left;margin-bottom:3px">Sovg\'a yuborish</div>' +
-    '<div class="gf-sb" style="text-align:left;margin-bottom:14px">' + esc(g.name) + '</div>' +
-    '<div class="ot-in"><input id="sgUser" type="text" placeholder="@ Telegram username" ' +
-      'autocomplete="off" spellcheck="false" oninput="sgIn()"></div>' +
+    mg2Head(g, 'Sovg\'a yuborish') + mg2Mini(g) +
+    '<div class="mg2-lbl">Qabul qiluvchi</div>' +
+    '<div class="mg2-in"><span class="pre">@</span><input id="sgUser" type="text" placeholder="username" ' +
+      'autocomplete="off" autocapitalize="off" spellcheck="false" oninput="sgIn()"></div>' +
     '<div id="sgWho" class="sp-who"></div>' +
-    '<button class="gf-b1" id="sgGo" disabled onclick="mgSendGo()">Yuborish</button>' +
-    '<button class="gf-b2" style="margin-top:9px" onclick="mgOpen(\'' + esc(g.msgId) + '\')">Orqaga</button>' +
-    '<div class="gf-fee">Xizmat haqi: ' + fmtGram(mgFee) + ' GRAM</div>';
+    '<div class="mg2-fee">' + MG2.info + '<span>Bizning mijozimizga bir zumda o\'tadi, boshqa odamga Telegram orqali yuboriladi. ' +
+      'Xizmat haqi <b>' + fmtGram(mgFee) + ' GRAM</b></span></div>' +
+    '<button class="mg2-pri go" id="sgGo" disabled onclick="mgSendGo()">' + MG2.send + 'Yuborish</button>';
   setTimeout(function(){ const el = document.getElementById('sgUser'); if(el) el.focus(); }, 120);
 }
 function sgBox(x){ const b = document.getElementById('sgWho'); if(b) b.innerHTML = x; }
