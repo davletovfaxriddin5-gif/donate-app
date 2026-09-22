@@ -2383,6 +2383,204 @@ app.get("/nft/market", (req,res)=>{
    Sovg'a bizning hisobimizda turgani uchun uni jismonan ko'chirish shart
    emas — faqat egasi o'zgaradi. Shuning uchun amal bir zumda va xavfsiz:
    pul yechiladi, sovg'a o'tadi, ikkalasi bitta yozuvda saqlanadi. */
+/* ===== NFT TAKLIFLARI (offer) =====
+   Xaridor sotuvdagi NFT ga o'z narxini taklif qiladi. Summa darhol uning
+   hamyonidan yechilib, taklif ichida saqlanadi (bloklangan pul).
+   - qabul qilinsa: NFT xaridorning "Sotuvda emas" bo'limiga o'tadi, sotuvchiga
+     summa bozor komissiyasi ayirib, taklif valyutasida tushadi;
+   - rad etilsa / bekor qilinsa / muddati o'tsa / NFT boshqa egaga o'tsa -
+     summa xaridorga TO'LIQ qaytadi.
+   Pul faqat offRefund va qabul qilish qismida harakatlanadi; ikkalasi ham faqat
+   "wait" holatidagi taklifga ishlaydi - bitta taklif ikki marta yopilmaydi. */
+const OFFER_DAYS = Number(process.env.OFFER_DAYS || 7);
+const OFFER_MAX  = 20;                 /* bitta xaridorning bir vaqtdagi takliflari */
+function offList(db){ if(!Array.isArray(db._offers)) db._offers = []; return db._offers; }
+function offGift(db, uid, msgId){
+  const u = db[uid];
+  if(!u || !Array.isArray(u.gifts)) return null;
+  return u.gifts.find(function(x){
+    return String(x.msgId) === String(msgId) && (x.state === "sale" || x.state === "idle"); }) || null;
+}
+function offAmtTxt(o){ return o.cur === "gram" ? (o.amt + " GRAM") : (o.amt + " so'm"); }
+function offRefund(db, o, why){
+  if(!o || o.status !== "wait") return false;
+  const b = urec(db, o.buyer);
+  if(o.cur === "gram") b.gram = Math.round((Number(b.gram || 0) + o.amt) * 1e9) / 1e9;
+  else                 b.nftSom = Math.round(Number(b.nftSom || 0) + o.amt);
+  o.status = why; o.doneAt = new Date().toISOString();
+  nftLog(b, "offer_back", o.amt, { cur: o.cur === "gram" ? "GRAM" : "so'm", item: o.name, note: "Taklif puli qaytarildi" });
+  return true;
+}
+/* Muddati o'tgan yoki NFT i boshqa egaga o'tib ketgan takliflar - pul qaytadi */
+function offSweep(){
+  try{
+    const db = load();
+    const L = offList(db);
+    const now = Date.now();
+    const closed = [];
+    L.forEach(function(o){
+      if(o.status !== "wait") return;
+      let why = "";
+      if(Date.parse(o.until) <= now) why = "exp";
+      else if(!offGift(db, o.seller, o.msgId)) why = "void";
+      if(why && offRefund(db, o, why)) closed.push(o);
+    });
+    const keep = L.filter(function(o){
+      return o.status === "wait" || (now - Date.parse(o.doneAt || o.at)) < 30 * 864e5; });
+    if(closed.length || keep.length !== L.length){
+      db._offers = keep;
+      save(db);
+    }
+    closed.forEach(function(o){
+      sendMd(o.buyer, "\u21A9\uFE0F [" + o.name + "](" + giftLink(o.slug) + ") uchun taklifingiz " +
+        (o.status === "exp" ? "muddati tugadi" : "yopildi \u2014 NFT boshqa egaga o'tdi") +
+        ". " + offAmtTxt(o) + " hamyoningizga qaytarildi.");
+    });
+  }catch(e){ console.log("OFFER SWEEP XATO:", e.message); }
+}
+setInterval(offSweep, 2 * 60 * 1000);
+setTimeout(offSweep, 20 * 1000);
+
+app.post("/nft/offer", (req,res)=>{
+  const who = checkInit(req.body && req.body.initData);
+  if(!who) return res.json({ ok:false, error:"auth" });
+  const msgId = String(req.body.msgId || "").trim();
+  const cur   = (String(req.body.cur) === "gram") ? "gram" : "som";
+  let amt = Number(String(req.body.amt || "").replace(",", "."));
+  if(!isFinite(amt) || !(amt > 0)) return res.json({ ok:false, error:"amt" });
+  amt = cur === "gram" ? Math.round(amt * 1000) / 1000 : Math.round(amt);
+  if(!(amt > 0)) return res.json({ ok:false, error:"amt" });
+  return (async function(){
+    let rate = 0;
+    if(cur === "gram"){ rate = await gramSom(); if(!(rate > 0)) return res.json({ ok:false, error:"rate" }); }
+    const db = load();
+    let sid = "", g = null;
+    Object.keys(db).forEach(function(k){
+      if(!/^\d+$/.test(k) || g) return;
+      const hit = ((db[k].gifts)||[]).find(function(x){ return String(x.msgId) === msgId && x.state === "sale"; });
+      if(hit){ sid = k; g = hit; }
+    });
+    if(!g) return res.json({ ok:false, error:"gone" });
+    const uid = String(who.id);
+    if(sid === uid) return res.json({ ok:false, error:"self" });
+    const price = Number(g.price) || 0;
+    /* taklif sotuv narxidan past bo'lishi kerak - teng yoki yuqori bo'lsa to'g'ridan-to'g'ri sotib olinadi */
+    const inSom = cur === "gram" ? amt * rate : amt;
+    if(price > 0 && inSom >= price) return res.json({ ok:false, error:"high" });
+    const L = offList(db);
+    if(L.some(function(o){ return o.status === "wait" && o.buyer === uid && String(o.msgId) === msgId; }))
+      return res.json({ ok:false, error:"dup" });
+    if(L.filter(function(o){ return o.status === "wait" && o.buyer === uid; }).length >= OFFER_MAX)
+      return res.json({ ok:false, error:"many" });
+    const b = urec(db, uid);
+    const have = cur === "gram" ? Number(b.gram || 0) : Number(b.nftSom || 0);
+    if(have < amt) return res.json({ ok:false, error:"low" });
+    /* pulni bloklaymiz: hamyondan yechib, taklif ichida saqlaymiz */
+    if(cur === "gram") b.gram = Math.round((Number(b.gram) - amt) * 1e9) / 1e9;
+    else               b.nftSom = Math.round(Number(b.nftSom) - amt);
+    const now = Date.now();
+    const o = { id: "OF" + now.toString().slice(-9) + Math.floor(Math.random() * 90 + 10),
+                msgId: msgId, slug: g.slug || "", name: g.name || "NFT", pic: g.pic || "",
+                seller: sid, buyer: uid, buyerName: String(who.name || ""), amt: amt, cur: cur, price: price,
+                status: "wait", at: new Date(now).toISOString(),
+                until: new Date(now + OFFER_DAYS * 864e5).toISOString() };
+    L.unshift(o);
+    nftLog(b, "offer_hold", amt, { cur: cur === "gram" ? "GRAM" : "so'm", item: o.name, note: "Taklif uchun bloklandi" });
+    save(db);
+    sendMd(sid, "\uD83D\uDCE9 [" + o.name + "](" + giftLink(o.slug) + ") uchun yangi taklif: *" + offAmtTxt(o) + "*\n\n" +
+      "Qabul qilsangiz NFT xaridorga o'tadi, summa bozor komissiyasi ayirib hamyoningizga tushadi. " +
+      "Rad etsangiz pul xaridorga qaytadi. Taklif " + OFFER_DAYS + " kun amal qiladi.",
+      { inline_keyboard: [[ { text: "Takliflarni ko'rish", web_app: { url: APP_URL + "?go=offers" } } ]] });
+    res.json({ ok:true, id: o.id, gram: Number(b.gram || 0), som: Number(b.nftSom || 0) });
+  })().catch(function(e){ console.log("OFFER XATO:", e.message); res.json({ ok:false, error:"server" }); });
+});
+
+app.post("/nft/offers", (req,res)=>{
+  const who = checkInit(req.body && req.body.initData);
+  if(!who) return res.json({ ok:false, error:"auth" });
+  try{
+    const uid = String(who.id);
+    const L = offList(load());
+    const pub = function(o){ return { id:o.id, msgId:o.msgId, slug:o.slug, name:o.name, pic:o.pic, amt:o.amt,
+      cur:o.cur, price:o.price, status:o.status, at:o.at, until:o.until, buyerName:o.buyerName }; };
+    res.json({ ok:true, fee: SALE_FEE, days: OFFER_DAYS,
+      inc: L.filter(function(o){ return o.seller === uid; }).slice(0, 60).map(pub),
+      out: L.filter(function(o){ return o.buyer === uid; }).slice(0, 60).map(pub) });
+  }catch(e){ res.json({ ok:false, error:"server" }); }
+});
+
+app.post("/nft/offer/act", (req,res)=>{
+  const who = checkInit(req.body && req.body.initData);
+  if(!who) return res.json({ ok:false, error:"auth" });
+  const id  = String(req.body.id || "");
+  const act = String(req.body.act || "");
+  const uid = String(who.id);
+  return (async function(){
+    let rate = 0;
+    if(act === "acc"){
+      const o0 = offList(load()).find(function(x){ return x.id === id; });
+      if(o0 && o0.cur === "gram"){ rate = await gramSom(); if(!(rate > 0)) return res.json({ ok:false, error:"rate" }); }
+    }
+    const db = load();
+    const o = offList(db).find(function(x){ return x.id === id; });
+    if(!o) return res.json({ ok:false, error:"none" });
+    if(o.status !== "wait") return res.json({ ok:false, error:"done", status:o.status });
+    if(act === "cancel"){
+      if(o.buyer !== uid) return res.json({ ok:false, error:"auth" });
+      offRefund(db, o, "cancel"); save(db);
+      sendMd(o.seller, "[" + o.name + "](" + giftLink(o.slug) + ") uchun " + offAmtTxt(o) + " lik taklif bekor qilindi.");
+      const bb = db[uid] || {};
+      return res.json({ ok:true, gram:Number(bb.gram || 0), som:Number(bb.nftSom || 0) });
+    }
+    if(o.seller !== uid) return res.json({ ok:false, error:"auth" });
+    if(act === "rej"){
+      offRefund(db, o, "rej"); save(db);
+      sendMd(o.buyer, "\u274C [" + o.name + "](" + giftLink(o.slug) + ") uchun taklifingiz rad etildi. " +
+        offAmtTxt(o) + " hamyoningizga qaytarildi.");
+      return res.json({ ok:true });
+    }
+    if(act !== "acc") return res.json({ ok:false, error:"act" });
+    /* Qabul: NFT hali ham sotuvchidami - oxirgi tekshiruv */
+    const g = offGift(db, uid, o.msgId);
+    if(!g){ offRefund(db, o, "void"); save(db); return res.json({ ok:false, error:"gone" }); }
+    const s = urec(db, uid), b = urec(db, o.buyer);
+    /* komissiya sotuvdagidek: SALE_FEE, lekin summaning yarmidan oshmaydi */
+    let fee, paid;
+    if(o.cur === "gram"){
+      fee  = Math.min(Math.ceil((SALE_FEE / rate) * 1000) / 1000, Math.floor(o.amt * 500) / 1000);
+      paid = Math.round((o.amt - fee) * 1e9) / 1e9;
+      s.gram = Math.round((Number(s.gram || 0) + paid) * 1e9) / 1e9;
+    } else {
+      fee  = Math.min(SALE_FEE, Math.floor(o.amt / 2));
+      paid = o.amt - fee;
+      s.nftSom = Math.round(Number(s.nftSom || 0) + paid);
+    }
+    /* NFT egasini almashtiramiz - sotib olishdagidek */
+    const idx = s.gifts.findIndex(function(x){ return String(x.msgId) === String(o.msgId); });
+    if(idx >= 0) s.gifts.splice(idx, 1);
+    if(!Array.isArray(b.gifts)) b.gifts = [];
+    b.gifts.unshift(Object.assign({}, g, { state:"idle", price:0, saleAt:null, seller:null,
+      at:new Date().toISOString(), boughtFrom:uid, boughtFor:o.amt, boughtCur:o.cur }));
+    o.status = "acc"; o.doneAt = new Date().toISOString(); o.fee = fee;
+    const curTxt = o.cur === "gram" ? "GRAM" : "so'm";
+    nftLog(b, "nft_buy",  o.amt, { cur: curTxt, item: o.name, note: "Taklif qabul qilindi" });
+    nftLog(s, "nft_sell", paid,  { cur: curTxt, item: o.name, note: "Taklif orqali sotildi (komissiya " + fee + ")" });
+    /* shu NFT ga boshqa takliflar - pul qaytadi */
+    const others = [];
+    offList(db).forEach(function(x){
+      if(x !== o && x.status === "wait" && String(x.msgId) === String(o.msgId) && offRefund(db, x, "void")) others.push(x);
+    });
+    save(db);
+    sendMd(o.buyer, "\u2705 [" + o.name + "](" + giftLink(o.slug) + ") uchun taklifingiz qabul qilindi!\n\nSovg'a *Sotuvda emas* bo'limida.",
+      { inline_keyboard: [[ { text: "Sovg'alarimni ochish", web_app: { url: APP_URL + "?go=gifts" } } ]] });
+    others.forEach(function(x){
+      sendMd(x.buyer, "\u21A9\uFE0F [" + x.name + "](" + giftLink(x.slug) + ") boshqa xaridorga sotildi. " +
+        "Taklifingiz (" + offAmtTxt(x) + ") hamyoningizga qaytarildi.");
+    });
+    res.json({ ok:true, gram:Number(s.gram || 0), som:Number(s.nftSom || 0) });
+  })().catch(function(e){ console.log("OFFER ACT XATO:", e.message); res.json({ ok:false, error:"server" }); });
+});
+
 app.post("/nft/gift/buy", (req,res)=>{
   const who = checkInit(req.body && req.body.initData);
   if(!who) return res.json({ ok:false, error:"auth" });
