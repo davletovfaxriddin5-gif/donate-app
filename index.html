@@ -1647,6 +1647,17 @@ body.light .of-info{ color:#7A5A00 }
 .sl-row .p{ font-size:14px; font-weight:800; color:var(--text); white-space:nowrap }
 .sl-empty{ text-align:center; padding:22px 10px; color:var(--faint); font-size:12.5px; line-height:1.55 }
 .sl-note{ font-size:11px; color:var(--faint); margin-top:8px; line-height:1.4 }
+/* ===== Sovg'alarim > Tarix filtrlari (mh) ===== */
+.nftm-fil button.on{ color:var(--text); border-color:rgba(110,124,255,.55); background:rgba(110,124,255,.13) }
+.nftm-fil button.on svg{ stroke:#8C9BFF }
+.mg-row .pv.plus{ color:#4FE0A0 }
+.mh-ttl{ font-size:21px; font-weight:800; letter-spacing:-.4px; color:var(--text); margin:4px 4px 12px }
+.mh-opt{ display:flex; justify-content:space-between; align-items:center; width:100%; height:48px; padding:0 14px;
+  border-radius:13px; font-size:15px; font-weight:600; color:var(--text); text-align:left }
+.mh-opt.on{ background:var(--card-2) }
+.mh-opt svg{ width:18px; height:18px; stroke:#8C9BFF; fill:none; stroke-width:2.6; stroke-linecap:round; stroke-linejoin:round }
+.mh-clr{ display:block; margin:10px auto 0; height:38px; padding:0 16px; border-radius:12px; background:var(--card-2);
+  color:var(--dim); font-size:13.5px; font-weight:600 }
 
 /* NFT bo'limining shrifti — iPhone'da SF Pro, Android'da Roboto.
    body.nft-mode faqat NFT ekranlarida yoqiladi, shuning uchun bosh
@@ -5794,7 +5805,22 @@ function nftAdmin(){ return !!(tgUser && MAINT_OK.indexOf(tgUser.id) > -1); }
 /* ---------- NFT bo'limiga o'tish: darvoza ----------
    Ikki qanot tepadan va pastdan kelib o'rtada tutashadi, ekran shu
    pardaning orqasida almashadi, keyin qanotlar orqaga qaytib ochiladi. */
+/* Darvoza ovozi - kirishda ham, chiqishda ham. Faylning boshida 332 ms jimlik bor:
+   shunda ovozning eng baland nuqtasi eshiklar tutashgan lahzaga (880 ms) aynan tushadi.
+   Ovoz darvoza bilan birga, barmoq bosilgan zahoti chalinadi - iPhone ovozni faqat
+   bosishga bevosita javob sifatida ruxsat beradi (kechiktirilsa jim qolishi mumkin). */
+var drSnd = null;
+function drSound(){
+  try{
+    if(!drSnd){ drSnd = new Audio('/sounds-x2.mp3'); drSnd.preload = 'auto'; }
+    drSnd.volume = 0.9;
+    drSnd.currentTime = 0;
+    const p = drSnd.play();
+    if(p && typeof p.catch === 'function') p.catch(function(){});
+  }catch(e){}
+}
 function nftDoor(next){
+  drSound();
   const old = document.getElementById('drWrap');
   if(old) old.remove();
   const w = document.createElement('div');
@@ -7157,9 +7183,9 @@ function nftStats(){
     if(r.kind === 'nft_buy'){
       if(cur === "so'm"){ spent += Number(r.amount) || 0; som += Number(r.amount) || 0; }
       else gram += Number(r.amount) || 0;
-      /* TG Stars / Premium ham shu hamyondan olinadi, lekin ular NFT emas */
-      const it = String(r.item || '').toUpperCase();
-      if(it.indexOf('TG STARS') < 0 && it.indexOf('TG PREMIUM') < 0) bought++;
+      /* NFT hamyonidan olingan buyurtmalar (Stars, Premium va boshqalar) ham shu
+         turda, lekin IZOHSIZ yoziladi. Haqiqiy NFT xaridida izoh bor. */
+      if(r.note) bought++;
     }
     if(r.kind === 'nft_sell') sold++;
   });
@@ -7805,34 +7831,124 @@ const MG_SEARCH = `<label class="nftm-search">
     </label>`;
 const MG_CV = `<svg viewBox="0 0 24 24"><path d="M6 9.5l6 6 6-6"/></svg>`;
 
+/* ---------- Sovg'alarim > Tarix ----------
+   Ikki manba birlashadi: NFT hamyonidan olingan buyurtmalar (Stars, Premium - holati
+   bilan) va serverdagi NFT voqealari (sotib olish, sotish, qabul qilish, yuborish,
+   takliflar). Buyurtmalar serverda ham izohsiz "nft_buy" bo'lib yoziladi - ular
+   ikki marta chiqmasligi uchun faqat izohli (haqiqiy NFT) yozuvlar olinadi. */
+var mhQ = '', mhType = 'all', mhSort = 'date', mhPer = 0, mhHistTry = false;
+const MH_TYPES = [['all','Hammasi'],['buy','Sotib olingan'],['sell','Sotilgan'],['in','Qabul qilingan'],['out','Yuborilgan'],['offer','Takliflar']];
+const MH_SORT  = [['date',"Sana bo'yicha"],['hi','Qimmatdan arzonga'],['lo','Arzondan qimmatga']];
+const MH_PER   = [[0,'Hammasi'],[1,'Bugun'],[7,'7 kun'],[30,'30 kun']];
+const MH_IC    = { nft_buy:'\uD83D\uDED2', nft_sell:'\uD83C\uDF81', gift_in:'\uD83D\uDCE5', gift_out:'\uD83D\uDCE4',
+                   offer_hold:'\uD83D\uDCE8', offer_back:'\u21A9\uFE0F' };
+function mhLbl(L, v){ const x = L.find(function(p){ return p[0] === v; }); return x ? x[1] : ''; }
+function mhTop(){
+  return '<div class="nftm-top"><label class="nftm-search">' +
+      '<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6"/></svg>' +
+      '<input type="text" placeholder="Tezkor qidiruv" autocomplete="off" value="' + esc(mhQ) + '" oninput="mhSearch(this)"></label></div>' +
+    '<div class="nftm-fil">' +
+      '<button class="' + (mhType !== 'all' ? 'on' : '') + '" onclick="mhOpen(\'type\')">' + (mhType !== 'all' ? mhLbl(MH_TYPES, mhType) : 'Turi') + MG_CV + '</button>' +
+      '<button class="' + (mhSort !== 'date' ? 'on' : '') + '" onclick="mhOpen(\'sort\')">' + (mhSort === 'hi' ? 'Qimmatroq' : mhSort === 'lo' ? 'Arzonroq' : 'Narxi') + MG_CV + '</button>' +
+      '<button class="' + (mhPer ? 'on' : '') + '" onclick="mhOpen(\'per\')">' + (mhPer ? mhLbl(MH_PER, mhPer) : 'Sana') + MG_CV + '</button>' +
+    '</div>';
+}
+function mhItems(){
+  const out = [];
+  getNftOrders().forEach(function(o){
+    const gram = (o.pay === 'gram' && o.gram) ? Number(o.gram) : 0;
+    out.push({ type:'buy', at: Date.parse(o.at) || 0,
+      name: o.item || [o.game, o.package].filter(Boolean).join(' \u2014 ') || 'NFT',
+      img: o.img ? IMG(o.img) : '', glyph: o.glyph || '\uD83C\uDF81',
+      amt: gram || Number(o.price) || 0, cur: gram ? 'GRAM' : "so'm", sign: -1,
+      st: (o.status === 'refund' || o.status === 'cancel') ? 'Bekor qilindi' : (o.status === 'wait') ? 'Yuborilmoqda' : 'Sotib olindi' });
+  });
+  (nftHist || []).forEach(function(r){
+    const k = r.kind, off = /Taklif/i.test(String(r.note || ''));
+    let type = '', st = '', sign = 0;
+    if(k === 'nft_buy'){ if(!r.note) return; type = 'buy'; st = off ? 'Taklif orqali olindi' : 'Sotib olindi'; sign = -1; }
+    else if(k === 'nft_sell'){ type = 'sell'; st = off ? 'Taklif orqali sotildi' : 'Sotildi'; sign = 1; }
+    else if(k === 'gift_in'){ type = 'in'; st = 'Qabul qilindi'; }
+    else if(k === 'gift_out'){ type = 'out'; st = 'Yuborildi'; }
+    else if(k === 'offer_hold'){ type = 'offer'; st = 'Taklif \u2014 pul bloklandi'; sign = -1; }
+    else if(k === 'offer_back'){ type = 'offer'; st = 'Taklif \u2014 pul qaytdi'; sign = 1; }
+    else return;
+    out.push({ type: type, at: Date.parse(r.at) || 0, name: r.item || 'NFT', img: '', glyph: MH_IC[k] || '\uD83C\uDF81',
+      amt: sign ? (Number(r.amount) || 0) : 0, cur: r.cur || "so'm", sign: sign, st: st });
+  });
+  return out;
+}
+function mhSom(x){ return x.cur === 'GRAM' ? x.amt * (gramSomRate || 0) : x.amt; }
 function mgHistory(){
-  const rows = getNftOrders();
-  if(!rows.length){
-    return `<div class="empty"><div class="em">🧾</div><h3>Hozircha bo'sh</h3><p>Sotib olgan sovg'alaringiz shu yerda ko'rinadi.</p></div>`;
+  if(!nftHistLoaded && !mhHistTry){
+    mhHistTry = true;
+    nftHistLoad(function(){ if(view === 'nft_gifts' && mgTab === 'history') renderNftGifts(); });
   }
+  const all = mhItems();
+  if(!all.length){
+    return `<div class="empty"><div class="em">🧾</div><h3>Hozircha bo'sh</h3><p>Sovg'alar bilan bog'liq xaridlar, sotuvlar va takliflar shu yerda ko'rinadi.</p></div>`;
+  }
+  const q = mhQ.trim().toLowerCase();
+  const from = mhPer === 1 ? new Date(new Date().setHours(0, 0, 0, 0)).getTime() : (mhPer ? Date.now() - mhPer * 864e5 : 0);
+  let rows = all.filter(function(x){
+    if(mhType !== 'all' && x.type !== mhType) return false;
+    if(from && x.at < from) return false;
+    if(q && String(x.name).toLowerCase().indexOf(q) < 0) return false;
+    return true;
+  });
+  if(!rows.length){
+    return '<div class="empty"><div class="em">\uD83D\uDD0D</div><h3>Mos yozuv topilmadi</h3><p>Qidiruv yoki filtrlarni o\'zgartirib ko\'ring.</p>' +
+      '<button class="mh-clr" onclick="mhReset()">Filtrlarni tozalash</button></div>';
+  }
+  if(mhSort === 'hi') rows.sort(function(a, b){ return mhSom(b) - mhSom(a); });
+  else if(mhSort === 'lo') rows.sort(function(a, b){ return mhSom(a) - mhSom(b); });
+  else rows.sort(function(a, b){ return b.at - a.at; });
   const M = ['YANVAR','FEVRAL','MART','APREL','MAY','IYUN','IYUL','AVGUST','SENTABR','OKTABR','NOYABR','DEKABR'];
   let out = '', last = '';
-  rows.forEach(function(o){
-    const d = new Date(o.at || Date.now());
-    const key = d.getFullYear()+'-'+d.getMonth()+'-'+d.getDate();
-    if(key !== last){ last = key; out += `<div class="mg-day">${d.getDate()} ${M[d.getMonth()]} ${d.getFullYear()}</div>`; }
-    /* Nomi: "TG STARS — 50 ⭐" ko'rinishida. Narx qaysi hamyondan
-       to'langan bo'lsa o'sha valyutada ko'rsatiladi. */
-    const nm  = esc(o.item || [o.game, o.package].filter(Boolean).join(' — ') || 'NFT');
-    const val = (o.pay === 'gram' && o.gram)
-              ? ('-' + fmtGram(o.gram) + ' GRAM')
-              : (o.price ? '-' + money(o.price, true) : '');
-    const st  = (o.status === 'refund' || o.status === 'cancel') ? 'Bekor qilindi'
-              : (o.status === 'wait') ? 'Yuborilmoqda' : 'Sotib olindi';
+  rows.forEach(function(x){
+    const d = new Date(x.at || Date.now());
+    if(mhSort === 'date'){
+      const key = d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate();
+      if(key !== last){ last = key; out += `<div class="mg-day">${d.getDate()} ${M[d.getMonth()]} ${d.getFullYear()}</div>`; }
+    }
+    const tm = String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+    const val = x.amt ? ((x.sign > 0 ? '+' : '-') + (x.cur === 'GRAM' ? fmtGram(x.amt) + ' GRAM' : money(x.amt, true))) : '';
     out += `<div class="mg-row">
-      <div class="ic">${o.img ? `<img src="${IMG(o.img)}" alt="">` : (o.glyph||'🎁')}</div>
-      <div class="tx"><div class="nm">${nm}</div><div class="sb">${st}</div></div>
-      ${val ? `<div class="pv">${val}</div>` : ''}
-      <svg class="cv" viewBox="0 0 24 24"><path d="M9.5 6l6 6-6 6"/></svg>
+      <div class="ic">${x.img ? `<img src="${x.img}" alt="">` : x.glyph}</div>
+      <div class="tx"><div class="nm">${esc(x.name)}</div><div class="sb">${x.st}${mhSort === 'date' ? ' \u00b7 ' + tm : ' \u00b7 ' + d.getDate() + '.' + String(d.getMonth() + 1).padStart(2, '0')}</div></div>
+      ${val ? `<div class="pv${x.sign > 0 ? ' plus' : ''}">${val}</div>` : ''}
     </div>`;
   });
   return out;
 }
+function mhSearch(el){
+  mhQ = el.value || '';
+  const box = document.getElementById('mhList');
+  if(box) box.innerHTML = mgHistory();
+}
+function mhOpen(k){
+  haptic();
+  closeSheet();
+  const L = k === 'type' ? MH_TYPES : k === 'sort' ? MH_SORT : MH_PER;
+  const cur = k === 'type' ? mhType : k === 'sort' ? mhSort : mhPer;
+  const OK = '<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+  const bg = document.createElement('div'); bg.className='sheet-bg'; bg.id='shBg'; bg.onclick=closeSheet;
+  const sh = document.createElement('div'); sh.className='sheet'; sh.id='shBox';
+  sh.innerHTML = '<div class="mh-ttl">' + (k === 'type' ? 'Turi' : k === 'sort' ? 'Narxi' : 'Sana') + '</div>' +
+    L.map(function(p){
+      return '<button class="mh-opt' + (p[0] === cur ? ' on' : '') + '" onclick="mhPick(\'' + k + '\',\'' + p[0] + '\')"><span>' + p[1] + '</span>' + (p[0] === cur ? OK : '') + '</button>';
+    }).join('');
+  document.body.appendChild(bg); document.body.appendChild(sh);
+  try{ applyLang(); }catch(e){}
+  requestAnimationFrame(function(){ bg.classList.add('on'); sh.classList.add('on'); });
+}
+function mhPick(k, v){
+  haptic();
+  if(k === 'type') mhType = v; else if(k === 'sort') mhSort = v; else mhPer = Number(v) || 0;
+  closeSheet();
+  renderNftGifts();
+}
+function mhReset(){ haptic(); mhQ = ''; mhType = 'all'; mhSort = 'date'; mhPer = 0; renderNftGifts(); }
 
 function renderNftGifts(){
   const nUn = mgList.filter(function(g){ return g.state !== 'sale'; }).length;
@@ -7840,13 +7956,7 @@ function renderNftGifts(){
   let body = '';
 
   if(mgTab === 'history'){
-    body = `<div class="nftm-top">${MG_SEARCH}</div>
-    <div class="nftm-fil">
-      <button>Turi${MG_CV}</button>
-      <button>Narxi${MG_CV}</button>
-      <button>Sana${MG_CV}</button>
-    </div>
-    ${mgHistory()}`;
+    body = mhTop() + '<div id="mhList">' + mgHistory() + '</div>';
   } else if(mgTab === 'offers'){
     body = offTabHtml();
   } else {
@@ -10399,6 +10509,8 @@ window.addEventListener('load', hideSplash);
 setTimeout(hideSplash, 3400);
 /* Animatsiyalar o'chirilgan bo'lsa (bosh sahifa yoki NFT menyusidan) - eslab qolinadi */
 try{ if(localStorage.getItem('mt_anim') === '0') document.body.classList.add('reduce-motion'); }catch(e){}
+/* darvoza ovozi birinchi marta ham kechikmasin - oldindan yuklab qo'yamiz */
+try{ drSnd = new Audio('/sounds-x2.mp3'); drSnd.preload = 'auto'; drSnd.load(); }catch(e){}
 
 /* ===== Tortib yangilash (pull to refresh) =====
    iPhone da sahifa eng tepada pastga tortilsa "cho'ziladi" - window.scrollY manfiy
