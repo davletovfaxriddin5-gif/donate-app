@@ -1532,6 +1532,55 @@ body.light .pf2-chip{ color:#4453D6 }
 .nd-cf h3{ font-size:20px; font-weight:700; color:var(--text); margin:0 0 12px }
 .nd-cf p{ display:flex; gap:9px; text-align:left; font-size:13.5px; line-height:1.45; color:var(--dim); margin:0 0 9px }
 .nd-cf p:before{ content:""; width:7px; height:7px; border-radius:50%; background:#FFD54A; flex-shrink:0; margin-top:6px }
+/* ===== Takliflar (of) ===== */
+.nd-buy .nd-of{ flex:0 0 48px !important; width:48px; height:48px; border-radius:15px; background:var(--card-2);
+  border:1px solid var(--stroke-2); display:grid; place-items:center; padding:0 }
+.nd-page .nd-buy .nd-of{ background:var(--card) }
+.nd-of svg{ width:21px; height:21px; stroke:var(--text); fill:none; stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round }
+.of-card{ display:flex; gap:12px; align-items:center; padding:12px; border-radius:16px; background:var(--card-2);
+  border:1px solid var(--stroke-2); margin-bottom:14px }
+.of-card .im{ width:58px; height:58px; border-radius:14px; overflow:hidden; flex-shrink:0; background:var(--card);
+  display:grid; place-items:center; font-size:26px }
+.of-card .im img{ width:100%; height:100%; object-fit:cover; display:block }
+.of-card .nm{ font-size:15.5px; font-weight:700; color:var(--text) }
+.of-card .sb{ font-size:12.5px; color:var(--faint); margin-top:2px }
+.of-seg{ display:flex; gap:6px; padding:4px; border-radius:14px; background:var(--card-2); margin-bottom:10px }
+.of-seg button{ flex:1; height:36px; border-radius:11px; font-size:13.5px; font-weight:600; color:var(--dim) }
+.of-seg button.on{ background:var(--card); color:var(--text); box-shadow:0 1px 3px rgba(0,0,0,.25) }
+.of-in{ display:flex; align-items:center; gap:8px; padding:0 14px; height:50px; border-radius:15px;
+  background:var(--card-2); border:1px solid var(--stroke-2) }
+.of-in input{ flex:1; min-width:0; background:transparent; border:0; outline:none; color:var(--text);
+  font-size:17px; font-weight:600; font-family:inherit }
+.of-in span{ font-size:13px; font-weight:600; color:var(--faint) }
+.of-err{ font-size:12px; color:#FF7B7B; margin:6px 4px 0; min-height:15px }
+.of-info{ display:flex; gap:10px; padding:12px 13px; border-radius:14px; background:rgba(255,196,0,.09);
+  border:1px solid rgba(255,196,0,.22); color:#E9C46A; font-size:12.5px; line-height:1.45; margin:10px 0 12px }
+.of-info svg{ width:18px; height:18px; flex-shrink:0; stroke:#FFC93C; fill:none; stroke-width:2; stroke-linecap:round; margin-top:1px }
+body.light .of-info{ color:#7A5A00 }
+.of-kv{ display:flex; justify-content:space-between; gap:10px; font-size:13px; color:var(--dim); padding:4px 4px }
+.of-kv b{ color:var(--text); font-weight:600; text-align:right }
+.of-go{ width:100%; height:50px; border-radius:15px; background:var(--blue); color:#fff; font-size:15.5px; font-weight:700; margin-top:12px }
+.of-go:disabled{ opacity:.45 }
+.of-no{ width:100%; height:46px; border-radius:15px; background:var(--card-2); color:var(--dim); font-size:14.5px; font-weight:600; margin-top:8px }
+.of-list{ display:flex; flex-direction:column; gap:9px }
+.of-row{ padding:12px; border-radius:17px; background:var(--card-2); border:1px solid var(--stroke-2) }
+.of-row .top{ display:flex; gap:11px; align-items:center }
+.of-row .im{ width:48px; height:48px; border-radius:12px; overflow:hidden; flex-shrink:0; background:var(--card);
+  display:grid; place-items:center; font-size:22px }
+.of-row .im img{ width:100%; height:100%; object-fit:cover; display:block }
+.of-row .tx{ flex:1; min-width:0 }
+.of-row .nm{ font-size:14.5px; font-weight:700; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+.of-row .sb{ font-size:12px; color:var(--faint); margin-top:2px }
+.of-row .am{ font-size:15px; font-weight:800; color:var(--text); white-space:nowrap; text-align:right }
+.of-row .am small{ display:block; font-size:11px; font-weight:600; color:var(--faint) }
+.of-row .acts{ display:flex; gap:8px; margin-top:10px }
+.of-row .acts button{ flex:1; height:40px; border-radius:12px; font-size:13.5px; font-weight:700 }
+.of-row .acts .ok{ background:var(--blue); color:#fff }
+.of-row .acts .no{ background:var(--card); color:var(--dim); border:1px solid var(--stroke-2) }
+.of-st{ display:inline-block; margin-top:9px; padding:3px 9px; border-radius:8px; font-size:11.5px; font-weight:700;
+  background:var(--card); color:var(--faint) }
+.of-st.ok{ background:rgba(79,224,160,.14); color:#4FE0A0 }
+.of-st.bad{ background:rgba(255,107,107,.12); color:#FF8A8A }
 
 /* NFT bo'limining shrifti — iPhone'da SF Pro, Android'da Roboto.
    body.nft-mode faqat NFT ekranlarida yoqiladi, shuning uchun bosh
@@ -5835,7 +5884,8 @@ function nftTitle(n){ return n.collection || String(n.name || 'NFT').replace(/\s
 function nftBuyBtns(n){
   const mine = !!(tgUser && String(n.seller) === String(tgUser.id));
   if(mine) return '<div class="gf-fee">Bu sizning sovg\'angiz</div>';
-  return '<div class="nd-buy"><button class="gf-b1" onclick="nftBuyGo(\'som\')">So\'m bilan olish</button>' +
+  return '<div class="nd-buy"><button class="nd-of" onclick="offOpen()" aria-label="Taklif qilish">' + OF_ICON + '</button>' +
+         '<button class="gf-b1" onclick="nftBuyGo(\'som\')">So\'m bilan olish</button>' +
          '<button class="gf-b2" onclick="nftBuyGo(\'gram\')">GRAM bilan olish</button></div>';
 }
 function nftOpen(id){
@@ -5955,6 +6005,233 @@ function renderNftItem(){
     '<div class="nd-kv"><span>Telegram da ko\'rish</span><b><a onclick="nftTgView()" style="color:var(--blue)">t.me/nft/' + esc(n.slug || '') + '</a></b></div>' +
     '</div>';
   lotPlay('ndIm', n.slug);
+}
+/* ===== Takliflar =====
+   Xaridor narx taklif qiladi - summa server tomonida bloklanadi. Egasi
+   "Mening sovg'alarim > Takliflar" da qabul qiladi yoki rad etadi. */
+var offCur = 'som', offBusy = false, offLoading = false, mgOffSeg = 'in';
+var offData = { inc:[], out:[], loaded:false, days:7 };
+const OF_ICON = '<svg viewBox="0 0 24 24"><circle cx="7.5" cy="7.5" r="2.5"/><circle cx="16.5" cy="16.5" r="2.5"/><path d="M18 6L6 18"/></svg>';
+function offHave(){ return offCur === 'gram' ? getGram() : getNftSom(); }
+function offBalTxt(){ return offCur === 'gram' ? fmtGram(getGram()) + ' GRAM' : money(getNftSom(), false); }
+function offVal(){ const el = document.getElementById('offAmt'); return el ? (Number(String(el.value).replace(',', '.')) || 0) : 0; }
+function offOpen(){
+  const n = nftSel; if(!n) return;
+  haptic('medium');
+  mgClose(); closeSheet();
+  offCur = 'som';
+  const bg = document.createElement('div'); bg.className='sheet-bg'; bg.id='shBg'; bg.onclick=closeSheet;
+  const sh = document.createElement('div'); sh.className='sheet'; sh.id='shBox';
+  const gram = somToGram(n.price);
+  const fc = nftFloor('collection', n.collection), fm = n.model ? nftFloor('model', n.model) : 0;
+  sh.innerHTML =
+    '<div class="nd-top"><button class="nd-x" onclick="closeSheet()" aria-label="Yopish"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>' +
+    '<div class="of-card"><div class="im" style="' + nftBgStyle(n) + '">' + (n.img
+      ? '<img src="' + esc(n.img) + '" alt="" onerror="this.style.display=\'none\'">' : '\uD83C\uDF81') + '</div>' +
+      '<div><div class="nm">' + esc(nftTitle(n)) + ' <span style="color:var(--faint);font-weight:600">#' + esc(String(n.num || '')) + '</span></div>' +
+      '<div class="sb">Sotuv narxi: ' + money(n.price, true) + (gram ? ' \u00b7 ' + fmtGram(gram) + ' GRAM' : '') + '</div></div></div>' +
+    '<div class="of-seg" id="offSeg"><button class="on" onclick="offSetCur(\'som\')">So\'m</button><button onclick="offSetCur(\'gram\')">GRAM</button></div>' +
+    '<div class="of-in"><input id="offAmt" type="text" inputmode="decimal" placeholder="Narxingizni yozing" autocomplete="off" oninput="offIn(this)"><span id="offUnit">so\'m</span></div>' +
+    '<div class="of-err" id="offErr"></div>' +
+    '<div class="of-info"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.6v.2"/></svg><span>' +
+      'Egasi taklifni bozor komissiyasi ayirib oladi. Summa hamyoningizda bloklanadi va taklif rad etilsa, bekor qilinsa yoki ' +
+      (offData.days || 7) + ' kun ichida javob berilmasa to\'liq qaytariladi.</span></div>' +
+    (fc ? '<div class="of-kv"><span>' + esc(n.collection) + ' \u2014 eng past</span><b>' + nftGramTxt(fc) + '</b></div>' : '') +
+    (fm ? '<div class="of-kv"><span>' + esc(n.model) + ' \u2014 eng past</span><b>' + nftGramTxt(fm) + '</b></div>' : '') +
+    '<div class="of-kv"><span>Balans</span><b id="offBal">' + offBalTxt() + '</b></div>' +
+    '<button class="of-go" id="offGo" disabled onclick="offSend()">Taklif qilish</button>' +
+    '<button class="of-no" onclick="closeSheet()">Bekor qilish</button>';
+  document.body.appendChild(bg); document.body.appendChild(sh);
+  try{ applyLang(); }catch(e){}
+  requestAnimationFrame(function(){ bg.classList.add('on'); sh.classList.add('on'); });
+}
+function offSetCur(c){
+  if(c === offCur) return;
+  haptic(); offCur = c;
+  const bs = document.querySelectorAll('#offSeg button');
+  if(bs[0]) bs[0].classList.toggle('on', c === 'som');
+  if(bs[1]) bs[1].classList.toggle('on', c === 'gram');
+  const u = document.getElementById('offUnit'); if(u) u.textContent = (c === 'gram' ? 'GRAM' : "so'm");
+  const b = document.getElementById('offBal'); if(b) b.textContent = offBalTxt();
+  const el = document.getElementById('offAmt'); if(el) el.value = '';
+  offCheck();
+}
+function offIn(el){
+  let v = String(el.value).replace(/,/g, '.');
+  if(offCur === 'gram'){
+    v = v.replace(/[^0-9.]/g, '');
+    const i = v.indexOf('.');
+    if(i > -1) v = v.slice(0, i + 1) + v.slice(i + 1).replace(/\./g, '').slice(0, 3);
+  } else v = v.replace(/[^0-9]/g, '');
+  if(el.value !== v) el.value = v;
+  offCheck();
+}
+function offCheck(){
+  const n = nftSel, a = offVal();
+  const er = document.getElementById('offErr'), go = document.getElementById('offGo');
+  let msg = '';
+  if(a > 0){
+    if(offCur === 'gram' && !(gramSomRate > 0)) msg = 'GRAM kursi olinmadi, birozdan keyin urining';
+    else {
+      const inSom = offCur === 'gram' ? a * gramSomRate : a;
+      if(n && n.price && inSom >= n.price) msg = "Taklif sotuv narxidan past bo'lishi kerak \u2014 bu narxga to'g'ridan-to'g'ri sotib oling";
+      else if(a > offHave()) msg = "Mablag' yetarli emas";
+    }
+  }
+  if(er) er.textContent = msg;
+  if(go) go.disabled = !(a > 0) || !!msg || offBusy;
+}
+function offSend(){
+  const n = nftSel, go = document.getElementById('offGo');
+  if(offBusy || !n || !go) return;
+  offCheck();
+  if(go.disabled) return;
+  const a = offVal();
+  haptic('medium');
+  bioAsk(function(){
+    offBusy = true; go.disabled = true; go.textContent = 'Yuborilmoqda\u2026';
+    fetch(VBASE + '/nft/offer', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ initData: (tg && tg.initData) || '', msgId: n.id, amt: a, cur: offCur })
+    }).then(function(r){ return r.json(); }).then(function(d){
+      offBusy = false;
+      if(d && d.ok){
+        if(typeof d.gram === 'number') setGram(d.gram);
+        if(typeof d.som  === 'number') setNftSom(d.som);
+        notify('success'); toastOk('\u2705 Taklif yuborildi');
+        closeSheet();
+        offData.loaded = false;
+        try{ nftHistLoad(); }catch(e){}
+        return;
+      }
+      go.textContent = 'Taklif qilish';
+      notify('error');
+      const E = { high:"Taklif sotuv narxidan past bo'lishi kerak", dup:'Bu NFT ga taklifingiz allaqachon bor',
+                  low:"Mablag' yetarli emas", gone:'Bu NFT allaqachon sotilgan', many:"Faol takliflaringiz juda ko'p",
+                  self:"O'z sovg'angiz", rate:'GRAM kursi olinmadi, qayta urining', amt:"Summani to'g'ri kiriting" };
+      toastErr(E[d && d.error] || 'Yuborilmadi');
+      offCheck();
+    }).catch(function(){ offBusy = false; go.textContent = 'Taklif qilish'; offCheck(); toastErr("Aloqa yo'q"); });
+  });
+}
+function offLoad(cb){
+  if(offLoading) return;
+  if(!(tg && tg.initData)){ offData.loaded = true; if(cb) cb(); return; }
+  offLoading = true;
+  const done = function(){
+    offLoading = false; offData.loaded = true;
+    if(view === 'nft_gifts' && mgTab === 'offers') renderNftGifts();
+    if(cb) cb();
+  };
+  fetch(VBASE + '/nft/offers', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ initData: tg.initData })
+  }).then(function(r){ return r.json(); }).then(function(d){
+    if(d && d.ok){ offData.inc = d.inc || []; offData.out = d.out || []; offData.days = d.days || 7; }
+    done();
+  }).catch(done);
+}
+function offSeg(s){ haptic(); mgOffSeg = s; renderNftGifts(); }
+function offLeft(o){
+  const ms = Date.parse(o.until) - Date.now();
+  if(!(ms > 0)) return 'muddati tugadi';
+  const d = Math.floor(ms / 864e5), h = Math.floor(ms / 36e5) % 24;
+  return d ? d + ' kun qoldi' : (h ? h + ' soat qoldi' : 'bir soatdan kam qoldi');
+}
+const OF_ST = { acc:['ok','Qabul qilindi'], rej:['bad','Rad etildi'], cancel:['','Bekor qilindi'],
+                exp:['','Muddati tugadi'], void:['','Yopildi \u2014 NFT boshqa egaga o\'tdi'] };
+function offRowHtml(o){
+  const amt = o.cur === 'gram' ? fmtGram(o.amt) : fmt(o.amt);
+  const img = o.pic ? '<img src="' + esc(o.pic) + '" alt="" loading="lazy" onerror="this.style.display=\'none\'">' : '\uD83C\uDF81';
+  const sub = o.status === 'wait' ? ((mgOffSeg === 'in' ? esc(o.buyerName || 'Xaridor') + ' \u00b7 ' : '') + offLeft(o)) : '';
+  let tail;
+  if(o.status === 'wait'){
+    tail = mgOffSeg === 'in'
+      ? '<div class="acts"><button class="ok" onclick="offAct(\'' + o.id + '\',\'acc\')">Qabul qilish</button>' +
+        '<button class="no" onclick="offAct(\'' + o.id + '\',\'rej\')">Rad etish</button></div>'
+      : '<div class="acts"><button class="no" onclick="offAct(\'' + o.id + '\',\'cancel\')">Taklifni bekor qilish</button></div>';
+  } else {
+    const st = OF_ST[o.status] || ['', String(o.status)];
+    tail = '<span class="of-st ' + st[0] + '">' + st[1] + '</span>';
+  }
+  return '<div class="of-row"><div class="top"><div class="im">' + img + '</div>' +
+    '<div class="tx"><div class="nm">' + esc(o.name || 'NFT') + '</div><div class="sb">' + sub + '</div></div>' +
+    '<div class="am">' + amt + '<small>' + (o.cur === 'gram' ? 'GRAM' : "so'm") + '</small></div></div>' + tail + '</div>';
+}
+function offTabHtml(){
+  if(!offData.loaded){ offLoad(); return '<div class="empty"><div class="em">\u23F3</div><h3>Yuklanmoqda\u2026</h3></div>'; }
+  let half = false;
+  try{ half = localStorage.getItem('mt_half') === '1'; }catch(e){}
+  /* Menyudagi "50%" sozlamasi: kolleksiya eng past narxining yarmidan past kelgan takliflar yashiriladi */
+  let inc = offData.inc.slice();
+  if(half) inc = inc.filter(function(o){
+    if(o.status !== 'wait') return true;
+    const fl = nftFloor('collection', String(o.name || '').replace(/\s*#\d+$/, ''));
+    if(!fl) return true;
+    return (o.cur === 'gram' ? o.amt * gramSomRate : o.amt) >= fl / 2;
+  });
+  const nW = function(a){ return a.filter(function(o){ return o.status === 'wait'; }).length; };
+  const seg = '<div class="of-seg"><button class="' + (mgOffSeg === 'in' ? 'on' : '') + '" onclick="offSeg(\'in\')">Kelgan' + (nW(inc) ? ' (' + nW(inc) + ')' : '') + '</button>' +
+              '<button class="' + (mgOffSeg === 'out' ? 'on' : '') + '" onclick="offSeg(\'out\')">Yuborilgan' + (nW(offData.out) ? ' (' + nW(offData.out) + ')' : '') + '</button></div>';
+  const L = mgOffSeg === 'in' ? inc : offData.out;
+  if(!L.length) return seg + '<div class="empty"><div class="em">\uD83D\uDCE8</div><h3>Hozircha bo\'sh</h3><p>' +
+    (mgOffSeg === 'in' ? "Sotuvdagi NFT laringizga kelgan takliflar shu yerda ko'rinadi." : "Siz yuborgan takliflar shu yerda ko'rinadi.") + '</p></div>';
+  const act = L.filter(function(o){ return o.status === 'wait'; }), old = L.filter(function(o){ return o.status !== 'wait'; });
+  return seg + '<div class="of-list">' + act.concat(old).map(offRowHtml).join('') + '</div>';
+}
+function offConfirm(text, yes){
+  try{ if(tg && tg.showConfirm){ tg.showConfirm(text, function(ok){ if(ok) yes(); }); return; } }catch(e){}
+  if(window.confirm(text)) yes();
+}
+function offAct(id, act){
+  if(offBusy) return;
+  const o = offData.inc.concat(offData.out).find(function(x){ return x.id === id; });
+  if(!o) return;
+  haptic('medium');
+  const amtTxt = o.cur === 'gram' ? fmtGram(o.amt) + ' GRAM' : money(o.amt, false);
+  const q = act === 'acc' ? ('Taklifni qabul qilasizmi? ' + o.name + ' xaridorga o\'tadi, sizga ' + amtTxt + ' bozor komissiyasi ayirib tushadi.')
+          : act === 'rej' ? ('Taklifni rad etasizmi? ' + amtTxt + ' xaridorga qaytariladi.')
+          : ('Taklifni bekor qilasizmi? ' + amtTxt + ' hamyoningizga qaytadi.');
+  offConfirm(q, function(){
+    const run = function(){
+      offBusy = true;
+      fetch(VBASE + '/nft/offer/act', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ initData: (tg && tg.initData) || '', id: id, act: act })
+      }).then(function(r){ return r.json(); }).then(function(d){
+        offBusy = false;
+        if(d && d.ok){
+          if(typeof d.gram === 'number') setGram(d.gram);
+          if(typeof d.som  === 'number') setNftSom(d.som);
+          notify('success');
+          toastOk(act === 'acc' ? '\u2705 NFT sotildi' : act === 'rej' ? 'Taklif rad etildi' : 'Taklif bekor qilindi');
+        } else {
+          notify('error');
+          const E = { gone:"NFT allaqachon boshqa egaga o'tgan \u2014 taklif yopildi, pul xaridorga qaytdi",
+                      done:'Bu taklif allaqachon yopilgan', rate:'GRAM kursi olinmadi, qayta urining', auth:"Ruxsat yo'q" };
+          toastErr(E[d && d.error] || 'Bajarilmadi');
+        }
+        offData.loaded = false;
+        renderNftGifts();
+        try{ mgLoad(); }catch(e){} try{ nftHistLoad(); }catch(e){} try{ mktLoad(); }catch(e){} try{ nftLoad(); }catch(e){}
+      }).catch(function(){ offBusy = false; toastErr("Aloqa yo'q"); });
+    };
+    if(act === 'acc') bioAsk(run); else run();
+  });
+}
+/* Bot tugmasi: https://www.minatoh.uz/?go=offers (yoki gifts) */
+function nftGoParam(){
+  let g = '';
+  try{ g = (new URLSearchParams(location.search)).get('go') || ''; }catch(e){}
+  if(g !== 'offers' && g !== 'gifts') return;
+  if(!nftAdmin()) return;
+  setTimeout(function(){
+    nftDoor(function(){
+      if(g === 'offers'){ mgTab = 'offers'; mgOffSeg = 'in'; } else { mgTab = 'gifts'; mgSeg = 'un'; }
+      offData.loaded = false;
+      go('nft_gifts');
+    });
+  }, 1900);
 }
 /* ---------- Ulashilgan havola: t.me/<bot>?startapp=nft_<slug> ----------
    NFT bo'limi yopiq bo'lsa (texnik xizmat) hech narsa ochilmaydi. */
@@ -7242,7 +7519,7 @@ function renderNftGifts(){
     </div>
     ${mgHistory()}`;
   } else if(mgTab === 'offers'){
-    body = `<div class="empty"><div class="em">📨</div><h3>Hozircha bo'sh</h3><p>Takliflar shu yerda ko'rinadi.</p></div>`;
+    body = offTabHtml();
   } else {
     body = `<div class="seg">
       <button class="${mgSeg==='un'?'on':''}" onclick="setMgSeg('un')">Sotuvda emas<span class="n">${nUn}</span></button>
@@ -7535,13 +7812,15 @@ function nftMoneyRows(){
   /* Kirim va chiqimlarni serverdagi yagona tarixdan ajratamiz */
   /* Bu yerda faqat PUL harakati: to'ldirish va yechish.
      Sotib olishlar "Sovg'alarim" ustidagi tarixda ko'rinadi. */
-  const IN  = ['gram_in','som_in'];
-  const OUT = ['gram_out','som_out'];
+  const IN  = ['gram_in','som_in','offer_back'];
+  const OUT = ['gram_out','som_out','offer_hold'];
   const ICO = { gram_in:'\uD83D\uDC8E', gram_out:'\uD83D\uDC8E', som_in:'\uD83C\uDF81',
-                som_out:'\uD83C\uDFE7', nft_buy:'\uD83D\uDED2', nft_sell:'\uD83C\uDF81' };
+                som_out:'\uD83C\uDFE7', nft_buy:'\uD83D\uDED2', nft_sell:'\uD83C\uDF81',
+                offer_hold:'\uD83D\uDCE8', offer_back:'\u21A9\uFE0F' };
   const TTL = { gram_in:"GRAM to'ldirildi", gram_out:'GRAM yechildi',
                 som_in:"So'm tushdi", som_out:"So'm yechildi",
-                nft_buy:'NFT sotib olindi', nft_sell:'NFT sotildi' };
+                nft_buy:'NFT sotib olindi', nft_sell:'NFT sotildi',
+                offer_hold:'Taklif uchun bloklandi', offer_back:'Taklif puli qaytdi' };
 
   if(nftHTab === 'in'){
     const rows = nftHist.filter(function(r){ return IN.indexOf(r.kind) > -1; });
@@ -8411,7 +8690,9 @@ function walletLog(){
     nft_sell: { t:'gifts', ic:'\uD83C\uDF81', sub:'Sotildi',           plus:true  },
     nft_buy:  { t:'gifts', ic:'\uD83D\uDED2', sub:'Sotib olindi',      plus:false },
     gift_in:  { t:'gifts', ic:'\uD83C\uDF81', sub:'Qabul qilindi',     plus:true  },
-    gift_out: { t:'gifts', ic:'\uD83D\uDCE4', sub:'Yuborildi',         plus:false }
+    gift_out: { t:'gifts', ic:'\uD83D\uDCE4', sub:'Yuborildi',         plus:false },
+    offer_hold: { t:'gifts', ic:'\uD83D\uDCE8', sub:'Taklif bloklandi', plus:false },
+    offer_back: { t:'gifts', ic:'\u21A9\uFE0F', sub:'Taklif qaytdi',    plus:true  }
   };
   const out = [];
   (nftHist || []).forEach(function(r){
@@ -9772,6 +10053,7 @@ try{ new MutationObserver(()=>scheduleLang()).observe(document.getElementById('a
 applyLang();
 sendRef();
 try{ nftDeepLink(); }catch(e){}
+try{ nftGoParam(); }catch(e){}
 loadPhone();
 loadBalance();
 loadDynGames();
