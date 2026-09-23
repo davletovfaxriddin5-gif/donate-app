@@ -2237,6 +2237,11 @@ body.light .sz-card{ border-color:rgba(200,140,40,.40) }
 body.light .ref-seg button b{ background:rgba(16,24,40,.08) }
 body.light .ref-seg button.on b{ background:rgba(255,255,255,.25) }
 .ref-none{ padding:18px 8px 10px; text-align:center; font-size:13px; line-height:1.45; color:var(--faint) }
+/* Raketa videosi o'ynay boshlagach rasm qatlamlari o'rnini egallaydi */
+.sz-vid{ position:absolute; opacity:0; pointer-events:none; transition:opacity .3s }
+.sz-fly.anim .sz-vid{ opacity:1 }
+.sz-fly .sz-thr, .sz-fly .sz-body, .sz-fly .sz-gl{ transition:opacity .3s }
+.sz-fly.anim .sz-thr, .sz-fly.anim .sz-body, .sz-fly.anim .sz-gl{ opacity:0 }
 </style>
 </head>
 <body>
@@ -8750,6 +8755,7 @@ function szRocket(){
           '<img class="sz-flame" src="' + src('flame') + '" style="transform-origin:' + nz.ox + '% ' + nz.oy + '%" alt=""></div>' +
         img('body', 'sz-body') +
         '<div class="sz-gl" style="' + box('body') + ';-webkit-mask-image:url(' + src('body') + ');mask-image:url(' + src('body') + ')"><i></i></div>' +
+        '<canvas class="sz-vid" id="szVid" style="' + box('body') + '"></canvas>' +
       '</div>' + img('c1', 'sz-c c1') +
     '</div></div>';
 }
@@ -8837,6 +8843,7 @@ function renderSeason(){
     '<div class="sz-ltabs"><button data-t="tasks" class="' + (szList === 'tasks' ? 'on' : '') + '" onclick="szSetList(\'tasks\')">Vazifalar</button>' +
       '<button data-t="rating" class="' + (szList === 'rating' ? 'on' : '') + '" onclick="szSetList(\'rating\')">Reyting</button></div>' +
     '<div id="szList">' + szListHtml() + '</div></div>';
+  szVidStart();
   clearInterval(szTimer);
   szTimer = setInterval(function(){
     if(view !== 'nft_season'){ clearInterval(szTimer); szTimer = 0; return; }
@@ -8946,6 +8953,69 @@ function refCheckLater(d){
     if(refTimer) clearTimeout(refTimer);
     refTimer = setTimeout(function(){ refTimer = null; loadRefs(true); }, Math.min(20000, 1500 + d.checking * 130));
   }
+}
+
+/* ---------- Raketa videosi (Kling'da yaratilgan aylanish) ----------
+   raketa-x1.mp4 har kadrda ikki qismdan iborat: tepasida rang, pastida
+   shaffoflik. WebGL ularni qo'shib, raketani shaffof fonda chizadi —
+   aylanish va olov videodan, uchish yo'li va bezaklar CSS'dan keladi.
+   Video yuklanmasa, o'ynamasa yoki "Harakatni kamaytirish" yoqilgan
+   bo'lsa, oddiy raketa (rasm qatlamlari) qoladi. Fayllar index.html
+   bilan bir papkada turadi (raketa-x1.mp4 va raketa-x1.webm). */
+var szV = null;
+function szVidStop(){
+  const s = szV; szV = null; if(!s) return;
+  try{ cancelAnimationFrame(s.raf); s.v.pause(); while(s.v.firstChild) s.v.removeChild(s.v.firstChild); s.v.removeAttribute('src'); s.v.load(); }catch(e){}
+}
+function szVidStart(){
+  szVidStop();
+  const cv = document.getElementById('szVid');
+  if(!cv || document.body.classList.contains('reduce-motion')) return;
+  let gl = null;
+  try{ gl = cv.getContext('webgl', { alpha:true, premultipliedAlpha:true, antialias:false }) || cv.getContext('experimental-webgl'); }catch(e){}
+  if(!gl) return;
+  const mk = function(type, src){ const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); return s; };
+  const pr = gl.createProgram();
+  gl.attachShader(pr, mk(gl.VERTEX_SHADER, 'attribute vec2 p;varying vec2 u;void main(){u=vec2((p.x+1.)*.5,(1.-p.y)*.5);gl_Position=vec4(p,0.,1.);}'));
+  gl.attachShader(pr, mk(gl.FRAGMENT_SHADER, 'precision mediump float;varying vec2 u;uniform sampler2D t;void main(){' +
+    'vec3 c=texture2D(t,vec2(u.x,u.y*.5)).rgb;float a=texture2D(t,vec2(u.x,.5+u.y*.5)).r;' +
+    'a=clamp((a-.03)/.97,0.,1.);gl_FragColor=vec4(min(c,vec3(a)),a);}'));
+  gl.linkProgram(pr);
+  if(!gl.getProgramParameter(pr, gl.LINK_STATUS)) return;
+  gl.useProgram(pr);
+  gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+  const loc = gl.getAttribLocation(pr, 'p'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+  gl.bindTexture(gl.TEXTURE_2D, gl.createTexture());
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  const v = document.createElement('video');
+  v.muted = true; v.defaultMuted = true; v.loop = true; v.playsInline = true; v.preload = 'auto';
+  v.setAttribute('muted', ''); v.setAttribute('playsinline', ''); v.setAttribute('webkit-playsinline', '');
+  let last = null;
+  [['raketa-x1.mp4', 'video/mp4'], ['raketa-x1.webm', 'video/webm']].forEach(function(s){
+    const e = document.createElement('source'); e.src = s[0]; e.type = s[1]; v.appendChild(e); last = e;
+  });
+  const st = szV = { v: v, raf: 0, on: false, play: false };
+  if(last) last.addEventListener('error', function(){ if(szV === st) szVidStop(); });
+  v.addEventListener('playing', function(){ st.play = true; });
+  const draw = function(){
+    if(szV !== st) return;
+    if(!document.body.contains(cv) || view !== 'nft_season'){ szVidStop(); return; }
+    if(st.play && v.readyState >= 2 && v.videoWidth){
+      if(cv.width !== v.videoWidth || cv.height !== v.videoHeight / 2){
+        cv.width = v.videoWidth; cv.height = v.videoHeight / 2; gl.viewport(0, 0, cv.width, cv.height);
+      }
+      try{
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, v);
+        gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      }catch(e){ szVidStop(); return; }
+      if(!st.on){ st.on = true; const f = cv.closest('.sz-fly'); if(f) f.classList.add('anim'); }
+    }
+    st.raf = requestAnimationFrame(draw);
+  };
+  const p = v.play(); if(p && p.catch) p.catch(function(){});
+  st.raf = requestAnimationFrame(draw);
 }
 
 /* ---------- "Sovg'alarni qanday qo'shish?" ----------
