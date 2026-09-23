@@ -2231,10 +2231,26 @@ if(tg){
      kirilgandagina yuklanadi. Shunda ilova tezroq ochiladi. */
   /* Telegram sarlavhasi ostida qolmaslik uchun tepadan bo'sh joy.
      Yangi Telegram'lar aniq o'lchov beradi, eskilarida 46px qoladi.
-     Bir marta o'qiladi — hech qanday hodisaga ulanmaydi. */
+     Ochilganda va to'liq ekranga o'tganda qayta o'lchanadi. */
+  const tgTopSet = function(){
+    try{
+      const sa = (tg.contentSafeAreaInset && tg.contentSafeAreaInset.top) || 0;
+      if(sa > 0) document.documentElement.style.setProperty('--tg-top', (sa + 10) + 'px');
+      else document.documentElement.style.removeProperty('--tg-top');
+    }catch(e){}
+  };
+  tgTopSet();
+  /* Menu tugmasi (va boshqa tugmalar) orqali ochilganda ham ilova to'liq
+     ekranda bo'lsin — xuddi "Открыть" orqali ochilgandagidek. BotFather'dagi
+     Launch Mode faqat asosiy Mini App'ga ta'sir qiladi, Menu tugmasining esa
+     bunday sozlamasi yo'q, shuning uchun ilovaning o'zi so'raydi.
+     Faqat telefonda: kompyuterda butun monitor egallanib qolardi. */
   try{
-    const sa = (tg.contentSafeAreaInset && tg.contentSafeAreaInset.top) || 0;
-    if(sa > 0) document.documentElement.style.setProperty('--tg-top', (sa + 10) + 'px');
+    tg.onEvent('fullscreenChanged', tgTopSet);
+    tg.onEvent('contentSafeAreaChanged', tgTopSet);
+    const mob = /^(ios|android|android_x)$/i.test(String(tg.platform || ''));
+    const can = typeof tg.requestFullscreen === 'function' && (!tg.isVersionAtLeast || tg.isVersionAtLeast('8.0'));
+    if(mob && can && !tg.isFullscreen) tg.requestFullscreen();
   }catch(e){}
   try{ tg.setHeaderColor && tg.setHeaderColor('#0B1120'); tg.setBackgroundColor && tg.setBackgroundColor('#0B1120'); }catch(e){}
   tgUser = tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user : null;
