@@ -4115,6 +4115,7 @@ app.post("/ref", (req,res)=>{
     if(!who) return res.json({ ok:false, error:"auth" });
     const uid = String(who.id);
     const by  = String(b.ref || "").replace(/\D/g,"");
+    const viaNft = /^ref_?\d+n$/.test(String(b.ref || "").trim());
 
     const db = load();
     const isNewRec = !db[uid];
@@ -4138,6 +4139,7 @@ app.post("/ref", (req,res)=>{
       const inv = urec(db, by);
       u.refBy = by;
       u.refAt = new Date().toISOString();
+      if(viaNft) u.refSrc = "nft";
       if(!Array.isArray(inv.refs)) inv.refs = [];
       if(inv.refs.indexOf(uid) < 0) inv.refs.push(uid);
       ch = true;
@@ -4160,7 +4162,7 @@ app.get("/refs", (req,res)=>{
     const ids = Array.isArray(u.refs) ? u.refs : [];
     const list = ids.map(function(k){
       const r = db[k] || {};
-      return { id:k, nm:r.nm || "", un:r.un || "", at:r.refAt || "",
+      return { id:k, nm:r.nm || "", un:r.un || "", at:r.refAt || "", src: r.refSrc === "nft" ? "nft" : "main",
                left: !!r.left, started: !!r.greeted,
                orders:(r.orders||[]).filter(function(x){ return x.status==="done"; }).length };
     });
@@ -4174,9 +4176,19 @@ app.get("/refs", (req,res)=>{
     /* Ekran ochildi — shu odamning referallarini tekshirishga qo'yamiz.
        Javob darhol qaytadi, tekshiruv orqa fonda ketadi. */
     const q = scanQueue(ids);
+    /* Manba bo'yicha ajratilgan ro'yxatlar (bosh sahifa / NFT bo'limi).
+       Eski maydonlar o'zgarmagan — eski ilova ham ishlayveradi. */
+    const part = function(src){
+      const a = act.filter(function(x){ return x.src === src; });
+      const p = pend.filter(function(x){ return x.src === src; });
+      const g = gone.filter(function(x){ return x.src === src; });
+      return { count:a.length, list:a.slice(0,100), pending:p.length, pendList:p.slice(0,50),
+               gone:g.length, leftList:g.slice(0,50) };
+    };
     res.json({ ok:true, count:act.length, total:list.length, gone:gone.length,
                pending: pend.length, pendList: pend.slice(0,50),
-               checking: q, list:act.slice(0,100), leftList:gone.slice(0,50) });
+               checking: q, list:act.slice(0,100), leftList:gone.slice(0,50),
+               srcOk:true, by:{ main:part("main"), nft:part("nft") } });
   }catch(e){ res.json({ ok:false, error:"server" }); }
 });
 
@@ -5615,7 +5627,11 @@ app.post("/webhook", (req,res)=>{
       /* Referal havolasi: t.me/BOT?start=ref_<taklif qilgan id>
          Referal FAQAT shu yerda, ya'ni Start bosilgandan keyin hisoblanadi. */
       const pay = String(text.slice(6) || "").trim();
-      const rid = (pay.match(/^ref_?(\d+)$/) || [])[1] || "";
+      /* Oxirida "n" bo'lsa — havola NFT bo'limidan olingan (ref_123n).
+         Bosh sahifa havolasi (ref_123) avvalgidek ishlaydi. */
+      const pm  = pay.match(/^ref_?(\d+)(n)?$/) || [];
+      const rid = pm[1] || "";
+      const viaNft = !!pm[2];
       /* Referal FAQAT odamning eng birinchi Start ida hisoblanadi.
          Botga avval o'zi kirgan odam keyin havola bossa — hisoblanmaydi. */
       const usedG = (ug.orders||[]).length > 0 || (ug.topups||[]).length > 0 ||
@@ -5624,13 +5640,15 @@ app.post("/webhook", (req,res)=>{
         const inv = urec(dbg, rid);
         ug.refBy = rid;
         ug.refAt = new Date().toISOString();
+        if(viaNft) ug.refSrc = "nft";
         if(!Array.isArray(inv.refs)) inv.refs = [];
         if(inv.refs.indexOf(fromId) < 0) inv.refs.push(fromId);
         chg = true;
         if(ADMIN_ID) tgCall("sendMessage", { chat_id: ADMIN_ID,
           text: "\uD83D\uDC65 YANGI REFERAL (Start bosdi)\n" +
                 (ug.nm || fromId) + (ug.un ? " (@"+ug.un+")" : "") + " (id " + fromId + ")\n" +
-                "Taklif qilgan: " + (inv.nm || rid) + (inv.un ? " (@"+inv.un+")" : "") + " (id " + rid + ")" });
+                "Taklif qilgan: " + (inv.nm || rid) + (inv.un ? " (@"+inv.un+")" : "") + " (id " + rid + ")" +
+                (viaNft ? "\nManba: NFT bo'limi" : "") });
       }
       if(chg) save(dbg);
 
