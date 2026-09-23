@@ -2199,6 +2199,17 @@ body.light .sz-tabs{ background:rgba(16,24,40,.07) }
 body.light .sz-tabs button{ color:rgba(16,24,40,.55) }
 body.light .sz-tabs button.on{ background:#fff; color:#111A2E; box-shadow:0 1px 3px rgba(16,24,40,.14) }
 body.light .sz-card{ border-color:rgba(200,140,40,.40) }
+/* Taklif qilinganlar: bosh sahifa va NFT bo'limi alohida */
+.ref-seg{ display:flex; gap:4px; padding:4px; margin:0 0 12px; border-radius:14px; background:var(--card-2); border:1px solid var(--stroke) }
+.ref-seg button{ flex:1; min-width:0; height:36px; border-radius:11px; display:flex; align-items:center; justify-content:center; gap:6px;
+  font-size:13px; font-weight:600; color:var(--dim); white-space:nowrap; transition:background .15s, color .15s }
+.ref-seg button b{ min-width:20px; height:20px; padding:0 6px; border-radius:999px; display:inline-grid; place-items:center;
+  background:rgba(255,255,255,.08); font-size:11.5px; font-weight:700 }
+.ref-seg button.on{ background:var(--blue); color:#fff }
+.ref-seg button.on b{ background:rgba(255,255,255,.22) }
+body.light .ref-seg button b{ background:rgba(16,24,40,.08) }
+body.light .ref-seg button.on b{ background:rgba(255,255,255,.25) }
+.ref-none{ padding:18px 8px 10px; text-align:center; font-size:13px; line-height:1.45; color:var(--faint) }
 </style>
 </head>
 <body>
@@ -7588,8 +7599,8 @@ function renderNftProfile(){
     <span><div class="a">Har bir to'lovdan 1% bonus</div>
       <div class="b">Havolangiz orqali qo'shilgan do'stlaringiz shu yerda va bosh sahifadagi taklif bo'limida bir xil ko'rinadi.</div></span>
   </div>
-  <button class="pf2-inv" onclick="shareRef('${link}')"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>Do'stlarni taklif qilish</button>
-  <button class="pf2-copy" onclick="copyRef('${link}')"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2.5"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Havolani nusxalash</button>
+  <button class="pf2-inv" onclick="shareRef(refLink('nft'))"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>Do'stlarni taklif qilish</button>
+  <button class="pf2-copy" onclick="copyRef(refLink('nft'))"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2.5"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Havolani nusxalash</button>
   <div class="pf2-refs${pf2Open ? '' : ' clip'}" id="pf2Refs"><div id="refBox" class="${keep ? 'ref-list' : 'pf2-empty'}">${keep || "Hali hech kim taklif qilinmagan"}</div></div>
   <button class="pf2-more" id="pf2More" style="display:none" onclick="pf2More()">Hammasini ko'rish</button>
 `;
@@ -8671,7 +8682,7 @@ const SZ_SV = {
   buy:   '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1.2 11.2a1.5 1.5 0 0 1-1.5 1.3H7.7a1.5 1.5 0 0 1-1.5-1.3z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/><path d="M12 11.5v5M9.8 14.3 12 16.5l2.2-2.2"/></svg>',
   add:   '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M3 7h18v3H3zM12 7v13M12 7S10.8 3 8.6 3a2 2 0 0 0 0 4M12 7s1.2-4 3.4-4a2 2 0 0 1 0 4"/></svg>'
 };
-var szTab = 'all', szList = 'tasks', szTimer = 0, szHistTry = false;
+var szTab = 'all', szList = 'tasks', szTimer = 0, szHistTry = false, szRefN = 0, szRefTry = false;
 
 /* NFT profilidagi tugma */
 function pf2Season(){
@@ -8704,7 +8715,7 @@ function szCalc(){
   const from = (szTab === 'season' && SZ_START) ? Date.parse(SZ_START) : 0;
   const rate = Number(gramSomRate) || 0;
   const gram = function(r){ const a = Number(r.amount) || 0; return r.cur === 'GRAM' ? a : (rate > 0 ? a / rate : 0); };
-  const s = { bN:0, bP:0, sN:0, sP:0, rN:0, rP:0, tN:0, tP:0 };
+  const s = { bN:0, bP:0, sN:0, sP:0, rN:szRefN, rP:0, tN:0, tP:0 };
   (nftHist || []).forEach(function(r){
     if(from && (Date.parse(r.at) || 0) < from) return;
     if(r.kind === 'nft_buy' && r.note){ s.bN++; s.bP += gram(r) * SZ_BUY; }
@@ -8763,6 +8774,15 @@ function szSetList(t){
 function renderSeason(){
   if(!nftHistLoaded && !szHistTry){ szHistTry = true; nftHistLoad(function(){ if(view === 'nft_season') szCardDraw(); }); }
   if(!(Number(gramSomRate) > 0)){ try{ nftLoad(function(){ if(view === 'nft_season') szCardDraw(); }); }catch(e){} }
+  /* Referallar: faqat NFT bo'limi havolasi orqali kelganlar hisoblanadi */
+  if(!szRefTry && tgUser && tgUser.id){
+    szRefTry = true;
+    fetch(VBASE + '/refs?id=' + encodeURIComponent(tgUser.id)).then(function(r){ return r.json(); }).then(function(d){
+      if(!d || !d.ok) return;
+      if(d.srcOk && d.by){ refSrcSet(); refLast = d; szRefN = (d.by.nft && d.by.nft.count) || 0; }
+      if(view === 'nft_season') szCardDraw();
+    }).catch(function(){});
+  }
   app.innerHTML = '<div class="sz">' +
     '<div class="sz-top"><button class="sz-pill" onclick="szRules()">Qoidalar' + SZ_SV.info + '</button>' +
       '<button class="sz-pill" onclick="openGram()"><img src="' + TON_IMG + '" alt="">' + fmtGram(getGram()) + ' GRAM</button></div>' +
@@ -8790,8 +8810,7 @@ function szGo(k){
 function szDo(id){
   haptic();
   if(id === 'sub'){ openLink('https://t.me/' + SZ_CHANNEL); return; }
-  const bot = (typeof BOT_USERNAME !== 'undefined' && BOT_USERNAME) ? BOT_USERNAME : 'minatoh_bot';
-  const link = 'https://t.me/' + bot + '?start=ref_' + (tgUser && tgUser.id ? tgUser.id : '');
+  const link = refLink('nft');
   openLink('https://t.me/share/url?url=' + encodeURIComponent(link) + '&text=' + encodeURIComponent("MinatoUz \u2014 o'yin valyutasi va NFT sovg'alar"));
 }
 /* Tekshirish server bosqichida ulanadi (kanal a'zoligi va taklif qilingan do'st) */
@@ -8818,6 +8837,71 @@ function szRules(){
   document.body.appendChild(bg); document.body.appendChild(sh);
   document.body.classList.add('sheet-lock');
   requestAnimationFrame(function(){ requestAnimationFrame(function(){ bg.classList.add('on'); sh.classList.add('on'); }); });
+}
+
+/* ---------- Taklif havolasi va ro'yxat: bosh sahifa / NFT bo'limi ----------
+   Bosh sahifadagi havola hech o'zgarmaydi (ref_<id>). NFT bo'limidan olingan
+   havolaning oxirida bitta "n" bo'ladi (ref_<id>n) — server kim qaysi
+   bo'limdan kelganini shu bilan ajratadi. Ikkalasi ham o'sha botga olib boradi
+   va taklif o'sha odamga yoziladi. Server buni tanishi (/refs javobida srcOk)
+   bilinmaguncha NFT bo'limi ham oddiy havolani beradi — taklif yo'qolmaydi. */
+var refTab = '', refLast = null, refSrcOk = false;
+try{ refSrcOk = localStorage.getItem('mt_refsrc') === '1'; }catch(e){}
+function refSrcSet(){ if(refSrcOk) return; refSrcOk = true; try{ localStorage.setItem('mt_refsrc', '1'); }catch(e){} }
+function refLink(src){
+  const uid = tgUser && tgUser.id ? tgUser.id : '';
+  if(!uid) return 'https://t.me/' + BOT_USERNAME;
+  return 'https://t.me/' + BOT_USERNAME + '?start=ref_' + uid + ((src === 'nft' && refSrcOk) ? 'n' : '');
+}
+function refRowsHtml(p){
+  const L = p.list || [], PL = p.pendList || [], GL = p.leftList || [];
+  const av = function(x){ return '<img src="' + VBASE + '/avatar?id=' + encodeURIComponent(x.id) + '" loading="lazy" onerror="this.remove()">'; };
+  const rows = L.map(function(x){
+    const nm = x.nm || 'Foydalanuvchi';
+    const un = x.un ? '@' + x.un : ('id ' + x.id);
+    const dt = x.at ? new Date(x.at).toLocaleDateString('ru-RU') : '';
+    const click = x.un ? ' onclick="openTg(\'' + esc(x.un) + '\')"' : '';
+    return '<div class="ref-row' + (x.un ? ' tap' : '') + '"' + click + '>'
+         + '<div class="ref-av"><span>' + esc(nm.charAt(0).toUpperCase()) + '</span>' + av(x) + '</div>'
+         + '<div class="ref-nm"><div class="a">' + esc(nm) + '</div>'
+         + '<div class="b">' + esc(un) + (dt ? ' \u00B7 ' + dt : '') + '</div></div>'
+         + '<div class="ref-c">' + (x.orders || 0) + (x.un ? ' \u203A' : '') + '</div></div>';
+  }).join('');
+  const dim = function(x){
+    const nm = x.nm || 'Foydalanuvchi', un = x.un ? '@' + x.un : ('id ' + x.id);
+    return '<div class="ref-row gone"><div class="ref-av"><span>' + esc(nm.charAt(0).toUpperCase()) + '</span>' + av(x) + '</div>'
+         + '<div class="ref-nm"><div class="a">' + esc(nm) + '</div><div class="b">' + esc(un) + '</div></div></div>';
+  };
+  let out = '';
+  if(L.length) out += '<div class="ref-head">Taklif qilinganlar <span>' + (p.count || L.length) + '</span></div>' + rows;
+  if(PL.length) out += '<div class="ref-head gone-h">Botga Start bosmagan <span>' + (p.pending || PL.length) + '</span></div>' + PL.map(dim).join('');
+  if(GL.length) out += '<div class="ref-head gone-h">Botdan chiqib ketganlar <span>' + (p.gone || GL.length) + '</span></div>' + GL.map(dim).join('');
+  return out;
+}
+/* Ikki bo'lim: "Bosh sahifadan" va "NFT bo'limidan". NFT ekranlarida NFT
+   bo'limi, bosh sahifada bosh sahifa ochiq turadi — boshqasiga bir bosishda o'tiladi. */
+function refTabsDraw(){
+  const box = document.getElementById('refBox'), d = refLast;
+  if(!box || !d || !d.by) return;
+  const M = d.by.main || {}, N = d.by.nft || {};
+  const tot = function(p){ return (p.count || 0) + (p.pending || 0) + (p.gone || 0); };
+  if(!tot(M) && !tot(N)) return;
+  const tab = refTab || (isNftView(view) ? 'nft' : 'main');
+  const P = tab === 'nft' ? N : M;
+  box.innerHTML = '<div class="ref-seg">' +
+      '<button class="' + (tab === 'main' ? 'on' : '') + '" onclick="refSetTab(\'main\')">Bosh sahifadan<b>' + (M.count || 0) + '</b></button>' +
+      '<button class="' + (tab === 'nft' ? 'on' : '') + '" onclick="refSetTab(\'nft\')">NFT bo\'limidan<b>' + (N.count || 0) + '</b></button></div>' +
+    (tot(P) ? refRowsHtml(P) : '<div class="ref-none">' + (tab === 'nft'
+        ? "NFT bo'limidagi havola orqali hali hech kim qo'shilmagan."
+        : "Bosh sahifadagi havola orqali hali hech kim qo'shilmagan.") + '</div>');
+  box.className = 'ref-list';
+}
+function refSetTab(t){ haptic(); refTab = t; refTabsDraw(); try{ pf2Clip(); }catch(e){} }
+function refCheckLater(d){
+  if(d.checking > 0 && document.getElementById('refBox')){
+    if(refTimer) clearTimeout(refTimer);
+    refTimer = setTimeout(function(){ refTimer = null; loadRefs(true); }, Math.min(20000, 1500 + d.checking * 130));
+  }
 }
 
 /* ---------- "Sovg'alarni qanday qo'shish?" ----------
@@ -10771,6 +10855,8 @@ function loadRefs(again){
     .then(function(r){ return r.json(); })
     .then(function(d){
       if(!d || !d.ok) return;
+      /* Yangi server: ro'yxat bosh sahifa / NFT bo'limi bo'yicha ajratilgan */
+      if(d.srcOk && d.by){ refSrcSet(); refLast = d; refTabsDraw(); refCheckLater(d); return; }
       d.list = d.list || []; d.pendList = d.pendList || []; d.leftList = d.leftList || [];
       if(!d.list.length && !d.pendList.length && !d.leftList.length) return;
       const rows = d.list.map(function(x){
