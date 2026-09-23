@@ -2058,6 +2058,36 @@ body.light .hd-amt.plus{ color:#0f8a58 }
 .hd-cp svg{ width:14px; height:14px; flex-shrink:0; stroke:var(--faint); fill:none; stroke-width:2;
   stroke-linecap:round; stroke-linejoin:round }
 .hd-cp:active{ opacity:.55 }
+/* ===== Sovg'a oynasi: tekis sarlavha, xususiyat qatorlari, ikki teng tugma ===== */
+.mg3-hd{ margin-bottom:6px }
+.mg3-hd > div{ min-width:0 }
+.mg3-hd .t{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+.mg3-hd .t span{ color:var(--faint); font-weight:700 }
+.mg3-st{ display:flex; align-items:center; gap:6px; margin-top:4px; font-size:12.5px; font-weight:600; color:var(--dim) }
+.mg3-st i{ width:7px; height:7px; border-radius:50%; background:var(--faint); flex-shrink:0 }
+.mg3-st.on{ color:#4FE0A0 }
+.mg3-st.on i{ background:#4FE0A0; box-shadow:0 0 0 3px rgba(79,224,160,.16) }
+body.light .mg3-st.on{ color:#0f8a58 }
+.mg3 .mg2-hero{ margin:4px auto 14px }
+.mg3 .mg3-box{ margin:0 !important }
+.mg3-rp{ display:inline-block; margin-left:8px; padding:2px 7px; border-radius:7px; font-style:normal;
+  font-size:11.5px; font-weight:700; vertical-align:1px; background:rgba(255,196,0,.14); color:#FFC93C }
+.mg3-rp.t{ background:rgba(79,224,160,.14); color:#4FE0A0 }
+body.light .mg3-rp{ background:rgba(200,140,40,.12); color:#a86a12 }
+body.light .mg3-rp.t{ background:rgba(15,138,88,.10); color:#0f8a58 }
+.mg3-acts{ display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:14px }
+.mg3-btn{ height:44px; padding:0 10px; border-radius:14px; display:flex; align-items:center; justify-content:center; gap:7px;
+  background:var(--card-2); border:1px solid var(--stroke-2); color:var(--text); font-size:14.5px; font-weight:600;
+  white-space:nowrap; transition:transform .13s cubic-bezier(.2,.85,.3,1) }
+.mg3-btn svg{ width:17px; height:17px; flex-shrink:0; stroke:currentColor; fill:none; stroke-width:2;
+  stroke-linecap:round; stroke-linejoin:round }
+.mg3-btn.pri{ background:var(--blue-grad); border-color:transparent; color:#fff }
+.mg3-btn.red{ background:rgba(255,107,107,.08); border-color:rgba(255,107,107,.3); color:#FF6B6B }
+body.light .mg3-btn.red{ color:#cc2a30 }
+.mg3-btn.wide{ width:100%; margin-top:14px }
+.mg3-btn:active{ transform:scale(.985) }
+.mg3-btn:disabled{ opacity:.55 }
+@media (max-width:360px){ .mg3-btn{ font-size:13px; gap:5px } .mg3-btn svg{ width:15px; height:15px } }
 </style>
 </head>
 <body>
@@ -7661,7 +7691,7 @@ function mg2Head(g, title){
 function mg2Reset(b){
   if(!b) return;
   if(b.id === 'mgTakeBtn') b.innerHTML = '<span class="ic">' + MG2.out + '</span><span><b>Chiqarish</b><small>Telegram\'ingizga</small></span>';
-  else if(b.id === 'mgUnBtn') b.innerHTML = '<span class="ic">' + MG2.x + '</span><span><b>Sotuvdan olish</b><small>Sovg\'a "Sotuvda emas" bo\'limiga qaytadi</small></span>';
+  else if(b.id === 'mgUnBtn') b.innerHTML = MG2.x + 'Sotuvdan olish';
   else b.textContent = 'Hisobga chiqarish';
 }
 function mgOpen(msgId){
@@ -7676,37 +7706,62 @@ function mgOpen(msgId){
   const bg = document.createElement('div');
   bg.className = 'sheet-bg'; bg.id = 'gfBg'; bg.onclick = mgClose;
   const sh = document.createElement('div');
-  sh.className = 'sheet gf-sh mg2'; sh.id = 'gfSh';
+  sh.className = 'sheet gf-sh mg2 mg3'; sh.id = 'gfSh';
   const A = g.attrs || {}, sale = g.state === 'sale';
-  const chips = [['Model', A.model], ['Fon', A.bg], ['Belgi', A.sym]].filter(function(x){ return x[1] && x[1].n; }).map(function(x){
+  /* Xususiyatlar tekis qatorlarda: nomi chapda, qiymati va noyobligi o'ngda */
+  const rows = [['Model', A.model], ['Fon', A.bg], ['Belgi', A.sym]].filter(function(x){ return x[1] && x[1].n; }).map(function(x){
     const r = nftRar(x[1]);
-    return '<div class="mg2-chip"><span>' + x[0] + '</span><b>' + esc(x[1].n) + '</b>' +
-      (r ? '<i class="' + (/%$/.test(r) ? '' : 't') + '">' + esc(r) + '</i>' : '') + '</div>';
+    return shRow(x[0], esc(x[1].n) + (r ? '<i class="mg3-rp' + (/%$/.test(r) ? '' : ' t') + '">' + esc(r) + '</i>' : ''));
   }).join('');
+  const num = mg2Num(g);
+  /* Sarlavha tepada, yopish tugmasi bilan bir qatorda. Tugmalar ikkita,
+     teng o'lchamda: sotuvga qo'yish va o'z hisobiga chiqarib olish.
+     Boshqa odamga yuborish — yuqoridagi "Yuborish" tugmasida. */
   sh.innerHTML =
-    '<div class="nd-top"><button class="nd-x" onclick="mgClose()" aria-label="Yopish">' + MG2.x + '</button></div>' +
+    '<div class="gp-hd mg3-hd"><div>' +
+      '<div class="t">' + esc(mg2Title(g)) + (num ? ' <span>#' + esc(String(num)) + '</span>' : '') + '</div>' +
+      '<div class="mg3-st' + (sale ? ' on' : '') + '"><i></i>' + (sale ? 'Sotuvda \u00b7 ' + money(g.price || 0, true) : 'Sotuvda emas') + '</div>' +
+    '</div><button class="nd-x" onclick="mgClose()" aria-label="Yopish">' + MG2.x + '</button></div>' +
     '<div class="mg2-hero"><div class="mg2-im" id="gfIm" style="' + mg2Bg(g) + '">' + mg2Img(g) + '</div>' +
       (A.crafted ? '<button class="nd-badge" onclick="nftCrafted()" aria-label="Craft">' + ND_ANVIL + '</button>' : '') + '</div>' +
-    '<div class="mg2-nm">' + esc(mg2Title(g)) + (mg2Num(g) ? ' <span>#' + esc(String(mg2Num(g))) + '</span>' : '') + '</div>' +
-    '<div class="mg2-st' + (sale ? ' on' : '') + '"><i></i>' + (sale ? 'Sotuvda \u00b7 ' + money(g.price || 0, true) : 'Sotuvda emas') + '</div>' +
-    (chips ? '<div class="mg2-chips">' + chips + '</div>' : '') +
+    (rows ? '<div class="sh-box mg3-box">' + rows + '</div>' : '') +
     (sale
-      ? '<button class="mg2-tile wide red" id="mgUnBtn" onclick="mgUnsale()"><span class="ic">' + MG2.x + '</span>' +
-          '<span><b>Sotuvdan olish</b><small>Sovg\'a "Sotuvda emas" bo\'limiga qaytadi</small></span></button>'
-      : '<button class="mg2-pri" onclick="mgSale()">' + MG2.tag + 'Sotuvga qo\'yish</button>' +
-        '<div class="mg2-grid">' +
-          '<button class="mg2-tile" id="mgTakeBtn" onclick="mgTake()"><span class="ic">' + MG2.out + '</span>' +
-            '<span><b>Chiqarish</b><small>Telegram\'ingizga</small></span></button>' +
-          '<button class="mg2-tile" onclick="mgSendForm()"><span class="ic">' + MG2.gift + '</span>' +
-            '<span><b>Yuborish</b><small>Boshqa odamga</small></span></button>' +
-        '</div>' +
-        '<div class="mg2-fee">' + MG2.info + '<span>Chiqarish va yuborish haqi <b>' + fmtGram(mgFee) + ' GRAM</b>' +
-          ' \u00b7 balansingizda ' + fmtGram(getGram()) + ' GRAM</span></div>');
+      ? '<button class="mg3-btn red wide" id="mgUnBtn" onclick="mgUnsale()">' + MG2.x + 'Sotuvdan olish</button>'
+      : '<div class="mg3-acts">' +
+          '<button class="mg3-btn pri" onclick="mgSale()">' + MG2.tag + 'Sotuvga qo\'yish</button>' +
+          '<button class="mg3-btn" onclick="mgOutForm()">' + MG2.out + 'Chiqarib olish</button>' +
+        '</div>');
   document.body.appendChild(bg); document.body.appendChild(sh);
   requestAnimationFrame(function(){
     requestAnimationFrame(function(){ bg.classList.add('on'); sh.classList.add('on'); });
   });
   lotPlay('gfIm', g.slug);
+}
+/* "Chiqarib olish" — sovg'a oynasining ichida, xuddi "Sotuvga qo'yish"
+   formasi kabi: orqaga tugmasi sovg'aning o'ziga qaytaradi. Tasdiqlash
+   yuqoridagi Chiqarish oynasi bilan bir xil so'rovni yuboradi (gpGo). */
+function mgOutForm(){
+  if(!mgPick) return;
+  const sh = document.getElementById('gfSh'); if(!sh) return;
+  haptic();
+  lotStop();
+  const g = mgPick;
+  gpMode = 'out'; gpSelId = String(g.msgId);
+  const fee = Number(mgFee) || 0, have = Number(getGram()) || 0, low = have < fee;
+  const need = Math.ceil(Math.round((fee - have) * 1e6) / 1e4) / 100;
+  const me = (tgUser && tgUser.username) ? ('@' + tgUser.username) : 'Telegram hisobingiz';
+  sh.innerHTML = mg2Head(g, 'Chiqarib olish') + mg2Mini(g) +
+    '<div class="sh-box mg3-box">' +
+      shRow('Qayerga', esc(me)) +
+      shRow('Xizmat haqi', esc(fmtGram(fee)) + ' GRAM') +
+      shRow('Balansingiz', '<span class="gp-v' + (low ? ' low' : '') + '">' + esc(fmtGram(have)) + ' GRAM</span>') +
+    '</div>' +
+    '<div class="mg2-fee">' + MG2.info + '<span>' + (low
+      ? 'Chiqarish uchun yana <b>' + esc(fmtGram(need)) + ' GRAM</b> kerak.'
+      : "Sovg'a Telegram profilingizga tushadi va bu yerdan o'chadi. Yuborilmasa, haq qaytariladi.") +
+    '</span></div>' +
+    (low ? '<button class="mg2-pri go" onclick="gpTopGram()">' + GP_PLUS + "GRAM to'ldirish</button>"
+         : '<button class="mg2-pri go" id="gpBtn" onclick="gpGo()">' + MG2.out + 'Chiqarish</button>');
 }
 function mgClose(){
   lotStop();
@@ -8075,9 +8130,9 @@ function gpTopGram(){ mgClose(); openGram(); }
 /* Chiqarish — sovg'a oynasidagi mgTake bilan aynan bir xil so'rov */
 function gpGo(){
   if(gpBusy) return;
-  const g = gpSel(); if(!g) return;
+  const g = gpSel(); if(!g || String(g.msgId) !== String(gpSelId)) return;
   haptic();
-  if(getGram() < mgFee){ gpDraw(); return; }
+  if(getGram() < mgFee){ toast('GRAM yetarli emas \u2014 ' + fmtGram(mgFee) + ' kerak'); return; }
   bioAsk(function(){
     gpBusy = true;
     const b = document.getElementById('gpBtn');
