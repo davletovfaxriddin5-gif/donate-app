@@ -2994,7 +2994,11 @@ app.get("/nft/hist", (req,res)=>{
   if(!id) return res.json({ ok:false, error:"id" });
   const db = load();
   const rec = db[id];
-  res.json({ ok:true, rows: (rec && Array.isArray(rec.nftHist)) ? rec.nftHist : [] });
+  /* To'liq karta raqami va egasining ismi faqat serverda qoladi: bu so'rov
+     tekshiruvsiz, uni istalgan ID bilan chaqirish mumkin. Ilova ularni ishlatmaydi. */
+  res.json({ ok:true, rows: (rec && Array.isArray(rec.nftHist))
+    ? rec.nftHist.map(function(r){ const c = Object.assign({}, r); delete c.cardFull; delete c.holder; return c; })
+    : [] });
 });
 
 /* ---------- GRAM to'ldirish ----------
