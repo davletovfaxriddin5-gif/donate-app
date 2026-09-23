@@ -2088,6 +2088,8 @@ body.light .mg3-btn.red{ color:#cc2a30 }
 .mg3-btn:active{ transform:scale(.985) }
 .mg3-btn:disabled{ opacity:.55 }
 @media (max-width:360px){ .mg3-btn{ font-size:13px; gap:5px } .mg3-btn svg{ width:15px; height:15px } }
+/* NFT oynasi barmoq ortidan yursin (surish paytida animatsiya o'chadi) */
+.gf-sh.drag{ transition:none !important }
 </style>
 </head>
 <body>
@@ -6211,7 +6213,7 @@ function nftOpen(id){
     '</div>' +
     '<div class="nd-rows">' + nftRows(n) + '</div>' +
     nftBuyBtns(n);
-  document.body.appendChild(bg); document.body.appendChild(sh);
+  document.body.appendChild(bg); document.body.appendChild(sh); gfDragBind(sh);
   requestAnimationFrame(function(){
     requestAnimationFrame(function(){ bg.classList.add('on'); sh.classList.add('on'); });
   });
@@ -7731,7 +7733,7 @@ function mgOpen(msgId){
           '<button class="mg3-btn pri" onclick="mgSale()">' + MG2.tag + 'Sotuvga qo\'yish</button>' +
           '<button class="mg3-btn" onclick="mgOutForm()">' + MG2.out + 'Chiqarib olish</button>' +
         '</div>');
-  document.body.appendChild(bg); document.body.appendChild(sh);
+  document.body.appendChild(bg); document.body.appendChild(sh); gfDragBind(sh);
   requestAnimationFrame(function(){
     requestAnimationFrame(function(){ bg.classList.add('on'); sh.classList.add('on'); });
   });
@@ -8018,7 +8020,7 @@ function gpShell(cls){
   bg.className = 'sheet-bg'; bg.id = 'gfBg'; bg.onclick = mgClose;
   const sh = document.createElement('div');
   sh.className = 'sheet gf-sh mg2 ' + cls; sh.id = 'gfSh';
-  document.body.appendChild(bg); document.body.appendChild(sh);
+  document.body.appendChild(bg); document.body.appendChild(sh); gfDragBind(sh);
   return sh;
 }
 function gpShow(){
@@ -8392,6 +8394,52 @@ function hdShow(m){
     '<div class="sh-box">' + m.rows.map(function(x){ return shRow(x[0], x[1]); }).join('') + '</div>';
   gpShow();
   if(m.nft && m.slug) lotPlay('hdIm', m.slug);
+}
+
+/* ---------- NFT oynalarini pastga surib yopish ----------
+   "Qo'shish" varag'idagi kabi: barmoq bilan pastga tortilsa oyna birga
+   tushadi; yetarlicha tortilsa yoki tez siltansa yopiladi, kam bo'lsa
+   joyiga qaytadi. Oyna ichida aylantirish bo'lsa, avval u ishlaydi.
+   Yonga surish (sovg'alar tasmasi) ga tegilmaydi. X tugmasi ham ishlayveradi.
+   Tinglovchilar faqat oynaning o'ziga ulanadi (document ga emas). */
+function gfDragBind(sh){
+  if(!sh || sh._drag) return;
+  sh._drag = true;
+  let y0 = 0, x0 = 0, d = 0, mode = 0, raf = 0, ly = 0, lt = 0, v = 0;
+  sh.addEventListener('touchstart', function(e){
+    const t = e.touches[0];
+    y0 = ly = t.clientY; x0 = t.clientX; lt = Date.now(); d = 0; v = 0;
+    mode = e.touches.length > 1 ? -1 : 0;
+  }, { passive: true });
+  sh.addEventListener('touchmove', function(e){
+    if(mode < 0) return;
+    const t = e.touches[0], dy = t.clientY - y0, dx = t.clientX - x0, now = Date.now();
+    if(now > lt) v = (t.clientY - ly) / (now - lt);
+    ly = t.clientY; lt = now;
+    if(mode === 0){
+      const top = sh.scrollTop <= 0;
+      if(Math.abs(dx) > 6 && Math.abs(dx) > Math.abs(dy)){ mode = -1; return; }
+      if(dy > 6 && top){ mode = 1; sh.classList.add('drag'); }
+      else if(dy < -6 || !top){ mode = -1; return; }
+      else { if(dy > 0 && dy >= Math.abs(dx) && top && e.cancelable) e.preventDefault(); return; }
+    }
+    if(e.cancelable) e.preventDefault();
+    d = Math.max(0, dy - 6);
+    if(raf) return;
+    raf = requestAnimationFrame(function(){ raf = 0; sh.style.transform = 'translateY(' + d + 'px)'; });
+  }, { passive: false });
+  const end = function(){
+    if(mode !== 1){ mode = 0; return; }
+    mode = 0;
+    if(raf){ cancelAnimationFrame(raf); raf = 0; }
+    sh.classList.remove('drag');
+    sh.style.transition = 'transform .36s cubic-bezier(.22,.88,.28,1)';
+    sh.style.transform = '';
+    setTimeout(function(){ sh.style.transition = ''; }, 400);
+    if(d > 90 || (v > 0.55 && d > 24)) mgClose();
+  };
+  sh.addEventListener('touchend', end, { passive: true });
+  sh.addEventListener('touchcancel', end, { passive: true });
 }
 
 /* ---------- "Sovg'alarni qanday qo'shish?" ----------
