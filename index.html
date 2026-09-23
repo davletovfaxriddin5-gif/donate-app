@@ -2090,6 +2090,23 @@ body.light .mg3-btn.red{ color:#cc2a30 }
 @media (max-width:360px){ .mg3-btn{ font-size:13px; gap:5px } .mg3-btn svg{ width:15px; height:15px } }
 /* NFT oynasi barmoq ortidan yursin (surish paytida animatsiya o'chadi) */
 .gf-sh.drag{ transition:none !important }
+/* ===== Tarix qatorlari: emoji o'rniga o'z rasmi ===== */
+.nh-im{ width:100%; height:100%; display:block }
+.ic img.nh-im.fill, .hd-ic img.nh-im.fill{ object-fit:cover }
+.ic img.nh-im.fit, .hd-ic img.nh-im.fit{ object-fit:contain; padding:3px; box-sizing:border-box }
+.hd-ic img.nh-im.fit{ padding:10px }
+.hd-ic img{ width:100%; height:100%; object-fit:cover; display:block }
+.ic img.nh-ton, .hd-ic img.nh-ton{ object-fit:contain; padding:0 }
+.ic:has(> img.nh-ton), .hd-ic:has(> img.nh-ton){ background:transparent !important; box-shadow:none !important }
+.nh-sv{ width:100%; height:100%; display:grid; place-items:center; background:rgba(110,124,255,.14) }
+.nh-sv svg{ width:46%; height:46%; stroke:#8C9BFF; fill:none; stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round }
+.nh-sv.g{ background:rgba(79,224,160,.13) }
+.nh-sv.g svg{ stroke:#4FE0A0 }
+.nh-sv.a{ background:rgba(240,169,60,.13) }
+.nh-sv.a svg{ stroke:#F0A93C }
+body.light .nh-sv svg{ stroke:#4B5BD6 }
+body.light .nh-sv.g svg{ stroke:#0f8a58 }
+body.light .nh-sv.a svg{ stroke:#a86a12 }
 </style>
 </head>
 <body>
@@ -8353,6 +8370,7 @@ function hdFromRec(r){
     const G = hdGift(m.name);
     m.slug = G.slug; m.pic = G.pic; m.attrs = G.attrs; m.title = G.title; m.num = G.num;
   }
+  if(!m.nft) m.icon = nhIcon(r);
   if(r.id) rows.push(['Yozuv raqami', hdCp(r.id)]);
   return m;
 }
@@ -8367,6 +8385,7 @@ function hdFromOrder(o){
   if(o.package) m.rows.push(['Paket', esc(o.package)]);
   if(o.pid) m.rows.push(['Kimga', esc(o.pid)]);
   if(o.id) m.rows.push(['Buyurtma raqami', hdCp(o.id, '#' + o.id)]);
+  m.icon = nhOrderIcon(o);
   return m;
 }
 function hdShow(m){
@@ -8381,7 +8400,7 @@ function hdShow(m){
         (m.pic ? '<img src="' + esc(m.pic) + '" alt="" onerror="this.remove()">' : '') +
       '</div></div></div>';
   } else {
-    hero = '<div class="hd-ic">' + m.glyph + '</div>';
+    hero = '<div class="hd-ic">' + (m.icon || m.glyph) + '</div>';
   }
   const title = m.nft ? (esc(m.title || m.name) + (m.num ? ' <span>#' + esc(m.num) + '</span>' : '')) : esc(m.name);
   const sign  = m.sign > 0 ? '+' : (m.sign < 0 ? '\u2212' : '');
@@ -8441,6 +8460,69 @@ function gfDragBind(sh){
   sh.addEventListener('touchend', end, { passive: true });
   sh.addEventListener('touchcancel', end, { passive: true });
 }
+
+/* ---------- Tarix qatorlarining rasmlari ----------
+   Emoji o'rniga har yozuvning o'z rasmi: karta bilan to'ldirilgan bo'lsa
+   o'sha bankning rasmi (CARDS), USDT va Stars — to'ldirish ekranidagi
+   rasmlar, GRAM — TON belgisi, NFT — NFT'ning o'zi, Stars/Premium
+   xaridlari — o'yinlar ro'yxatidagi rasmi. O'z rasmi yo'q yozuvlar
+   (qaytgan pul, tuzatish, kartaga yechish) uchun oddiy chizma belgi.
+   Rasm yuklanmasa ham o'rnida o'sha chizma belgi chiqadi. */
+const TON_IMG = 'data:image/webp;base64,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';
+const NH_SV = {
+  card:   '<svg viewBox="0 0 24 24"><rect x="3" y="5.5" width="18" height="13" rx="2.6"/><path d="M3 9.8h18M6.8 14.6h3.6"/></svg>',
+  back:   '<svg viewBox="0 0 24 24"><path d="M9 7.5 5 11.5l4 4"/><path d="M5.5 11.5H14a4.5 4.5 0 0 1 0 9h-2"/></svg>',
+  help:   '<svg viewBox="0 0 24 24"><path d="M12 3.5 19 6v5.2c0 4.3-2.9 7.9-7 9.3-4.1-1.4-7-5-7-9.3V6z"/><path d="M9 12l2.2 2.2L15.5 10"/></svg>',
+  gift:   '<svg viewBox="0 0 24 24"><rect x="3.5" y="9" width="17" height="11" rx="2"/><path d="M12 9v11M3.5 13h17M12 9c-1.5-3.5-5.5-4-5.5-1.5S12 9 12 9zm0 0c1.5-3.5 5.5-4 5.5-1.5S12 9 12 9z"/></svg>',
+  wallet: '<svg viewBox="0 0 24 24"><path d="M3.5 8A2.5 2.5 0 0 1 6 5.5h10.5A2.5 2.5 0 0 1 19 8"/><rect x="3.5" y="8" width="17" height="10.5" rx="2.5"/><path d="M20.5 11.6h-3a1.9 1.9 0 0 0 0 3.8h3"/></svg>'
+};
+function nhSv(k, c){ return '<span class="nh-sv ' + (c || '') + '">' + (NH_SV[k] || NH_SV.wallet) + '</span>'; }
+function nhImg(src, fit, fb){
+  return '<img class="nh-im ' + fit + '" src="' + esc(src) + '" alt="" loading="lazy" onerror="nhImgErr(this,\'' + fb + '\')">';
+}
+function nhImgErr(el, fb){ try{ el.outerHTML = nhSv(fb); }catch(e){} }
+/* To'lov usuli nomidan rasm */
+function nhPayIcon(note){
+  const n = String(note || '').toLowerCase();
+  if(n.indexOf('usdt') > -1) return nhImg(IMG('/ton-x1.webp'), 'fit', 'wallet');
+  if(n.indexOf('stars') > -1) return nhImg(IMG('/stars-x7.webp'), 'fill', 'wallet');
+  let hit = null;
+  try{
+    Object.keys(CARDS).forEach(function(k){
+      const c = CARDS[k];
+      if(!hit && c && c.bank && n.indexOf(String(c.bank).toLowerCase()) > -1) hit = c;
+    });
+  }catch(e){}
+  if(hit && hit.icon && hit.icon.indexOf('/') === 0) return nhImg(IMG(hit.icon), 'fit', 'card');
+  return '';
+}
+function nhIcon(r){
+  if(!r) return nhSv('wallet');
+  const k = String(r.kind || ''), note = String(r.note || '');
+  if(/^(gift_|offer_)/.test(k) || k === 'nft_sell' || (k === 'nft_buy' && note)){
+    const G = hdGift(r.item);
+    return G.pic ? nhImg(G.pic, 'fill', 'gift') : nhSv('gift');
+  }
+  if(k === 'nft_buy') return nhOrderIcon({ game: String(r.item || '').split(' \u2014 ')[0] });
+  if(k === 'gram_in' || k === 'gram_out') return '<img class="nh-im nh-ton" src="' + TON_IMG + '" alt="">';
+  if(/bekor|qaytar/i.test(note)) return nhSv('back', 'g');
+  if(/qo'llab|tuzatish/i.test(note)) return nhSv('help', 'a');
+  if(k === 'som_in') return nhPayIcon(note) || nhSv('wallet');
+  if(k === 'som_out') return nhSv('card');
+  return nhSv('wallet');
+}
+/* NFT hamyonidan berilgan buyurtma (Stars, Premium va boshqalar) */
+function nhOrderIcon(o){
+  try{
+    const g = (GAMES || []).filter(function(x){
+      return x && o && (x.id === o.gameId || x.id === o.gid ||
+             String(x.name || '').toLowerCase() === String(o.game || '').toLowerCase());
+    })[0];
+    if(g && (g.img || g.hicon)) return nhImg(IMG(g.img || g.hicon), 'fill', 'wallet');
+  }catch(e){}
+  return nhSv('wallet');
+}
+function nhIconW(x){ return x ? (x.ord ? nhOrderIcon(x.ord) : nhIcon(x.rec)) : nhSv('wallet'); }
 
 /* ---------- "Sovg'alarni qanday qo'shish?" ----------
    Pastdan chiqadigan qo'llanma: rasm, uch qadam va tugma. */
@@ -8657,7 +8739,7 @@ function mgHistory(){
     const tm = String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
     const val = x.amt ? ((x.sign > 0 ? '+' : '-') + (x.cur === 'GRAM' ? fmtGram(x.amt) + ' GRAM' : money(x.amt, true))) : '';
     out += `<div class="mg-row" onclick="hdOpen('mh',${i})">
-      <div class="ic">${x.img ? `<img src="${x.img}" alt="">` : x.glyph}</div>
+      <div class="ic">${nhIconW(x)}</div>
       <div class="tx"><div class="nm">${esc(x.name)}</div><div class="sb">${x.st}${mhSort === 'date' ? ' \u00b7 ' + tm : ' \u00b7 ' + d.getDate() + '.' + String(d.getMonth() + 1).padStart(2, '0')}</div></div>
       ${val ? `<div class="pv${x.sign > 0 ? ' plus' : ''}">${val}</div>` : ''}
     </div>`;
@@ -9038,7 +9120,7 @@ function nftMoneyRows(){
       const amt = cur === 'GRAM' ? fmtGram(r.amount) : fmt(r.amount);
       return `<div class="order" onclick="hdOpen('nh',${i})">
         <div class="top">
-          <div class="g"><div class="ic">${ICO[r.kind]||'\uD83D\uDCB0'}</div><div><div class="nm">${esc(r.item || TTL[r.kind] || 'Kirim')}</div><div class="sub">${esc(r.note||'')}</div></div></div>
+          <div class="g"><div class="ic">${nhIcon(r)}</div><div><div class="nm">${esc(r.item || TTL[r.kind] || 'Kirim')}</div><div class="sub">${esc(r.note||'')}</div></div></div>
           <div class="price" style="color:#4FE0A0">+${amt}<small>${cur}</small></div>
         </div>
         <div class="sep"></div>
@@ -9055,7 +9137,7 @@ function nftMoneyRows(){
     const amt = cur === 'GRAM' ? fmtGram(r.amount) : fmt(r.amount);
     return `<div class="order" onclick="hdOpen('nh',${i})">
       <div class="top">
-        <div class="g"><div class="ic">${ICO[r.kind]||'\uD83C\uDFE7'}</div><div><div class="nm">${esc(r.item || r.card || TTL[r.kind] || 'Chiqim')}</div><div class="sub">${esc(r.note||'')}</div></div></div>
+        <div class="g"><div class="ic">${nhIcon(r)}</div><div><div class="nm">${esc(r.item || r.card || TTL[r.kind] || 'Chiqim')}</div><div class="sub">${esc(r.note||'')}</div></div></div>
         <div class="price">-${amt}<small>${cur}</small></div>
       </div>
       <div class="sep"></div>
@@ -9946,7 +10028,7 @@ function walletRows(){
     const key = d.getFullYear()+'-'+d.getMonth()+'-'+d.getDate();
     if(key !== last){ last = key; out += `<div class="mg-day">${d.getDate()} ${M[d.getMonth()]} ${d.getFullYear()}</div>`; }
     out += `<div class="mg-row" onclick="hdOpen('wl',${i})">
-      <div class="ic">${r.ic}</div>
+      <div class="ic">${nhIconW(r)}</div>
       <div class="tx"><div class="nm">${r.nm}</div><div class="sb">${r.sub}</div></div>
       <div class="pv"${r.plus?' style="color:#4FE0A0"':''}>${r.amount
         ? (r.plus?'+':'-') + (r.cur === 'GRAM' ? (fmtGram(r.amount) + ' GRAM') : fmt(r.amount))
