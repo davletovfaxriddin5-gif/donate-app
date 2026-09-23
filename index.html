@@ -1996,6 +1996,68 @@ body.light .tc-sh .tc-addr .cp svg{ color:rgba(16,24,40,.55) }
 .nft-maint .em{ font-size:52px; margin-bottom:18px }
 .nft-maint h3{ font-weight:600; font-size:26px; letter-spacing:-.5px; color:var(--text); margin:0 0 12px }
 .nft-maint p{ font-size:15px; line-height:1.5; margin:0 auto; max-width:300px }
+/* ===== Sovg'ani tanlash oynasi (Chiqarish / Yuborish) ===== */
+.gp-hd{ display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin:0 0 10px }
+.gp-hd .t{ font-size:20px; font-weight:800; color:var(--text); line-height:1.2 }
+.gp-hd .s{ font-size:12.5px; color:var(--faint); margin-top:3px }
+.gp-hd .nd-x{ flex-shrink:0; margin:-3px -7px 0 0 }
+.gp .mg2-hero{ width:124px; margin:6px auto 10px }
+.gp .mg2-im{ width:124px; height:124px; font-size:52px; border-radius:20px }
+.gp-strip{ position:relative; display:flex; gap:10px; overflow-x:auto; overflow-y:hidden;
+  -webkit-overflow-scrolling:touch; scrollbar-width:none; scroll-snap-type:x proximity;
+  padding:6px 6px 4px; margin:12px -6px 2px }
+.gp-strip::-webkit-scrollbar{ display:none }
+.gp-th{ flex:0 0 auto; width:60px; padding:0; border:0; background:transparent; display:flex;
+  flex-direction:column; align-items:center; gap:6px; scroll-snap-align:center }
+.gp-th .im{ width:56px; height:56px; border-radius:15px; overflow:hidden; display:grid; place-items:center;
+  background:var(--card-2); font-size:26px; box-shadow:inset 0 0 0 1px var(--stroke-2);
+  transition:transform .16s cubic-bezier(.2,.85,.3,1), box-shadow .16s ease }
+.gp-th .im img{ width:100%; height:100%; object-fit:cover; display:block }
+.gp-th .no{ max-width:60px; font-size:11px; font-weight:600; color:var(--faint);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+.gp-th.on .im{ box-shadow:0 0 0 2px var(--card), 0 0 0 4px #5B6CFF }
+.gp-th.on .no{ color:var(--text) }
+.gp-th:active .im{ transform:scale(.94) }
+.gp .sh-box{ margin:12px 0 0 !important }
+.gp .mg2-pri{ margin-top:12px }
+.gp-v.low{ color:#FF6B6B }
+body.light .gp-v.low{ color:#cc2a30 }
+.gp-empty{ text-align:center; padding:12px 6px 2px }
+.gp-empty .ic{ width:64px; height:64px; margin:0 auto 14px; border-radius:20px; display:grid; place-items:center;
+  background:var(--blue-soft) }
+.gp-empty .ic svg{ width:30px; height:30px; stroke:#8C9BFF; fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round }
+.gp-empty h3{ font-size:17px; font-weight:700; color:var(--text); margin:0 0 6px }
+.gp-empty p{ font-size:13px; line-height:1.45; color:var(--faint); margin:0 auto 4px; max-width:290px }
+
+/* ===== Tarix yozuvi oynasi ===== */
+.mg-row[onclick]{ cursor:pointer; transition:transform .13s cubic-bezier(.2,.85,.3,1) }
+.mg-row.tapped{ transform:scale(.985) }
+.hd .mg2-hero{ margin:0 auto 12px }
+.hd-im{ position:relative }
+.hd-bl{ position:absolute; inset:-30%; background-size:cover; background-position:center;
+  filter:blur(26px) saturate(1.3); opacity:.95 }
+.hd-an{ position:relative; width:100%; height:100%; display:grid; place-items:center }
+.hd-an img{ position:absolute; inset:0 }
+.hd-ic{ width:80px; height:80px; margin:2px auto 12px; border-radius:24px; overflow:hidden; display:grid;
+  place-items:center; font-size:38px; background:var(--card-2); box-shadow:inset 0 0 0 1px var(--stroke-2) }
+.hd-st.ok{ color:#4FE0A0 }
+.hd-st.ok i{ background:#4FE0A0; box-shadow:0 0 0 4px rgba(79,224,160,.16) }
+.hd-st.wait{ color:#F0A93C }
+.hd-st.wait i{ background:#F0A93C; box-shadow:0 0 0 4px rgba(240,169,60,.16) }
+.hd-st.bad{ color:#FF6B6B }
+.hd-st.bad i{ background:#FF6B6B; box-shadow:0 0 0 4px rgba(255,107,107,.16) }
+body.light .hd-st.ok{ color:#0f8a58 }
+body.light .hd-st.wait{ color:#a86a12 }
+body.light .hd-st.bad{ color:#cc2a30 }
+.hd-amt{ text-align:center; margin:-4px 0 14px; font-size:26px; font-weight:700; color:var(--text);
+  font-variant-numeric:tabular-nums }
+.hd-amt.plus{ color:#4FE0A0 }
+body.light .hd-amt.plus{ color:#0f8a58 }
+.hd .sh-box{ margin-bottom:2px !important }
+.hd-cp{ display:inline-flex; align-items:center; gap:6px; cursor:pointer }
+.hd-cp svg{ width:14px; height:14px; flex-shrink:0; stroke:var(--faint); fill:none; stroke-width:2;
+  stroke-linecap:round; stroke-linejoin:round }
+.hd-cp:active{ opacity:.55 }
 </style>
 </head>
 <body>
@@ -7243,18 +7305,23 @@ function lotLib(){
 function lotUrl(slug){
   return slug ? ('https://nft.fragment.com/gift/' + String(slug).toLowerCase() + '.lottie.json') : '';
 }
-let lotAnim = null;
+let lotAnim = null, lotTok = 0;
 function lotStop(){
+  lotTok++;   /* yo'ldagi yuklanish eskirdi — boshqa oynaga tushib qolmasin */
   if(lotAnim){ try{ lotAnim.destroy(); }catch(e){} lotAnim = null; }
 }
 /* Oynadagi rasmni animatsiyaga almashtiradi */
 function lotPlay(boxId, slug){
+  /* Har chaqiruvga raqam: tezda boshqa NFT tanlansa, kechikib kelgan eski
+     animatsiya yangi oynaga tushmaydi */
+  const tok = ++lotTok;
   const url = lotUrl(slug); if(!url) return;
   lotLib().then(function(ok){
-    if(!ok) return;                       /* kutubxona kelmadi — rasm qoladi */
+    if(!ok || tok !== lotTok) return;                       /* kutubxona kelmadi — rasm qoladi */
     const box = document.getElementById(boxId);
     if(!box) return;
     fetch(url).then(function(r){ return r.json(); }).then(function(data){
+      if(tok !== lotTok) return;
       const b = document.getElementById(boxId);
       if(!b) return;
       lotStop();
@@ -7562,13 +7629,7 @@ const HW_WARN = '<svg viewBox="0 0 24 24" fill="none" stroke="none"><circle cx="
 
 function mgAdd(){ mgHowTo('/qoshish-x2.webp'); }
 /* Yuqoridagi "Chiqarish" tugmasi — qaysi sovg'a ekanini so'raydi */
-function mgOut(){
-  haptic();
-  const rows = mgList.filter(function(g){ return g.state !== 'sale' && g.state !== 'out'; });
-  if(!rows.length){ toast("Chiqariladigan sovg'a yo'q"); return; }
-  if(rows.length === 1){ mgOpen(rows[0].msgId); return; }
-  toast("Sovg'ani tanlang");
-}
+function mgOut(){ gpOpen('out'); }
 
 /* ---------- Sovg'a oynasi ---------- */
 /* ---------- Sovg'a oynasi (mg2) ----------
@@ -7772,12 +7833,13 @@ function mgTake(){
   });
 }
 /* ---------- Sovg'ani boshqa odamga yuborish ---------- */
+/* Ilgari bu yerda avval katta sovg'a oynasi ochilib, 0.3 soniyadan keyin
+   formaga almashardi — NFT bir lahza katta bo'lib ko'rinib ketardi.
+   Endi: sovg'a bitta bo'lsa forma darhol, ko'p bo'lsa avval tanlash oynasi. */
 function mgSend(){
-  haptic();
-  const rows = mgList.filter(function(g){ return g.state === 'idle'; });
-  if(!rows.length){ toast("Yuboriladigan sovg'a yo'q"); return; }
-  if(rows.length === 1){ mgOpen(rows[0].msgId); setTimeout(mgSendForm, 320); return; }
-  toast("Sovg'ani tanlang");
+  const rows = gpRows();
+  if(mgLoaded && rows.length === 1){ haptic(); gpSendDirect(rows[0]); return; }
+  gpOpen('send');
 }
 let sgOk = false, sgLast = '', sgT = null, sgBusy = false;
 function mgSendForm(){
@@ -7875,6 +7937,408 @@ function mgSendGo(){
     });
   });
 }
+/* =====================================================================
+   Sovg'ani tanlash oynasi — yuqoridagi "Chiqarish" va "Yuborish" uchun.
+   Sovg'a oynasi bilan bir joyda (#gfSh) ochiladi, shuning uchun mgClose,
+   mgSendForm va mgSendGo hech o'zgarishsiz ishlayveradi.
+   gpMode: 'out' — o'z hisobiga chiqarish, 'send' — boshqa odamga yuborish.
+   ===================================================================== */
+var gpMode = 'out', gpSelId = '', gpBusy = false;
+const GP_PLUS = '<svg viewBox="0 0 24 24"><path d="M12 5.5v13M5.5 12h13"/></svg>';
+
+/* Tanlasa bo'ladigan sovg'alar: sotuvda ham, yo'lda ham emas */
+function gpRows(){
+  return (mgList || []).filter(function(g){ return g.state !== 'sale' && g.state !== 'out'; });
+}
+function gpSel(){
+  const rows = gpRows();
+  return rows.find(function(g){ return String(g.msgId) === String(gpSelId); }) || rows[0] || null;
+}
+/* Yangi, hali ko'rinmaydigan varaq. Ochiq turgan eski oyna olib tashlanadi. */
+function gpShell(cls){
+  const old = document.getElementById('gfSh'); if(old) old.remove();
+  const ob  = document.getElementById('gfBg'); if(ob) ob.remove();
+  lotStop();
+  const bg = document.createElement('div');
+  bg.className = 'sheet-bg'; bg.id = 'gfBg'; bg.onclick = mgClose;
+  const sh = document.createElement('div');
+  sh.className = 'sheet gf-sh mg2 ' + cls; sh.id = 'gfSh';
+  document.body.appendChild(bg); document.body.appendChild(sh);
+  return sh;
+}
+function gpShow(){
+  const bg = document.getElementById('gfBg'), sh = document.getElementById('gfSh');
+  requestAnimationFrame(function(){
+    requestAnimationFrame(function(){ if(bg) bg.classList.add('on'); if(sh) sh.classList.add('on'); });
+  });
+}
+function gpOpen(mode){
+  haptic();
+  if(!mgLoaded){
+    toast('Yuklanmoqda\u2026');
+    mgLoad(function(){ if(mgLoaded && view === 'nft_gifts') gpOpen(mode); });
+    return;
+  }
+  gpMode = (mode === 'send') ? 'send' : 'out';
+  gpSelId = '';
+  gpShell('gp');
+  gpDraw();
+  gpShow();
+}
+function gpDraw(){
+  const sh = document.getElementById('gfSh'); if(!sh) return;
+  const send = gpMode === 'send';
+  const rows = gpRows();
+  const was  = document.getElementById('gpStrip');
+  const keep = was ? was.scrollLeft : -1;
+  const head = '<div class="gp-hd"><div><div class="t">' + (send ? "Sovg'a yuborish" : "Sovg'ani chiqarish") + '</div>' +
+      '<div class="s">' + (send ? "Boshqa odamning Telegram hisobiga" : "O'z Telegram hisobingizga") + '</div></div>' +
+    '<button class="nd-x" onclick="mgClose()" aria-label="Yopish">' + MG2.x + '</button></div>';
+  lotStop();
+
+  if(!rows.length){
+    const nSale = (mgList || []).filter(function(g){ return g.state === 'sale'; }).length;
+    const nOut  = (mgList || []).filter(function(g){ return g.state === 'out'; }).length;
+    let h, p, b = '';
+    if(nSale){
+      h = "Hamma sovg'alaringiz sotuvda";
+      p = (send ? 'Yuborish' : 'Chiqarish') + " uchun avval sovg'ani sotuvdan oling.";
+      b = '<button class="mg2-pri" onclick="gpToSale()">Sotuvdagilarni ko\'rish</button>';
+    } else if(nOut){
+      h = "Sovg'a yuborilmoqda";
+      p = "Jarayon tugagach, qolgan sovg'alaringiz shu yerda ko'rinadi.";
+    } else {
+      h = send ? "Yuboriladigan sovg'a yo'q" : "Chiqariladigan sovg'a yo'q";
+      p = send ? "Sovg'a qo'shganingizdan keyin uni shu yerdan boshqa odamga yubora olasiz."
+               : "Sovg'a qo'shganingizdan keyin uni shu yerdan Telegram hisobingizga chiqarib olasiz.";
+      b = '<button class="mg2-pri" onclick="gpToAdd()">' + GP_PLUS + 'Sovg\'a qo\'shish</button>';
+    }
+    sh.innerHTML = head + '<div class="gp-empty"><div class="ic">' + MG2.gift + '</div>' +
+      '<h3>' + h + '</h3><p>' + p + '</p></div>' + b;
+    return;
+  }
+
+  const g = gpSel(); gpSelId = String(g.msgId);
+  const num = mg2Num(g);
+  const strip = rows.length < 2 ? '' :
+    '<div class="gp-strip" id="gpStrip">' + rows.map(function(x){
+      const n = mg2Num(x);
+      return '<button class="gp-th' + (String(x.msgId) === gpSelId ? ' on' : '') + '" data-id="' + esc(String(x.msgId)) +
+        '" onclick="gpPick(this.dataset.id)"><span class="im" style="' + mg2Bg(x) + '">' + mg2Img(x) + '</span>' +
+        '<span class="no">' + (n ? '#' + esc(String(n)) : esc(mg2Title(x))) + '</span></button>';
+    }).join('') + '</div>';
+
+  const fee = Number(mgFee) || 0, have = Number(getGram()) || 0;
+  const low  = !send && have < fee;
+  const need = Math.ceil(Math.round((fee - have) * 1e6) / 1e4) / 100;
+  const me   = (tgUser && tgUser.username) ? ('@' + tgUser.username) : 'Telegram hisobingiz';
+  const info = send ? '' :
+    '<div class="sh-box">' +
+      shRow('Qayerga', esc(me)) +
+      shRow('Xizmat haqi', esc(fmtGram(fee)) + ' GRAM') +
+      shRow('Balansingiz', '<span class="gp-v' + (low ? ' low' : '') + '">' + esc(fmtGram(have)) + ' GRAM</span>') +
+    '</div>';
+  const note = '<div class="mg2-fee">' + MG2.info + '<span>' + (send
+      ? "Keyingi qadamda qabul qiluvchining username'ini kiritasiz. Xizmat haqi <b>" + esc(fmtGram(fee)) + ' GRAM</b>'
+      : low ? 'Chiqarish uchun yana <b>' + esc(fmtGram(need)) + ' GRAM</b> kerak.'
+            : "Sovg'a Telegram profilingizga tushadi va bu yerdan o'chadi. Yuborilmasa, haq qaytariladi.") +
+    '</span></div>';
+  const btn = send ? '<button class="mg2-pri" onclick="gpNext()">Davom etish</button>'
+    : low ? '<button class="mg2-pri" onclick="gpTopGram()">' + GP_PLUS + "GRAM to'ldirish</button>"
+          : '<button class="mg2-pri" id="gpBtn" onclick="gpGo()">' + MG2.out + 'Chiqarish</button>';
+
+  sh.innerHTML = head +
+    '<div class="mg2-hero"><div class="mg2-im" id="gpIm" style="' + mg2Bg(g) + '">' + mg2Img(g) + '</div></div>' +
+    '<div class="mg2-nm">' + esc(mg2Title(g)) + (num ? ' <span>#' + esc(String(num)) + '</span>' : '') + '</div>' +
+    strip + info + note + btn;
+
+  const st = document.getElementById('gpStrip');
+  if(st){
+    if(keep >= 0) st.scrollLeft = keep;
+    else {
+      const on = st.querySelector('.on');
+      if(on) st.scrollLeft = Math.max(0, on.offsetLeft - (st.clientWidth - on.offsetWidth) / 2);
+    }
+  }
+  lotPlay('gpIm', g.slug);
+}
+function gpPick(id){
+  if(gpBusy || String(id) === String(gpSelId)) return;
+  haptic();
+  gpSelId = String(id);
+  gpDraw();
+}
+function gpToSale(){ mgClose(); mgTab = 'gifts'; setMgSeg('on'); }
+function gpToAdd(){ mgClose(); mgAdd(); }
+function gpTopGram(){ mgClose(); openGram(); }
+
+/* Chiqarish — sovg'a oynasidagi mgTake bilan aynan bir xil so'rov */
+function gpGo(){
+  if(gpBusy) return;
+  const g = gpSel(); if(!g) return;
+  haptic();
+  if(getGram() < mgFee){ gpDraw(); return; }
+  bioAsk(function(){
+    gpBusy = true;
+    const b = document.getElementById('gpBtn');
+    if(b){ b.disabled = true; b.textContent = 'Chiqarilmoqda\u2026'; }
+    fetch(VBASE + '/nft/gift/out', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ initData: tg.initData || '', msgId: g.msgId })
+    }).then(function(r){ return r.json(); }).then(function(d){
+      gpBusy = false;
+      if(d && d.ok){
+        setGram(d.left);
+        notify('success');
+        toastOk('\u2705 Hisobingizga yuborildi');
+        mgClose(); mgLoad(); nftHistLoad();
+        return;
+      }
+      gpBtnReset();
+      notify('error');
+      if(d && d.error === 'fee')  return toastErr('GRAM yetarli emas');
+      if(d && d.error === 'busy') return toastErr('Allaqachon yuborilmoqda');
+      if(d && d.error === 'send') return toastErr('Yuborilmadi, haq qaytarildi');
+      toastErr('Bajarilmadi');
+    }).catch(function(){
+      gpBusy = false;
+      gpBtnReset();
+      toastErr("Aloqa yo'q");
+    });
+  });
+}
+function gpBtnReset(){
+  const b = document.getElementById('gpBtn');
+  if(b){ b.disabled = false; b.innerHTML = MG2.out + 'Chiqarish'; }
+}
+
+/* Yuborish: tanlangan sovg'a uchun mavjud forma (mgSendForm) ochiladi */
+function gpNext(){
+  const g = gpSel(); if(!g) return;
+  haptic();
+  mgPick = g;
+  lotStop();
+  mgSendForm();
+  gpBackPatch(true);
+}
+/* Sovg'a bitta bo'lsa — tanlash shart emas, forma darhol ochiladi */
+function gpSendDirect(g){
+  gpMode = 'send'; gpSelId = String(g.msgId);
+  mgPick = g;
+  gpShell('gp');
+  mgSendForm();
+  gpBackPatch(false);
+  gpShow();
+}
+/* Formadagi "orqaga" sovg'aning katta oynasiga emas, tanlash oynasiga
+   qaytaradi. Tanlash bo'lmagan bo'lsa (sovg'a bitta) — oynani yopadi. */
+function gpBackPatch(toPick){
+  const b = document.querySelector('#gfSh .mg2-back');
+  if(!b) return;
+  if(toPick){ b.setAttribute('onclick', 'gpBack()'); return; }
+  b.setAttribute('onclick', 'mgClose()');
+  b.setAttribute('aria-label', 'Yopish');
+  b.innerHTML = MG2.x;
+}
+function gpBack(){ haptic(); gpMode = 'send'; gpDraw(); }
+
+/* =====================================================================
+   Tarix yozuvi oynasi — Sovg'alarim > Tarix, so'm hamyoni va pastki
+   menyudagi Tarix qatorlari bosilganda ochiladi: sana, vaqt, tafsilotlar
+   va NFT bo'lsa uning animatsiyasi. Ro'yxat chizilganda ko'rsatilgan
+   qatorlar shu massivlarga yoziladi, bosilganda tartib raqamidan topiladi.
+   ===================================================================== */
+var mhShown = [], wlShown = [], nhShown = [];
+const HD_MON = ['yanvar','fevral','mart','aprel','may','iyun','iyul','avgust','sentabr','oktabr','noyabr','dekabr'];
+const HD_CP  = '<svg viewBox="0 0 24 24"><rect x="8.5" y="8.5" width="11" height="11" rx="2.4"/>' +
+               '<path d="M15.5 8.5V6.4a1.9 1.9 0 0 0-1.9-1.9H6.4a1.9 1.9 0 0 0-1.9 1.9v7.2a1.9 1.9 0 0 0 1.9 1.9h2.1"/></svg>';
+/* Qatorlar bosilganda ozgina ichkariga kirsin (bindHistTaps pastda) */
+function nhBind(){ setTimeout(function(){ try{ bindHistTaps(); }catch(e){} }, 0); }
+
+function hdOpen(src, i){
+  const L = src === 'mh' ? mhShown : (src === 'wl' ? wlShown : nhShown);
+  const x = L && L[i];
+  if(!x) return;
+  const o = (src === 'nh') ? null : x.ord;
+  const r = (src === 'nh') ? x : x.rec;
+  const m = o ? hdFromOrder(o) : (r ? hdFromRec(r) : null);
+  if(m) hdShow(m);
+}
+function hdWhen(at){
+  const d = new Date(at || '');
+  if(!at || isNaN(d.getTime())) return ['', ''];
+  return [d.getDate() + ' ' + HD_MON[d.getMonth()] + ' ' + d.getFullYear(),
+          String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0')];
+}
+function hdMoney(n, cur){
+  n = Number(n) || 0;
+  return cur === 'GRAM' ? (fmtGram(n) + ' GRAM') : (fmt(Math.round(n)) + " so'm");
+}
+/* [rang, matn]: ok — yashil, wait — sariq, bad — qizil */
+function hdSt(s, okTxt, waitTxt){
+  if(!s || s === 'done') return ['ok', okTxt || 'Bajarildi'];
+  if(s === 'wait' || s === 'sent') return ['wait', waitTxt || 'Kutilmoqda'];
+  if(s === 'refund') return ['bad', 'Pul qaytarildi'];
+  return ['bad', 'Bekor qilingan'];
+}
+/* Bosilganda nusxalanadigan qiymat */
+function hdCp(v, shown){
+  if(!v) return '';
+  return '<span class="hd-cp" data-c="' + esc(String(v)) + '" onclick="hdCopy(this)">' +
+         esc(String(shown || v)) + HD_CP + '</span>';
+}
+function hdCopy(el){
+  const v = (el && el.dataset) ? el.dataset.c : '';
+  if(!v) return;
+  haptic();
+  const say = function(ok){ toast(ok ? 'Nusxalandi' : 'Nusxalanmadi'); };
+  const old = function(){
+    let ok = false;
+    try{
+      const t = document.createElement('textarea');
+      t.value = v; t.setAttribute('readonly', '');
+      t.style.cssText = 'position:fixed;top:0;left:0;opacity:0';
+      document.body.appendChild(t); t.select();
+      try{ t.setSelectionRange(0, v.length); }catch(e){}
+      try{ ok = document.execCommand('copy'); }catch(e){}
+      t.remove();
+    }catch(e){}
+    return ok;
+  };
+  try{
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(v).then(function(){ say(true); }, function(){ say(old()); });
+      return;
+    }
+  }catch(e){}
+  say(old());
+}
+/* Tarix yozuvida faqat NFT nomi bor. Sovg'a hali biror ro'yxatda bo'lsa
+   ma'lumoti o'shandan olinadi, bo'lmasa havola nomi nomdan tiklanadi:
+   "Plush Pepe #1234" -> "PlushPepe-1234" (Fragment katta-kichik harfni farqlamaydi). */
+function hdGift(name){
+  const nm = String(name || '');
+  const same = function(x){ return x && String(x.name) === nm; };
+  let g = null;
+  try{
+    g = (mgList || []).find(same) || (NFT_ITEMS || []).find(same) ||
+        ((offData && offData.inc) || []).find(same) || ((offData && offData.out) || []).find(same) || null;
+  }catch(e){}
+  const mt = nm.match(/^(.*?)\s*#(\d+)\s*$/);
+  const title = mt ? mt[1] : nm, num = mt ? mt[2] : '';
+  const slug = (g && g.slug) || (mt ? title.replace(/[^A-Za-z0-9]/g, '') + '-' + num : '');
+  const pic  = (g && (g.pic || g.img)) || (slug ? 'https://nft.fragment.com/gift/' + slug.toLowerCase() + '.medium.jpg' : '');
+  return { slug: slug, pic: pic, attrs: (g && g.attrs) || null, title: title, num: num };
+}
+function hdFromRec(r){
+  const k = String(r.kind || ''), note = String(r.note || ''), cur = r.cur || "so'm";
+  const amt = Number(r.amount) || 0, offer = /taklif/i.test(note), w = hdWhen(r.at);
+  const rows = [['Sana', esc(w[0])], ['Vaqt', esc(w[1])]];
+  const m = { nft:false, name:'', glyph:'\uD83D\uDCB0', amt:0, cur:cur, sign:0, st:hdSt(r.status), rows:rows };
+  const nft = function(){ m.nft = true; m.name = String(r.item || 'NFT'); m.glyph = '\uD83C\uDF81'; };
+
+  if(k === 'gift_in'){
+    nft(); m.st = hdSt(r.status, 'Qabul qilindi');
+    const f = note.match(/^@?(\S+) dan keldi/);
+    if(f) rows.push(['Kimdan', esc(/^\d+$/.test(f[1]) ? ('ID ' + f[1]) : ('@' + f[1]))]);
+    else if(note) rows.push(['Qanday', esc(note)]);
+  } else if(k === 'gift_out'){
+    nft();
+    const t = note.match(/^@?(\S+) ga yuborildi/);
+    if(t){ m.st = hdSt(r.status, 'Yuborildi'); rows.push(['Kimga', esc('@' + t[1])]); }
+    else { m.st = hdSt(r.status, 'Chiqarildi'); rows.push(['Qayerga', 'Telegram hisobingiz']); }
+    if(amt) rows.push(['Xizmat haqi', esc(hdMoney(amt, cur))]);
+  } else if(k === 'nft_buy'){
+    if(note){ nft(); rows.push(['Qanday', offer ? 'Taklif orqali' : 'Bozordan']); }
+    else { m.name = String(r.item || 'Xarid'); m.glyph = '\uD83D\uDED2'; }
+    m.st = hdSt(r.status, offer ? 'Taklif orqali olindi' : 'Sotib olindi');
+    m.amt = amt; m.sign = -1;
+  } else if(k === 'nft_sell'){
+    nft(); m.st = hdSt(r.status, offer ? 'Taklif orqali sotildi' : 'Sotildi');
+    m.amt = amt; m.sign = 1;
+    rows.push(['Qanday', offer ? 'Taklif orqali' : 'Bozorda']);
+    const c = note.match(/komissiya\s*([\d.]+)/i);
+    if(c) rows.push(['Komissiya', esc(hdMoney(c[1], cur))]);
+  } else if(k === 'offer_hold' || k === 'offer_back'){
+    nft();
+    const back = k === 'offer_back';
+    m.st = back ? hdSt(r.status, 'Pul qaytarildi')
+         : (r.status && r.status !== 'done') ? hdSt(r.status) : ['wait', 'Pul bloklandi'];
+    m.amt = amt; m.sign = back ? 1 : -1;
+    rows.push(['Turi', back ? 'Taklif puli qaytdi' : 'Taklif uchun bloklandi']);
+  } else if(k === 'som_in' || k === 'gram_in'){
+    const gr = k === 'gram_in';
+    m.name = gr ? "GRAM to'ldirildi" : "So'm tushdi"; m.glyph = gr ? '\uD83D\uDC8E' : '\uD83D\uDCB3';
+    m.st = hdSt(r.status, 'Hisobga tushdi');
+    m.amt = amt; m.sign = 1;
+    if(note) rows.push([/bekor/i.test(note) ? 'Sabab' : ((!gr && !/qo'llab/i.test(note)) ? "To'lov usuli" : 'Manba'), esc(note)]);
+    if(r.ref) rows.push(["To'lov raqami", hdCp(r.ref)]);
+  } else if(k === 'som_out'){
+    m.name = 'Kartaga yechish'; m.glyph = '\uD83C\uDFE7';
+    m.st = hdSt(r.status, "Kartaga o'tkazildi");
+    m.amt = amt; m.sign = -1;
+    if(r.card) rows.push(['Karta', esc(r.card)]);
+    if(r.no) rows.push(['Ariza raqami', hdCp(r.no)]);
+    if(note && !r.card) rows.push(['Izoh', esc(note)]);
+  } else if(k === 'gram_out'){
+    m.name = 'GRAM yechildi'; m.glyph = '\uD83D\uDC8E';
+    m.st = hdSt(r.status, 'Bajarildi', 'Yuborilmoqda');
+    m.amt = amt; m.sign = -1;
+    if(r.to) rows.push(['Hamyon', hdCp(r.to, tcShort(r.to))]);
+    if(r.fee) rows.push(['Tarmoq haqi', esc(hdMoney(r.fee, 'GRAM'))]);
+    if(note && !r.to) rows.push(['Izoh', esc(note)]);
+  } else {
+    m.name = String(r.item || note || 'Yozuv');
+    if(note && r.item) rows.push(['Izoh', esc(note)]);
+    m.amt = amt;
+  }
+  if(m.nft){
+    const G = hdGift(m.name);
+    m.slug = G.slug; m.pic = G.pic; m.attrs = G.attrs; m.title = G.title; m.num = G.num;
+  }
+  if(r.id) rows.push(['Yozuv raqami', hdCp(r.id)]);
+  return m;
+}
+/* NFT hamyonidan berilgan buyurtma (Stars, Premium va boshqalar) */
+function hdFromOrder(o){
+  const w = hdWhen(o.at || o.createdAt);
+  const gram = (o.pay === 'gram' && o.gram) ? Number(o.gram) : 0;
+  const m = { nft:false, name: String(o.game || o.item || 'Xarid'), glyph: o.glyph || '\u2B50',
+              amt: gram || Number(o.price) || 0, cur: gram ? 'GRAM' : "so'm", sign: -1,
+              st: hdSt(o.status, 'Bajarildi', 'Yuborilmoqda'),
+              rows: [['Sana', esc(w[0])], ['Vaqt', esc(w[1])]] };
+  if(o.package) m.rows.push(['Paket', esc(o.package)]);
+  if(o.pid) m.rows.push(['Kimga', esc(o.pid)]);
+  if(o.id) m.rows.push(['Buyurtma raqami', hdCp(o.id, '#' + o.id)]);
+  return m;
+}
+function hdShow(m){
+  const sh = gpShell('hd');
+  let hero;
+  if(m.nft){
+    const A = m.attrs || {};
+    const known = !!(A.bg && A.bg.c1);
+    hero = '<div class="mg2-hero"><div class="mg2-im hd-im" style="' + (known ? mg2Bg({ attrs: A }) : '') + '">' +
+      ((!known && m.pic) ? '<i class="hd-bl" style="background-image:url(\'' + esc(m.pic) + '\')"></i>' : '') +
+      '<div class="hd-an" id="hdIm"><span>' + m.glyph + '</span>' +
+        (m.pic ? '<img src="' + esc(m.pic) + '" alt="" onerror="this.remove()">' : '') +
+      '</div></div></div>';
+  } else {
+    hero = '<div class="hd-ic">' + m.glyph + '</div>';
+  }
+  const title = m.nft ? (esc(m.title || m.name) + (m.num ? ' <span>#' + esc(m.num) + '</span>' : '')) : esc(m.name);
+  const sign  = m.sign > 0 ? '+' : (m.sign < 0 ? '\u2212' : '');
+  sh.innerHTML =
+    '<div class="nd-top"><button class="nd-x" onclick="mgClose()" aria-label="Yopish">' + MG2.x + '</button></div>' +
+    hero +
+    '<div class="mg2-nm">' + title + '</div>' +
+    '<div class="mg2-st hd-st ' + m.st[0] + '"><i></i>' + esc(m.st[1]) + '</div>' +
+    (m.amt ? '<div class="hd-amt' + (m.sign > 0 ? ' plus' : '') + '">' + sign + esc(hdMoney(m.amt, m.cur)) + '</div>' : '') +
+    '<div class="sh-box">' + m.rows.map(function(x){ return shRow(x[0], x[1]); }).join('') + '</div>';
+  gpShow();
+  if(m.nft && m.slug) lotPlay('hdIm', m.slug);
+}
+
 /* ---------- "Sovg'alarni qanday qo'shish?" ----------
    Pastdan chiqadigan qo'llanma: rasm, uch qadam va tugma. */
 function mgHowTo(pic){
@@ -8030,7 +8494,7 @@ function mhItems(){
       name: o.item || [o.game, o.package].filter(Boolean).join(' \u2014 ') || 'NFT',
       img: o.img ? IMG(o.img) : '', glyph: o.glyph || '\uD83C\uDF81',
       amt: gram || Number(o.price) || 0, cur: gram ? 'GRAM' : "so'm", sign: -1,
-      st: (o.status === 'refund' || o.status === 'cancel') ? 'Bekor qilindi' : (o.status === 'wait') ? 'Yuborilmoqda' : 'Sotib olindi' });
+      st: (o.status === 'refund' || o.status === 'cancel') ? 'Bekor qilindi' : (o.status === 'wait') ? 'Yuborilmoqda' : 'Sotib olindi', ord: o });
   });
   (nftHist || []).forEach(function(r){
     const k = r.kind, off = /Taklif/i.test(String(r.note || ''));
@@ -8048,7 +8512,7 @@ function mhItems(){
                (NFT_ITEMS || []).find(function(x){ return String(x.name) === nm; });
     out.push({ type: type, at: Date.parse(r.at) || 0, name: r.item || 'NFT',
       img: (g && g.pic) ? g.pic : '', glyph: MH_IC[k] || '\uD83C\uDF81',
-      amt: sign ? (Number(r.amount) || 0) : 0, cur: r.cur || "so'm", sign: sign, st: st });
+      amt: sign ? (Number(r.amount) || 0) : 0, cur: r.cur || "so'm", sign: sign, st: st, rec: r });
   });
   return out;
 }
@@ -8079,7 +8543,9 @@ function mgHistory(){
   else rows.sort(function(a, b){ return b.at - a.at; });
   const M = ['YANVAR','FEVRAL','MART','APREL','MAY','IYUN','IYUL','AVGUST','SENTABR','OKTABR','NOYABR','DEKABR'];
   let out = '', last = '';
-  rows.forEach(function(x){
+  mhShown = rows;
+  nhBind();
+  rows.forEach(function(x, i){
     const d = new Date(x.at || Date.now());
     if(mhSort === 'date'){
       const key = d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate();
@@ -8087,7 +8553,7 @@ function mgHistory(){
     }
     const tm = String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
     const val = x.amt ? ((x.sign > 0 ? '+' : '-') + (x.cur === 'GRAM' ? fmtGram(x.amt) + ' GRAM' : money(x.amt, true))) : '';
-    out += `<div class="mg-row">
+    out += `<div class="mg-row" onclick="hdOpen('mh',${i})">
       <div class="ic">${x.img ? `<img src="${x.img}" alt="">` : x.glyph}</div>
       <div class="tx"><div class="nm">${esc(x.name)}</div><div class="sb">${x.st}${mhSort === 'date' ? ' \u00b7 ' + tm : ' \u00b7 ' + d.getDate() + '.' + String(d.getMonth() + 1).padStart(2, '0')}</div></div>
       ${val ? `<div class="pv${x.sign > 0 ? ' plus' : ''}">${val}</div>` : ''}
@@ -8464,10 +8930,10 @@ function nftMoneyRows(){
   if(nftHTab === 'in'){
     const rows = nftHist.filter(function(r){ return IN.indexOf(r.kind) > -1; });
     if(!rows.length) return `<div class="empty"><div class="em">\uD83C\uDF81</div><h3>Hozircha bo'sh</h3><p>Hisobingizga tushgan pul shu yerda ko'rinadi.</p></div>`;
-    return rows.map(function(r){
+    nhBind(); return (nhShown = rows).map(function(r, i){
       const cur = r.cur || "so'm";
       const amt = cur === 'GRAM' ? fmtGram(r.amount) : fmt(r.amount);
-      return `<div class="order">
+      return `<div class="order" onclick="hdOpen('nh',${i})">
         <div class="top">
           <div class="g"><div class="ic">${ICO[r.kind]||'\uD83D\uDCB0'}</div><div><div class="nm">${esc(r.item || TTL[r.kind] || 'Kirim')}</div><div class="sub">${esc(r.note||'')}</div></div></div>
           <div class="price" style="color:#4FE0A0">+${amt}<small>${cur}</small></div>
@@ -8481,10 +8947,10 @@ function nftMoneyRows(){
 
   const rows = nftHist.filter(function(r){ return OUT.indexOf(r.kind) > -1; });
   if(!rows.length) return `<div class="empty"><div class="em">🏧</div><h3>Hozircha bo'sh</h3><p>Kartangizga yechib olganlaringiz shu yerda ko'rinadi.</p></div>`;
-  return rows.map(function(r){
+  nhBind(); return (nhShown = rows).map(function(r, i){
     const cur = r.cur || "so'm";
     const amt = cur === 'GRAM' ? fmtGram(r.amount) : fmt(r.amount);
-    return `<div class="order">
+    return `<div class="order" onclick="hdOpen('nh',${i})">
       <div class="top">
         <div class="g"><div class="ic">${ICO[r.kind]||'\uD83C\uDFE7'}</div><div><div class="nm">${esc(r.item || r.card || TTL[r.kind] || 'Chiqim')}</div><div class="sub">${esc(r.note||'')}</div></div></div>
         <div class="price">-${amt}<small>${cur}</small></div>
@@ -9345,7 +9811,7 @@ function walletLog(){
     out.push({ t:m.t, ic:m.ic, nm: r.item || r.card || r.note || m.sub,
                sub: r.note || m.sub, plus:m.plus,
                amount: Number(r.amount) || 0, cur: r.cur || "so'm",
-               status: r.status || 'done', at: r.at });
+               status: r.status || 'done', at: r.at, rec: r });
   });
   /* Stars va Premium buyurtmalari — alohida bo'limda */
   getNftOrders().forEach(function(o){
@@ -9357,7 +9823,7 @@ function walletLog(){
                plus:false,
                amount: (o.pay === 'gram' && o.gram) ? Number(o.gram) : Number(o.price) || 0,
                cur: (o.pay === 'gram') ? 'GRAM' : "so'm",
-               status: o.status || 'done', at: o.at });
+               status: o.status || 'done', at: o.at, ord: o });
   });
   return out.sort(function(a,b){ return (Date.parse(b.at)||0) - (Date.parse(a.at)||0); });
 }
@@ -9370,11 +9836,13 @@ function walletRows(){
   if(!rows.length) return `<div class="empty"><div class="em">🧾</div><h3>Hozircha bo'sh</h3><p>Bu bo'limdagi pul harakati shu yerda ko'rinadi.</p></div>`;
   const M = ['YANVAR','FEVRAL','MART','APREL','MAY','IYUN','IYUL','AVGUST','SENTABR','OKTABR','NOYABR','DEKABR'];
   let out = '', last = '';
-  rows.forEach(function(r){
+  wlShown = rows;
+  nhBind();
+  rows.forEach(function(r, i){
     const d = new Date(r.at || Date.now());
     const key = d.getFullYear()+'-'+d.getMonth()+'-'+d.getDate();
     if(key !== last){ last = key; out += `<div class="mg-day">${d.getDate()} ${M[d.getMonth()]} ${d.getFullYear()}</div>`; }
-    out += `<div class="mg-row">
+    out += `<div class="mg-row" onclick="hdOpen('wl',${i})">
       <div class="ic">${r.ic}</div>
       <div class="tx"><div class="nm">${r.nm}</div><div class="sb">${r.sub}</div></div>
       <div class="pv"${r.plus?' style="color:#4FE0A0"':''}>${r.amount
@@ -10618,7 +11086,7 @@ function sndTap(){ /* bosilganda tovush yo'q \u2014 faqat tebranish */ }
 /* Har bir bosilishda yengil tebranish */
 
 let _hapT = 0;
-const TAP_SEL = '.refresh-btn, .chips .c, .seg button, .order[onclick], .sh-close, .rlk-b, .guide-btn, .check-btn';
+const TAP_SEL = '.refresh-btn, .chips .c, .seg button, .order[onclick], .sh-close, .rlk-b, .guide-btn, .check-btn, .mg-row[onclick]';
 let _tapEl = null, _tapT = 0, _tapY = 0, _tapX = 0;
 function tapDown(e){
   const p = (e.touches && e.touches[0]) || e;
