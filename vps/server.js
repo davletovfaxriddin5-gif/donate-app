@@ -2066,6 +2066,14 @@ app.post("/som/out", (req,res)=>{
    To'lov yozuvida dest:"nft" bo'lsa pul NFT bo'limining so'm hamyoniga
    tushadi, aks holda odatdagidek asosiy balansga. Bitta joyda hal
    qilamiz — shunda barcha usullar (karta, Stars, USDT) bir xil ishlaydi. */
+/* Adminga: to'ldirish qaysi hisobga. NFT bo'limidan kelgan bo'lsa sarlavha
+   ostida alohida qator chiqadi va NFT hisobining qoldig'i ko'rsatiladi.
+   Bosh sahifa to'ldirishlari uchun xabar avvalgidek qoladi. */
+function tpWhere(rec, u){
+  if(String(rec && rec.dest) === "nft")
+    return { tag: "\n\uD83D\uDDBC NFT BO'LIMI \u2014 NFT hisobini to'ldirmoqda", bal: "\nJoriy NFT hisobi: " + (Number(u.nftSom) || 0) + " so'm" };
+  return { tag: "", bal: "\nJoriy balans: " + u.balance };
+}
 function creditTopup(u, rec, som){
   const toNft = rec && String(rec.dest) === "nft";
   if(toNft){
@@ -3896,12 +3904,12 @@ async function tonCheck(){
       send(uid, "\u2705 " + (crU.nft ? "NFT hisobingiz" : "Balansingiz") +
         " to'ldirildi: +"+som+" so'm ("+usdt.toFixed(2)+
         " USDT)\nJoriy qoldiq: "+crU.left+" so'm");
-      if(ADMIN_ID) send(ADMIN_ID, "\uD83E\uDD16 AVTO TASDIQ (USDT) "+rec.id+
+      if(ADMIN_ID) send(ADMIN_ID, "\uD83E\uDD16 AVTO TASDIQ (USDT) "+rec.id+ tpWhere(rec, u).tag +
         "\nKelgan: "+usdt.toFixed(2)+" USDT"+
         "\nMemo: "+memo+
         "\nBalansga: "+som+" so'm"+
         "\nKimga: "+(rec.who || uid)+
-        "\nYangi balans: "+u.balance);
+        (crU.nft ? "\nYangi NFT hisobi: " : "\nYangi balans: ")+crU.left);
     }
   }
   if(changed) save(db);
@@ -3963,10 +3971,12 @@ app.post("/star-invoice", async (req,res)=>{
       return res.json({ ok:false, error:"qty", min:STAR_TOPUP_MIN, max:STAR_TOPUP_MAX });
 
     const som = n * STAR_TOPUP_RATE;
+    /* NFT bo'limidan bo'lsa pul NFT hisobiga tushadi — belgisi to'lov yukida saqlanadi */
+    const dest = String(b.dest || "") === "nft" ? "nft" : "main";
     const inv = {
-      title: "Balansni to'ldirish",
-      description: n + " Stars = " + som + " so'm balansingizga qo'shiladi",
-      payload: "star:" + who.id + ":" + n,
+      title: dest === "nft" ? "NFT hisobini to'ldirish" : "Balansni to'ldirish",
+      description: n + " Stars = " + som + " so'm " + (dest === "nft" ? "NFT hisobingizga" : "balansingizga") + " qo'shiladi",
+      payload: "star:" + who.id + ":" + n + (dest === "nft" ? ":nft" : ""),
       provider_token: "",
       currency: "XTR",
       prices: [{ label: n + " Stars", amount: n }]
@@ -4008,18 +4018,19 @@ function starPaid(fromId, sp){
 
   const som = stars * STAR_TOPUP_RATE;
   const id  = "ST" + Date.now().toString().slice(-8);
-  u.balance += som;
-  u.topups.unshift({ id:id, amount:som, base:som, method:"Telegram Stars",
+  const dest = String(sp.invoice_payload || "").split(":")[3] === "nft" ? "nft" : "main";
+  const cr = creditTopup(u, { id:id, dest:dest, method:"Telegram Stars" }, som);
+  u.topups.unshift({ id:id, amount:som, base:som, method:"Telegram Stars", dest:dest,
                      stars:stars, charge:charge, status:"ok",
                      at:new Date().toISOString(), doneAt:new Date().toISOString() });
   u.topups = u.topups.slice(0,60);
   save(db);
 
-  send(fromId, "\u2b50 " + stars + " Stars qabul qilindi!\nBalansingizga " + som +
-               " so'm qo'shildi.\nJoriy balans: " + u.balance + " so'm");
+  send(fromId, "\u2b50 " + stars + " Stars qabul qilindi!\n" + (cr.nft ? "NFT hisobingizga " : "Balansingizga ") + som +
+               " so'm qo'shildi.\nJoriy " + (cr.nft ? "qoldiq" : "balans") + ": " + cr.left + " so'm");
   if(ADMIN_ID) tgCall("sendMessage", { chat_id: ADMIN_ID,
-    text: "\u2b50 STARS TO'LDIRISH " + id + "\n" + stars + " Stars = " + som +
-          " so'm\nid: " + fromId + "\nYangi balans: " + u.balance });
+    text: "\u2b50 STARS TO'LDIRISH " + id + tpWhere({ dest:dest }, u).tag + "\n" + stars + " Stars = " + som +
+          " so'm\nid: " + fromId + (cr.nft ? "\nYangi NFT hisobi: " : "\nYangi balans: ") + cr.left });
 }
 
 /* ---------- Karta orqali to'ldirish (noyob summa bilan) ---------- */
@@ -4402,11 +4413,11 @@ app.post("/topup", (req,res)=>{
       save(db);
 
       if(ADMIN_ID) tgCall("sendMessage", { chat_id: ADMIN_ID,
-        text: "\uD83D\uDCB3 TO'LDIRISH " + tid + " (USDT)" +
+        text: "\uD83D\uDCB3 TO'LDIRISH " + tid + " (USDT)" + tpWhere({ dest:dest }, u).tag +
               "\nKutilmoqda: " + usdt.toFixed(2) + " USDT (" + base + " so'm)" +
               "\nMemo: " + memo +
               "\nKimdan: " + who2(who) + "\nid: " + uid +
-              "\nJoriy balans: " + u.balance +
+              tpWhere({ dest:dest }, u).bal +
               "\n\nAvtomatik tasdiqlanadi \u2014 tugma kerak emas." });
 
       return res.json({ ok:true, id:tid, memo:memo, usdt:usdt.toFixed(2),
@@ -4436,12 +4447,12 @@ app.post("/topup", (req,res)=>{
     save(db);
 
     if(ADMIN_ID) tgCall("sendMessage", { chat_id: ADMIN_ID,
-      text: "💳 TO'LDIRISH "+id+
+      text: "💳 TO'LDIRISH "+id+ tpWhere(rec, u).tag +
             "\nAYNAN: "+payText(base, pay, String(b.method||""))+
             "\nKimdan: "+who2(who)+
             "\nid: "+uid+
             "\nUsul: "+(b.method||"-")+
-            "\nJoriy balans: "+u.balance,
+            tpWhere(rec, u).bal,
       reply_markup: { inline_keyboard: [[
         { text:"✅ Tasdiqlash", callback_data:"tp_ok:"+uid+":"+id },
         { text:"❌ Rad etish",  callback_data:"tp_no:"+uid+":"+id }
@@ -5065,15 +5076,17 @@ app.post("/sms", (req,res)=>{
 
     t.status = "done";
     t.auto = true;
-    u.balance += t.amount;
+    /* NFT bo'limidan kelgan to'ldirish NFT hisobiga tushadi (ilgari SMS
+       tasdig'ida doim asosiy balansga tushib qolardi) */
+    const crS = creditTopup(u, t, t.amount);
     save(db);
 
-    send(h.uid, "\u2705 Balansingiz to'ldirildi: +" + t.amount + " so'm\nJoriy balans: " + u.balance + " so'm");
-    if(ADMIN_ID) send(ADMIN_ID, "\uD83E\uDD16 AVTO TASDIQ " + t.id +
+    send(h.uid, "\u2705 " + (crS.nft ? "NFT hisobingiz" : "Balansingiz") + " to'ldirildi: +" + t.amount + " so'm\nJoriy " + (crS.nft ? "qoldiq" : "balans") + ": " + crS.left + " so'm");
+    if(ADMIN_ID) send(ADMIN_ID, "\uD83E\uDD16 AVTO TASDIQ " + t.id + tpWhere(t, u).tag +
       "\nKelgan: " + label + " (" + (t.method || "-") + ")" +
       "\nBalansga: " + t.amount + " so'm" +
       "\nKimga: " + (t.who || h.uid) +
-      "\nYangi balans: " + u.balance);
+      (crS.nft ? "\nYangi NFT hisobi: " : "\nYangi balans: ") + crS.left);
 
     res.json({ ok:true, matched:1, id:t.id });
   }catch(e){ console.log("SMS XATO:", e.message); res.json({ ok:false, error:"server" }); }
