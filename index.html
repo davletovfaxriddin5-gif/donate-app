@@ -9109,12 +9109,12 @@ function szCurve(K){
 const szFd = szCurve(SZ_D), szFax = szCurve(SZ_AX), szFw = szCurve(SZ_W);
 /* Aylanish: cho'kishda (0-0,18 s) turadi, otilishda keskin tezlashadi,
    0,95 s dan keyin asta sekinlashib, 2,7 s da to'xtaydi — halqada roppa-rosa
-   4 marta. Burchak 1 ms qadamli jadvaldan olinadi. */
+   2 marta. Burchak 1 ms qadamli jadvaldan olinadi. */
 const SZ_SPN = (function(){
   const N = 2700, a = new Float64Array(N + 1);
   const v = function(u){ if(u < .18) return 0; if(u < .30){ const y = (u - .18) / .12; return y * y * (3 - 2 * y); } if(u < .95) return 1; return Math.pow(Math.max(0, 1 - (u - .95) / 1.75), 1.4); };
   for(let i = 1; i <= N; i++) a[i] = a[i - 1] + (v((i - 1) / 1000) + v(i / 1000)) / 2;
-  const k = 8 * Math.PI / a[N]; for(let i = 0; i <= N; i++) a[i] *= k;
+  const k = 4 * Math.PI / a[N]; for(let i = 0; i <= N; i++) a[i] *= k;
   return a;
 })();
 function szSpin(u){ const x = u * 1000, i = Math.min(2699, Math.floor(x)), f = x - i; return SZ_SPN[i] + (SZ_SPN[i + 1] - SZ_SPN[i]) * f; }
