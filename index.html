@@ -2345,6 +2345,18 @@ body.light .sz-my{ border-bottom-color:rgba(0,0,0,.08) } body.light .sz-lr{ bord
 .st-amt .ic .st-ic{ width:1.05em; height:1.05em; vertical-align:-.12em }
 /* Maydon ichidagi yulduz: eski "i" belgisining to'q doirasi kerak emas */
 .info-i:has(.st-ic){ background:none !important; border:0 !important; box-shadow:none !important }
+/* NFT tarixi: holat filtrlari (ixcham), holat belgilari, yordam tugmasi */
+.chips.nh-f{ gap:6px; margin:0 0 10px; padding-bottom:2px; scrollbar-width:none }
+.chips.nh-f::-webkit-scrollbar{ display:none }
+.chips.nh-f .c{ flex:0 0 auto; display:inline-flex; align-items:center; gap:5px; padding:6px 12px !important; font-size:12px !important; line-height:1.15 }
+.chips.nh-f .c .n{ min-width:16px; height:16px; padding:0 4px; border-radius:99px; background:#F0A93C; color:#1a1300;
+  font-size:10.5px; font-weight:800; display:inline-grid; place-items:center }
+.nh-none{ text-align:center; padding:22px 12px; border-radius:16px; border:1px dashed var(--stroke-2); color:var(--faint); font-size:12.5px }
+.badge-st.back{ color:#4FD1C5 !important; background:rgba(79,209,197,.12) !important; border-color:rgba(79,209,197,.30) !important }
+.badge-st.sup{ color:#F0A93C !important; background:rgba(240,169,60,.12) !important; border-color:rgba(240,169,60,.30) !important }
+.hd-sup{ width:100%; height:44px; margin-top:12px; border-radius:14px; display:flex; align-items:center; justify-content:center; gap:8px;
+  background:linear-gradient(135deg,#4F6BFF,#6A4DF5); color:#fff; font-size:15px; font-weight:700 }
+.hd-sup svg{ width:18px; height:18px; stroke:#fff; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round }
 </style>
 </head>
 <body>
@@ -8515,7 +8527,7 @@ function hdSt(s, okTxt, waitTxt){
   if(!s || s === 'done') return ['ok', okTxt || 'Bajarildi'];
   if(s === 'wait' || s === 'sent') return ['wait', waitTxt || 'Kutilmoqda'];
   if(s === 'refund') return ['bad', 'Pul qaytarildi'];
-  return ['bad', 'Bekor qilingan'];
+  return ['bad', 'Bekor qilindi'];
 }
 /* Bosilganda nusxalanadigan qiymat */
 function hdCp(v, shown){
@@ -8633,6 +8645,9 @@ function hdFromRec(r){
     m.slug = G.slug; m.pic = G.pic; m.attrs = G.attrs; m.title = G.title; m.num = G.num;
   }
   if(!m.nft) m.icon = nhIcon(r);
+  { const c = nhCat(r);
+    if(c === 'sup'){ m.st = ['wait', "Qo'llab-quvvatlash"]; m.sup = String(r.id || r.ref || ''); }
+    else if(c === 'back') m.st = ['ok', "Pul qaytarildi"]; }
   if(r.id) rows.push(['Yozuv raqami', hdCp(r.id)]);
   return m;
 }
@@ -8672,7 +8687,8 @@ function hdShow(m){
     '<div class="mg2-nm">' + title + '</div>' +
     '<div class="mg2-st hd-st ' + m.st[0] + '"><i></i>' + esc(m.st[1]) + '</div>' +
     (m.amt ? '<div class="hd-amt' + (m.sign > 0 ? ' plus' : '') + '">' + sign + esc(hdMoney(m.amt, m.cur)) + '</div>' : '') +
-    '<div class="sh-box">' + m.rows.map(function(x){ return shRow(x[0], x[1]); }).join('') + '</div>';
+    '<div class="sh-box">' + m.rows.map(function(x){ return shRow(x[0], x[1]); }).join('') + '</div>' +
+    (('sup' in m) ? '<button class="hd-sup" onclick="nhSup(\'' + esc(m.sup) + '\')"><svg viewBox="0 0 24 24"><path d="M4.5 13.5v-2a7.5 7.5 0 0 1 15 0v2"/><rect x="3" y="13" width="4" height="6" rx="1.6"/><rect x="17" y="13" width="4" height="6" rx="1.6"/><path d="M19 19c0 1.4-1.6 2.3-4.5 2.3H13"/></svg>' + "Qo'llab-quvvatlash</button>" : '');
   gpShow();
   if(m.nft && m.slug) lotPlay('hdIm', m.slug);
 }
@@ -9859,6 +9875,43 @@ function renderNftMarket(){
    Bosh sahifadagi buyurtmalar va hisob to'ldirishlar bu yerga TUSHMAYDI. */
 let nftHTab = 'in';   /* in = Kirimlar, out = Yechimlar */
 function setNftHTab(t){ haptic(); nftHTab = t; renderNft('nft_hist'); }
+/* Holat bo'yicha filtr. Nosozlik bo'lgan yoki 24 soatdan ortiq kutib qolgan
+   yozuv "Qo'llab-quvvatlash" ga tushadi — bosilganda pastida yordam tugmasi. */
+const NH_CATS = [['all','Hammasi'],['done','Bajarildi'],['wait','Kutilmoqda'],['cancel','Bekor qilindi'],['back',"Pul qaytarildi"],['sup',"Qo'llab-quvvatlash"]];
+const NH_SUP = 'dv1mm_garant';
+let nhFil = 'all';
+function nhCat(r){
+  const s = String(r.status || 'done'), note = String(r.note || ''), k = String(r.kind || '');
+  const age = Date.now() - (Date.parse(r.at) || Date.now());
+  if(/^(fail|failed|error|stuck|support)$/.test(s)) return 'sup';
+  if(s === 'wait' || s === 'pending' || s === 'sent') return age > 864e5 ? 'sup' : 'wait';
+  if(s === 'refund') return 'back';
+  if(s === 'cancel' || s === 'expired') return /qaytar/i.test(note) ? 'back' : 'cancel';
+  if(k === 'offer_back' || ((k === 'som_in' || k === 'gram_in') && /bekor|qaytar/i.test(note))) return 'back';
+  return 'done';
+}
+function nhSegRows(){
+  const IN = ['gram_in','som_in','offer_back'], OUT = ['gram_out','som_out','offer_hold'];
+  return (nftHist || []).filter(function(r){ return (nftHTab === 'in' ? IN : OUT).indexOf(r.kind) > -1; });
+}
+function nhChips(){
+  const n = nhSegRows().filter(function(r){ return nhCat(r) === 'sup'; }).length;
+  return NH_CATS.map(function(c){
+    return '<button class="c' + (nhFil === c[0] ? ' on' : '') + '" data-f="' + c[0] + '" onclick="setNhFil(\'' + c[0] + '\')">' + c[1] +
+      (c[0] === 'sup' && n ? '<span class="n">' + n + '</span>' : '') + '</button>';
+  }).join('');
+}
+function setNhFil(f){
+  if(f === nhFil) return; haptic(); nhFil = f;
+  document.querySelectorAll('.nh-f .c').forEach(function(b){ b.classList.toggle('on', b.dataset.f === f); });
+  const l = document.getElementById('nftList'); if(l) l.innerHTML = nftMoneyRows();
+}
+/* Yordam: @dv1mm_garant chati ochiladi, yozuv raqami xabarga yozib qo'yiladi */
+function nhSup(id){
+  haptic();
+  const t = "Salom! NFT bo'limi tarixidagi yozuv bo'yicha savolim bor" + (id ? ' (' + id + ')' : '') + '.';
+  openLink('https://t.me/' + NH_SUP + '?text=' + encodeURIComponent(t));
+}
 
 /* Kirimlar — sovg'a sotilib, pul hisobga tushgani */
 function getNftIn(){ try{ return JSON.parse(localStorage.getItem('mt_nft_in')||'[]'); }catch(e){ return []; } }
@@ -9919,13 +9972,14 @@ function nftRefresh(){
 function nftMoneyRows(){
   const dt = function(v){ return new Date(v||Date.now()).toLocaleString('ru-RU',
     {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}); };
-  const badge = function(status, okTxt){
-    const ok  = status === 'done';
-    const bad = (status === 'cancel' || status === 'expired');
-    const lbl = ok ? okTxt : bad ? 'Bekor qilingan' : 'Kutilmoqda';
-    const style = bad ? ' style="color:#FF6B6B;background:rgba(255,107,107,.14)"' : '';
-    return `<span class="badge-st ${ok?'done':'wait'}"${style}>${lbl}</span>`;
+  const badge = function(r, okTxt){
+    const c = nhCat(r);
+    const lbl = c === 'done' ? okTxt : c === 'wait' ? 'Kutilmoqda' : c === 'cancel' ? 'Bekor qilindi' : c === 'back' ? "Pul qaytarildi" : "Qo'llab-quvvatlash";
+    const style = c === 'cancel' ? ' style="color:#FF6B6B;background:rgba(255,107,107,.14)"' : '';
+    return `<span class="badge-st ${c}"${style}>${lbl}</span>`;
   };
+  const pick = function(rows){ return nhFil === 'all' ? rows : rows.filter(function(r){ return nhCat(r) === nhFil; }); };
+  const none = `<div class="nh-none">Bu holatda yozuv yo'q</div>`;
 
   /* Kirim va chiqimlarni serverdagi yagona tarixdan ajratamiz */
   /* Bu yerda faqat PUL harakati: to'ldirish va yechish.
@@ -9941,8 +9995,9 @@ function nftMoneyRows(){
                 offer_hold:'Taklif uchun bloklandi', offer_back:'Taklif puli qaytdi' };
 
   if(nftHTab === 'in'){
-    const rows = nftHist.filter(function(r){ return IN.indexOf(r.kind) > -1; });
-    if(!rows.length) return `<div class="empty"><div class="em">\uD83C\uDF81</div><h3>Hozircha bo'sh</h3><p>Hisobingizga tushgan pul shu yerda ko'rinadi.</p></div>`;
+    const all = nftHist.filter(function(r){ return IN.indexOf(r.kind) > -1; });
+    if(!all.length) return `<div class="empty"><div class="em">\uD83C\uDF81</div><h3>Hozircha bo'sh</h3><p>Hisobingizga tushgan pul shu yerda ko'rinadi.</p></div>`;
+    const rows = pick(all); if(!rows.length) return none;
     nhBind(); return (nhShown = rows).map(function(r, i){
       const cur = r.cur || "so'm";
       const amt = cur === 'GRAM' ? fmtGram(r.amount) : fmt(r.amount);
@@ -9952,14 +10007,15 @@ function nftMoneyRows(){
           <div class="price" style="color:#4FE0A0">+${amt}<small>${cur}</small></div>
         </div>
         <div class="sep"></div>
-        <div class="kv"><span class="k">Holat</span>${badge(r.status,'Hisobga tushdi')}</div>
+        <div class="kv"><span class="k">Holat</span>${badge(r,'Hisobga tushdi')}</div>
         <div class="date">${dt(r.at)}</div>
       </div>`;
     }).join('');
   }
 
-  const rows = nftHist.filter(function(r){ return OUT.indexOf(r.kind) > -1; });
-  if(!rows.length) return `<div class="empty"><div class="em">🏧</div><h3>Hozircha bo'sh</h3><p>Kartangizga yechib olganlaringiz shu yerda ko'rinadi.</p></div>`;
+  const all = nftHist.filter(function(r){ return OUT.indexOf(r.kind) > -1; });
+  if(!all.length) return `<div class="empty"><div class="em">🏧</div><h3>Hozircha bo'sh</h3><p>Kartangizga yechib olganlaringiz shu yerda ko'rinadi.</p></div>`;
+  const rows = pick(all); if(!rows.length) return none;
   nhBind(); return (nhShown = rows).map(function(r, i){
     const cur = r.cur || "so'm";
     const amt = cur === 'GRAM' ? fmtGram(r.amount) : fmt(r.amount);
@@ -9969,7 +10025,7 @@ function nftMoneyRows(){
         <div class="price">-${amt}<small>${cur}</small></div>
       </div>
       <div class="sep"></div>
-      <div class="kv"><span class="k">Holat</span>${badge(r.status,'Bajarildi')}</div>
+      <div class="kv"><span class="k">Holat</span>${badge(r,'Bajarildi')}</div>
       <div class="date">${dt(r.at)}</div>
     </div>`;
   }).join('');
@@ -10929,9 +10985,12 @@ function renderNft(v){
       <button class="${nftHTab==='out'?'on':''}" onclick="setNftHTab('out')">Yechimlar</button>
     </div>
     <button class="refresh-btn${nftRefBusy ? ' busy' : ''}" onclick="nftRefresh()"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.6-6.4M21 4v5h-5"/></svg>${nftRefBusy ? 'Tekshirilmoqda' : 'Statusni yangilash'}</button>
+    <div class="chips nh-f">${nhChips()}</div>
     <div id="nftList">${nftMoneyRows()}</div>`;
     /* qayta chizilgan tugmaga bosilish effekti yana ulanadi (go() faqat ekranga kirganda ulaydi) */
     try{ bindTap(document.querySelector('#app .refresh-btn')); }catch(e){}
+    /* tanlangan filtr tugmasi qatorda ko'rinib tursin */
+    const fo = document.querySelector('.nh-f .c.on'); if(fo && fo.parentNode) fo.parentNode.scrollLeft = Math.max(0, fo.offsetLeft - 16);
   }
 }
 
