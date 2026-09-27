@@ -2401,14 +2401,15 @@ body.light .seg-fx > i.seg-pill.glass{ background:rgba(16,24,40,.07); border-col
 /* "Fikrlar" tugmasi ixchamroq */
 .profile .coin{ padding:4px 10px !important; gap:5px !important; font-size:12px !important }
 /* Sozlamalar: ID o'ng chetda, kichik ramkada; "ID" va raqam bir xil o'lchamda, yonma-yon */
-.set-profile .id-row{ display:flex; justify-content:flex-end; align-items:center; gap:6px; margin:10px 0 0 }
-.set-profile .id-row + .stat-row{ margin-top:7px !important }
+.set-profile .id-row{ display:flex; justify-content:flex-start; align-items:center; flex-wrap:wrap; gap:6px; margin:7px 0 0 }
 .id-chip.ph-chip{ cursor:default }
 .id-chip.id-r{ margin:0 !important; flex-shrink:0; align-self:center; padding:5px 8px !important; gap:5px !important; border-radius:9px !important; line-height:1 !important }
 .id-chip.id-r .k, .id-chip.id-r .v{ font-size:11.5px; line-height:1; font-weight:600; letter-spacing:0; font-variant-numeric:tabular-nums }
 .id-chip.id-r .k{ color:var(--faint) }
 .id-chip.id-r .v{ color:var(--text) }
 .id-chip.id-r svg{ width:11px !important; height:11px !important }
+/* Darvoza turganda butun ekran to'siladi — NFT tugmasiga qayta bosib bo'lmaydi */
+.dr-wrap{ pointer-events:auto !important; touch-action:none }
 </style>
 </head>
 <body>
@@ -6352,11 +6353,12 @@ function drSound(){
 /* Darvoza ishlayotganda qayta bosishlar e'tiborsiz — aks holda qayta-qayta takrorlanardi.
    Jami 2.8 s: 0-850 ms yopilish, 1300 ms ekran almashadi, 1800-2750 ms ochilish.
    O'rtada logotip yo'q — faqat qanotlar va ular tutashgan chiziq. */
-var drBusy = false;
+var drBusy = false, drTok = 0;
 function nftDoor(next){
   if(drBusy) return;
   drBusy = true;
-  setTimeout(function(){ drBusy = false; }, 3600);
+  const tok = ++drTok;   /* har bir darvoza o'z taymerlari bilan: eskisi yangisini bo'shatib yubormasin */
+  setTimeout(function(){ if(drTok === tok) drBusy = false; }, 4200);
   drSound();
   const old = document.getElementById('drWrap');
   if(old) old.remove();
@@ -6370,7 +6372,9 @@ function nftDoor(next){
   setTimeout(function(){ haptic(); }, 850);
   setTimeout(function(){ try{ next(); }catch(e){} }, 1300);
   setTimeout(function(){ w.classList.add('opening'); w.classList.remove('shut'); }, 1800);
-  setTimeout(function(){ if(w) w.remove(); drBusy = false; }, 2800);
+  setTimeout(function(){ if(w) w.remove(); }, 2800);
+  /* tugagandan keyin ham bir oz (0.7 s) ortiqcha bosishlar e'tiborsiz */
+  setTimeout(function(){ if(drTok === tok) drBusy = false; }, 3500);
 }
 
 function toggleNft(){
@@ -11244,10 +11248,11 @@ function renderSettings(){
   <div class="set-profile">
     <div class="top">
       <div class="avatar" style="width:52px;height:52px;font-size:19px">${photo}</div>
-      <div><div class="nm">${name}</div><div class="un">${un}</div></div>
-    </div>
-    <div class="id-row">
-      <button class="id-chip id-r" ontouchstart="" onclick="copyId('${uid}')"><span class="k">ID</span><span class="v">${uid}</span><svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg></button>
+      <div><div class="nm">${name}</div><div class="un">${un}</div>
+        <div class="id-row">
+          <button class="id-chip id-r" ontouchstart="" onclick="copyId('${uid}')"><span class="k">ID</span><span class="v">${uid}</span><svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg></button>
+        </div>
+      </div>
     </div>
     <div class="stat-row">
       <div class="stat"><div class="k">Balans</div><div class="v">${money(balance,false)}</div></div>
