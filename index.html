@@ -2393,16 +2393,17 @@ body.light .seg-fx > i.seg-pill.glass{ background:rgba(16,24,40,.07); border-col
 /* Tepadan chiqadigan xabarlar — ixchamroq */
 .toast{ padding:8px 14px !important; font-size:14px !important; line-height:1.25 !important; border-radius:14px !important }
 /* Bosh sahifa Tarixi: Buyurtmalar/Moliya, filtrlar va "Statusni yangilash" ixchamroq */
-.seg.h-seg{ padding:3px !important; margin-bottom:10px !important }
-.seg.h-seg button{ padding:7px !important }
-.chips.h-chips{ gap:6px !important; margin-bottom:10px !important }
-.chips.h-chips .c{ padding:5px 12px !important }
-.refresh-btn.h-ref{ padding:8px !important; margin-bottom:12px !important }
+.seg.h-seg{ padding:4px !important; margin-bottom:12px !important }
+.seg.h-seg button{ padding:8px !important }
+.chips.h-chips{ gap:7px !important; margin-bottom:12px !important }
+.chips.h-chips .c{ padding:6px 13px !important }
+.refresh-btn.h-ref{ padding:10px !important; margin-bottom:14px !important; border-radius:12px !important }
 /* "Fikrlar" tugmasi ixchamroq */
 .profile .coin{ padding:4px 10px !important; gap:5px !important; font-size:12px !important }
 /* Sozlamalar: ID o'ng chetda, kichik ramkada; "ID" va raqam bir xil o'lchamda, yonma-yon */
-.set-profile .top .who2{ flex:1; min-width:0 }
-.set-profile .top .who2 .nm, .set-profile .top .who2 .un{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+.set-profile .id-row{ display:flex; justify-content:flex-end; align-items:center; gap:6px; margin:10px 0 0 }
+.set-profile .id-row + .stat-row{ margin-top:7px !important }
+.id-chip.ph-chip{ cursor:default }
 .id-chip.id-r{ margin:0 !important; flex-shrink:0; align-self:center; padding:5px 8px !important; gap:5px !important; border-radius:9px !important; line-height:1 !important }
 .id-chip.id-r .k, .id-chip.id-r .v{ font-size:11.5px; line-height:1; font-weight:600; letter-spacing:0; font-variant-numeric:tabular-nums }
 .id-chip.id-r .k{ color:var(--faint) }
@@ -11243,7 +11244,9 @@ function renderSettings(){
   <div class="set-profile">
     <div class="top">
       <div class="avatar" style="width:52px;height:52px;font-size:19px">${photo}</div>
-      <div class="who2"><div class="nm">${name}</div><div class="un">${un}</div></div>
+      <div><div class="nm">${name}</div><div class="un">${un}</div></div>
+    </div>
+    <div class="id-row">
       <button class="id-chip id-r" ontouchstart="" onclick="copyId('${uid}')"><span class="k">ID</span><span class="v">${uid}</span><svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg></button>
     </div>
     <div class="stat-row">
@@ -11344,10 +11347,12 @@ function setPhoneText(txt){
     if(!chip){
       chip = document.createElement('div');
       chip.id = 'phoneChip';
-      chip.className = 'ph-line';
-      idChip.parentNode.insertBefore(chip, idChip);   /* ID chipdan YUQORIGA */
+      /* ID bilan bir xil ramkada, uning chap yonida */
+      chip.className = idChip.classList.contains('id-r') ? 'id-chip id-r ph-chip' : 'ph-line';
+      idChip.parentNode.insertBefore(chip, idChip);
     }
-    chip.textContent = p;
+    if(chip.classList.contains('ph-chip')) chip.innerHTML = '<span class="v">' + esc(p) + '</span>';
+    else chip.textContent = p;
   }
 }
 /* Yangi o'yinlar serverdan keladi (games.json). Ilovada qo'lda yozilmagan —
