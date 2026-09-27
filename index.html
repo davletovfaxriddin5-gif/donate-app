@@ -8733,8 +8733,8 @@ function nhImgErr(el, fb){ try{ el.outerHTML = nhSv(fb); }catch(e){} }
 /* To'lov usuli nomidan rasm */
 function nhPayIcon(note){
   const n = String(note || '').toLowerCase();
-  if(n.indexOf('usdt') > -1) return nhImg(IMG('/ton-x1.webp'), 'fit', 'wallet');
-  if(n.indexOf('stars') > -1) return nhImg(IMG('/stars-x7.webp'), 'fill', 'wallet');
+  if(n.indexOf('usdt') > -1) return nhImg('https://www.minatoh.uz/usdt-x2.webp', 'fill', 'wallet');
+  if(n.indexOf('stars') > -1) return nhImg(starsPic(), 'fill', 'wallet');
   let hit = null;
   try{
     Object.keys(CARDS).forEach(function(k){
@@ -9647,6 +9647,11 @@ const IMG_BASE = 'https://api.minatoh.uz/img/';
    manzil bilan yoziladi. Serverdan keladigan o'yinlarning rasmi shu yerda
    almashtiriladi. */
 const GAME_IMG = { genshinimpact:'https://www.minatoh.uz/genshin-x2.webp', eafcmobile:'https://www.minatoh.uz/eafc-x2.webp' };
+/* Telegram Stars rasmi — bosh sahifadagi "TG STARS" kartasi bilan bir xil */
+function starsPic(){
+  const g = (typeof GAMES !== 'undefined' ? GAMES : []).filter(function(x){ return x && x.id === 'tgstars'; })[0];
+  return IMG((g && g.img) || '/stars-x7.webp');
+}
 function isPic(s){ return /^(\/|https?:)/i.test(String(s || '')); }
 function IMG(p){
   const s = String(p == null ? '' : p);
@@ -9973,8 +9978,8 @@ function renderNftTopup(){
       const ic = isPic(c.icon) ? `<img src="${IMG(c.icon)}" alt="">` : c.icon;
       return `<button class="pay" onclick="nftPick('${k}')"><span class="box sq">${ic}</span><span class="nm">${c.bank}</span></button>`;
     }).join('')}
-    <button class="pay" onclick="nftPick('stars')"><span class="box sq em">⭐</span><span class="nm">Telegram Stars</span></button>
-    <button class="pay" onclick="nftPick('usdt')"><span class="box sq em"><img class="ton" src="https://api.minatoh.uz/img/ton-x1.webp" alt="" onerror="this.replaceWith(document.createTextNode('💵'))"></span><span class="nm">USDT (TON)</span></button>
+    <button class="pay" onclick="nftPick('stars')"><span class="box sq"><img src="${starsPic()}" alt="" onerror="this.replaceWith(document.createTextNode('⭐'))"></span><span class="nm">Telegram Stars</span></button>
+    <button class="pay" onclick="nftPick('usdt')"><span class="box sq"><img src="https://www.minatoh.uz/usdt-x2.webp" alt="" onerror="this.replaceWith(document.createTextNode('💵'))"></span><span class="nm">USDT (TON)</span></button>
   </div>
   <button class="guide-btn" style="margin-top:16px" onclick="openLink('${GUIDE_URL}')">
     <span class="ic">📖</span><span class="t">Qo'llanma</span><span class="r">Kanal</span>
@@ -11533,8 +11538,8 @@ function renderTopup(){
     <p style="color:var(--dim);font-size:13.5px;margin:-6px 2px 18px">To'lov usulini tanlang</p>
     <div class="pay-grid">
      ${Object.keys(CARDS).filter(k=>CARDS[k].num).map(k=>`<button class="pay" onclick="pickPay('${k}')"><span class="box sq">${isPic(CARDS[k].icon) ? `<img src="${IMG(CARDS[k].icon)}" alt="">` : CARDS[k].icon}</span><span class="nm">${CARDS[k].bank}</span></button>`).join('')}
-     <button class="pay" onclick="pickPay('stars')"><span class="box sq em">⭐</span><span class="nm">Telegram Stars</span></button>
-     <button class="pay" onclick="pickPay('usdt')"><span class="box sq em"><img class="ton" src="https://api.minatoh.uz/img/ton-x1.webp" alt="" onerror="this.replaceWith(document.createTextNode('💵'))"></span><span class="nm">USDT (TON)</span></button>
+     <button class="pay" onclick="pickPay('stars')"><span class="box sq"><img src="${starsPic()}" alt="" onerror="this.replaceWith(document.createTextNode('⭐'))"></span><span class="nm">Telegram Stars</span></button>
+     <button class="pay" onclick="pickPay('usdt')"><span class="box sq"><img src="https://www.minatoh.uz/usdt-x2.webp" alt="" onerror="this.replaceWith(document.createTextNode('💵'))"></span><span class="nm">USDT (TON)</span></button>
     </div>
     <button class="guide-btn" style="margin-top:16px" onclick="openLink('${GUIDE_URL}')">
       <span class="ic">📖</span><span class="t">Qo'llanma</span><span class="r">Kanal</span>
