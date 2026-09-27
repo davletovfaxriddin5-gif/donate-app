@@ -43,7 +43,7 @@ body{ overflow-x:hidden; max-width:100%;
 }
 .reduce-motion *{animation:none!important;transition:none!important}
 .wrap{max-width:460px;margin:0 auto;position:relative;min-height:100dvh;overflow-x:hidden;
-  padding:calc(env(safe-area-inset-top) + var(--tg-top, 46px)) 14px calc(var(--nav-h) + env(safe-area-inset-bottom) + 16px);}
+  padding:calc(var(--sa-top, env(safe-area-inset-top, 0px)) + var(--tg-top, 46px)) 14px calc(var(--nav-h) + var(--sa-bottom, env(safe-area-inset-bottom, 0px)) + 16px);}
 button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:none}
 input{font-family:inherit}
 ::-webkit-scrollbar{display:none}
@@ -173,7 +173,7 @@ input{font-family:inherit}
   padding:2px 7px;border-radius:7px;letter-spacing:.3px}
 .pkg .info .a.small{font-size:13px;white-space:normal;max-width:100%}
 
-.buy-bar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom) + 14px);
+.buy-bar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--sa-bottom, env(safe-area-inset-bottom, 0px)) + 14px);
   width:calc(100% - 28px);max-width:432px;z-index:60}
 .buy-btn{width:100%;background:var(--blue-grad);border-radius:15px;padding:15px;font-weight:800;font-size:15px;
   color:#fff;box-shadow:0 14px 34px -10px rgba(63,85,246,.7)}
@@ -275,7 +275,7 @@ input{font-family:inherit}
 .pay .nm{font-size:12.5px;font-weight:700;color:#1a2236;text-align:center}
 
 .nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:460px;z-index:70;
-  height:calc(var(--nav-h) + env(safe-area-inset-bottom));padding:0 12px env(safe-area-inset-bottom);
+  height:calc(var(--nav-h) + var(--sa-bottom, env(safe-area-inset-bottom, 0px)));padding:0 12px var(--sa-bottom, env(safe-area-inset-bottom, 0px));
   display:flex;align-items:center;gap:8px}
 .nav-inner{flex:1;display:flex;background:rgba(15,22,38,.9);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
   border:1px solid var(--stroke);border-radius:18px;padding:7px 4px;height:54px}
@@ -315,7 +315,7 @@ input{font-family:inherit}
 .chg-btn{background:none;border:none;padding:4px 2px;color:#7E93FF;font-size:12.5px;font-weight:500;
   font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif;white-space:nowrap}
 .chg-btn:active{opacity:.55}
-.toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top) + var(--tg-top, 46px) + 6px);transform:translateX(-50%) translateY(-20px);
+.toast{position:fixed;left:50%;top:calc(var(--sa-top, env(safe-area-inset-top, 0px)) + var(--tg-top, 46px) + 6px);transform:translateX(-50%) translateY(-20px);
   background:var(--card-2);border:1px solid var(--stroke-2);color:#fff;padding:12px 18px;border-radius:13px;
   font-size:13px;font-weight:600;z-index:99;opacity:0;transition:.25s;box-shadow:0 12px 30px rgba(0,0,0,.5);
   pointer-events:none;max-width:88%;text-align:center}
@@ -708,7 +708,7 @@ body.light .toast.t-err{ color:#cc2a30 !important }
 .sheet-bg.on{opacity:1}
 .sheet{position:fixed;left:0;right:0;bottom:0;z-index:201;background:var(--card);
   border-radius:24px 24px 0 0;border-top:1px solid var(--stroke-2);
-  padding:10px 16px calc(env(safe-area-inset-bottom) + 16px);
+  padding:10px 16px calc(var(--sa-bottom, env(safe-area-inset-bottom, 0px)) + 16px);
   transform:translateY(100%);transition:transform .32s cubic-bezier(.22,.9,.3,1);
   max-height:88vh;overflow-y:auto;-webkit-overflow-scrolling:touch;max-width:460px;margin:0 auto}
 .sheet.on{transform:translateY(0)}
@@ -852,7 +852,7 @@ body.light .order{ border-color:rgba(16,24,40,.07) !important;
                   letter-spacing:-.3px !important }
 /* Suzuvchi oyna: ekranga yopishmaydi — chap, o'ng va pastdan bo'shliq, hamma burchagi yumaloq */
 .sheet{ left:12px !important; right:12px !important;
-        bottom:calc(env(safe-area-inset-bottom) + 12px) !important;
+        bottom:calc(var(--sa-bottom, env(safe-area-inset-bottom, 0px)) + 12px) !important;
         border-radius:32px !important;
         border:1px solid var(--stroke-2) !important;
         padding:18px 20px 20px !important;
@@ -1627,7 +1627,7 @@ body.light .of-info{ color:#7A5A00 }
 .ct-row .pr small{ display:block; font-size:11px; font-weight:600; color:var(--faint) }
 .ct-row.gone .im, .ct-row.gone .tx .nm{ opacity:.5 }
 .ct-row .gn{ font-size:11.5px; font-weight:700; color:#FF8A8A; margin-top:2px }
-.ct-foot{ position:sticky; bottom:calc(var(--nav-h, 70px) + env(safe-area-inset-bottom) + 10px); margin-top:14px; padding:14px;
+.ct-foot{ position:sticky; bottom:calc(var(--nav-h, 70px) + var(--sa-bottom, env(safe-area-inset-bottom, 0px)) + 10px); margin-top:14px; padding:14px;
   border-radius:20px; background:var(--card-2); border:1px solid var(--stroke-2); box-shadow:0 -8px 24px -12px rgba(0,0,0,.5) }
 .ct-sum{ display:flex; justify-content:space-between; align-items:baseline; font-size:14px; color:var(--dim) }
 .ct-sum b{ font-size:20px; font-weight:800; color:var(--text) }
@@ -1871,7 +1871,7 @@ body.kb-open .buy-bar{ display:none !important }
 .hw-sh{ text-align:left; height:88dvh; display:flex; flex-direction:column;
   left:4px !important; right:4px !important; bottom:0 !important;
   border-radius:26px 26px 0 0 !important; overflow:hidden;
-  padding:0 0 calc(env(safe-area-inset-bottom) + 10px) !important }
+  padding:0 0 calc(var(--sa-bottom, env(safe-area-inset-bottom, 0px)) + 10px) !important }
 /* Hamma narsa bir qarashda sig'sin — pastga surib qidirishga hojat qolmasin */
 .hw-sh.drag{ transition:none !important }
 /* Xabar (toast) varaq ostida qolib ketmasin */
@@ -1969,7 +1969,7 @@ body.light .tc-sh .tc-addr .cp svg{ color:rgba(16,24,40,.55) }
 .pw-lock{ position:fixed; inset:0; z-index:400; display:none; place-items:center;
   background:var(--bg); padding:24px }
 .pw-lock.on{ display:grid }
-.pw-lock .x{ position:absolute; top:calc(env(safe-area-inset-top) + 12px); left:14px;
+.pw-lock .x{ position:absolute; top:calc(var(--sa-top, env(safe-area-inset-top, 0px)) + 12px); left:14px;
   width:40px; height:40px; border-radius:50%; display:grid; place-items:center;
   background:var(--card-2); border:1px solid var(--stroke-2); color:var(--text);
   font-size:15px; line-height:1; transition:.14s }
@@ -2538,11 +2538,41 @@ if(tg){
   const tgTopSet = function(){
     try{
       const sa = (tg.contentSafeAreaInset && tg.contentSafeAreaInset.top) || 0;
+      const mob = /^(ios|android|android_x)$/i.test(String(tg.platform || ''));
       if(sa > 0) document.documentElement.style.setProperty('--tg-top', (sa + 10) + 'px');
+      /* Kompyuter / brauzer / macOS: Telegram sarlavhasi ilova ustiga tushmaydi — 46px shart emas */
+      else if(!mob && !tg.isFullscreen) document.documentElement.style.setProperty('--tg-top', '10px');
       else document.documentElement.style.removeProperty('--tg-top');
     }catch(e){}
+    saSet();
   };
+  /* Qurilmaning o'z panellari (holat paneli, pastki tizim tugmalari, o'yiq, uy chizig'i).
+     Har bir qurilma o'z qiymatini beradi: Telegram (safeAreaInset) va brauzer (env) —
+     ikkalasining KATTASI olinadi. iPhone'da ikkalasi bir xil (hech narsa o'zgarmaydi);
+     Android'da env() odatda 0 bo'ladi — shuning uchun tugmalar tizim tugmalari
+     ostida qolib ketardi, endi Telegram bergan aniq balandlik ishlatiladi. */
+  function saSet(){
+    try{
+      const pr = document.createElement('div');
+      pr.style.cssText = 'position:fixed;left:0;top:0;visibility:hidden;pointer-events:none;' +
+        'padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)';
+      document.body.appendChild(pr);
+      const cs = getComputedStyle(pr);
+      const e = { top:parseFloat(cs.paddingTop) || 0, right:parseFloat(cs.paddingRight) || 0,
+                  bottom:parseFloat(cs.paddingBottom) || 0, left:parseFloat(cs.paddingLeft) || 0 };
+      pr.remove();
+      const s = (tg && tg.safeAreaInset) || {}, c = (tg && tg.contentSafeAreaInset) || {};
+      const v = { top: Math.max(e.top, Number(s.top) || 0),
+                  right: Math.max(e.right, (Number(s.right) || 0) + (Number(c.right) || 0)),
+                  bottom: Math.max(e.bottom, (Number(s.bottom) || 0) + (Number(c.bottom) || 0)),
+                  left: Math.max(e.left, (Number(s.left) || 0) + (Number(c.left) || 0)) };
+      Object.keys(v).forEach(function(k){ document.documentElement.style.setProperty('--sa-' + k, Math.round(v[k]) + 'px'); });
+    }catch(e){}
+  }
   tgTopSet();
+  try{ tg.onEvent('safeAreaChanged', tgTopSet); tg.onEvent('viewportChanged', function(){ saSet(); }); }catch(e){}
+  window.addEventListener('resize', function(){ saSet(); });
+  window.addEventListener('orientationchange', function(){ setTimeout(saSet, 250); });
   /* Menu tugmasi (va boshqa tugmalar) orqali ochilganda ham ilova to'liq
      ekranda bo'lsin — xuddi "Открыть" orqali ochilgandagidek. BotFather'dagi
      Launch Mode faqat asosiy Mini App'ga ta'sir qiladi, Menu tugmasining esa
@@ -12443,7 +12473,7 @@ function ptrMake(){
   ptrEl.setAttribute('aria-hidden', 'true');
   const s = ptrEl.style;
   s.position = 'fixed'; s.left = '50%'; s.width = '26px'; s.height = '26px'; s.marginLeft = '-13px';
-  s.top = 'calc(env(safe-area-inset-top) + (var(--tg-top, 46px) - 36px) / 2)';
+  s.top = 'calc(var(--sa-top, env(safe-area-inset-top, 0px)) + (var(--tg-top, 46px) - 36px) / 2)';
   s.zIndex = '150'; s.pointerEvents = 'none'; s.opacity = '0'; s.transition = 'opacity .18s';
   let sp = '';
   for(let i = 0; i < 8; i++){
