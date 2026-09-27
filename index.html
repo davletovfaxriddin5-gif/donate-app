@@ -2262,6 +2262,26 @@ body.light .sz-pts{ background:rgba(200,140,40,.12); color:#a86a12; border-color
 .sz-per{ margin:1px 0 0; font-size:12px; font-weight:500; color:var(--faint) }
 .sz-empty .ic{ background:transparent !important }
 .sz-empty .ic .sz-coin{ width:56px; height:56px }
+/* Mavsum: bajarilgan vazifa va reyting ro'yxati */
+.sz-go.done{ display:inline-flex; align-items:center; gap:4px; background:rgba(52,199,89,.14); color:#34C759; border-color:rgba(52,199,89,.32); opacity:1 }
+.sz-go.done svg{ width:14px; height:14px; fill:none; stroke:currentColor; stroke-width:2.8; stroke-linecap:round; stroke-linejoin:round }
+.sz-go.busy{ opacity:.6; pointer-events:none }
+.sz-lb2{ padding:4px 12px 8px }
+.sz-my{ display:flex; align-items:center; gap:5px; padding:12px 4px; font-size:13.5px; color:var(--muted, #8b93a7); border-bottom:1px solid rgba(255,255,255,.07) }
+.sz-my b{ color:var(--text, #fff); font-weight:800 }
+.sz-my .sz-coin{ width:19px; height:19px; margin:-3px 0 }
+.sz-lr{ display:flex; align-items:center; gap:11px; padding:9px 6px; border-bottom:1px solid rgba(255,255,255,.06) }
+.sz-lr:last-child{ border-bottom:0 }
+.sz-lr.me{ background:rgba(255,200,61,.09); border-radius:12px; border-bottom-color:transparent }
+.sz-lr .n{ width:22px; flex-shrink:0; text-align:center; font-weight:800; font-size:14px; color:var(--muted, #8b93a7) }
+.sz-lr .n.t1{ color:#FFC83D } .sz-lr .n.t2{ color:#C9D2DE } .sz-lr .n.t3{ color:#E3A26B }
+.sz-lr .av{ position:relative; width:36px; height:36px; flex-shrink:0; border-radius:50%; overflow:hidden; display:grid; place-items:center; background:linear-gradient(135deg,#3b4a6b,#232c45) }
+.sz-lr .av i{ font-style:normal; font-weight:800; font-size:15px; color:#fff }
+.sz-lr .av img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover }
+.sz-lr .nm{ flex:1; min-width:0; font-weight:700; font-size:14.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+.sz-lr .pt{ display:inline-flex; align-items:center; gap:3px; font-weight:800; font-size:14px }
+.sz-lr .pt .sz-coin{ width:19px; height:19px; margin:-3px 0 }
+body.light .sz-my{ border-bottom-color:rgba(0,0,0,.08) } body.light .sz-lr{ border-bottom-color:rgba(0,0,0,.06) }
 </style>
 </head>
 <body>
@@ -8737,7 +8757,7 @@ const SZ_SV = {
   buy:   '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1.2 11.2a1.5 1.5 0 0 1-1.5 1.3H7.7a1.5 1.5 0 0 1-1.5-1.3z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/><path d="M12 11.5v5M9.8 14.3 12 16.5l2.2-2.2"/></svg>',
   add:   '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M3 7h18v3H3zM12 7v13M12 7S10.8 3 8.6 3a2 2 0 0 0 0 4M12 7s1.2-4 3.4-4a2 2 0 0 1 0 4"/></svg>'
 };
-var szTab = 'all', szList = 'tasks', szTimer = 0, szHistTry = false, szRefN = 0, szRefTry = false;
+var szTab = 'all', szList = 'tasks', szTimer = 0, szHistTry = false, szRefN = 0, szRefTry = false, szSrv = null, szTopD = null, szBusy = '';
 
 /* NFT profilidagi tugma */
 function pf2Season(){
@@ -8761,6 +8781,8 @@ function szRocket(){
 /* Ochkolar: xarid va sotuv serverdagi tarixdan; so'mdagi summa joriy
    GRAM kursida hisoblanadi. Referal va vazifa ochkolari — server bosqichida. */
 function szCalc(){
+  const sv = szSrv && szSrv[szTab === 'season' ? 'season' : 'all'];
+  if(sv) return Object.assign({ bN:0, bP:0, sN:0, sP:0, rN:0, rP:0, tN:0, tP:0, total:0 }, sv);
   const from = (szTab === 'season' && SZ_START) ? Date.parse(SZ_START) : 0;
   const rate = Number(gramSomRate) || 0;
   const gram = function(r){ const a = Number(r.amount) || 0; return r.cur === 'GRAM' ? a : (rate > 0 ? a / rate : 0); };
@@ -8804,8 +8826,10 @@ function szPeriod(){
 function szCardDraw(){ const c = document.getElementById('szCard'); if(c) c.innerHTML = szCardHtml(); }
 function szSetTab(t){ if(t === szTab) return; haptic(); szTab = t; szCardDraw(); }
 function szTaskHtml(x, daily){
-  const act = daily ? '<button class="sz-go" onclick="szGo(\'' + x.go + '\')">Boshlash</button>'
-                    : '<button class="sz-go" onclick="szCheck(\'' + x.id + '\')">Tekshirish</button>';
+  const st = szSrv && (daily ? szSrv.today : szSrv.once), done = !!(st && st[x.id]);
+  const act = done ? '<button class="sz-go done" disabled>' + SZ_OK + 'Bajarildi</button>'
+    : daily ? '<button class="sz-go" onclick="szGo(\'' + x.go + '\')">Boshlash</button>'
+            : '<button class="sz-go' + (szBusy === x.id ? ' busy' : '') + '" data-sz="' + x.id + '" onclick="szCheck(\'' + x.id + '\')">' + (szBusy === x.id ? 'Tekshirilmoqda\u2026' : 'Tekshirish') + '</button>';
   return '<div class="sz-t"><button class="ic ' + x.c + '"' + (daily ? ' onclick="szGo(\'' + x.go + '\')"' : ' onclick="szDo(\'' + x.id + '\')"') + '>' + SZ_SV[x.ic] + '</button>' +
     '<div class="tx"><div class="nm"' + (daily ? '' : ' onclick="szDo(\'' + x.id + '\')"') + '>' + x.t + '</div>' +
     '<span class="sz-pts">' + szCoin() + '+' + fmt(x.p) + '</span></div>' + act + '</div>';
@@ -8818,10 +8842,7 @@ function szLeft(){
   return p(Math.floor(s / 3600)) + ':' + p(Math.floor(s / 60) % 60) + ':' + p(s % 60);
 }
 function szListHtml(){
-  if(szList === 'rating'){
-    return '<div class="sz-box sz-empty"><div class="ic">' + szCoin() + '</div><h3>Reyting tez orada</h3>' +
-      '<p>Mavsum ochkolari bo\'yicha eng faol ishtirokchilar shu yerda ko\'rinadi.</p></div>';
-  }
+  if(szList === 'rating') return szTopHtml();
   return '<div class="sz-box">' +
     '<div class="sz-grp"><span>Bir martalik \u00b7 ' + SZ_TASKS.once.length + '</span></div>' +
     SZ_TASKS.once.map(function(x){ return szTaskHtml(x, false); }).join('') +
@@ -8830,10 +8851,12 @@ function szListHtml(){
 }
 function szSetList(t){
   if(t === szList) return; haptic(); szList = t;
+  if(t === 'rating') szTopD = null;
   document.querySelectorAll('.sz-ltabs button').forEach(function(b){ b.classList.toggle('on', b.dataset.t === t); });
   const l = document.getElementById('szList'); if(l) l.innerHTML = szListHtml();
 }
 function renderSeason(){
+  szSrvLoad();
   if(!nftHistLoaded && !szHistTry){ szHistTry = true; nftHistLoad(function(){ if(view === 'nft_season') szCardDraw(); }); }
   if(!(Number(gramSomRate) > 0)){ try{ nftLoad(function(){ if(view === 'nft_season') szCardDraw(); }); }catch(e){} }
   /* Referallar: faqat NFT bo'limi havolasi orqali kelganlar hisoblanadi */
@@ -8876,8 +8899,31 @@ function szDo(id){
   const link = refLink('nft');
   openLink('https://t.me/share/url?url=' + encodeURIComponent(link) + '&text=' + encodeURIComponent("MinatoUz \u2014 o'yin valyutasi va NFT sovg'alar"));
 }
-/* Tekshirish server bosqichida ulanadi (kanal a'zoligi va taklif qilingan do'st) */
-function szCheck(id){ haptic(); toast('Tekshirish keyingi bosqichda ulanadi'); }
+/* Bir martalik vazifani serverda tekshirish: kanal a'zoligi yoki taklif qilingan do'st */
+function szCheck(id){
+  haptic();
+  if(!szSrv){ toast('Tekshirish hozircha ishlamayapti, birozdan keyin urinib ko\'ring'); szSrvLoad(); return; }
+  if(szBusy) return;
+  szBusy = id; szListDraw();
+  fetch(VBASE + '/sz/check', { method:'POST', headers:{ 'Content-Type':'application/json' },
+    body: JSON.stringify({ initData: (tg && tg.initData) || '', task: id }) })
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      szBusy = '';
+      if(d && d.ok){
+        if(!d.already){ try{ tg.HapticFeedback.notificationOccurred('success'); }catch(e){} }
+        toast(d.already ? 'Bu vazifa allaqachon bajarilgan' : '+' + fmt(d.p) + ' ochko qo\'shildi');
+        szSrv.once[id] = true; szListDraw(); szSrvLoad(); return;
+      }
+      const e = d && d.error;
+      toast(e === 'not_member' ? 'Avval @' + SZ_CHANNEL + ' kanaliga obuna bo\'ling'
+          : e === 'no_ref' ? 'Hali NFT havolangiz orqali hech kim qo\'shilmadi'
+          : e === 'auth' ? 'Ilovani yopib, qayta oching'
+          : 'Tekshirib bo\'lmadi, birozdan keyin urinib ko\'ring');
+      szListDraw();
+    })
+    .catch(function(){ szBusy = ''; toast('Internet aloqasini tekshiring'); szListDraw(); });
+}
 /* Qoidalar — "Qo'shish" varag'i bilan bir xil: pastga surib yopiladi */
 function szRules(){
   haptic();
@@ -9186,6 +9232,45 @@ function sz3Draw(st, cv, fly, now){
   gl.drawElements(gl.TRIANGLES, st.n, st.it, 0);
   if(!st.on){ st.on = true; fly.classList.add('on3d'); }
   if(!still || window.SZ3_T != null) st.raf = requestAnimationFrame(function(n){ sz3Draw(st, cv, fly, n); });
+}
+
+/* ---------- Mavsum: server bilan ulanish ----------
+   /sz/me — ochkolar (Umumiy va Mavsum), vazifalar holati, reytingdagi o'rin;
+   /sz/check — bir martalik vazifani tekshirish; /sz/top — reyting.
+   Server hali yangilanmagan bo'lsa, ilova avvalgidek telefonda hisoblaydi. */
+const SZ_OK = '<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+function szSrvLoad(){
+  if(!tgUser || !tgUser.id) return;
+  fetch(VBASE + '/sz/me?id=' + encodeURIComponent(tgUser.id)).then(function(r){ return r.json(); }).then(function(d){
+    if(!d || !d.ok || !d.season) return;
+    szSrv = d;
+    if(view === 'nft_season'){ szCardDraw(); if(szList === 'tasks') szListDraw(); }
+  }).catch(function(){});
+}
+function szListDraw(){ const l = document.getElementById('szList'); if(l) l.innerHTML = szListHtml(); }
+function szTopLoad(){
+  const q = tgUser && tgUser.id ? '?id=' + encodeURIComponent(tgUser.id) : '';
+  fetch(VBASE + '/sz/top' + q).then(function(r){ return r.json(); }).then(function(d){
+    szTopD = (d && d.ok && Array.isArray(d.list)) ? d : 'off';
+  }).catch(function(){ szTopD = 'off'; }).then(function(){ if(view === 'nft_season' && szList === 'rating') szListDraw(); });
+}
+function szTopRow(x, me){
+  const nm = x.nm || (x.un ? '@' + x.un : 'Foydalanuvchi'), ini = esc(String(x.nm || x.un || '?').trim().charAt(0).toUpperCase() || '?');
+  return '<div class="sz-lr' + (me ? ' me' : '') + '"><span class="n' + (x.r <= 3 ? ' t' + x.r : '') + '">' + x.r + '</span>' +
+    '<span class="av"><i>' + ini + '</i><img src="' + VBASE + '/avatar?id=' + encodeURIComponent(x.id) + '" alt="" loading="lazy" onerror="this.remove()"></span>' +
+    '<span class="nm">' + esc(nm) + '</span><span class="pt">' + fmt(x.p) + szCoin() + '</span></div>';
+}
+function szTopHtml(){
+  if(!szTopD){ szTopLoad(); return '<div class="sz-box sz-empty"><div class="ic">' + szCoin() + '</div><h3>Reyting yuklanmoqda\u2026</h3></div>'; }
+  if(szTopD === 'off') return '<div class="sz-box sz-empty"><div class="ic">' + szCoin() + '</div><h3>Reyting tez orada</h3>' +
+    '<p>Mavsum ochkolari bo\'yicha eng faol ishtirokchilar shu yerda ko\'rinadi.</p></div>';
+  if(!szTopD.list.length) return '<div class="sz-box sz-empty"><div class="ic">' + szCoin() + '</div><h3>Hali hech kim ochko to\'plamagan</h3>' +
+    '<p>Birinchi bo\'ling \u2014 sovg\'a soting, sotib oling yoki vazifalarni bajaring.</p></div>';
+  const mine = tgUser && tgUser.id ? String(tgUser.id) : '', me = szTopD.me;
+  return '<div class="sz-box sz-lb2"><div class="sz-my">' +
+      (me ? 'Sizning o\'rningiz: <b>' + me.r + '</b><span>\u00b7</span><b>' + fmt(me.p) + '</b>' + szCoin()
+          : 'Siz hali reytingda yo\'qsiz \u2014 ochko to\'plang') + '</div>' +
+    szTopD.list.map(function(x){ return szTopRow(x, String(x.id) === mine); }).join('') + '</div>';
 }
 
 /* ---------- "Sovg'alarni qanday qo'shish?" ----------
