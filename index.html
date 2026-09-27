@@ -2384,15 +2384,30 @@ body.light .seg-fx > i.seg-pill.glass{ background:rgba(16,24,40,.07); border-col
 .sp-seg button{ transition:color .46s cubic-bezier(.22,.9,.28,1) !important }
 /* Tor ekranlar (360 px) uchun Market / Sovg'alarim bo'limlari ham sig'sin */
 @media (max-width: 380px){ .mg-tabs button{ padding:7px 9px !important; font-size:14px !important } }
-/* Darvoza: tezroq (~2.1 s) va bir tekis — yopilish ham, ochilish ham yumshoq tezlashib to'xtaydi */
-.dr-wrap .dr{ transition:transform .62s cubic-bezier(.55,0,.25,1) !important }
-.dr-wrap.opening .dr{ transition:transform .7s cubic-bezier(.45,0,.2,1) !important }
-.dr-wrap .dr.t:after, .dr-wrap .dr.b:after{ transition:opacity .18s .42s !important }
-.dr-wrap.opening .dr.t:after, .dr-wrap.opening .dr.b:after{ transition:opacity .15s 0s !important }
-.dr-wrap.act .dr-logo{ animation:logoIn .5s cubic-bezier(.2,1.4,.4,1) forwards !important }
-.dr-wrap.act .dr-logo .gl{ animation:logoGl .55s ease-out .32s forwards !important }
-@keyframes drLogoOut{ from{ opacity:1; transform:scale(1) rotate(0) } to{ opacity:0; transform:scale(.82) rotate(0) } }
-.dr-wrap.out .dr-logo{ animation:drLogoOut .22s ease-in forwards !important }
+/* Darvoza: 2.8 s — yopilish .85 s, ochilish .95 s; ikkalasi ham bir tekis tezlashib yumshoq to'xtaydi. Logotip yo'q. */
+.dr-wrap .dr{ transition:transform .85s cubic-bezier(.55,0,.25,1) !important }
+.dr-wrap.opening .dr{ transition:transform .95s cubic-bezier(.45,0,.2,1) !important }
+.dr-wrap .dr.t:after, .dr-wrap .dr.b:after{ transition:opacity .2s .62s !important }
+.dr-wrap.opening .dr.t:after, .dr-wrap.opening .dr.b:after{ transition:opacity .18s 0s !important }
+.dr-stage, .dr-logo{ display:none !important }
+/* Tepadan chiqadigan xabarlar — ixchamroq */
+.toast{ padding:8px 14px !important; font-size:14px !important; line-height:1.25 !important; border-radius:14px !important }
+/* Bosh sahifa Tarixi: Buyurtmalar/Moliya, filtrlar va "Statusni yangilash" ixchamroq */
+.seg.h-seg{ padding:3px !important; margin-bottom:10px !important }
+.seg.h-seg button{ padding:7px !important }
+.chips.h-chips{ gap:6px !important; margin-bottom:10px !important }
+.chips.h-chips .c{ padding:5px 12px !important }
+.refresh-btn.h-ref{ padding:8px !important; margin-bottom:12px !important }
+/* "Fikrlar" tugmasi ixchamroq */
+.profile .coin{ padding:4px 10px !important; gap:5px !important; font-size:12px !important }
+/* Sozlamalar: ID o'ng chetda, kichik ramkada; "ID" va raqam bir xil o'lchamda, yonma-yon */
+.set-profile .top .who2{ flex:1; min-width:0 }
+.set-profile .top .who2 .nm, .set-profile .top .who2 .un{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+.id-chip.id-r{ margin:0 !important; flex-shrink:0; align-self:center; padding:5px 8px !important; gap:5px !important; border-radius:9px !important; line-height:1 !important }
+.id-chip.id-r .k, .id-chip.id-r .v{ font-size:11.5px; line-height:1; font-weight:600; letter-spacing:0; font-variant-numeric:tabular-nums }
+.id-chip.id-r .k{ color:var(--faint) }
+.id-chip.id-r .v{ color:var(--text) }
+.id-chip.id-r svg{ width:11px !important; height:11px !important }
 </style>
 </head>
 <body>
@@ -4418,8 +4433,8 @@ const GAMES = [
     idFields:[{key:'playerId',label:"O'YINCHI ID",ph:'Player ID kiriting'}],
     packages:[
       {a:'60', c:'UC', p:11600, oid:'60_uc', grp:'UC', im:'/IMG_4457.png'},
-      {a:'325', c:'UC', p:55000, oid:'325_uc', grp:'UC', hit:true, im:'/IMG_4458.png'},
-      {a:'660', c:'UC', p:106000, oid:'660_uc', grp:'UC', hit:true, im:'/IMG_4453.png'},
+      {a:'325', c:'UC', p:55000, oid:'325_uc', grp:'UC', im:'/IMG_4458.png'},
+      {a:'660', c:'UC', p:106000, oid:'660_uc', grp:'UC', im:'/IMG_4453.png'},
       {a:'1800', c:'UC', p:265000, oid:'1800_uc', grp:'UC', im:'/IMG_4454.png'},
       {a:'3850', c:'UC', p:531000, oid:'3850_uc', grp:'UC', im:'/IMG_4444.png'},
       {a:'8100', c:'UC', p:1050000, oid:'8100_uc', grp:'UC', im:'/IMG_4445.png'},
@@ -5190,7 +5205,7 @@ function renderGame(){
     : '<div class="gd-head' + (g.hbg ? ' hasbg' : '') + (g.hpop ? ' haspop' : '') + '"'
       + (g.hbg ? ' style="background-image:url(\'' + IMG(g.hbg) + '\')"' : '') + '>'
       + (g.hpop ? '<img class="pop" src="' + IMG(g.hpop) + '" alt="">' : '')
-      + '<div class="ic">' + ((g.hicon || g.img) ? '<img src="' + IMG(g.hicon || g.img) + '">' : g.glyph) + '</div>'
+      + '<div class="ic">' + ((g.hicon || g.img) ? '<img src="' + IMG(g.hicon || g.img) + '"' + ((!g.hicon && g.zoom) ? ' style="transform:scale(' + g.zoom + ')"' : '') + '>' : g.glyph) + '</div>'
       + '<div><div class="nm">' + esc(g.name) + '</div><div class="cur">' + (g.cur||'') + '</div></div>'
       + '</div>'
       + (g.peek ? '<img class="peek-side" src="' + IMG(g.peek) + '" alt="">' : '');
@@ -5774,6 +5789,16 @@ function ordIcon(o){
   if(g && g.hicon) return '<img src="' + IMG(g.hicon) + '">';
   return (o && o.glyph) || (g && g.glyph) || '\uD83C\uDFAE';
 }
+/* Moliya: to'lov usulining rasmi — nomdagi kalit so'z bo'yicha (eski yozuvlarda ham) */
+function tpIcon(m){
+  const s = String(m || '').toLowerCase(), U = 'https://www.minatoh.uz/';
+  if(/qo'llab|tuzatish/.test(s)) return nhImg(U + 'minato-m-x1.webp', 'fill', 'help');
+  if(/star/.test(s)) return nhImg(starsPic(), 'fill', 'wallet');
+  const f = /usdt|\bton\b/.test(s) ? 'usdt-x2.webp' : /sber|\u0441\u0431\u0435\u0440/.test(s) ? 'sber-x2.webp'
+          : /tinkof|t-bank|tbank/.test(s) ? 'tinkoff-x2.webp' : /\btbc\b/.test(s) ? 'tbc-x2.webp'
+          : /visa/.test(s) ? 'visa-x2.webp' : /hamkor|humo|uzcard/.test(s) ? 'hamkor-x2.webp' : '';
+  return f ? nhImg(U + f, 'fill', 'card') : (nhPayIcon(m) || '\uD83D\uDCB3');
+}
 function renderHistory(){
   histTick();
   const fin = histTab==='finance';
@@ -5795,17 +5820,17 @@ function renderHistory(){
   }
   app.innerHTML = profileRow() + `
   <div class="page-title">Tarix</div>
-  <div class="seg">
+  <div class="seg h-seg">
     <button class="${histTab==='orders'?'on':''}" onclick="setHistTab('orders')">Buyurtmalar</button>
     <button class="${histTab==='finance'?'on':''}" onclick="setHistTab('finance')">Moliya</button>
   </div>
-  <div class="chips">
+  <div class="chips h-chips">
     <button class="c ${histFilter==='all'?'on':''}" onclick="setFilter('all')">Barchasi</button>
     <button class="c ${histFilter==='done'?'on':''}" onclick="setFilter('done')">Bajarildi</button>
     <button class="c ${histFilter==='wait'?'on':''}" onclick="setFilter('wait')">Kutilmoqda</button>
     <button class="c ${histFilter==='cancel'?'on':''}" onclick="setFilter('cancel')">Bekor qilingan</button>
   </div>
-  <button class="refresh-btn" onclick="refreshStatus()"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.6-6.4M21 4v5h-5"/></svg>Statusni yangilash</button>
+  <button class="refresh-btn h-ref" onclick="refreshStatus()"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.6-6.4M21 4v5h-5"/></svg>Statusni yangilash</button>
   <div id="histList"></div>`;
   setTimeout(bindHistTaps, 0);
   const list=document.getElementById('histList');
@@ -5819,7 +5844,7 @@ function renderHistory(){
       const bad = (t.status==='cancel'||t.status==='expired');
       const lbl = ok ? "Tasdiqlandi" : bad ? "Bekor qilingan" : "Kutilmoqda";
       const style = bad ? ' style="color:#FF6B6B;background:rgba(255,107,107,.14)"' : '';
-      const ic = String(t.method||'').toLowerCase().indexOf('sber')>-1 ? '🏦' : '💳';
+      const ic = tpIcon(t.method);
       const date = new Date(t.at).toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
       return `<div class="order">
         <div class="top">
@@ -5920,9 +5945,10 @@ function openOrderSheet(id){
     </div>
     ${o.code ? '<div style="font-size:12.5px;line-height:1.6;opacity:.75;margin:12px 2px 0">Kodni <b>' + esc(o.redeem || 'roblox.com/redeem') + '</b> saytida ishlatasiz.</div>'
       + '<button class="sh-close" style="background:var(--gold);color:#241a06;font-weight:800" data-c="' + esc(String(o.code).replace(/"/g,'')) + '" onclick="copyCode(this.dataset.c)">Kodni nusxalash</button>' : ''}
-    <button class="sh-close" onclick="closeSheet()">Yopish</button>`;
+`;
   document.body.appendChild(bg);
   document.body.appendChild(sh);
+  try{ gfDragBind(sh, closeSheet); }catch(e){}
   try{ applyLang(); }catch(e){}
   try{ bindHistTaps(); }catch(e){}
   requestAnimationFrame(function(){ bg.classList.add('on'); sh.classList.add('on'); });
@@ -6317,45 +6343,33 @@ function drSound(){
   try{
     if(!drSnd){ drSnd = new Audio('/sounds-x2.mp3'); drSnd.preload = 'auto'; }
     drSnd.volume = 0.9;
-    drSnd.currentTime = 0.26;   /* ovoz cho'qqisi qanotlar tutashgan lahzaga (620 ms) tushsin */
+    drSnd.currentTime = 0.03;   /* ovoz cho'qqisi qanotlar tutashgan lahzaga (850 ms) tushsin */
     const p = drSnd.play();
     if(p && typeof p.catch === 'function') p.catch(function(){});
   }catch(e){}
 }
-/* Darvoza ishlayotganda qayta bosishlar e'tiborsiz — aks holda qayta-qayta takrorlanardi */
+/* Darvoza ishlayotganda qayta bosishlar e'tiborsiz — aks holda qayta-qayta takrorlanardi.
+   Jami 2.8 s: 0-850 ms yopilish, 1300 ms ekran almashadi, 1800-2750 ms ochilish.
+   O'rtada logotip yo'q — faqat qanotlar va ular tutashgan chiziq. */
 var drBusy = false;
 function nftDoor(next){
   if(drBusy) return;
   drBusy = true;
-  setTimeout(function(){ drBusy = false; }, 3200);
+  setTimeout(function(){ drBusy = false; }, 3600);
   drSound();
   const old = document.getElementById('drWrap');
   if(old) old.remove();
   const w = document.createElement('div');
   w.className = 'dr-wrap'; w.id = 'drWrap';
-  /* O'rtadagi to'lqin halqalari va uchqunlar olib tashlandi - faqat logotip qoladi.
-     Ularning uslublari .rg / .sp da turibdi, kerak bo'lsa qaytarish oson. */
-  w.innerHTML = '<div class="dr t"></div><div class="dr b"></div>' +
-    '<div class="dr-stage"><div class="dr-core">' +
-      '<div class="dr-logo"><img src="' + IMG('/minato-logo.webp') + '" alt="" ' +
-        'onerror="this.closest(\'.dr-logo\').classList.add(\'off\')"><i class="gl"></i></div>' +
-    '</div></div>';
+  w.innerHTML = '<div class="dr t"></div><div class="dr b"></div>';
   document.body.appendChild(w);
-  const img = w.querySelector('.dr-logo img');
-  /* Vaqtlar (~2.1 s): 0-620 ms yopilish, 620 ms logotip, 1050 ms ekran almashadi,
-     1230 ms logotip so'nadi, 1350-2050 ms ochilish. Ikkala harakat ham bir tekis
-     tezlashib, yumshoq to'xtaydi. */
   requestAnimationFrame(function(){
     requestAnimationFrame(function(){ w.classList.add('shut'); });
   });
-  setTimeout(function(){
-    if(!(img && img.complete && img.naturalWidth)){ const lg = w.querySelector('.dr-logo'); if(lg) lg.classList.add('off'); }
-    w.classList.add('act'); haptic();
-  }, 620);
-  setTimeout(function(){ try{ next(); }catch(e){} }, 1050);
-  setTimeout(function(){ w.classList.add('out'); }, 1230);
-  setTimeout(function(){ w.classList.add('opening'); w.classList.remove('shut'); }, 1350);
-  setTimeout(function(){ if(w) w.remove(); drBusy = false; }, 2150);
+  setTimeout(function(){ haptic(); }, 850);
+  setTimeout(function(){ try{ next(); }catch(e){} }, 1300);
+  setTimeout(function(){ w.classList.add('opening'); w.classList.remove('shut'); }, 1800);
+  setTimeout(function(){ if(w) w.remove(); drBusy = false; }, 2800);
 }
 
 function toggleNft(){
@@ -9796,7 +9810,7 @@ const IMG_BASE = 'https://api.minatoh.uz/img/';
    bir joyda — GitHub'ning bosh papkasida — turadi, shuning uchun to'liq
    manzil bilan yoziladi. Serverdan keladigan o'yinlarning rasmi shu yerda
    almashtiriladi. */
-const GAME_IMG = { genshinimpact:'https://www.minatoh.uz/genshin-x2.webp', eafcmobile:'https://www.minatoh.uz/eafc-x2.webp' };
+const GAME_IMG = { genshinimpact:'https://www.minatoh.uz/genshin-x3.webp', eafcmobile:'https://www.minatoh.uz/eafc-x2.webp' };
 /* Telegram Stars rasmi — bosh sahifadagi "TG STARS" kartasi bilan bir xil */
 function starsPic(){
   const g = (typeof GAMES !== 'undefined' ? GAMES : []).filter(function(x){ return x && x.id === 'tgstars'; })[0];
@@ -11229,9 +11243,8 @@ function renderSettings(){
   <div class="set-profile">
     <div class="top">
       <div class="avatar" style="width:52px;height:52px;font-size:19px">${photo}</div>
-      <div><div class="nm">${name}</div><div class="un">${un}</div>
-      <button class="id-chip" ontouchstart="" onclick="copyId('${uid}')">ID: ${uid} <svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg></button>
-      </div>
+      <div class="who2"><div class="nm">${name}</div><div class="un">${un}</div></div>
+      <button class="id-chip id-r" ontouchstart="" onclick="copyId('${uid}')"><span class="k">ID</span><span class="v">${uid}</span><svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg></button>
     </div>
     <div class="stat-row">
       <div class="stat"><div class="k">Balans</div><div class="v">${money(balance,false)}</div></div>
@@ -11277,7 +11290,7 @@ function renderSettings(){
       <span class="switch ${reduced?'on':''}"></span>
     </button>
     <button class="svc" onclick="toggleTheme(this)">
-      <span class="ic" style="background:#C9902A"><svg viewBox="0 0 24 24"><path d="M21 12.8A8.5 8.5 0 1 1 11.2 3a6.6 6.6 0 0 0 9.8 9.8z"/></svg></span>
+      <span class="ic" style="background:#C9902A">${document.body.classList.contains('light') ? TH_SUN : TH_MOON}</span>
       <span class="txt"><div class="t">${document.body.classList.contains('light')?tr("Yorug' rejim"):tr("Tungi rejim")}</div><div class="s">${document.body.classList.contains('light')?tr("Tungi rejimga o'tish"):tr("Yorug' rejimga o'tish")}</div></span>
       <span class="switch ${document.body.classList.contains('light')?'on':''}"></span>
     </button>
@@ -11582,6 +11595,9 @@ function toggleMotion(el){ haptic(); const on=document.body.classList.toggle('re
   try{ tg && tg.setBackgroundColor && tg.setBackgroundColor(c); }catch(e){}
 }
 let themeT = null;
+/* Rejim belgisi: tungi rejimda oy, yorug' rejimda porlab turgan quyosh */
+const TH_MOON = '<svg viewBox="0 0 24 24"><path d="M21 12.8A8.5 8.5 0 1 1 11.2 3a6.6 6.6 0 0 0 9.8 9.8z"/></svg>';
+const TH_SUN  = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.3"/><path d="M12 2.6v2.3M12 19.1v2.3M2.6 12h2.3M19.1 12h2.3M5.35 5.35l1.62 1.62M17.03 17.03l1.62 1.62M5.35 18.65l1.62-1.62M17.03 6.97l1.62-1.62"/></svg>';
 function toggleTheme(el){
   haptic();
   /* .theming \u2014 0.4s davomida ranglar silliq o'zgaradi */
@@ -11592,6 +11608,7 @@ function toggleTheme(el){
   const on = document.body.classList.toggle('light');
   try{ localStorage.setItem('mt_theme', on ? 'light' : 'dark'); }catch(e){}
   const sw = el.querySelector('.switch'); if(sw) sw.classList.toggle('on', on);
+  const ti = el.querySelector('.ic'); if(ti) ti.innerHTML = on ? TH_SUN : TH_MOON;
   const tl = el.querySelector('.t'); if(tl) tl.textContent = on ? tr("Yorug' rejim") : tr("Tungi rejim");
   const lb = el.querySelector('.s'); if(lb) lb.textContent = on ? tr("Tungi rejimga o'tish") : tr("Yorug' rejimga o'tish");
   applyTheme();
@@ -12390,8 +12407,6 @@ setTimeout(hideSplash, 3400);
 try{ if(localStorage.getItem('mt_anim') === '0') document.body.classList.add('reduce-motion'); }catch(e){}
 /* darvoza ovozi birinchi marta ham kechikmasin - oldindan yuklab qo'yamiz */
 try{ drSnd = new Audio('/sounds-x2.mp3'); drSnd.preload = 'auto'; drSnd.load(); }catch(e){}
-/* darvoza logotipi ham oldindan yuklanadi — o'rtada bo'sh ramka ko'rinmasin */
-try{ window.__drLogo = new Image(); window.__drLogo.src = IMG('/minato-logo.webp'); }catch(e){}
 
 /* ===== Tortib yangilash (pull to refresh) =====
    iPhone da sahifa eng tepada pastga tortilsa "cho'ziladi" - window.scrollY manfiy
