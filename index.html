@@ -2258,6 +2258,10 @@ body.light .ref-seg button.on b{ background:rgba(255,255,255,.25) }
 .sz-pts{ gap:3px; padding:2px 9px 2px 3px; background:rgba(255,200,61,.13); color:#FFC83D; border:1px solid rgba(255,200,61,.26); font-style:normal }
 .sz-pts .sz-coin{ width:18px; height:18px; margin:-3px 0 }
 body.light .sz-pts{ background:rgba(200,140,40,.12); color:#a86a12; border-color:rgba(200,140,40,.30) }
+/* Mavsum kartasi: yorliq qaysi davrni sanayotgani; reyting bo'sh holatidagi tanga */
+.sz-per{ margin:1px 0 0; font-size:12px; font-weight:500; color:var(--faint) }
+.sz-empty .ic{ background:transparent !important }
+.sz-empty .ic .sz-coin{ width:56px; height:56px }
 </style>
 </head>
 <body>
@@ -8703,7 +8707,7 @@ function nhIconW(x){ return x ? (x.ord ? nhOrderIcon(x.ord) : nhIcon(x.rec)) : n
    ===================================================================== */
 const SZ_OPEN    = false;
 const SZ_TITLE   = 'Mavsum #1';
-const SZ_START   = '';          /* mavsum boshlangan kun, masalan '2026-10-01'. Bo'sh — butun tarix */
+const SZ_START   = '2026-09-27T00:00:00+05:00';   /* Mavsum 1 boshlangan vaqt (Toshkent). "Mavsum 1" yorlig'i shundan keyingisini sanaydi */
 const SZ_BUY     = 100;         /* har 1 GRAM xarid uchun ochko */
 const SZ_SELL    = 50;          /* har 1 GRAM sotuv uchun ochko */
 const SZ_CHANNEL = 'minatoh_uz';
@@ -8760,7 +8764,7 @@ function szCalc(){
   const from = (szTab === 'season' && SZ_START) ? Date.parse(SZ_START) : 0;
   const rate = Number(gramSomRate) || 0;
   const gram = function(r){ const a = Number(r.amount) || 0; return r.cur === 'GRAM' ? a : (rate > 0 ? a / rate : 0); };
-  const s = { bN:0, bP:0, sN:0, sP:0, rN:szRefN, rP:0, tN:0, tP:0 };
+  const s = { bN:0, bP:0, sN:0, sP:0, rN:szRefCnt(from), rP:0, tN:0, tP:0 };
   (nftHist || []).forEach(function(r){
     if(from && (Date.parse(r.at) || 0) < from) return;
     if(r.kind === 'nft_buy' && r.note){ s.bN++; s.bP += gram(r) * SZ_BUY; }
@@ -8780,9 +8784,22 @@ function szCardHtml(){
       '<button class="' + (szTab === 'all' ? 'on' : '') + '" onclick="szSetTab(\'all\')">Umumiy</button>' +
       '<button class="' + (szTab === 'season' ? 'on' : '') + '" onclick="szSetTab(\'season\')">Mavsum 1</button></div>' +
     '<div class="sz-lb">Shu davrda to\'plandi<button onclick="szRules()" aria-label="Qoidalar">' + SZ_SV.info + '</button></div>' +
+    '<div class="sz-per">' + szPeriod() + '</div>' +
     '<div class="sz-big">' + fmt(s.total) + szCoin() + '</div>' +
     szRow('Xaridlar', s.bN, 'gift', s.bP) + szRow('Sotuvlar', s.sN, 'gift', s.sP) +
     szRow('Referallar savdosi', s.rN, 'ppl', s.rP) + szRow('Vazifalar', s.tN, 'chk', s.tP);
+}
+/* Yorliqlar: "Umumiy" — butun vaqt, "Mavsum 1" — SZ_START dan keyin.
+   Referallar: faqat NFT bo'limi havolasi orqali kelganlar, davr bo'yicha. */
+function szRefCnt(from){
+  const n = (refLast && refLast.by && refLast.by.nft) || null;
+  if(!n) return 0;
+  return from ? (n.list || []).filter(function(x){ return (Date.parse(x.at) || 0) >= from; }).length : (n.count || 0);
+}
+function szPeriod(){
+  if(szTab !== 'season' || !SZ_START) return 'Butun vaqt davomida';
+  const d = new Date(SZ_START);
+  return d.getDate() + ' ' + HD_MON[d.getMonth()] + ' ' + d.getFullYear() + ' dan boshlab';
 }
 function szCardDraw(){ const c = document.getElementById('szCard'); if(c) c.innerHTML = szCardHtml(); }
 function szSetTab(t){ if(t === szTab) return; haptic(); szTab = t; szCardDraw(); }
@@ -8802,7 +8819,7 @@ function szLeft(){
 }
 function szListHtml(){
   if(szList === 'rating'){
-    return '<div class="sz-box sz-empty"><div class="ic">' + SZ_SV.star + '</div><h3>Reyting tez orada</h3>' +
+    return '<div class="sz-box sz-empty"><div class="ic">' + szCoin() + '</div><h3>Reyting tez orada</h3>' +
       '<p>Mavsum ochkolari bo\'yicha eng faol ishtirokchilar shu yerda ko\'rinadi.</p></div>';
   }
   return '<div class="sz-box">' +
