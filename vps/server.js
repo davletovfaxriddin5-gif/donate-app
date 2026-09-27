@@ -2975,8 +2975,115 @@ app.post("/nft/gift/out", async (req,res)=>{
    Barcha kirim va chiqimlar shu yerda. Ilgari ular telefonda turardi —
    nizo chiqsa dalil bo'lmasdi. Endi serverda va zaxiraga tushadi.
    kind: gram_in, gram_out, som_in, som_out, nft_buy, nft_sell */
+/* ======================= MAVSUM (sezon) =======================
+   Ochkolar SERVERDA yig'iladi — telefonda soxtalashtirib bo'lmaydi.
+   Har bir NFT hodisasi nftLog() dan o'tadi va shu yerda mavsum hisobiga
+   ham qo'shiladi. nftHist 200 yozuv bilan cheklangani uchun ochkolar
+   alohida (u.sz) saqlanadi — eski yozuvlar o'chsa ham ochko yo'qolmaydi.
+   Qoidalar (ilovadagi "Qoidalar" oynasi bilan bir xil):
+     sovg'a xaridi — 1 GRAM uchun 100 ochko, sotuvi — 50 ochko
+       (so'mdagi summa joriy GRAM kursida GRAM ga aylantiriladi)
+     bir martalik: kanalga obuna +200, do'st taklif qilish +250
+     kunlik (Toshkent kuni): sotuv +200, taklif orqali savdo +200,
+       xarid +100, sovg'a qo'shish +100
+     referal: NFT havolasi orqali kelgan do'st mavsumda kamida 10 GRAM
+       savdo qilsa, uning ochkolarining 10% i taklif qilganga qo'shiladi.
+   O'yin donatlari (izohsiz nft_buy) sovg'a xaridi emas — hisoblanmaydi. */
+const SZ_ID     = "s1";
+const SZ_START  = Date.parse(process.env.SZ_START || "2026-09-27T00:00:00+05:00");
+const SZ_CHAN   = process.env.SZ_CHANNEL || "@minatoh_uz";
+const SZ_BUY = 100, SZ_SELL = 50, SZ_REF_PCT = 0.10, SZ_REF_MIN = 10;
+const SZ_ONCE  = { sub:200, inv:250 };
+const SZ_DAILY = { sell:200, offer:200, buy:100, add:100 };
+function szDay(ts){ return new Date(ts + 5 * 3600e3).toISOString().slice(0, 10); }
+function szKinds(r){
+  const note = String(r.note || ""), k = [];
+  if(r.kind === "nft_sell"){ k.push("sell"); if(/^Taklif/.test(note)) k.push("offer"); }
+  else if(r.kind === "nft_buy" && /^(NFT sotib olindi|Taklif qabul qilindi)/.test(note)){ k.push("buy"); if(/^Taklif/.test(note)) k.push("offer"); }
+  else if(r.kind === "gift_in" && /^Hisobga qo'shildi/.test(note)) k.push("add");
+  return k;
+}
+function szNew(){ return { id:SZ_ID, since:Date.now(), bG:0, bS:0, bN:0, sG:0, sS:0, sN:0, days:{}, once:{} }; }
+function szAdd(z, r){
+  const t = Date.parse(r.at) || Date.now(); if(t < SZ_START) return;
+  const ks = szKinds(r); if(!ks.length) return;
+  const a = Number(r.amount) || 0, g = r.cur === "GRAM" ? a : 0, s = r.cur === "so'm" ? a : 0;
+  if(ks.indexOf("buy") > -1){ z.bG += g; z.bS += s; z.bN++; }
+  if(ks.indexOf("sell") > -1){ z.sG += g; z.sS += s; z.sN++; }
+  const d = szDay(t), dd = z.days[d] || (z.days[d] = {});
+  ks.forEach(function(k){ dd[k] = 1; });
+}
+/* Yozish uchun: hisob yo'q bo'lsa yaratiladi va mavsum boshidan shu
+   paytgacha bo'lgan tarix bir marta qo'shiladi */
+function szOf(u){
+  if(u.sz && u.sz.id === SZ_ID) return u.sz;
+  const z = szNew();
+  (Array.isArray(u.nftHist) ? u.nftHist : []).forEach(function(r){ if((Date.parse(r.at) || 0) < z.since) szAdd(z, r); });
+  u.sz = z; return z;
+}
+/* O'qish uchun: bazani o'zgartirmaydi */
+function szPeek(u){
+  if(!u) return null;
+  if(u.sz && u.sz.id === SZ_ID) return u.sz;
+  const h = Array.isArray(u.nftHist) ? u.nftHist : [];
+  if(!h.some(function(r){ return (Date.parse(r.at) || 0) >= SZ_START; })) return null;
+  const z = szNew(); h.forEach(function(r){ szAdd(z, r); }); return z;
+}
+function szPts(z, rate){
+  const bg = z.bG + (rate > 0 ? z.bS / rate : 0), sg = z.sG + (rate > 0 ? z.sS / rate : 0);
+  let tN = 0, tP = 0;
+  Object.keys(z.once || {}).forEach(function(k){ if(SZ_ONCE[k]){ tN++; tP += SZ_ONCE[k]; } });
+  Object.keys(z.days || {}).forEach(function(d){ Object.keys(z.days[d]).forEach(function(k){ if(SZ_DAILY[k]){ tN++; tP += SZ_DAILY[k]; } }); });
+  const bP = Math.floor(bg * SZ_BUY), sP = Math.floor(sg * SZ_SELL);
+  return { bN:z.bN, bP:bP, sN:z.sN, sP:sP, tN:tN, tP:tP, vol:bg + sg, own:bP + sP + tP };
+}
+/* NFT havolasi orqali kelgan, Start bosgan va chiqib ketmagan referallar */
+function szRefs(db, u, rate){
+  let nA = 0, nS = 0, p = 0;
+  (Array.isArray(u && u.refs) ? u.refs : []).forEach(function(k){
+    const r = db[k];
+    if(!r || r.refSrc !== "nft" || !r.greeted || r.left) return;
+    nA++; if((Date.parse(r.refAt) || 0) >= SZ_START) nS++;
+    const z = szPeek(r); if(!z) return;
+    const q = szPts(z, rate); if(q.vol >= SZ_REF_MIN) p += Math.floor(q.own * SZ_REF_PCT);
+  });
+  return { nA:nA, nS:nS, p:p };
+}
+/* Mavsumdan oldingi sovg'a savdolari — faqat "Umumiy" yorlig'i uchun */
+function szPre(u, rate){
+  const o = { bN:0, bP:0, sN:0, sP:0 }; let bg = 0, sg = 0;
+  (Array.isArray(u && u.nftHist) ? u.nftHist : []).forEach(function(r){
+    if((Date.parse(r.at) || 0) >= SZ_START) return;
+    const ks = szKinds(r), a = Number(r.amount) || 0, g = r.cur === "GRAM" ? a : (rate > 0 ? a / rate : 0);
+    if(ks.indexOf("buy") > -1){ o.bN++; bg += g; }
+    if(ks.indexOf("sell") > -1){ o.sN++; sg += g; }
+  });
+  o.bP = Math.floor(bg * SZ_BUY); o.sP = Math.floor(sg * SZ_SELL); return o;
+}
+/* Reyting: 1 daqiqa xotirada saqlanadi */
+let szTopC = { at:0, list:[] };
+function szBoard(db, rate){
+  if(Date.now() - szTopC.at < 60000) return szTopC.list;
+  const rows = [];
+  Object.keys(db).forEach(function(k){
+    if(!/^\d+$/.test(k)) return;
+    const u = db[k]; if(!u || typeof u !== "object" || isBanned(k)) return;
+    const z = szPeek(u), own = z ? szPts(z, rate).own : 0;
+    const rp = Array.isArray(u.refs) && u.refs.length ? szRefs(db, u, rate).p : 0;
+    const p = own + rp; if(p <= 0) return;
+    rows.push({ id:k, nm:String(u.nm || ""), un:String(u.un || ""), p:p });
+  });
+  rows.sort(function(a, b){ return b.p - a.p; });
+  szTopC = { at:Date.now(), list:rows };
+  return rows;
+}
+async function szRate(){ try{ return (await gramSom()) || gramRate.som || 0; }catch(e){ return gramRate.som || 0; } }
+
 function nftLog(u, kind, amount, extra){
   if(!Array.isArray(u.nftHist)) u.nftHist = [];
+  /* mavsum hisobi yangi yozuvdan OLDIN olinadi — birinchi marta ochilganda
+     eski tarix qo'shiladi, yangi yozuv esa quyida bir marta qo'shiladi */
+  let z = null; try{ z = szOf(u); }catch(e){}
   const rec = Object.assign({
     id: "H" + Date.now().toString().slice(-9) + Math.floor(Math.random()*90+10),
     kind: String(kind),
@@ -2986,6 +3093,7 @@ function nftLog(u, kind, amount, extra){
   }, extra || {});
   u.nftHist.unshift(rec);
   u.nftHist = u.nftHist.slice(0, 200);
+  if(z){ try{ szAdd(z, rec); szTopC.at = 0; }catch(e){} }
   return rec;
 }
 
@@ -2999,6 +3107,65 @@ app.get("/nft/hist", (req,res)=>{
   res.json({ ok:true, rows: (rec && Array.isArray(rec.nftHist))
     ? rec.nftHist.map(function(r){ const c = Object.assign({}, r); delete c.cardFull; delete c.holder; return c; })
     : [] });
+});
+
+/* ---------- Mavsum: ochkolar, vazifalarni tekshirish, reyting ---------- */
+app.get("/sz/me", async (req,res)=>{
+  try{
+    const uid = String(req.query.id || "").replace(/\D/g, "");
+    if(!uid) return res.json({ ok:false, error:"id" });
+    const rate = await szRate();
+    const db = load(), u = db[uid] || {};
+    const z = szPeek(u) || szNew(), m = szPts(z, rate), rf = szRefs(db, u, rate), pre = szPre(u, rate);
+    const dd = (z.days || {})[szDay(Date.now())] || {};
+    const b = szBoard(db, rate), i = b.findIndex(function(x){ return x.id === uid; });
+    res.json({ ok:true, sz:SZ_ID, start:new Date(SZ_START).toISOString(), rate:rate,
+      season:{ bN:m.bN, bP:m.bP, sN:m.sN, sP:m.sP, rN:rf.nS, rP:rf.p, tN:m.tN, tP:m.tP, total:m.own + rf.p },
+      all:{ bN:m.bN + pre.bN, bP:m.bP + pre.bP, sN:m.sN + pre.sN, sP:m.sP + pre.sP, rN:rf.nA, rP:rf.p, tN:m.tN, tP:m.tP,
+            total:m.own + pre.bP + pre.sP + rf.p },
+      once:{ sub:!!(z.once || {}).sub, inv:!!(z.once || {}).inv },
+      today:{ sell:!!dd.sell, offer:!!dd.offer, buy:!!dd.buy, add:!!dd.add },
+      rank: i > -1 ? i + 1 : 0, players: b.length });
+  }catch(e){ console.log("SZ me xato:", e.message); res.json({ ok:false, error:"server" }); }
+});
+/* Bir martalik vazifani tekshirish: kanalga a'zolik (bot kanalda admin) yoki
+   mavsum davomida NFT havolasi orqali kelgan kamida bitta do'st */
+app.post("/sz/check", async (req,res)=>{
+  try{
+    const who = checkInit((req.body || {}).initData);
+    if(!who) return res.json({ ok:false, error:"auth" });
+    const task = String((req.body || {}).task || "");
+    if(!SZ_ONCE[task]) return res.json({ ok:false, error:"task" });
+    if(task === "sub"){
+      const r = await tgAsk("getChatMember", { chat_id:SZ_CHAN, user_id:Number(who.id) });
+      if(!r || !r.ok || !r.result) return res.json({ ok:false, error:"check_failed" });
+      const st = r.result.status;
+      const mem = st === "member" || st === "administrator" || st === "creator" || (st === "restricted" && r.result.is_member);
+      if(!mem) return res.json({ ok:false, error:"not_member" });
+    }
+    const db = load(), u = urec(db, who.id);
+    if(task === "inv"){
+      const ok = (Array.isArray(u.refs) ? u.refs : []).some(function(k){
+        const r = db[k]; return r && r.refSrc === "nft" && r.greeted && !r.left && (Date.parse(r.refAt) || 0) >= SZ_START;
+      });
+      if(!ok) return res.json({ ok:false, error:"no_ref" });
+    }
+    const z = szOf(u);
+    if(z.once[task]) return res.json({ ok:true, already:true, p:SZ_ONCE[task] });
+    z.once[task] = new Date().toISOString();
+    save(db); szTopC.at = 0;
+    res.json({ ok:true, p:SZ_ONCE[task] });
+  }catch(e){ console.log("SZ check xato:", e.message); res.json({ ok:false, error:"server" }); }
+});
+app.get("/sz/top", async (req,res)=>{
+  try{
+    const uid = String(req.query.id || "").replace(/\D/g, "");
+    const rate = await szRate();
+    const b = szBoard(load(), rate), i = uid ? b.findIndex(function(x){ return x.id === uid; }) : -1;
+    res.json({ ok:true, n:b.length,
+      list: b.slice(0, 50).map(function(x, k){ return { r:k + 1, id:x.id, nm:x.nm, un:x.un, p:x.p }; }),
+      me: i > -1 ? { r:i + 1, p:b[i].p } : null });
+  }catch(e){ console.log("SZ top xato:", e.message); res.json({ ok:false, error:"server" }); }
 });
 
 /* ---------- GRAM to'ldirish ----------
