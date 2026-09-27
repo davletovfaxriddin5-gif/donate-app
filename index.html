@@ -2339,6 +2339,12 @@ body.light .sz-my{ border-bottom-color:rgba(0,0,0,.08) } body.light .sz-lr{ bord
 .gr-quick button .d{ width:20px; height:20px; background:none !important }
 .gr-quick button .d svg{ width:20px !important; height:20px !important }
 .sp-card .gr-quick button .d, .sp-card .gr-quick button .d svg{ width:18px !important; height:18px !important }
+/* Telegram Stars belgisi (⭐ emojisi o'rniga): matn o'lchamiga moslashadi */
+.st-ic{ display:inline-block; width:1.18em; height:1.18em; vertical-align:-.24em; object-fit:contain; pointer-events:none }
+.info-i .st-ic{ width:22px; height:22px; vertical-align:middle }
+.st-amt .ic .st-ic{ width:1.05em; height:1.05em; vertical-align:-.12em }
+/* Maydon ichidagi yulduz: eski "i" belgisining to'q doirasi kerak emas */
+.info-i:has(.st-ic){ background:none !important; border:0 !important; box-shadow:none !important }
 </style>
 </head>
 <body>
@@ -4353,6 +4359,9 @@ function applyMap(map){
   arr.forEach(n=>{ const k=n.nodeValue.trim(); if(k && map[k]) n.nodeValue = n.nodeValue.replace(k, map[k]); });
   document.querySelectorAll('[placeholder]').forEach(el=>{ const k=(el.placeholder||'').trim(); if(k && map[k]) el.placeholder = map[k]; });
 }
+/* "IXTIYORIY MIQDOR (⭐)" yozuvidagi yulduz endi rasm — matn qismi alohida tarjima qilinadi */
+try{ Object.keys(DICT).forEach(function(l){ const v = DICT[l]["IXTIYORIY MIQDOR (\u2b50)"];
+  if(v && !DICT[l]["IXTIYORIY MIQDOR"]) DICT[l]["IXTIYORIY MIQDOR"] = String(v).replace(/\s*\(\u2b50\)\s*$/, ''); }); }catch(e){}
 function applyLang(){ const d = DICT[currentLang]; if(d) applyMap(d); }
 
 const GAMES = [
@@ -5048,7 +5057,7 @@ function pkgHtml(list){
     return head + `
       <button class="pkg ${p.txt?'txt-only':''} ${p.promo?'promo':''}" data-i="${i}" onclick="pickPkg(${i})" style="${p.promo?'border-color:rgba(245,179,1,.62)':''}">
         ${p.hit?`<span class="hit">HIT</span>`:''}
-        <span class="pic"><span class="em">${p.im?'<img class="pim" src="'+IMG(p.im)+'">':p.txt?'🎁':(p.c==='💎'?'💎':p.c==='⭐'?'⭐':'🪙')}</span>${p.x2?`<span class="x2">x2</span>`:''}</span>
+        <span class="pic"><span class="em">${p.im?'<img class="pim" src="'+IMG(p.im)+'">':p.txt?'🎁':(p.c==='💎'?'💎':p.c==='⭐'?stI():'🪙')}</span>${p.x2?`<span class="x2">x2</span>`:''}</span>
         <span class="info"><span class="a ${p.txt?'small':''}">${p.a}${p.c&&p.c.length<=2?' '+p.c:''}</span><span class="p">${money(p.p,true)}</span></span>
       </button>`;
   }).join('');
@@ -5172,8 +5181,8 @@ function renderGame(){
         + '</div>'
     : g.custom==='stars'
       ? '<div class="form-card">'
-        + '<div class="lbl">Summani kiriting (\u2b50)</div>'
-        + '<div class="inp-wrap"><input class="inp" id="starQty" inputmode="numeric" placeholder="0" autocomplete="off" oninput="onQty()"><span class="info-i">\u2b50</span></div>'
+        + '<div class="lbl">Summani kiriting (' + stI() + ')</div>'
+        + '<div class="inp-wrap"><input class="inp" id="starQty" inputmode="numeric" placeholder="0" autocomplete="off" oninput="onQty()"><span class="info-i">' + stI() + '</span></div>'
         + '<div class="lbl" style="margin-top:14px">Narx</div>'
         + '<div class="inp-wrap"><input class="inp" id="starSum" readonly value="\u2014" style="opacity:.85"></div>'
         + '<div id="starHint" style="margin-top:11px;font-size:12.5px;line-height:1.6"></div>'
@@ -5276,15 +5285,15 @@ function onQty(){
   if(h){
     const mx = maxStars(balance);
     let warn = '';
-    if(n && n < STAR_MIN) warn = `<div style="color:var(--gold)">Eng kami ${STAR_MIN} ⭐</div>`;
-    else if(n > STAR_MAX) warn = `<div style="color:var(--gold)">Eng ko'pi ${fmt(STAR_MAX)} ⭐</div>`;
+    if(n && n < STAR_MIN) warn = `<div style="color:var(--gold)">Eng kami ${STAR_MIN} ${stI()}</div>`;
+    else if(n > STAR_MAX) warn = `<div style="color:var(--gold)">Eng ko'pi ${fmt(STAR_MAX)} ${stI()}</div>`;
     else if(n && price > balance) warn = `<div style="color:var(--gold)">Balans yetarli emas — ${money(balance,false)} bor</div>`;
     h.innerHTML = warn
-      + `<div style="color:var(--dim)">1 ⭐ = ${fmt(starRate(n||STAR_MIN))} so'm</div>`
+      + `<div style="color:var(--dim)">1 ${stI()} = ${fmt(starRate(n||STAR_MIN))} so'm</div>`
       + (mx >= STAR_MIN
-          ? `<div style="color:var(--dim)">Balansga sig'adi: ${fmt(mx)} ⭐ (${fmt(starPrice(mx))} so'm)</div>`
-          : `<div style="color:var(--dim)">Eng kichik buyurtma ${STAR_MIN} ⭐ — ${fmt(starPrice(STAR_MIN))} so'm</div>`)
-      + `<div style="color:var(--dim)">Ko'proq olsangiz 1 ⭐ arzonlashadi: 100 dan 240, 250 dan 230, 1000 dan 220 so'm</div>`;
+          ? `<div style="color:var(--dim)">Balansga sig'adi: ${fmt(mx)} ${stI()} (${fmt(starPrice(mx))} so'm)</div>`
+          : `<div style="color:var(--dim)">Eng kichik buyurtma ${STAR_MIN} ${stI()} — ${fmt(starPrice(STAR_MIN))} so'm</div>`)
+      + `<div style="color:var(--dim)">Ko'proq olsangiz 1 ${stI()} arzonlashadi: 100 dan 240, 250 dan 230, 1000 dan 220 so'm</div>`;
   }
   syncBuy();
 }
@@ -7463,7 +7472,7 @@ function spPanel(){
     </div>
     <div class="sp-err" id="spErr" style="display:none"></div>
     <div class="gr-quick scroll">
-      ${SP_QUICK.map(function(v){ return `<button onclick="spAmt(${v})">⭐️ ${fmt(v)}</button>`; }).join('')}
+      ${SP_QUICK.map(function(v){ return `<button onclick="spAmt(${v})">${stI()} ${fmt(v)}</button>`; }).join('')}
     </div>
     <button class="gr-go" id="spGo" disabled onclick="spBuy()">Stars sotib olish</button>
   </div>`;
@@ -10158,13 +10167,13 @@ function renderOutStars(){
   <div id="soWho" class="sp-who"></div>
   <div class="st-box">
     <div class="st-amt">
-      <span class="ic">⭐️</span>
+      <span class="ic">${stI()}</span>
       <input id="stAmt" type="text" inputmode="numeric" placeholder="Miqdorni kiriting" oninput="stIn(this)">
     </div>
   </div>
   <div class="st-bal" id="soCost">Mavjud balans: ${fmtGram(getGram())} GRAM</div>
   <div class="gr-quick scroll">
-    ${q.map(function(v){ return `<button onclick="stSet(${v})">${fmt(v)} ⭐️</button>`; }).join('')}
+    ${q.map(function(v){ return `<button onclick="stSet(${v})">${fmt(v)} ${stI()}</button>`; }).join('')}
   </div>
   <button class="gr-go" id="stGo" disabled onclick="soBuy()">Sotib olish</button>`;
   soSync();
@@ -10426,6 +10435,10 @@ function ocAll(){
    Vektor (SVG) — har o'lchamda tiniq. GRAM_ICON — HTML ichiga, GRAM_IMG — <img> uchun. */
 const GRAM_SVG = '<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="24" fill="#3AA0F2"/><path d="M16.2 15.7H31.8L35.7 22.6L24 34.5L12.3 22.6Z" fill="#fff" stroke="#fff" stroke-width="6" stroke-linejoin="round"/><path d="M27.6 16.4C28.6 20 29.2 20.6 32.8 21.6C29.2 22.6 28.6 23.2 27.6 26.8C26.6 23.2 26 22.6 22.4 21.6C26 20.6 26.6 20 27.6 16.4Z" fill="#3AA0F2"/></svg>';
 const GRAM_ICON = GRAM_SVG;
+/* Telegram Stars belgisi — skrinshotdagi oltin yulduz (foni va uchqunlari olib
+   tashlangan, 192 px). Matn o'lchamiga moslashadi (1em). ⭐ emojisi o'rniga. */
+const STAR_IMG = 'data:image/webp;base64,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';
+function stI(){ return '<img class="st-ic" src="' + STAR_IMG + '" alt="\u2b50">'; }
 const GRAM_IMG = 'data:image/svg+xml,' + encodeURIComponent(GRAM_SVG.replace('<svg ', '<svg xmlns="http://www.w3.org/2000/svg" '));
 let gramFrom = 'nft_market';
 /* ---------- NFT hamyonlari: endi SERVERDA ----------
@@ -11558,7 +11571,7 @@ function renderTopup(){
     if(stConfirm){
       app.innerHTML = `
       <div style="border:1px solid var(--gold);border-radius:var(--radius);padding:26px 16px;text-align:center;margin-bottom:12px;background:var(--card)">
-        <div style="font-size:54px;line-height:1">⭐</div>
+        <div style="font-size:54px;line-height:1">${stI()}</div>
         <div style="font-size:34px;font-weight:800;color:var(--gold);margin-top:10px">${fmt(stConfirm)} Stars</div>
         <div style="color:var(--dim);font-size:15px;margin-top:6px">= ${fmt(stConfirm * stRate)} so'm</div>
       </div>
@@ -11575,8 +11588,8 @@ function renderTopup(){
       <button class="chg-btn" onclick="backToPays()">O'zgartirish</button></div>
     <p style="color:var(--dim);font-size:13.5px;margin:-6px 2px 18px">Qancha yulduz to'lamoqchisiz?</p>
     <div class="form-card">
-      <div class="lbl">IXTIYORIY MIQDOR (⭐)</div>
-      <div class="inp-wrap"><input class="inp" id="stTop" inputmode="numeric" placeholder="0" autocomplete="off" oninput="onStTop()"><span class="info-i">⭐</span></div>
+      <div class="lbl"><span>IXTIYORIY MIQDOR</span> (${stI()})</div>
+      <div class="inp-wrap"><input class="inp" id="stTop" inputmode="numeric" placeholder="0" autocomplete="off" oninput="onStTop()"><span class="info-i">${stI()}</span></div>
       <div class="lbl" style="margin-top:14px">BALANSGA QO'SHILADI</div>
       <div class="inp-wrap"><input class="inp" id="stSom" readonly value="—" style="opacity:.85"></div>
       <div id="stHint" style="margin-top:11px;font-size:12.5px;line-height:1.6"></div>
@@ -11716,9 +11729,9 @@ function onStTop(){
   const h = document.getElementById('stHint');
   if(h){
     let warn = '';
-    if(n && n < stMin) warn = `<div style="color:var(--gold)">Eng kami ${stMin} ⭐</div>`;
-    else if(n > stMax) warn = `<div style="color:var(--gold)">Eng ko'pi ${fmt(stMax)} ⭐</div>`;
-    h.innerHTML = warn + `<div>1 ⭐ = ${money(stRate,true)}</div>`
+    if(n && n < stMin) warn = `<div style="color:var(--gold)">Eng kami ${stMin} ${stI()}</div>`;
+    else if(n > stMax) warn = `<div style="color:var(--gold)">Eng ko'pi ${fmt(stMax)} ${stI()}</div>`;
+    h.innerHTML = warn + `<div>1 ${stI()} = ${money(stRate,true)}</div>`
       + `<div>Xohlagan miqdorni kiriting — qancha yulduzingiz bo'lsa shuncha.</div>`;
   }
   const b = document.getElementById('stBtn');
@@ -11732,7 +11745,7 @@ function stSay(msg, bad){
 }
 
 function stGo(){
-  if(!stN){ stSay('Miqdor kiritilmagan (' + stMin + '\u2013' + fmt(stMax) + ' \u2b50)', true); return; }
+  if(!stN){ stSay('Miqdor kiritilmagan (' + stMin + '\u2013' + fmt(stMax) + ' ' + stI() + ')', true); return; }
   haptic(); stConfirm = stN; renderTopup();
 }
 function stBack(){ haptic(); stConfirm = 0; stBusy = false; renderTopup(); }
@@ -11758,7 +11771,7 @@ function payStars(){
     if(!d || !d.ok || !d.link){
       const e = (d && d.error) || 'javob yo\'q';
       notify('error');
-      stSay(e === 'qty'  ? stMin + '\u2013' + fmt(stMax) + ' \u2b50 oralig\'ida kiriting'
+      stSay(e === 'qty'  ? stMin + '\u2013' + fmt(stMax) + ' ' + stI() + ' oralig\'ida kiriting'
           : e === 'auth' ? 'Telegram tasdiqlamadi \u2014 ilovani qayta oching'
           : 'Server xatosi: ' + e, true);
       return;
