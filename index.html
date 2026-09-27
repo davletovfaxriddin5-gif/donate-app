@@ -11745,7 +11745,7 @@ function payStars(){
 
   fetch(VBASE + '/star-invoice', {
     method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({ stars: n, initData: (tg && tg.initData) || '' })
+    body: JSON.stringify({ stars: n, dest: topDest, initData: (tg && tg.initData) || '' })
   }).then(function(r){ return r.json(); }).then(function(d){
     done();
     if(!d || !d.ok || !d.link){
@@ -11829,7 +11829,7 @@ function showSendBtn(){
     b.disabled = true; b.textContent = 'Yuborilmoqda\u2026';
     fetch(VBASE + '/star-invoice', {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ stars: (stConfirm || stN), send: true, initData: (tg && tg.initData) || '' })
+      body: JSON.stringify({ stars: (stConfirm || stN), send: true, dest: topDest, initData: (tg && tg.initData) || '' })
     }).then(function(r){ return r.json(); }).then(function(d){
       if(d && d.ok){
         stSay('\u2705 To\'lov tugmasi botga yuborildi');
