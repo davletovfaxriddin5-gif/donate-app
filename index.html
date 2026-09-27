@@ -9264,18 +9264,18 @@ function sz3Load(st, b){
   return Promise.all([tex(pbr.baseColorTexture.index, 0), tex(pbr.metallicRoughnessTexture.index, 1), tex(mat.normalTexture.index, 2)])
     .then(function(){ return sz3 === st; });
 }
-/* Raketa harakati — Telegram'dagi raketadan har 33 ms da o'lchab olingan
-   2,7 soniyalik halqa. Nuqtalar orasi tebranish bermaydigan (monoton) silliq
-   egri bilan to'ldiriladi: tezlik faqat ikki joyda nolga tushadi — 0,10 s
-   (eng orqada) va 0,50 s (eng oldinda); orqaga qaytishda to'xtash yo'q.
-   d — oldinga siljish, ax — bo'yi (1 = oddiy), w — burun burchagi (gradus),
-   hammasi raketa uzunligiga nisbatan. */
-const SZ_T = 2.7;
-const SZ_D  = [[0,0],[.033,-.114],[.05,-.169],[.10,-.189],[.133,-.174],[.167,-.099],[.20,.005],[.233,.04],[.267,.214],[.30,.288],
-               [.333,.342],[.383,.39],[.433,.42],[.467,.43],[.50,.435],[.60,.431],[.70,.422],[.80,.408],[.90,.391],[1.50,.2854],[2.10,.1798],[2.55,.1006],[2.60,.0918],[2.70,0]];
-const SZ_AX = [[0,1],[.033,.89],[.05,.84],[.10,.83],[.133,.85],[.167,.98],[.20,1.09],[.233,1.44],[.267,1.18],[.333,1.17],[.40,1.13],
-               [.433,1.11],[.467,1.07],[.50,1.04],[.533,1.02],[.60,1],[2.70,1]];
-const SZ_W  = [[0,0],[.05,7],[.10,9],[.15,6.5],[.20,5],[.30,4],[.40,3.2],[.50,2.2],[.60,1.1],[.75,0],[2.70,0]];
+/* Raketa harakati — Portals raketasidan kadrma-kadr (60 kadr/s) o'lchab olingan
+   3 soniyalik halqa (videodagi ikki davrning o'rtachasi, har 50 ms da qiymat):
+   sokin suzish, keyin bir necha yumshoq turtki (orqaga tortilib-oldinga
+   itarilish, burun chap-o'ngga qayriladi) va shu payt bitta to'liq aylanish.
+   Masofalar raketa uzunligiga nisbatan: oldinga-orqaga ~±8%, yonga ~±5%,
+   burchak ~±4°, cho'zilish ~±6%. Nuqtalar orasi tebranish bermaydigan
+   (monoton) silliq egri bilan to'ldiriladi. */
+const SZ_T = 3.0;
+const SZ_D  = [[0.00,0.0642],[0.05,0.0539],[0.10,0.0438],[0.15,0.0339],[0.20,0.0252],[0.25,0.0182],[0.30,0.0133],[0.35,0.0076],[0.40,0.0031],[0.45,-0.0005],[0.50,-0.0034],[0.55,-0.0057],[0.60,-0.0074],[0.65,-0.0089],[0.70,-0.0101],[0.75,-0.0109],[0.80,-0.0114],[0.85,-0.012],[0.90,-0.0124],[0.95,-0.0123],[1.00,-0.0116],[1.05,-0.0104],[1.10,-0.0088],[1.15,-0.0071],[1.20,-0.0058],[1.25,-0.0053],[1.30,-0.0058],[1.35,-0.0073],[1.40,-0.0095],[1.45,-0.0116],[1.50,-0.0131],[1.55,-0.017],[1.60,-0.0232],[1.65,-0.0259],[1.70,-0.0152],[1.75,0.0014],[1.80,0.0208],[1.85,0.0378],[1.90,0.0473],[1.95,0.0473],[2.00,0.0393],[2.05,0.0259],[2.10,0.01],[2.15,-0.0097],[2.20,-0.0317],[2.25,-0.0501],[2.30,-0.0649],[2.35,-0.079],[2.40,-0.0854],[2.45,-0.0787],[2.50,-0.0649],[2.55,-0.0456],[2.60,-0.0212],[2.65,0.0035],[2.70,0.0241],[2.75,0.0422],[2.80,0.0568],[2.85,0.0659],[2.90,0.0705],[2.95,0.0703],[3.00,0.0642]];
+const SZ_P  = [[0.00,0.0257],[0.05,0.0183],[0.10,0.0081],[0.15,-0.0043],[0.20,-0.0163],[0.25,-0.0253],[0.30,-0.0318],[0.35,-0.0389],[0.40,-0.0442],[0.45,-0.0477],[0.50,-0.0492],[0.55,-0.0488],[0.60,-0.0467],[0.65,-0.043],[0.70,-0.0381],[0.75,-0.0322],[0.80,-0.0255],[0.85,-0.0185],[0.90,-0.0115],[0.95,-0.0047],[1.00,0.0016],[1.05,0.0072],[1.10,0.0119],[1.15,0.0158],[1.20,0.0187],[1.25,0.0208],[1.30,0.0221],[1.35,0.0228],[1.40,0.023],[1.45,0.0226],[1.50,0.0216],[1.55,0.0207],[1.60,0.0197],[1.65,0.0181],[1.70,0.0153],[1.75,0.013],[1.80,0.0116],[1.85,0.0105],[1.90,0.0096],[1.95,0.0091],[2.00,0.0081],[2.05,0.0064],[2.10,0.0045],[2.15,0.0016],[2.20,-0.0022],[2.25,-0.0052],[2.30,-0.0067],[2.35,-0.0069],[2.40,-0.0053],[2.45,-0.0018],[2.50,0.0023],[2.55,0.0063],[2.60,0.0105],[2.65,0.0153],[2.70,0.0201],[2.75,0.024],[2.80,0.0273],[2.85,0.0297],[2.90,0.0308],[2.95,0.0298],[3.00,0.0257]];
+const SZ_W  = [[0.00,-3.06],[0.05,-3.11],[0.10,-2.96],[0.15,-2.49],[0.20,-1.8715],[0.25,-1.4544],[0.30,-1.1789],[0.35,-0.84],[0.40,-0.5456],[0.45,-0.3222],[0.50,-0.1667],[0.55,-0.0756],[0.60,-0.05],[0.65,-0.0678],[0.70,-0.1022],[0.75,-0.1544],[0.80,-0.2289],[0.85,-0.3056],[0.90,-0.3722],[0.95,-0.4322],[1.00,-0.4756],[1.05,-0.4778],[1.10,-0.4189],[1.15,-0.2922],[1.20,-0.0844],[1.25,0.2167],[1.30,0.6067],[1.35,1.0656],[1.40,1.5411],[1.45,1.9489],[1.50,2.2089],[1.55,2.727],[1.60,3.2448],[1.65,3.24],[1.70,2.05],[1.75,0.57],[1.80,-0.73],[1.85,-1.62],[1.90,-1.81],[1.95,-1.38],[2.00,-0.63],[2.05,0.02],[2.10,0.53],[2.15,1],[2.20,1.53],[2.25,1.96],[2.30,2.22],[2.35,2.4],[2.40,2.46],[2.45,2.28],[2.50,1.81],[2.55,1.27],[2.60,0.74],[2.65,0.09],[2.70,-0.71],[2.75,-1.32],[2.80,-1.8],[2.85,-2.24],[2.90,-2.64],[2.95,-2.9],[3.00,-3.06]];
+const SZ_AX = [[0.00,0.9557],[0.05,0.9568],[0.10,0.957],[0.15,0.962],[0.20,0.9678],[0.25,0.9703],[0.30,0.9751],[0.35,0.9829],[0.40,0.9877],[0.45,0.9906],[0.50,0.9959],[0.55,1.0012],[0.60,1.0027],[0.65,1.0044],[0.70,1.009],[0.75,1.0116],[0.80,1.0115],[0.85,1.0143],[0.90,1.0177],[0.95,1.0181],[1.00,1.0208],[1.05,1.0297],[1.10,1.0395],[1.15,1.0478],[1.20,1.0561],[1.25,1.0627],[1.30,1.0659],[1.35,1.0672],[1.40,1.0677],[1.45,1.0639],[1.50,1.0509],[1.55,1.029],[1.60,1.0113],[1.65,1.0006],[1.70,0.9913],[1.75,0.9906],[1.80,0.9975],[1.85,0.9984],[1.90,0.996],[1.95,0.9996],[2.00,1.003],[2.05,1.0044],[2.10,1.0072],[2.15,1.0082],[2.20,1.0044],[2.25,1.0001],[2.30,0.9978],[2.35,0.9927],[2.40,0.9852],[2.45,0.9814],[2.50,0.9781],[2.55,0.972],[2.60,0.9683],[2.65,0.9677],[2.70,0.9645],[2.75,0.9601],[2.80,0.959],[2.85,0.9585],[2.90,0.9551],[2.95,0.9533],[3.00,0.9557]];
 /* Davriy monoton kubik (Fritsch-Carlson): har nuqtadagi qiyalik oldindan hisoblanadi */
 function szCurve(K){
   const n = K.length, m = new Array(n).fill(0), sec = function(i){ return (K[i + 1][1] - K[i][1]) / (K[i + 1][0] - K[i][0]); };
@@ -9290,31 +9290,27 @@ function szCurve(K){
     return (2 * x3 - 3 * x2 + 1) * K[i][1] + (x3 - 2 * x2 + x) * h * m[i] + (-2 * x3 + 3 * x2) * K[i + 1][1] + (x3 - x2) * h * m[i + 1];
   };
 }
-const szFd = szCurve(SZ_D), szFax = szCurve(SZ_AX), szFw = szCurve(SZ_W);
-/* Aylanish: cho'kishda (0-0,18 s) turadi, otilishda keskin tezlashadi,
-   0,95 s dan keyin asta sekinlashib, 2,7 s da to'xtaydi — halqada roppa-rosa
-   2 marta. Burchak 1 ms qadamli jadvaldan olinadi. */
-const SZ_SPN = (function(){
-  const N = 2700, a = new Float64Array(N + 1);
-  const v = function(u){ if(u < .18) return 0; if(u < .30){ const y = (u - .18) / .12; return y * y * (3 - 2 * y); } if(u < .95) return 1; return Math.pow(Math.max(0, 1 - (u - .95) / 1.75), 1.4); };
-  for(let i = 1; i <= N; i++) a[i] = a[i - 1] + (v((i - 1) / 1000) + v(i / 1000)) / 2;
-  const k = 4 * Math.PI / a[N]; for(let i = 0; i <= N; i++) a[i] *= k;
-  return a;
-})();
-function szSpin(u){ const x = u * 1000, i = Math.min(2699, Math.floor(x)), f = x - i; return SZ_SPN[i] + (SZ_SPN[i + 1] - SZ_SPN[i]) * f; }
+const szFd = szCurve(SZ_D), szFp = szCurve(SZ_P), szFw = szCurve(SZ_W), szFax = szCurve(SZ_AX);
+/* Aylanish (Portals'dagidek): turtkilar paytida (1,75-2,55 s) bitta to'liq,
+   boshi va oxiri yumshoq aylanish; qolgan vaqtda "M" old tomonda turib,
+   biroz (±13°) chapga-o'ngga tebranadi. Halqa ulangan joyida sakrash yo'q. */
+function szSpin(u){
+  const x = Math.min(1, Math.max(0, (u - 1.75) / .8)), e = x * x * x * (x * (x * 6 - 15) + 10);
+  return Math.PI * 2 * e + .23 * Math.sin(Math.PI * 2 * u / 1.5);
+}
 function szBump(u, c, hw, T){
   let x = u - c; if(x > T / 2) x -= T; if(x < -T / 2) x += T;
   return Math.abs(x) < hw ? (1 + Math.cos(Math.PI * x / hw)) / 2 : 0;
 }
-/* Titrash: haqiqiy raketadek mayda qaltirash (11-27 Hz, takrorlanmaydigan),
-   otilishda kuchliroq. Vaqt halqaga bog'lanmagan — har safar boshqacha. */
+/* Titrash: juda mayda va yumshoq (7-13 Hz), turtkilar paytida biroz kuchliroq —
+   "sovuqdan qaltirash" emas, uchayotgan raketaning yengil tebranishi. */
 function szMo(t){
-  const u = ((t % SZ_T) + SZ_T) % SZ_T, ax = szFax(u), env = .6 + .8 * szBump(u, .36, .30, SZ_T);
-  const n1 = Math.sin(t * 71.3 + .4) * .5 + Math.sin(t * 112.9 + 1.7) * .3 + Math.sin(t * 151.1 + 2.9) * .2;
-  const n2 = Math.sin(t * 83.7 + 2.2) * .5 + Math.sin(t * 127.3 + .9) * .3 + Math.sin(t * 166.9 + .3) * .2;
-  const n3 = Math.sin(t * 67.1 + 1.1) * .5 + Math.sin(t * 104.3 + 2.5) * .3 + Math.sin(t * 143.9 + .7) * .2;
-  return { ax: ax, rd: Math.pow(ax, -.6), d: (szFd(u) + .006 * env * n2) * 1.9, p: .010 * env * n1 * 1.9,
-           w: (szFw(u) + .9 * env * n3) * Math.PI / 180, sp: szSpin(u) };
+  const u = ((t % SZ_T) + SZ_T) % SZ_T, ax = szFax(u), env = .5 + szBump(u, 2.1, .8, SZ_T);
+  const n1 = Math.sin(t * 44.0 + .4) * .5 + Math.sin(t * 63.5 + 1.7) * .3 + Math.sin(t * 81.7 + 2.9) * .2;
+  const n2 = Math.sin(t * 47.3 + 2.2) * .5 + Math.sin(t * 69.1 + .9) * .3 + Math.sin(t * 77.9 + .3) * .2;
+  const n3 = Math.sin(t * 41.9 + 1.1) * .5 + Math.sin(t * 58.7 + 2.5) * .3 + Math.sin(t * 83.3 + .7) * .2;
+  return { ax: ax, rd: Math.pow(ax, -.6), d: (szFd(u) + .0015 * env * n2) * 1.9, p: (szFp(u) + .002 * env * n1) * 1.9,
+           w: (szFw(u) + .15 * env * n3) * Math.PI / 180, sp: szSpin(u) };
 }
 function sz3Draw(st, cv, fly, now){
   if(sz3 !== st) return;
@@ -9333,7 +9329,7 @@ function sz3Draw(st, cv, fly, now){
     return [rz(c0), rz(c1), rz(c2)];
   };
   const A = mk3(m.rd, m.ax), Nn = mk3(1 / m.rd, 1 / m.ax);
-  const off = m.d - .25, tx = -sz * off + cz * m.p, ty = cz * off + sz * m.p;
+  const off = m.d - .08, tx = -sz * off + cz * m.p, ty = cz * off + sz * m.p;
   const M = new Float32Array([A[0][0], A[0][1], A[0][2], 0, A[1][0], A[1][1], A[1][2], 0, A[2][0], A[2][1], A[2][2], 0, tx, ty, 0, 1]);
   const NM = new Float32Array([Nn[0][0], Nn[0][1], Nn[0][2], Nn[1][0], Nn[1][1], Nn[1][2], Nn[2][0], Nn[2][1], Nn[2][2]]);
   const f = 1 / Math.tan(.31), asp = (w || 1) / (h || 1), nr = .1, fr = 20, D = 4.48;
