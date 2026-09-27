@@ -2357,6 +2357,16 @@ body.light .sz-my{ border-bottom-color:rgba(0,0,0,.08) } body.light .sz-lr{ bord
 .hd-sup{ width:100%; height:44px; margin-top:12px; border-radius:14px; display:flex; align-items:center; justify-content:center; gap:8px;
   background:linear-gradient(135deg,#4F6BFF,#6A4DF5); color:#fff; font-size:15px; font-weight:700 }
 .hd-sup svg{ width:18px; height:18px; stroke:#fff; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round }
+/* Almashtirgichlar: surilib yuruvchi tanlov kapsulasi (Stars/Premium dagi harakat bilan bir xil) */
+.seg-fx{ position:relative }
+.seg-fx > button{ position:relative; z-index:1; background:transparent !important; box-shadow:none !important; border-color:transparent !important;
+  transition:color .38s cubic-bezier(.34,.68,.16,1) !important }
+.seg-fx > button b{ transition:color .38s cubic-bezier(.34,.68,.16,1), background-color .38s cubic-bezier(.34,.68,.16,1) }
+.seg-fx > i.seg-pill{ position:absolute; left:0; top:0; z-index:0; pointer-events:none; box-sizing:border-box; will-change:transform;
+  transition:transform .38s cubic-bezier(.34,.68,.16,1), width .38s cubic-bezier(.34,.68,.16,1), height .38s cubic-bezier(.34,.68,.16,1) }
+.seg-fx > i.seg-pill.line{ border-radius:3px; background:var(--blue) }
+.mg-tabs.seg-fx{ padding-bottom:6px }
+body.reduce-motion .seg-fx > i.seg-pill, body.reduce-motion .seg-fx > button{ transition:none !important }
 </style>
 </head>
 <body>
@@ -9356,6 +9366,85 @@ function szTopHtml(){
           : 'Siz hali reytingda yo\'qsiz \u2014 ochko to\'plang') + '</div>' +
     szTopD.list.map(function(x){ return szTopRow(x, String(x.id) === mine); }).join('') + '</div>';
 }
+
+/* ===== Almashtirgichlar: tanlov silliq suriladi =====
+   Market → Stars/Premium dagidek. Bu guruhlar bosilganda butunlay qayta
+   chiziladi, shuning uchun: bosilgan guruh yangi chizilganda bir lahza ESKI
+   tanlovda ko'rsatiladi, ikki kadrdan so'ng "kapsula" yangi tanlovga silliq
+   suriladi (yozuv rangi ham birga almashadi). Kapsulaning ko'rinishi tanlangan
+   tugmaning o'z uslubidan olinadi. .mg-tabs (matnli bo'limlar) — ostida chiziq.
+   Faqat bosilganda suriladi — oyna yangi ochilganda sakramaydi. */
+const SEG_FX = [['.nd-cur', 0], ['.sl-tabs', 0], ['.sl-per', 0], ['.of-seg', 0], ['.ref-seg', 0], ['.sz-tabs', 0], ['.mg-tabs', 1]];
+let segQ = 0, segClick = null;
+function segBtns(box){ return Array.prototype.filter.call(box.children, function(x){ return x.tagName === 'BUTTON'; }); }
+function segGeo(b, line){
+  return line ? { x:b.offsetLeft, y:b.offsetTop + b.offsetHeight + 1, w:b.offsetWidth, h:3 }
+              : { x:b.offsetLeft, y:b.offsetTop, w:b.offsetWidth, h:b.offsetHeight };
+}
+function segPut(p, g, anim){
+  p.style.transition = anim ? '' : 'none';
+  p.style.width = g.w + 'px'; p.style.height = g.h + 'px';
+  p.style.transform = 'translate(' + g.x + 'px,' + g.y + 'px)';
+  p._g = g;
+  if(!anim){ void p.offsetWidth; p.style.transition = ''; }
+}
+function segSync(){
+  segQ = 0;
+  const still = document.body.classList.contains('reduce-motion');
+  SEG_FX.forEach(function(d){
+    document.querySelectorAll(d[0]).forEach(function(box, i){
+      if(box._segBusy) return;
+      const bs = segBtns(box), idx = bs.findIndex(function(x){ return x.classList.contains('on'); });
+      if(idx < 0 || !bs[idx].offsetWidth) return;
+      const key = d[0] + '#' + i;
+      let p = box.querySelector(':scope > i.seg-pill');
+      if(!p){
+        const cs = getComputedStyle(bs[idx]);
+        p = document.createElement('i'); p.className = 'seg-pill' + (d[1] ? ' line' : '');
+        if(!d[1]){
+          p.style.backgroundColor = cs.backgroundColor; p.style.backgroundImage = cs.backgroundImage;
+          p.style.boxShadow = cs.boxShadow; p.style.borderRadius = cs.borderRadius;
+          if(parseFloat(cs.borderTopWidth) > 0) p.style.border = cs.borderTopWidth + ' solid ' + cs.borderTopColor;
+        }
+        box.classList.add('seg-fx'); box.insertBefore(p, box.firstChild);
+        const c = segClick;
+        if(c && c.key === key && Date.now() - c.t < 800 && c.from > -1 && c.from !== idx && c.from < bs.length && !still){
+          segClick = null; box._segBusy = true;
+          bs[idx].classList.remove('on'); bs[c.from].classList.add('on');
+          segPut(p, segGeo(bs[c.from], d[1]), false);
+          requestAnimationFrame(function(){ requestAnimationFrame(function(){
+            bs[c.from].classList.remove('on'); bs[idx].classList.add('on');
+            segPut(p, segGeo(bs[idx], d[1]), true);
+            box._segBusy = false;
+          }); });
+          return;
+        }
+        segPut(p, segGeo(bs[idx], d[1]), false);
+        return;
+      }
+      const g = segGeo(bs[idx], d[1]), o = p._g;
+      if(!o || o.x !== g.x || o.y !== g.y || o.w !== g.w || o.h !== g.h) segPut(p, g, !!o && !still);
+    });
+  });
+}
+function segQueue(){ if(!segQ) segQ = requestAnimationFrame(segSync); }
+/* Qaysi guruhdagi qaysi tugmadan bosilganini qayta chizilishdan OLDIN eslab qolamiz */
+document.addEventListener('click', function(e){
+  const b = e.target && e.target.closest ? e.target.closest('button') : null, box = b && b.parentElement;
+  if(!box) return;
+  for(let k = 0; k < SEG_FX.length; k++){
+    const sel = SEG_FX[k][0];
+    if(!box.matches(sel)) continue;
+    const i = Array.prototype.indexOf.call(document.querySelectorAll(sel), box);
+    segClick = { key: sel + '#' + i, from: segBtns(box).findIndex(function(x){ return x.classList.contains('on'); }), t: Date.now() };
+    break;
+  }
+}, true);
+(function segStart(){
+  if(!document.body){ setTimeout(segStart, 50); return; }
+  try{ new MutationObserver(segQueue).observe(document.body, { childList:true, subtree:true, attributes:true, attributeFilter:['class'] }); }catch(e){}
+  segQueue();
+})();
 
 /* ---------- "Sovg'alarni qanday qo'shish?" ----------
    Pastdan chiqadigan qo'llanma: rasm, uch qadam va tugma. */
