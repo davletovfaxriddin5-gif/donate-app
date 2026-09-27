@@ -2360,13 +2360,30 @@ body.light .sz-my{ border-bottom-color:rgba(0,0,0,.08) } body.light .sz-lr{ bord
 /* Almashtirgichlar: surilib yuruvchi tanlov kapsulasi (Stars/Premium dagi harakat bilan bir xil) */
 .seg-fx{ position:relative }
 .seg-fx > button{ position:relative; z-index:1; background:transparent !important; box-shadow:none !important; border-color:transparent !important;
-  transition:color .38s cubic-bezier(.34,.68,.16,1) !important }
-.seg-fx > button b{ transition:color .38s cubic-bezier(.34,.68,.16,1), background-color .38s cubic-bezier(.34,.68,.16,1) }
-.seg-fx > i.seg-pill{ position:absolute; left:0; top:0; z-index:0; pointer-events:none; box-sizing:border-box; will-change:transform;
-  transition:transform .38s cubic-bezier(.34,.68,.16,1), width .38s cubic-bezier(.34,.68,.16,1), height .38s cubic-bezier(.34,.68,.16,1) }
+  transition:color .46s cubic-bezier(.22,.9,.28,1) !important }
+.seg-fx > button b{ transition:color .46s cubic-bezier(.22,.9,.28,1), background-color .46s cubic-bezier(.22,.9,.28,1) }
+.seg-fx > i.seg-pill{ position:absolute; left:0; top:0; z-index:0; pointer-events:none; box-sizing:border-box; will-change:transform, width;
+  transition:transform .52s cubic-bezier(.22,.9,.28,1), width .52s cubic-bezier(.22,.9,.28,1), height .52s cubic-bezier(.22,.9,.28,1) }
 .seg-fx > i.seg-pill.line{ border-radius:3px; background:var(--blue) }
 .mg-tabs.seg-fx{ padding-bottom:6px }
 body.reduce-motion .seg-fx > i.seg-pill, body.reduce-motion .seg-fx > button{ transition:none !important }
+/* Sovg'alarim bo'limlari (Gift / Takliflar / Tarix) — Telegram papkalari kabi:
+   yupqa qobiq, tanlangan so'z shisha kapsula ichida; kapsula so'z uzunligiga
+   qarab kengayib-torayib suriladi */
+.mg-tabs{ display:inline-flex !important; max-width:100%; gap:2px !important; padding:4px !important; margin:0 0 12px !important;
+  border-radius:999px; background:rgba(255,255,255,.035); border:1px solid rgba(255,255,255,.08); vertical-align:top }
+.mg-tabs button{ padding:7px 12px !important; font-size:15px !important; letter-spacing:-.2px !important; line-height:1.15; border-radius:999px; white-space:nowrap }
+.mg-tabs.seg-fx{ padding-bottom:4px !important }
+.seg-fx > i.seg-pill.glass{ border-radius:999px; background:rgba(255,255,255,.11); border:1px solid rgba(255,255,255,.13);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.07), 0 4px 14px rgba(0,0,0,.18);
+  -webkit-backdrop-filter:blur(12px) saturate(1.4); backdrop-filter:blur(12px) saturate(1.4) }
+body.light .mg-tabs{ background:rgba(16,24,40,.03); border-color:rgba(16,24,40,.09) }
+body.light .seg-fx > i.seg-pill.glass{ background:rgba(16,24,40,.07); border-color:rgba(16,24,40,.09); box-shadow:none }
+/* Stars / Premium ham xuddi shu yumshoq harakat bilan */
+.sp-seg:before{ transition:transform .52s cubic-bezier(.22,.9,.28,1) !important }
+.sp-seg button{ transition:color .46s cubic-bezier(.22,.9,.28,1) !important }
+/* Tor ekranlar (360 px) uchun Market / Sovg'alarim bo'limlari ham sig'sin */
+@media (max-width: 380px){ .mg-tabs button{ padding:7px 9px !important; font-size:14px !important } }
 </style>
 </head>
 <body>
@@ -9374,11 +9391,11 @@ function szTopHtml(){
    suriladi (yozuv rangi ham birga almashadi). Kapsulaning ko'rinishi tanlangan
    tugmaning o'z uslubidan olinadi. .mg-tabs (matnli bo'limlar) — ostida chiziq.
    Faqat bosilganda suriladi — oyna yangi ochilganda sakramaydi. */
-const SEG_FX = [['.nd-cur', 0], ['.sl-tabs', 0], ['.sl-per', 0], ['.of-seg', 0], ['.ref-seg', 0], ['.sz-tabs', 0], ['.mg-tabs', 1]];
+const SEG_FX = [['.nd-cur', 0], ['.sl-tabs', 0], ['.sl-per', 0], ['.of-seg', 0], ['.ref-seg', 0], ['.sz-tabs', 0], ['.mg-tabs', 2]];
 let segQ = 0, segClick = null;
 function segBtns(box){ return Array.prototype.filter.call(box.children, function(x){ return x.tagName === 'BUTTON'; }); }
 function segGeo(b, line){
-  return line ? { x:b.offsetLeft, y:b.offsetTop + b.offsetHeight + 1, w:b.offsetWidth, h:3 }
+  return line === 1 ? { x:b.offsetLeft, y:b.offsetTop + b.offsetHeight + 1, w:b.offsetWidth, h:3 }
               : { x:b.offsetLeft, y:b.offsetTop, w:b.offsetWidth, h:b.offsetHeight };
 }
 function segPut(p, g, anim){
@@ -9400,7 +9417,7 @@ function segSync(){
       let p = box.querySelector(':scope > i.seg-pill');
       if(!p){
         const cs = getComputedStyle(bs[idx]);
-        p = document.createElement('i'); p.className = 'seg-pill' + (d[1] ? ' line' : '');
+        p = document.createElement('i'); p.className = 'seg-pill' + (d[1] === 1 ? ' line' : d[1] === 2 ? ' glass' : '');
         if(!d[1]){
           p.style.backgroundColor = cs.backgroundColor; p.style.backgroundImage = cs.backgroundImage;
           p.style.boxShadow = cs.boxShadow; p.style.borderRadius = cs.borderRadius;
