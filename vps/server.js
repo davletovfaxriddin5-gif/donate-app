@@ -3344,6 +3344,171 @@ app.post("/chat/send", (req,res)=>{
   }catch(e){ console.log("CHATSEND XATO:", e.message); res.json({ ok:false, error:"server" }); }
 });
 
+/* ======================= USTOZ AI =======================
+   Admin bot chatida faqat BITTA odamga "Ustoz AI" nomidan yozadi:
+     /ustoz @username matn      yoki   /ustoz 123456789 matn
+     /ustoz @username           - keyingi xabaringiz (rasm, video, fayl, matn) o'sha odamga
+     /ustozlar                  - ochiq suhbatlar
+     /ustozyop @username        - suhbatni yopish
+   Mijoz javob yozsa (reply qilmasa ham) - 72 soat ichida adminga keladi, kimdan
+   kelgani bilan. Admin o'sha xabarga reply qilsa - javob yana Ustoz AI nomidan ketadi.
+   Holat alohida ustoz.json da saqlanadi (asosiy bazaga tegmaydi). */
+const USTOZ_FILE = "/root/donate-app/ustoz.json";
+const USTOZ_HDR  = "\uD83E\uDD16 Ustoz AI";
+const USTOZ_OPEN_MS = 72 * 3600 * 1000;
+let ustozArm = null;                       /* { uid, at } - keyingi admin xabari shu odamga */
+let USTOZ = { open:{}, map:{} };           /* open: uid -> oxirgi yozishma vaqti; map: admin chatidagi xabar id -> uid */
+try{
+  const z = JSON.parse(fs.readFileSync(USTOZ_FILE, "utf8"));
+  if(z && typeof z === "object") USTOZ = { open: z.open || {}, map: z.map || {} };
+}catch(e){}
+function ustozSave(){
+  try{
+    const keys = Object.keys(USTOZ.map);
+    if(keys.length > 800) keys.slice(0, keys.length - 800).forEach(function(k){ delete USTOZ.map[k]; });
+    fs.writeFileSync(USTOZ_FILE, JSON.stringify(USTOZ));
+  }catch(e){ console.log("USTOZ saqlanmadi:", e.message); }
+}
+function ustozIsOpen(uid){ const t = USTOZ.open[String(uid)]; return !!t && Date.now() - t < USTOZ_OPEN_MS; }
+async function ustozTg(method, body){
+  try{
+    const r = await fetch("https://api.telegram.org/bot" + TOKEN + "/" + method, {
+      method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify(body) });
+    return await r.json();
+  }catch(e){ return { ok:false, description: e.message }; }
+}
+function ustozWho(uid, from){
+  let nm = "", un = "";
+  if(from){ nm = String(from.first_name || "").trim(); un = String(from.username || ""); }
+  else { try{ const u = load()[String(uid)] || {}; nm = u.nm || ""; un = u.un || ""; }catch(e){} }
+  return (nm || "Foydalanuvchi") + (un ? " (@" + un + ")" : "") + " \u00B7 ID " + uid;
+}
+function ustozMap(mid, uid){ USTOZ.map[String(mid)] = String(uid); ustozSave(); }
+function ustozCut(t, n){ t = String(t || ""); return t.length > n ? t.slice(0, n - 1) + "\u2026" : t; }
+const USTOZ_CAP = function(m){ return !!(m.photo || m.video || m.document || m.animation || m.audio || m.voice); };
+/* Admin -> mijoz: matn yoki admin yuborgan xabarning nusxasi (rasm/video/fayl) */
+async function ustozSend(uid, msg, body){
+  uid = String(uid);
+  const foot = ustozIsOpen(uid) ? "" : "\n\n<i>\u270D\uFE0F Javobingizni shu chatga yozishingiz mumkin.</i>";
+  const head = "<b>" + USTOZ_HDR + "</b>";
+  let j;
+  if(body){
+    j = await ustozTg("sendMessage", { chat_id: uid, parse_mode:"HTML", link_preview_options:{ is_disabled:true },
+                                       text: head + "\n\n" + esc(ustozCut(body, 3800)) + foot });
+  } else if(USTOZ_CAP(msg)){
+    j = await ustozTg("copyMessage", { chat_id: uid, from_chat_id: msg.chat.id, message_id: msg.message_id, parse_mode:"HTML",
+                                       caption: head + (msg.caption ? "\n\n" + esc(ustozCut(msg.caption, 900)) : "") + foot });
+  } else {
+    j = await ustozTg("sendMessage", { chat_id: uid, parse_mode:"HTML", text: head + foot });
+    if(j && j.ok) j = await ustozTg("copyMessage", { chat_id: uid, from_chat_id: msg.chat.id, message_id: msg.message_id });
+  }
+  if(!j || !j.ok){
+    const why = String((j && j.description) || "");
+    send(ADMIN_ID, "\u274C Yuborilmadi: " + ustozWho(uid) + "\n" +
+      (/blocked|deactivated/i.test(why) ? "Foydalanuvchi botni bloklagan." :
+       /chat not found|initiate/i.test(why) ? "Bu odam botga hali kirmagan (Start bosmagan)." : why));
+    return false;
+  }
+  USTOZ.open[uid] = Date.now(); ustozSave();
+  const c = await ustozTg("sendMessage", { chat_id: ADMIN_ID,
+    text: "\u2705 Ustoz AI \u2192 " + ustozWho(uid) + "\nDavom ettirish uchun shu xabarga reply qiling." });
+  if(c && c.ok) ustozMap(c.result.message_id, uid);
+  return true;
+}
+/* Mijoz -> admin. Ochiq suhbat (72 soat) yoki Ustoz AI xabariga reply bo'lsa */
+function ustozFromUser(msg, uid){
+  try{
+    const t = String(msg.text || "");
+    if(t.charAt(0) === "/") return false;               /* /start va boshqa buyruqlar odatdagidek */
+    const rt = msg.reply_to_message;
+    const toUs = !!(rt && rt.from && rt.from.is_bot && String(rt.text || rt.caption || "").indexOf("Ustoz AI") > -1);
+    if(!ustozIsOpen(uid) && !toUs) return false;
+    USTOZ.open[String(uid)] = Date.now(); ustozSave();
+    ustozToAdmin(msg, uid);
+    return true;
+  }catch(e){ console.log("USTOZ mijoz xato:", e.message); return false; }
+}
+async function ustozToAdmin(msg, uid){
+  if(!ADMIN_ID) return;
+  const hdr = "\uD83D\uDCE9 <b>Ustoz AI \u00B7 javob keldi</b>\n\uD83D\uDC64 " + esc(ustozWho(uid, msg.from));
+  let j;
+  if(msg.text){
+    j = await ustozTg("sendMessage", { chat_id: ADMIN_ID, parse_mode:"HTML", link_preview_options:{ is_disabled:true },
+                                       text: hdr + "\n\n" + esc(ustozCut(msg.text, 3800)) });
+  } else if(USTOZ_CAP(msg)){
+    j = await ustozTg("copyMessage", { chat_id: ADMIN_ID, from_chat_id: uid, message_id: msg.message_id, parse_mode:"HTML",
+                                       caption: hdr + (msg.caption ? "\n\n" + esc(ustozCut(msg.caption, 800)) : "") });
+  } else {
+    const h = await ustozTg("sendMessage", { chat_id: ADMIN_ID, parse_mode:"HTML", text: hdr });
+    if(h && h.ok) ustozMap(h.result.message_id, uid);
+    j = await ustozTg("copyMessage", { chat_id: ADMIN_ID, from_chat_id: uid, message_id: msg.message_id });
+  }
+  if(j && j.ok) ustozMap(j.result.message_id, uid);
+}
+/* Admin Ustoz AI xabariga reply qildi -> o'sha mijozga */
+function ustozAdminReply(msg){
+  try{
+    const rt = msg.reply_to_message; if(!rt) return false;
+    const uid = USTOZ.map[String(rt.message_id)]; if(!uid) return false;
+    const body = String(msg.text || "").trim();
+    if(body.charAt(0) === "/") return false;
+    ustozSend(uid, msg, body);
+    return true;
+  }catch(e){ console.log("USTOZ reply xato:", e.message); return false; }
+}
+function ustozAgo(ms){ const m = Math.round(ms / 60000); return m < 60 ? m + " daq oldin" : Math.round(m / 60) + " soat oldin"; }
+/* Admin buyruqlari. true - xabar shu yerda ishlandi */
+function ustozAdminCmd(msg, text){
+  const t = String(text || "");
+  if(ustozArm && Date.now() - ustozArm.at > 15 * 60000) ustozArm = null;
+  if(ustozArm && (t.charAt(0) !== "/" || t.indexOf("/bekor") === 0)){
+    const uid = ustozArm.uid; ustozArm = null;
+    if(t.indexOf("/bekor") === 0){ send(ADMIN_ID, "\u274C Ustoz AI xabari bekor qilindi"); return true; }
+    ustozSend(uid, msg, t.trim());
+    return true;
+  }
+  if(t.indexOf("/ustozlar") === 0){
+    const now = Date.now();
+    const L = Object.keys(USTOZ.open).filter(ustozIsOpen).sort(function(a, b){ return USTOZ.open[b] - USTOZ.open[a]; });
+    send(ADMIN_ID, L.length ? "\uD83D\uDCAC Ochiq suhbatlar (" + L.length + "):\n\n" +
+      L.slice(0, 30).map(function(k){ return "\u2022 " + ustozWho(k) + " \u2014 " + ustozAgo(now - USTOZ.open[k]); }).join("\n")
+      : "Ochiq suhbat yo'q.");
+    return true;
+  }
+  if(t.indexOf("/ustozyop") === 0){
+    const q = t.replace(/^\/ustozyop(@\w+)?/i, "").trim();
+    const uid = q ? findUser(load(), q) : "";
+    if(!uid){ send(ADMIN_ID, "Ishlatilishi: /ustozyop @username yoki /ustozyop 123456789"); return true; }
+    delete USTOZ.open[uid]; ustozSave();
+    send(ADMIN_ID, "\uD83D\uDD12 Suhbat yopildi: " + ustozWho(uid));
+    return true;
+  }
+  if(t.indexOf("/ustoz") === 0){
+    const raw = t.replace(/^\/ustoz(@\w+)?/i, "").trim();
+    const m = raw.match(/^(@?[A-Za-z0-9_]{3,32})(?:\s+([\s\S]*))?$/);
+    if(!m){
+      send(ADMIN_ID, "\uD83E\uDD16 Ustoz AI \u2014 bitta odamga shaxsiy xabar\n\n" +
+        "/ustoz @username matn\n/ustoz 123456789 matn\n\n" +
+        "Matnsiz yozsangiz (/ustoz @username), keyingi xabaringiz \u2014 rasm, video, fayl yoki matn \u2014 o'sha odamga boradi.\n\n" +
+        "Mijoz javob yozsa shu yerga keladi. Unga reply qilib javob berasiz.\n" +
+        "/ustozlar \u2014 ochiq suhbatlar\n/ustozyop @username \u2014 suhbatni yopish");
+      return true;
+    }
+    const uid = findUser(load(), m[1]);
+    if(!uid){ send(ADMIN_ID, "\u274C Topilmadi: " + m[1] + "\nBu username bot bazasida yo'q \u2014 ID raqami bilan yozing."); return true; }
+    const body = String(m[2] || "").trim();
+    if(!body){
+      ustozArm = { uid: uid, at: Date.now() };
+      send(ADMIN_ID, "\u270D\uFE0F Keyingi xabaringiz " + ustozWho(uid) + " ga Ustoz AI nomidan boradi.\nBekor qilish: /bekor");
+      return true;
+    }
+    ustozSend(uid, msg, body);
+    return true;
+  }
+  return false;
+}
+/* ===================== /USTOZ AI ===================== */
+
 function adminReply(msg){
   try{
     const rt = msg.reply_to_message;
@@ -5156,10 +5321,14 @@ app.post("/webhook", (req,res)=>{
     }
 
     const text = String(msg.text || "");
+    /* Ustoz AI: ochiq suhbatdagi mijoz yozsa (reply qilmasa ham) - adminga boradi */
+    if(fromId !== ADMIN_ID && ustozFromUser(msg, fromId)) return;
     if(ADMIN_ID && fromId === ADMIN_ID && msg.reply_to_message){
+      if(ustozAdminReply(msg)) return;
       if(adminReply(msg)) return;
     }
     if(ADMIN_ID && fromId === ADMIN_ID){
+      if(ustozAdminCmd(msg, text)) return;
       const arm = { "/xabar":"btn", "/bonus":"bonus", "/oyin":"oyin", "/yangi":"yangi",
                     "/albom":"plain", "/kirish":"kirish", "/minato":"minato" };
       let hit = null;
