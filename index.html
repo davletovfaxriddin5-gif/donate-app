@@ -5899,6 +5899,7 @@ function loadOrders(cb){
          const sv = map[x.id];
          if(!sv) return;
          x.status = sv.status;
+         if(sv.at && !x.at) x.at = sv.at;     /* telefondagi nusxada sana boshqa nomda (createdAt) */
          if(sv.code) x.code = sv.code;        /* sovg'a kartasining kodi */
          if(sv.redeem) x.redeem = sv.redeem;
        });
@@ -5910,7 +5911,13 @@ function loadOrders(cb){
          return !(t && t < ghostLim);
        });
        d.orders.forEach(function(x){ if(!loc.some(function(y){ return y.id === x.id; })) loc.push(x); });
-       loc.sort(function(a,b){ return String(b.at||'').localeCompare(String(a.at||'')); });
+       /* Eng yangisi tepada. Sana matn emas, VAQT sifatida solishtiriladi va ikkala
+          maydon ham hisobga olinadi: telefonda yaratilgan buyurtmada "createdAt",
+          serverdagisida "at". Ilgari faqat "at" matn bo'yicha solishtirilardi —
+          telefonda berilgan yangi buyurtmalar pastga, eski server yozuvlari tepaga
+          chiqib qolardi. */
+       const ordTs = function(o){ return Date.parse((o && (o.at || o.createdAt || o.created)) || '') || 0; };
+       loc.sort(function(a,b){ return ordTs(b) - ordTs(a); });
        srvOrders = loc;
        try{ localStorage.setItem('mt_orders', JSON.stringify(loc.slice(0,60))); }catch(e){}
      }
