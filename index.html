@@ -2544,6 +2544,7 @@ body.light .rc-code{ color:#1a2236 }
     padding-left: max(20px, var(--sa-left, env(safe-area-inset-left, 0px))) !important;
     padding-right: max(20px, var(--sa-right, env(safe-area-inset-right, 0px))) !important }
   .games{ grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) !important; gap: 14px !important }
+  .pkg-grid{ grid-template-columns: repeat(auto-fill, minmax(165px, 1fr)) !important }
   .pay-grid{ grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) !important }
   .nftm-grid, .mg-grid, .mg2-grid{ grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)) !important }
   #histList, #nftList{ display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; align-items: start }
@@ -2561,13 +2562,7 @@ body.light .rc-code{ color:#1a2236 }
           max-height: calc(100dvh - var(--sa-top, env(safe-area-inset-top, 0px)) - var(--tg-top, 46px) - 18px) !important;
           padding-bottom: 16px !important }
   .sheet:not(.hw-sh){ overflow-y: auto !important; overscroll-behavior: contain }
-  /* O'yin, to'ldirish va hisobni tiklash sahifalari yotiq holatda ham AYNAN tik holatdagi
-     ko'rinishida qoladi: 460px ustun markazda - sarlavha rasmi, paketlar, tugmalar avvalgidek */
-  body[data-view="game"] .wrap, body[data-view="topup"] .wrap, body[data-view="acct_rec"] .wrap{ max-width: 460px !important }
-  body .wrap .balance{ background:
-      radial-gradient(90% 170% at 100% 100%, rgba(66,92,255,.55) 0%, rgba(66,92,255,.22) 40%, rgba(66,92,255,0) 72%),
-      linear-gradient(90deg, rgba(60,74,240,.40) 0%, rgba(60,74,240,.28) 40%, rgba(60,74,240,.14) 70%, rgba(60,74,240,.08) 100%),
-      linear-gradient(135deg, #1C2233 0%, #171D2D 48%, #141A29 100%) !important }
+
   .sheet-bg.on{ background: rgba(4,8,18,.72) !important; backdrop-filter: blur(8px) !important; -webkit-backdrop-filter: blur(8px) !important }
   /* "Sovg'alarni qanday qo'shish?" oynasi: rasm ekran balandligining 44% idan oshmaydi */
   .hw-sh{ padding-bottom: 12px !important }
@@ -2585,22 +2580,19 @@ body.light .rc-code{ color:#1a2236 }
   .sheet .sh-box .sh-row .k{ font-size: 12px }
   .sheet .sh-box .sh-row .v{ text-align: left; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 14px }
 }
-/* ===== Balans kartasi - Portals uslubida: to'q fon, ko'k rang pastki o'ng burchakdan
-   yupqa nur bo'lib tarqaladi; "M" rasmi alohida qatlamda, chap cheti asta shaffoflashadi -
-   hech qanday tik chiziq qolmaydi (tik va yotiq holatda bir xil) ===== */
-.balance{
-  background:
-    radial-gradient(120% 150% at 100% 100%, rgba(66,92,255,.80) 0%, rgba(66,92,255,.42) 30%, rgba(66,92,255,.12) 55%, rgba(66,92,255,0) 72%),
-    radial-gradient(55% 80% at 95% 0%, rgba(130,150,255,.14) 0%, rgba(130,150,255,0) 70%),
-    linear-gradient(135deg, #1C2233 0%, #171D2D 48%, #141A29 100%) !important;
-  border: 1px solid rgba(255,255,255,.07);
-  box-shadow: 0 18px 40px -26px rgba(40,70,255,.6) !important }
-.balance .bal-art{ position:absolute; top:-4%; right:-30px; height:108%; width:auto; max-width:none; z-index:0; pointer-events:none; opacity:.95;
-  /* o'tish rasmning O'Z chap chetidan boshlanadi - karta qancha keng bo'lmasin, chiziq qolmaydi */
+/* ===== Balans kartasi: ASL ko'k dizayn (ko'k fon + rasm + rasm ustidagi ko'k qatlam).
+   Yagona farq - "M" rasmi alohida <img>, uning chap cheti asta shaffoflashadi, shuning uchun
+   karta qanchalik keng bo'lmasin (telefon yotqizilganda ham) o'rtada chiziq qolmaydi. ===== */
+.balance{ background:linear-gradient(150deg,#2B2FE8 0%,#3D33EE 55%,#4A3BF2 100%) !important;
+  box-shadow:0 14px 34px -14px rgba(43,47,232,.65) !important }
+.balance .bal-art{ position:absolute; top:-4%; right:-30px; height:108%; width:auto; max-width:none; z-index:0; pointer-events:none;
   -webkit-mask-image:linear-gradient(90deg, transparent 0%, rgba(0,0,0,.35) 18%, rgba(0,0,0,.8) 36%, #000 52%);
           mask-image:linear-gradient(90deg, transparent 0%, rgba(0,0,0,.35) 18%, rgba(0,0,0,.8) 36%, #000 52%) }
-.balance > :not(.bal-art){ position:relative; z-index:1 }
-.balance::after{ background:rgba(255,255,255,.035) !important; z-index:0 }
+/* asl dizayndagi ko'k qatlam - rasm ustida, butun karta bo'ylab (chapda to'liq ko'k, o'ngga qarab yupqalashadi) */
+.balance::before{ content:""; position:absolute; inset:0; z-index:1; pointer-events:none;
+  background:linear-gradient(90deg,#2B2FE8 0%,rgba(43,47,232,.97) 22%,rgba(45,44,236,.74) 40%,rgba(52,46,238,.5) 56%,rgba(58,50,240,.34) 76%,rgba(60,52,242,.26) 100%) }
+.balance::after{ z-index:1 }
+.balance > :not(.bal-art){ position:relative; z-index:2 }
 </style>
 </head>
 <body>
