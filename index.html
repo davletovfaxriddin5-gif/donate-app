@@ -2462,6 +2462,28 @@ body.reduce-motion .pw-scene img, body.reduce-motion .pw-art.press .pw-scene img
 .pw-lock .lnk{ margin-top:12px !important }
 body.light .pw-code i{ background:linear-gradient(180deg, rgba(16,24,40,.05), rgba(16,24,40,.02)) !important; border-color:rgba(59,77,240,.35) !important; color:#1a2236 }
 body.light .pw-code i.f{ background:linear-gradient(180deg, rgba(59,77,240,.20), rgba(59,77,240,.08)) !important; color:#1a2236; text-shadow:none }
+/* NFT → Yechish → Telegram Stars: yulduz kichikroq, maydon ixchamroq */
+.st-amt{ padding:10px 12px !important; gap:9px !important }
+.st-amt .ic{ font-size:16px !important }
+.st-amt .ic .st-ic{ width:1.1em !important; height:1.1em !important; vertical-align:-.16em !important }
+.st-amt input{ font-size:15.5px !important }
+/* Tashqi hamyon: manzil maydoni (Telegram Wallet uslubiga yaqin), QR skaner va oxirgi manzillar */
+.ot-in.ow-in{ height:52px; border-radius:16px; padding:0 6px 0 16px; gap:2px }
+.ot-in.ow-in input{ font-size:16px }
+.ot-in.ow-in .act{ color:#8B9BFF; font-size:15px; font-weight:600; padding:0 8px }
+.ot-in.ow-in .qr{ width:40px; height:40px }
+.ot-in.ow-in .qr svg{ width:23px; height:23px; stroke:#8B9BFF }
+.ow-rec{ margin:2px 0 14px }
+.ow-rh{ display:flex; align-items:center; justify-content:space-between; margin:0 2px 4px }
+.ow-rh span{ font-size:15px; font-weight:700; color:var(--dim) }
+.ow-rh button{ background:none; border:0; padding:4px 0; color:#8B9BFF; font-size:12px; font-weight:700; letter-spacing:.6px; text-transform:uppercase }
+.ow-row{ width:100%; display:flex; align-items:center; gap:12px; padding:9px 2px; background:none; border:0; text-align:left; font-family:inherit }
+.ow-row + .ow-row{ border-top:1px solid var(--stroke) }
+.ow-row img{ width:40px; height:40px; border-radius:50%; flex-shrink:0 }
+.ow-row .t{ display:flex; flex-direction:column; min-width:0 }
+.ow-row b{ font-size:15.5px; font-weight:600; color:var(--text); letter-spacing:.2px }
+.ow-row small{ font-size:12.5px; color:var(--faint); margin-top:2px }
+.ow-row:active{ opacity:.6 }
 </style>
 </head>
 <body>
@@ -6526,6 +6548,34 @@ function nftDoor(next){
   setTimeout(function(){ if(drTok === tok) drBusy = false; }, 3500);
 }
 
+/* ===== Rasmlar miltillamasin =====
+   Bo'limlar orasida o'tganda sahifa qayta chiziladi. Bir marta yuklangan rasm
+   keyingi safar KUTMASDAN (lazy emas) va shu kadrning o'zida chiziladi; yuklangan
+   rasmlar xotirada ushlab turiladi. Hali ko'rilmaganlari avvalgidek lazy. */
+const IMG_SEEN = new Map();
+document.addEventListener('load', function(e){
+  const t = e.target;
+  if(!t || t.tagName !== 'IMG') return;
+  const s = t.currentSrc || t.src;
+  if(!s || s.indexOf('data:') === 0 || IMG_SEEN.has(s)) return;
+  const k = new Image(); k.src = s; IMG_SEEN.set(s, k);
+  if(IMG_SEEN.size > 600) IMG_SEEN.delete(IMG_SEEN.keys().next().value);
+}, true);
+function imgFast(root){
+  const list = root.tagName === 'IMG' ? [root] : (root.querySelectorAll ? root.querySelectorAll('img[loading="lazy"]') : []);
+  for(let i = 0; i < list.length; i++){
+    const im = list[i];
+    if(im.getAttribute('loading') === 'lazy' && IMG_SEEN.has(im.src)){ im.loading = 'eager'; im.decoding = 'sync'; }
+  }
+}
+try{
+  new MutationObserver(function(ms){
+    for(let i = 0; i < ms.length; i++){
+      const add = ms[i].addedNodes;
+      for(let j = 0; j < add.length; j++){ if(add[j].nodeType === 1) imgFast(add[j]); }
+    }
+  }).observe(document.body, { childList:true, subtree:true });
+}catch(e){}
 function toggleNft(){
   haptic();
   if(isNftView(view)){ nftDoor(function(){ go('home'); }); return; }
@@ -10397,11 +10447,13 @@ function renderOut(){
 function renderOutWallet(){
   const bal = getGram();
   app.innerHTML = `<div class="page-title">Tashqi hamyon</div>
-  <div class="ot-in">
+  <div class="ot-in ow-in">
     <input id="otAddr" type="text" placeholder="TON manzili" autocomplete="off" spellcheck="false" oninput="ocSync()">
-    <button class="act" onclick="ocMine()">Meniki</button>
+    <button class="act" onclick="ocMine()">O'zimga</button>
+    ${ocCanScan() ? '<button class="qr" onclick="ocScan()" aria-label="QR skaner"><svg viewBox="0 0 24 24"><path d="M4 8.5V6.5A2.5 2.5 0 0 1 6.5 4h2M15.5 4h2A2.5 2.5 0 0 1 20 6.5v2M20 15.5v2a2.5 2.5 0 0 1-2.5 2.5h-2M8.5 20h-2A2.5 2.5 0 0 1 4 17.5v-2M4 12h16"/></svg></button>' : ''}
   </div>
   <div class="ot-hint">GRAM faqat TON tarmog'idagi manzilga yuboriladi.</div>
+  <div id="owRec">${ocRecentHtml()}</div>
 
   <div class="gr-card" style="margin-top:14px">
     <div class="lb">Chiqariladigan miqdor</div>
@@ -10421,6 +10473,59 @@ function renderOutWallet(){
     <button class="gr-go" id="ocGo" disabled onclick="ocSend()">Chiqarib olish</button>
   </div>`;
   ocSync();
+  if(!nftHistLoaded) nftHistLoad(function(){ const r = document.getElementById('owRec'); if(r && view === 'nft_out_wallet') r.innerHTML = ocRecentHtml(); });
+}
+/* ===== Tashqi hamyon: oxirgi manzillar va QR skaner ===== */
+function ocRecent(){
+  let clr = 0; try{ clr = Number(localStorage.getItem('mt_oc_clr') || 0); }catch(e){}
+  const seen = {}, out = [];
+  (nftHist || []).filter(function(r){ return r && r.kind === 'gram_out' && r.to; })
+    .sort(function(a, b){ return new Date(b.at) - new Date(a.at); })
+    .forEach(function(r){
+      const t = new Date(r.at).getTime();
+      if(out.length >= 3 || t <= clr || seen[r.to]) return;
+      seen[r.to] = 1; out.push(r);
+    });
+  return out;
+}
+function ocShort(a){ a = String(a || ''); return a.length > 12 ? a.slice(0, 4) + '\u2026' + a.slice(-4) : a; }
+function ocWhen(at){
+  const d = new Date(at); if(isNaN(d)) return '';
+  const M = ['yanvar','fevral','mart','aprel','may','iyun','iyul','avgust','sentabr','oktabr','noyabr','dekabr'];
+  return d.getDate() + '-' + M[d.getMonth()] + ', ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+}
+function ocRecentHtml(){
+  const L = ocRecent(); if(!L.length) return '';
+  return '<div class="ow-rec"><div class="ow-rh"><span>Oxirgilar</span><button onclick="ocClear()">Tozalash</button></div>' +
+    L.map(function(r){
+      return '<button class="ow-row" onclick="ocPick(\'' + esc(r.to) + '\')"><img src="' + GRAM_IMG + '" alt="">' +
+             '<span class="t"><b>' + esc(ocShort(r.to)) + '</b><small>' + esc(ocWhen(r.at)) + '</small></span></button>';
+    }).join('') + '</div>';
+}
+function ocPick(a){ haptic(); const el = document.getElementById('otAddr'); if(el){ el.value = a; ocSync(); } }
+function ocClear(){
+  haptic();
+  try{ localStorage.setItem('mt_oc_clr', String(Date.now())); }catch(e){}
+  const r = document.getElementById('owRec'); if(r) r.innerHTML = '';
+}
+function ocCanScan(){
+  try{ return !!(tg && typeof tg.showScanQrPopup === 'function' && (!tg.isVersionAtLeast || tg.isVersionAtLeast('6.4')) &&
+                 /^(ios|android|android_x)$/i.test(String(tg.platform || ''))); }catch(e){ return false; }
+}
+function ocScan(){
+  haptic();
+  try{
+    tg.showScanQrPopup({ text:"TON manzil QR kodini skanerlang" }, function(txt){
+      const s = String(txt || ''), m = s.match(/([A-Za-z0-9_-]{48}|0:[0-9a-fA-F]{64})/);
+      if(!m) return false;                       /* manzil topilmadi — skaner ochiq qoladi */
+      const el = document.getElementById('otAddr'); if(el) el.value = m[1];
+      const am = s.match(/[?&]amount=(\d+)/);   /* ton://transfer/...?amount=… (nanoton) */
+      const q = document.getElementById('ocAmt');
+      if(am && q){ q.value = String(Math.round(Number(am[1]) / 1e7) / 100); }
+      ocSync(); notify('success');
+      return true;                                /* skaner yopiladi */
+    });
+  }catch(e){ toast('Skaner ochilmadi'); }
 }
 /* Miqdorni tozalab yozamiz */
 function ocIn(el){
