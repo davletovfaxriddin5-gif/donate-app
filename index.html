@@ -514,6 +514,25 @@ body .mg-row .tx .nm { white-space:normal; display:-webkit-box; -webkit-line-cla
 /* NFT atributi: nom va "eng past …" boshqa tillarda (va tor ekranda) ustma-ust - yonma-yon sig'maydi */
 html[lang]:not([lang="uz"]) .nd-row .k { flex-direction:column; align-items:flex-start; gap:1px; line-height:1.15 }
 @media (max-width:380px){ .nd-row .k { flex-direction:column; align-items:flex-start; gap:1px; line-height:1.15 } }
+/* iPhone telefon yotqizilganda matnni o'zi kattalashtiradi (text autosizing) - o'chiramiz:
+   gorizontal holatda ham yozuvlar tik holatdagidek o'lchamda qoladi */
+html { -webkit-text-size-adjust:100%; text-size-adjust:100% }
+/* Menyu -> Til: tanlangan tilning yorqin nuri tepa/pastdan kesilmasin (aylanuvchi qator nurni kesadi).
+   Ichki joy kattalashtirildi, tashqi manfiy chegara bilan qoplandi - oraliqlar o'zgarmaydi */
+body .nm-langs { padding:14px 20px 18px; margin:-12px -20px -12px;
+  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 8px,#000 calc(100% - 26px),transparent);
+          mask-image:linear-gradient(90deg,transparent 0,#000 8px,#000 calc(100% - 26px),transparent) }
+/* NFT profili: menyu tugmasi - ixchamroq */
+body .pf2-menu { width:36px; height:36px; border-radius:12px }
+body .pf2-menu svg { width:18px; height:18px; stroke-width:2.2 }
+body .pf2-menu:active { transform:scale(.94) }
+/* NFT hamyon kartasi: rasm bosh sahifadagidek alohida, chap cheti yumshoq so'nadi -
+   karta qancha keng bo'lmasin (gorizontal holat), "Yechish" orqasida chiziq/uzilish ko'rinmaydi */
+.wl-card { position:relative; overflow:hidden; background:linear-gradient(135deg,#3F55F6 0%,#5A43F2 100%) }
+.wl-card .wl-art { position:absolute; top:-6%; right:-34px; height:112%; width:auto; max-width:none; z-index:0; pointer-events:none;
+  -webkit-mask-image:linear-gradient(90deg, transparent 0%, rgba(0,0,0,.35) 18%, rgba(0,0,0,.8) 36%, #000 52%);
+          mask-image:linear-gradient(90deg, transparent 0%, rgba(0,0,0,.35) 18%, rgba(0,0,0,.8) 36%, #000 52%) }
+.wl-card > :not(.wl-art) { position:relative; z-index:2 }
 /* Tor ekranlar (360 px Android): narx va balans raqamlari "…" bilan kesilmasin */
 @media (max-width:380px){
   body .nftm-buy .pr { font-size:12px; letter-spacing:-.4px; padding:0 6px }
@@ -5288,6 +5307,13 @@ const NAV = (function(){
   inner.addEventListener('touchend', end);
   inner.addEventListener('touchcancel', end);
   window.addEventListener('resize', function(){ sync(false); });
+  /* iPhone'da "resize" burilish tugamasdan keladi - kapsula oraliq o'lchamda qotib qolardi.
+     Panel kengligi haqiqatan o'zgarganda (burilish tugagach) va burilishdan keyin bir necha marta qayta joylaymiz. */
+  function resync(){ if(!pressed) sync(false); }
+  window.addEventListener('orientationchange', function(){ [80, 300, 700].forEach(function(t){ setTimeout(resync, t); }); });
+  try{ tg.onEvent('viewportChanged', function(){ setTimeout(resync, 120); }); }catch(e){}
+  try{ if(window.ResizeObserver){ let lw = 0, rt = null;
+    new ResizeObserver(function(){ const cw = inner.getBoundingClientRect().width; if(Math.abs(cw - lw) < 0.5) return; lw = cw; clearTimeout(rt); rt = setTimeout(resync, 60); }).observe(inner); } }catch(e){}
   return { sync:sync };
 })();
 function syncNavPill(animate){ NAV.sync(animate); }
@@ -8436,7 +8462,7 @@ function renderNftProfile(){
   const keep = (ob && ob.className === 'ref-list') ? ob.innerHTML : '';
   app.innerHTML = `
   <div class="pf2-bar">
-    <button class="pf2-menu" onclick="openNftMenu()" aria-label="Menyu"><svg viewBox="0 0 24 24"><path d="M5 8.5h14M5 15.5h14"/></svg></button>
+    <button class="pf2-menu" onclick="openNftMenu()" aria-label="Menyu"><svg viewBox="0 0 24 24"><path d="M5 9h14M5 15h9"/></svg></button>
   </div>
 
   <div class="pf2-card">
@@ -11847,7 +11873,7 @@ function renderWallet(){
     <span class="arw">›</span>
   </button>
 
-  <div class="wl-card" style="background-image:linear-gradient(90deg,#3F55F6 0%,#3F55F6 32%,rgba(63,85,246,.93) 40%,rgba(70,78,245,.62) 52%,rgba(82,70,243,.4) 66%,rgba(90,67,242,.28) 100%),url('${IMG('/banner-x9.webp')}'),linear-gradient(135deg,#3F55F6 0%,#5A43F2 100%);background-size:cover,auto 112%,cover;background-position:center,right -34px center,center;background-repeat:no-repeat,no-repeat,no-repeat">
+  <div class="wl-card"><img class="wl-art" src="${IMG('/banner-x9.webp')}" alt="" onerror="this.remove()">
     <div class="lb">Hamyon balansi</div>
     <div class="amt">${big}</div>
     ${cur.c !== 'UZS' ? `<div class="sub">${som}</div>` : ''}
