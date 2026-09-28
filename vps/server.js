@@ -3371,6 +3371,169 @@ app.post("/chat/send", (req,res)=>{
   }catch(e){ console.log("CHATSEND XATO:", e.message); res.json({ ok:false, error:"server" }); }
 });
 
+/* ======================= TO'LOV ESLATMALARI (faqat admin) =======================
+   Oylik/yillik to'lovlar (FazerCards tarifi, VPS, Claude va h.k.) muddati yaqinlashganda
+   bot adminga BIR NECHA MARTA eslatadi: 3 kun, 2 kun, 1 kun, 12 soat, 3 soat, 1 soat qolganda
+   va aynan vaqtida; "To'landi" bosilmasa - muddat o'tgach har 12 soatda (5 kungacha).
+   Vaqt Toshkent vaqtida. Keyingi muddat o'sha soat:daqiqada hisoblanadi.
+   /eslatma (yoki /tolovlar) - ro'yxat, qo'shish, "To'landi", o'chirish. */
+const ES_FILE = "/root/donate-app/eslatma.json";
+const ES_TZ = 5 * 3600e3;
+const ES_BEFORE = [["3d", 3*86400e3], ["2d", 2*86400e3], ["1d", 86400e3], ["12h", 12*3600e3], ["3h", 3*3600e3], ["1h", 3600e3], ["0", 0]];
+const ES_AFTER = [12, 24, 36, 48, 60, 72, 96, 120].map(function(hh){ return ["+" + hh + "h", hh * 3600e3]; });
+const ES_EVERY = { month:"har oy", year:"har yil", week:"har hafta" };
+let ES = { items: [] };
+try{ const z = JSON.parse(fs.readFileSync(ES_FILE, "utf8")); if(z && Array.isArray(z.items)) ES = z; }catch(e){}
+let esFlow = null;
+function esSave(){ try{ fs.writeFileSync(ES_FILE, JSON.stringify(ES, null, 1)); }catch(e){} }
+function esFmt(ms){ const d = new Date(ms + ES_TZ).toISOString(); return d.slice(8,10) + "." + d.slice(5,7) + "." + d.slice(0,4) + ", soat " + d.slice(11,16); }
+function esLeft(ms){
+  const x = ms - Date.now(), a = Math.abs(x);
+  const d = Math.floor(a / 86400e3), h = Math.floor(a % 86400e3 / 3600e3), m = Math.floor(a % 3600e3 / 60000);
+  const s = ((d ? d + " kun " : "") + (d < 3 && h ? h + " soat " : "") + (!d && h < 3 ? m + " daqiqa" : "")).trim();
+  return x >= 0 ? (s || "hozir") + " qoldi" : (s || "hozir") + " o'tdi";
+}
+/* keyingi muddat: o'sha soat:daqiqa; oy oxiri (31) qisqa oyda oxirgi kunga, keyin yana 31 ga */
+function esNext(ms, every, dom){
+  if(every === "week") return ms + 7 * 86400e3;
+  const t = new Date(ms + ES_TZ);
+  let y = t.getUTCFullYear(), mo = t.getUTCMonth();
+  const day = dom || t.getUTCDate();
+  if(every === "year") y += 1; else mo += 1;
+  const last = new Date(Date.UTC(y, mo + 1, 0)).getUTCDate();
+  return Date.UTC(y, mo, Math.min(day, last), t.getUTCHours(), t.getUTCMinutes()) - ES_TZ;
+}
+/* "21.10 15:00", "21.10.2026 15:00", "2026-10-21 15:00" (Toshkent vaqti) */
+function esParse(s){
+  s = String(s || "").trim().replace(/,/g, " ").replace(/\s+/g, " ");
+  let m = s.match(/^(\d{1,2})[.\/-](\d{1,2})(?:[.\/-](\d{2,4}))?(?:\s+(?:soat\s*)?(\d{1,2})[:.](\d{2}))?$/i), y = null, mo, d, hh = 12, mi = 0, hasT = false;
+  if(m){ d = +m[1]; mo = +m[2] - 1; if(m[3]) y = +m[3] < 100 ? 2000 + +m[3] : +m[3]; if(m[4]){ hh = +m[4]; mi = +m[5]; hasT = true; } }
+  else {
+    m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})(?:[ T](\d{1,2}):(\d{2}))?$/);
+    if(!m) return null;
+    y = +m[1]; mo = +m[2] - 1; d = +m[3]; if(m[4]){ hh = +m[4]; mi = +m[5]; hasT = true; }
+  }
+  if(!(d >= 1 && d <= 31 && mo >= 0 && mo <= 11 && hh <= 23 && mi <= 59)) return null;
+  if(y === null){ y = new Date(Date.now() + ES_TZ).getUTCFullYear(); if(Date.UTC(y, mo, d, hh, mi) - ES_TZ < Date.now() - 86400e3) y += 1; }
+  return { ms: Date.UTC(y, mo, d, hh, mi) - ES_TZ, dom: d, hasT: hasT };
+}
+function esThr(it){
+  return ES_BEFORE.map(function(b){ return { k: b[0], at: it.due - b[1] }; })
+    .concat(ES_AFTER.map(function(a){ return { k: a[0], at: it.due + a[1] }; }));
+}
+/* yangi qo'shilgan / surilgan eslatmada o'tib ketgan bosqichlar "yuborilgan" hisoblanadi */
+function esMarkPast(it){ const now = Date.now(); it.sent = esThr(it).filter(function(x){ return now >= x.at; }).map(function(x){ return x.k; }); }
+function esKb(it){ return { inline_keyboard: [[{ text: "\u2705 To'landi", callback_data: "es_ok:" + it.id }]] }; }
+function esList(){
+  const items = ES.items.slice().sort(function(a, b){ return a.due - b.due; });
+  const rows = items.map(function(it){ return [{ text: "\u2705 " + it.name.slice(0, 22), callback_data: "es_ok:" + it.id }, { text: "\uD83D\uDDD1", callback_data: "es_del:" + it.id }]; });
+  rows.push([{ text: "\u2795 Yangi to'lov qo'shish", callback_data: "es_add" }]);
+  send(ADMIN_ID, "\uD83D\uDDD3 TO'LOV ESLATMALARI\n\n" +
+    (items.length ? items.map(function(it, i){ return (i + 1) + ". " + it.name + "\n     " + esFmt(it.due) + " (" + esLeft(it.due) + ")" +
+      (it.amount ? "\n     " + it.amount : "") + " \u00B7 " + (ES_EVERY[it.every] || "har oy"); }).join("\n\n") : "Hozircha hech narsa yo'q.") +
+    "\n\n\u2705 \u2014 to'landi deb belgilash,  \uD83D\uDDD1 \u2014 o'chirish", { inline_keyboard: rows });
+}
+/* Admin xabarlari: /eslatma buyrug'i va qo'shish bosqichlari. true - shu yerda ishlandi */
+function esFlowHook(text){
+  const t = String(text || "").trim();
+  if(/^\/(eslatma|tolovlar)(@\w+)?(\s|$)/i.test(t)){ esFlow = null; esList(); return true; }
+  if(!esFlow) return false;
+  if(/^\/bekor/i.test(t)){ esFlow = null; send(ADMIN_ID, "\u274C Qo'shish bekor qilindi."); return true; }
+  if(!t || t.charAt(0) === "/") return false;
+  if(esFlow.step === "name"){
+    esFlow.name = t.slice(0, 60); esFlow.step = "due";
+    send(ADMIN_ID, "2/4 \u2014 Keyingi to'lov qachon? Sana va soatini yozing (Toshkent vaqti).\n\nMasalan:  21.10 15:00   yoki   21.10.2026 15:00");
+    return true;
+  }
+  if(esFlow.step === "due"){
+    const p = esParse(t);
+    if(!p){ send(ADMIN_ID, "Tushunmadim \uD83D\uDE4F Shunday yozing:  21.10 15:00"); return true; }
+    esFlow.due = p.ms; esFlow.dom = p.dom; esFlow.step = "amount";
+    send(ADMIN_ID, (p.hasT ? "" : "\u2139\uFE0F Soat yozilmadi \u2014 12:00 qo'yildi.\n\n") + "3/4 \u2014 Qancha to'lanadi? (masalan: 30$ yoki 120 000 so'm)\nKerak bo'lmasa: -");
+    return true;
+  }
+  if(esFlow.step === "amount"){
+    esFlow.amount = t === "-" ? "" : t.slice(0, 40); esFlow.step = "every";
+    send(ADMIN_ID, "4/4 \u2014 Qanchada bir takrorlanadi?", { inline_keyboard: [[
+      { text: "Har oy", callback_data: "es_ev:month" }, { text: "Har yil", callback_data: "es_ev:year" }, { text: "Har hafta", callback_data: "es_ev:week" } ]] });
+    return true;
+  }
+  return true;
+}
+/* Tugmalar: qo'shish, takrorlanish, To'landi (jadval / hozirdan), o'chirish */
+function esCb(cq){
+  const d = String(cq.data || "");
+  const ans = function(txt){ tgCall("answerCallbackQuery", { callback_query_id: cq.id, text: txt || "" }); };
+  if(!ADMIN_ID || String((cq.from && cq.from.id) || "") !== String(ADMIN_ID)){ ans(); return; }
+  const msg = cq.message || {};
+  const edit = function(text){ tgCall("editMessageText", { chat_id: (msg.chat && msg.chat.id) || ADMIN_ID, message_id: msg.message_id, text: text }); };
+  if(d === "es_add"){
+    ans(); esFlow = { step: "name" };
+    send(ADMIN_ID, "\u2795 Yangi to'lov eslatmasi\n\n1/4 \u2014 Nomini yozing (masalan: FazerCards tarifi)\n\nBekor qilish: /bekor");
+    return;
+  }
+  if(d.indexOf("es_ev:") === 0){
+    if(!esFlow || esFlow.step !== "every"){ ans("Bu tugma eskirgan"); return; }
+    const it = { id: "E" + Date.now().toString(36), name: esFlow.name, due: esFlow.due, dom: esFlow.dom,
+                 amount: esFlow.amount || "", every: ES_EVERY[d.slice(6)] ? d.slice(6) : "month", sent: [] };
+    esMarkPast(it); ES.items.push(it); esSave(); esFlow = null; ans("Saqlandi");
+    edit("\u2705 Saqlandi: " + it.name + "\n\nKeyingi to'lov: " + esFmt(it.due) + " (" + esLeft(it.due) + ")" +
+         (it.amount ? "\nSumma: " + it.amount : "") + "\nTakrorlanadi: " + ES_EVERY[it.every] +
+         "\n\nEslatmalar: 3 kun, 2 kun, 1 kun, 12 soat, 3 soat, 1 soat oldin va aynan vaqtida. \"To'landi\" bosilmasa \u2014 keyin ham har 12 soatda.");
+    return;
+  }
+  const id = d.split(":")[1] || "";
+  const it = ES.items.filter(function(x){ return x.id === id; })[0];
+  if(!it){ ans("Topilmadi"); return; }
+  if(d.indexOf("es_ok:") === 0){
+    const plan = esNext(it.due, it.every, it.dom), fromNow = esNext(Date.now(), it.every, null);
+    ans();
+    send(ADMIN_ID, "\u2705 " + it.name + " \u2014 to'landi.\n\nKeyingi muddat qaysi vaqtdan hisoblansin?", { inline_keyboard: [
+      [{ text: "\uD83D\uDCC5 Jadval bo'yicha: " + esFmt(plan).replace(", soat", ""), callback_data: "es_nx:" + id + ":p" }],
+      [{ text: "\uD83D\uDD52 Hozirdan: " + esFmt(fromNow).replace(", soat", ""), callback_data: "es_nx:" + id + ":n" }] ] });
+    return;
+  }
+  if(d.indexOf("es_nx:") === 0){
+    if(d.split(":")[2] === "n"){ it.due = esNext(Date.now(), it.every, null); it.dom = new Date(it.due + ES_TZ).getUTCDate(); }
+    else it.due = esNext(it.due, it.every, it.dom);
+    esMarkPast(it); esSave(); ans("Saqlandi");
+    edit("\u2705 " + it.name + " \u2014 to'landi.\n\nKeyingi to'lov: " + esFmt(it.due) + " (" + esLeft(it.due) + ")");
+    return;
+  }
+  if(d.indexOf("es_del:") === 0){
+    ans();
+    send(ADMIN_ID, "\uD83D\uDDD1 \u00AB" + it.name + "\u00BB eslatmasi o'chirilsinmi?", { inline_keyboard: [[
+      { text: "Ha, o'chirish", callback_data: "es_dy:" + id }, { text: "Yo'q", callback_data: "es_dn:" + id } ]] });
+    return;
+  }
+  if(d.indexOf("es_dy:") === 0){ ES.items = ES.items.filter(function(x){ return x.id !== id; }); esSave(); ans("O'chirildi"); edit("\uD83D\uDDD1 \u00AB" + it.name + "\u00BB o'chirildi."); return; }
+  if(d.indexOf("es_dn:") === 0){ ans(); edit("Bekor qilindi \u2014 eslatma joyida qoldi."); return; }
+  ans();
+}
+/* Har daqiqada: vaqti kelgan bosqich bo'yicha eslatma. Server o'chib qolgan bo'lsa - o'tkazib
+   yuborilganlarning faqat eng oxirgisi yuboriladi (bir dasta xabar kelmasin). */
+function esTick(){
+  if(!ADMIN_ID || !ES.items.length) return;
+  const now = Date.now(); let ch = false;
+  ES.items.forEach(function(it){
+    it.sent = it.sent || [];
+    const due = esThr(it).filter(function(x){ return now >= x.at && it.sent.indexOf(x.k) < 0; });
+    if(!due.length) return;
+    due.forEach(function(x){ it.sent.push(x.k); }); ch = true;
+    const over = now >= it.due, soon = it.due - now <= 86400e3;
+    const head = over ? (now - it.due < 3600e3 ? "\uD83D\uDD34 VAQTI KELDI" : "\u26A0\uFE0F MUDDATI O'TDI") : (soon ? "\uD83D\uDFE0 ESLATMA" : "\u23F0 ESLATMA");
+    const left = esLeft(it.due);
+    send(ADMIN_ID, head + ": " + it.name + "\n\n" +
+      (over ? "Muddat: " + esFmt(it.due) + " (" + left + ")\nTo'lagan bo'lsangiz \u00AB\u2705 To'landi\u00BB ni bosing \u2014 aks holda eslatib turaman."
+            : "To'lov: " + esFmt(it.due) + "\n" + left.charAt(0).toUpperCase() + left.slice(1)) +
+      (it.amount ? "\nSumma: " + it.amount : ""), esKb(it));
+  });
+  if(ch) esSave();
+}
+setInterval(esTick, 60 * 1000);
+setTimeout(esTick, 20 * 1000);
+/* ===================== /TO'LOV ESLATMALARI ===================== */
+
 /* ======================= YORDAMCHI AI =======================
    Bot chatida /yordamchi (yoki /ai) - haqiqiy sun'iy intellekt (Claude) javob beradi.
    Faqat MinatoUz haqida: buyurtmalar, to'ldirish, to'lovlar, NFT, xavfsizlik va h.k.
@@ -5608,6 +5771,7 @@ app.post("/webhook", (req,res)=>{
     const cq = req.body && req.body.callback_query;
     if(cq){
       if(isBanned((cq.from && cq.from.id) || "")) return;
+      if(String(cq.data || "").indexOf("es_") === 0){ esCb(cq); return; }
       if(cq.data === "ai_stop"){ aiStop(String(cq.from.id), true); tgCall("answerCallbackQuery", { callback_query_id: cq.id, text: "Suhbat tugatildi" }); return; }
       handleCb(cq); return;
     }
@@ -5667,6 +5831,8 @@ app.post("/webhook", (req,res)=>{
     const text = String(msg.text || "");
     /* Yordamchi AI: /yordamchi bilan boshlangan suhbat - javobni sun'iy intellekt beradi */
     if(aiHook(msg, fromId)) return;
+    /* To'lov eslatmalari: /eslatma buyrug'i va qo'shish bosqichlari (faqat admin) */
+    if(ADMIN_ID && fromId === ADMIN_ID && esFlowHook(text)) return;
     if(ADMIN_ID && fromId === ADMIN_ID && text.indexOf("/aistat") === 0){ aiStat(); return; }
     /* Ustoz AI: ochiq suhbatdagi mijoz yozsa (reply qilmasa ham) - adminga boradi */
     if(fromId !== ADMIN_ID && ustozFromUser(msg, fromId)) return;
