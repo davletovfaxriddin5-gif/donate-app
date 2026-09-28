@@ -907,6 +907,7 @@ function giftFill(g){
 function loadGiftGames(){
   GIFTS.forEach(function(g){
     g.items.forEach(function(it){
+      if(!it.base) it.base = it.price;      /* asl narx - bundan pastga hech qachon tushmaydi */
       GIFT_IDX["gift:" + g.cat + "|" + it.oid] = {
         price: it.price, cost: Math.round(it.usd * GIFT_RATE), usd: it.usd,
         fields: [], gift: g.cat, redeem: g.redeem, name: it.name
@@ -952,12 +953,16 @@ async function giftSync(){
         const ix = GIFT_IDX["gift:" + g.cat + "|" + it.oid];
         if(ix && usd > 0){ ix.usd = usd; ix.cost = cost; }
         if(cost > 0){
+          /* narx = asl narx yoki (tannarx + foyda pog'onasi) - qaysi biri katta bo'lsa.
+             Tannarx tushsa yoki kurs to'g'rilansa, narx o'zi asl holiga qaytadi. */
           const need = Math.ceil((cost + (GIFT_PLUS[it.oid] || 3000)) / 500) * 500;
-          if(need > it.price){
-            const old = it.price; it.price = need; if(ix) ix.price = need;
+          const target = Math.max(it.base || it.price, need);
+          if(target !== it.price){
+            const old = it.price; it.price = target; if(ix) ix.price = target;
             if(ADMIN_ID) tgCall("sendMessage", { chat_id: ADMIN_ID,
-              text: "\u2139\uFE0F " + g.name + " " + it.name + ": tannarx oshdi (" + n0(cost) + " so'm, 1$ = " + n0(COST_RATE) + ").\n" +
-                    "Narx " + n0(old) + " \u2192 " + n0(need) + " so'm ga ko'tarildi, foyda " + n0(need - cost) + " so'm." });
+              text: "\u2139\uFE0F " + g.name + " " + it.name + ": " + (target > old ? "tannarx oshdi" : "narx asl holiga qaytdi") +
+                    " (tannarx " + n0(cost) + " so'm, 1$ = " + n0(COST_RATE) + ").\n" +
+                    "Narx " + n0(old) + " \u2192 " + n0(target) + " so'm, foyda " + n0(target - cost) + " so'm." });
           }
         }
         GIFT_ST[g.cat + "|" + it.oid] = !o ? 0 : (isFinite(st) ? st : 0);   /* faqat zaxira tugasa yopiladi */
@@ -5737,8 +5742,12 @@ app.post("/webhook", (req,res)=>{
     if(text.indexOf("/kurs") === 0){
       if(ADMIN_ID && fromId !== ADMIN_ID) return;
       const kv = Number(String(text.replace(/^\/kurs(@\w+)?/i, "")).replace(/[^\d.]/g, ""));
-      if(!kv){ send(fromId, "\uD83D\uDCB1 Joriy kurs: 1$ = " + n0(COST_RATE) + " so'm\nO'zgartirish: /kurs 11900"); return; }
-      if(kv < 5000 || kv > 30000){ send(fromId, "\u274C Kurs noto'g'ri ko'rinadi: " + kv); return; }
+      if(!kv){ send(fromId, "\uD83D\uDCB1 Joriy kurs: 1$ = " + n0(COST_RATE) + " so'm\n\n" +
+        "Bu - hamyonda 1 USDT (1 dollar) necha so'mdan olinayotgani. Tannarx va foyda shu bilan hisoblanadi.\n" +
+        "O'zgartirish: /kurs 11900"); return; }
+      if(kv < 9000 || kv > 16000){ send(fromId, "\u274C " + n0(kv) + " dollar kursiga o'xshamaydi.\n\n" +
+        "Hamyonda 1 USDT (1 dollar) necha so'm ekanini yozing, masalan: /kurs 11900\n" +
+        "(TON yoki boshqa tanganing narxini emas.)"); return; }
       const eski = COST_RATE; COST_RATE = Math.round(kv); kursSave();
       send(fromId, "\u2705 Kurs yangilandi: 1$ = " + n0(eski) + " \u2192 " + n0(COST_RATE) + " so'm\n" +
                    "Tannarx, foyda hisoboti va Roblox narxlari endi shu kurs bilan hisoblanadi.");
