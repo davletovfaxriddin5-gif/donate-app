@@ -2533,6 +2533,30 @@ body.light .rc-code{ color:#1a2236 }
 .rc-code{ font-family:ui-monospace,"SF Mono",Menlo,Consolas,"DejaVu Sans Mono",monospace !important; letter-spacing:.2px !important;
   font-size:clamp(12px, 3.7vw, 15px) !important; padding:13px 8px !important }
 .ar-card .ar-code{ font-family:ui-monospace,"SF Mono",Menlo,Consolas,"DejaVu Sans Mono",monospace !important; letter-spacing:.3px !important }
+/* ===== Yotiq ekran (landscape): Telegram'dagidek keng joylashuv =====
+   Telefon yotqizilganda (yoki keng oynada) kontent butun kenglikka yoyiladi, to'rlar
+   ko'proq ustunli bo'ladi; pastki panel o'z kichik o'lchamida qoladi va bitta qatorga
+   tushadi, NFT tugmasi uning o'ng yoniga o'tadi (Telegram'dagi qidiruv tugmasi kabi).
+   Tik holatga hech narsa ta'sir qilmaydi. */
+@media (orientation: landscape) and (min-width: 640px){
+  :root, body.nft-mode{ --nav-h: 76px !important }
+  .wrap{ max-width: 1080px !important;
+    padding-left: max(20px, var(--sa-left, env(safe-area-inset-left, 0px))) !important;
+    padding-right: max(20px, var(--sa-right, env(safe-area-inset-right, 0px))) !important }
+  .games{ grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) !important; gap: 14px !important }
+  .pkg-grid{ grid-template-columns: repeat(auto-fill, minmax(165px, 1fr)) !important }
+  .pay-grid{ grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) !important }
+  .nftm-grid, .mg-grid, .mg2-grid{ grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)) !important }
+  #histList, #nftList{ display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; align-items: start }
+  #histList > .order, #nftList > .order{ margin-bottom: 0 !important }
+  #histList > :not(.order), #nftList > :not(.order){ grid-column: 1 / -1 }
+  .nav{ width: auto !important; max-width: none !important; flex-direction: row !important; align-items: center; gap: 10px !important;
+        padding: 0 12px var(--sa-bottom, env(safe-area-inset-bottom, 0px)) !important }
+  .nav-row{ width: 436px !important; flex: 0 0 auto }
+  .nav-nft{ order: 2; height: 54px !important; border-radius: 18px !important; padding: 0 20px !important }
+  .sheet, .gf-sh{ left: max(0px, calc(50% - 290px)) !important; right: max(0px, calc(50% - 290px)) !important;
+                 max-height: calc(100dvh - 10px) !important; overflow-y: auto !important }
+}
 </style>
 </head>
 <body>
