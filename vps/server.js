@@ -6122,6 +6122,287 @@ app.post("/sms", (req,res)=>{
   }catch(e){ console.log("SMS XATO:", e.message); res.json({ ok:false, error:"server" }); }
 });
 
+
+/* ======================= A'ZO BO'L BOTI (@newazobol_bot) =======================
+   Guruhlarda: @minatoh_bot ga Start bosmagan odam yozsa - xabari o'chiriladi va
+   "A'zo bo'lish" tugmasi chiqadi (t.me/minatoh_bot?start=g<guruh>). Start bosgach
+   darhol yoza oladi. Talab FAQAT @minatoh_bot - kodda qat'iy, hech kim o'zgartira olmaydi.
+   Admin buyruqlari (@minatoh_bot chatida):
+     /azobot <token>   - botni ulash (tokenli xabar darhol o'chiriladi)
+     /azo              - statistika
+     /azo guruhlar     - bot turgan guruhlar
+   Ma'lumot: /root/donate-app/gate.json (token, guruhlar, kim qaysi guruhdan kelgani) */
+const GATE_FILE = "/root/donate-app/gate.json";
+const GATE_URL  = "https://api.minatoh.uz/gate-webhook";
+const MAIN_BOT  = "minatoh_bot";
+let GATE = { token: "", secret: "", un: "", chats: {}, joins: [] };
+try{ const z = JSON.parse(fs.readFileSync(GATE_FILE, "utf8")); if(z && typeof z === "object") GATE = Object.assign(GATE, z); }catch(e){}
+if(!GATE.token && process.env.GATE_TOKEN) GATE.token = process.env.GATE_TOKEN;
+if(!GATE.chats || typeof GATE.chats !== "object") GATE.chats = {};
+if(!Array.isArray(GATE.joins)) GATE.joins = [];
+let gateSaveT = null;
+function gateSave(){
+  clearTimeout(gateSaveT);
+  gateSaveT = setTimeout(function(){
+    try{ fs.writeFileSync(GATE_FILE + ".tmp", JSON.stringify(GATE)); fs.renameSync(GATE_FILE + ".tmp", GATE_FILE); }
+    catch(e){ console.log("gate saqlash xato:", e.message); }
+  }, 400);
+}
+async function gateApi(method, body){
+  if(!GATE.token) return { ok:false, description:"token yo'q" };
+  try{
+    const r = await fetch("https://api.telegram.org/bot" + GATE.token + "/" + method,
+      { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify(body || {}) });
+    return await r.json();
+  }catch(e){ return { ok:false, description: e.message }; }
+}
+
+/* Start bosganmi: baza 30 soniyada bir o'qiladi (katta guruhlarda serverni qiynamaslik uchun),
+   hozirgina Start bosganlar esa gOk orqali DARHOL o'tadi. */
+let gSnap = null, gSnapAt = 0;
+const gOk = new Map();
+function gateStarted(uid){
+  uid = String(uid);
+  const t = gOk.get(uid); if(t && Date.now() - t < 120000) return true;
+  if(!gSnap || Date.now() - gSnapAt > 30000){ gSnap = load(); gSnapAt = Date.now(); }
+  const u = gSnap[uid];
+  return !!(u && u.greeted && !u.left);
+}
+/* Guruh adminlari - 10 daqiqa eslab qolinadi */
+const gAdm = {};
+async function gateAdmins(cid){
+  const c = gAdm[cid];
+  if(c && Date.now() - c.at < 600000) return c.ids;
+  const r = await gateApi("getChatAdministrators", { chat_id: cid });
+  const ids = new Set();
+  if(r && r.ok) r.result.forEach(function(m){ if(m.user) ids.add(String(m.user.id)); });
+  gAdm[cid] = { at: Date.now(), ids: ids };
+  return ids;
+}
+function gateChat(chat){
+  const cid = String(chat.id);
+  let c = GATE.chats[cid], ch = false;
+  if(!c){ c = GATE.chats[cid] = { at: new Date().toISOString(), st: "member", del: 0 }; ch = true; }
+  if(chat.title && c.t !== chat.title){ c.t = chat.title; ch = true; }
+  if((chat.username || "") !== (c.un || "")){ c.un = chat.username || ""; ch = true; }
+  if(chat.type && c.type !== chat.type){ c.type = chat.type; ch = true; }
+  if(ch) gateSave();
+  return c;
+}
+/* Ogohlantirish: bir odamga daqiqasiga 1 ta, guruhga daqiqasiga 20 tadan oshmaydi (spam bo'lmasin) */
+const gWarn = {}, gWarnMin = {}, gAsk = {};
+function gateWarn(cid, from){
+  const key = cid + ":" + from.id, now = Date.now();
+  const w = gWarn[key]; if(w && now - w.at < 60000) return;
+  const lst = (gWarnMin[cid] || []).filter(function(t){ return now - t < 60000; });
+  gWarnMin[cid] = lst;
+  if(lst.length >= 20) return;
+  lst.push(now);
+  gWarn[key] = { at: now, mid: 0 };
+  const nm = esc(String(from.first_name || from.username || "Do'stim").slice(0, 40));
+  const link = "https://t.me/" + MAIN_BOT + "?start=g" + String(cid).replace("-", "");
+  gateApi("sendMessage", { chat_id: cid, parse_mode: "HTML", disable_notification: true,
+    text: '<a href="tg://user?id=' + from.id + '">' + nm + "</a>, guruhda yozish uchun @" + MAIN_BOT +
+          " ga a'zo bo'ling: pastdagi tugmani bosing va <b>Start</b> ni bosing \uD83D\uDC47",
+    reply_markup: { inline_keyboard: [[{ text: "\u2705 A'zo bo'lish", url: link }]] } }).then(function(r){
+      if(!(r && r.ok)) return;
+      if(gWarn[key]) gWarn[key].mid = r.result.message_id;
+      setTimeout(function(){ gateApi("deleteMessage", { chat_id: cid, message_id: r.result.message_id }); }, 60000);
+  });
+}
+function gateAskRights(cid){
+  const now = Date.now();
+  if(gAsk[cid] && now - gAsk[cid] < 6 * 3600000) return;
+  gAsk[cid] = now;
+  gateApi("sendMessage", { chat_id: cid, disable_notification: true,
+    text: "\u26A0\uFE0F Ishlashim uchun meni admin qiling va \u00ABXabarlarni o'chirish\u00BB huquqini bering." });
+}
+async function gateOnMessage(msg){
+  const chat = msg.chat || {};
+  if(chat.type !== "group" && chat.type !== "supergroup") return;
+  const cid = String(chat.id);
+  if(msg.migrate_to_chat_id){   /* oddiy guruh superguruhga aylandi - id o'zgaradi */
+    const nid = String(msg.migrate_to_chat_id);
+    if(GATE.chats[cid]){ GATE.chats[nid] = Object.assign({}, GATE.chats[cid], GATE.chats[nid] || {}); delete GATE.chats[cid]; }
+    GATE.joins.forEach(function(j){ if(j.c === cid) j.c = nid; });
+    gateSave(); return;
+  }
+  if(msg.sender_chat || msg.is_automatic_forward) return;          /* kanal postlari, anonim adminlar */
+  const from = msg.from || {};
+  if(!from.id || from.is_bot || from.id === 777000) return;         /* botlar, Telegram xizmati */
+  if(msg.new_chat_members || msg.left_chat_member || msg.new_chat_title || msg.new_chat_photo ||
+     msg.delete_chat_photo || msg.pinned_message || msg.group_chat_created || msg.supergroup_chat_created ||
+     msg.video_chat_started || msg.video_chat_ended || msg.video_chat_participants_invited) return;   /* xizmat xabarlari */
+  const c = gateChat(chat);
+  const uid = String(from.id);
+  if(gateStarted(uid)) return;
+  const adm = await gateAdmins(cid);
+  if(adm.has(uid)) return;
+  const d = await gateApi("deleteMessage", { chat_id: cid, message_id: msg.message_id });
+  if(!(d && d.ok)){
+    if(!c.noRights){ c.noRights = true; gateSave(); }
+    gateAskRights(cid); return;
+  }
+  if(c.noRights) delete c.noRights;
+  c.del = (c.del || 0) + 1;
+  if(c.del % 20 === 1) gateSave();
+  gateWarn(cid, from);
+}
+async function gateOnMember(u){
+  const chat = u.chat || {};
+  if(chat.type === "private") return;
+  const cid = String(chat.id);
+  const st = (u.new_chat_member && u.new_chat_member.status) || "";
+  const old = (u.old_chat_member && u.old_chat_member.status) || "";
+  const c = gateChat(chat);
+  const wasIn = old === "member" || old === "administrator" || old === "creator";
+  const isIn  = st === "member" || st === "administrator";
+  c.st = st;
+  c.canDel = st === "administrator" && !!(u.new_chat_member && u.new_chat_member.can_delete_messages);
+  if(c.canDel) delete c.noRights;
+  delete gAdm[cid];
+  if(isIn){
+    const n = await gateApi("getChatMemberCount", { chat_id: cid });
+    if(n && n.ok) c.n = n.result;
+    if(!wasIn){
+      c.addAt = new Date().toISOString();
+      if(u.from) c.by = { id: String(u.from.id), nm: String(u.from.first_name || "") + (u.from.username ? " (@" + u.from.username + ")" : "") };
+      if(ADMIN_ID) tgCall("sendMessage", { chat_id: ADMIN_ID, text:
+        "\u2795 @" + (GATE.un || "bot") + " yangi " + (chat.type === "channel" ? "kanalga" : "guruhga") + " qo'shildi\n" +
+        (c.t || cid) + (c.un ? " (@" + c.un + ")" : "") + "\nA'zolar: " + (c.n || "?") +
+        "\nQo'shgan: " + (c.by ? c.by.nm + " (id " + c.by.id + ")" : "?") +
+        (chat.type === "channel" ? "\n\u2139\uFE0F Kanalda obunachilar yozmaydi - botni kanalning izohlar guruhiga qo'shish kerak."
+                                 : (c.canDel ? "" : "\n\u26A0\uFE0F Hali admin emas - o'chirish huquqi berilmagan")) });
+    }
+    if(chat.type !== "channel"){
+      if(!c.canDel) gateAskRights(cid);
+      else if(old !== "administrator")
+        gateApi("sendMessage", { chat_id: cid, disable_notification: true,
+          text: "\u2705 Tayyor! Endi bu guruhda faqat @" + MAIN_BOT + " ga a'zo bo'lganlar yoza oladi." });
+    }
+  } else if(st === "left" || st === "kicked"){
+    c.outAt = new Date().toISOString();
+    if(wasIn && ADMIN_ID) tgCall("sendMessage", { chat_id: ADMIN_ID, text: "\u2796 @" + (GATE.un || "bot") + " chiqarildi: " + (c.t || cid) });
+  }
+  gateSave();
+}
+function gateOnPrivate(msg){
+  const uid = String((msg.from && msg.from.id) || "");
+  if(!uid) return;
+  if(ADMIN_ID && uid === ADMIN_ID){ gateApi("sendMessage", { chat_id: uid, text: gateStatText(false) + "\nTo'liq: @" + MAIN_BOT + " chatida /azo" }); return; }
+  gateApi("sendMessage", { chat_id: uid,
+    text: "\uD83D\uDC4B Men guruhlarda faqat @" + MAIN_BOT + " ga a'zo bo'lganlarga yozishga ruxsat beraman.\n\n" +
+          "Guruhingizga qo'shing va admin qiling (\u00ABXabarlarni o'chirish\u00BB huquqi bilan).",
+    reply_markup: { inline_keyboard: [
+      [{ text: "\u2795 Guruhga qo'shish", url: "https://t.me/" + (GATE.un || "newazobol_bot") + "?startgroup=true&admin=delete_messages" }],
+      [{ text: "\uD83E\uDD16 @" + MAIN_BOT, url: "https://t.me/" + MAIN_BOT }] ] } });
+}
+/* @minatoh_bot /start g<guruh> - guruhdan kelgan odam Start bosdi */
+function gateJoined(uid, cid, isNew){
+  uid = String(uid); cid = String(cid);
+  gOk.set(uid, Date.now());
+  if(!GATE.joins.some(function(j){ return j.u === uid && j.c === cid; })){
+    GATE.joins.push({ u: uid, c: cid, at: new Date().toISOString(), nw: !!isNew });
+    if(GATE.joins.length > 50000) GATE.joins.splice(0, GATE.joins.length - 50000);
+    gateSave();
+  }
+  const key = cid + ":" + uid, w = gWarn[key];
+  if(w && w.mid){ gateApi("deleteMessage", { chat_id: cid, message_id: w.mid }); }
+  delete gWarn[key];
+  const c = GATE.chats[cid] || {};
+  setTimeout(function(){
+    send(uid, "\u2705 Rahmat! Endi \u00AB" + (c.t || "guruh") + "\u00BB guruhida bemalol yozishingiz mumkin.",
+      c.un ? { inline_keyboard: [[{ text: "\u21A9\uFE0F Guruhga qaytish", url: "https://t.me/" + c.un }]] } : undefined);
+  }, 1200);
+}
+function gateStatText(full){
+  const now = Date.now(), day = 864e5, J = GATE.joins;
+  const since = function(ms){ return J.filter(function(j){ return now - Date.parse(j.at) < ms; }); };
+  const nw = function(a){ return a.filter(function(j){ return j.nw; }).length; };
+  const ppl = function(a){ return new Set(a.map(function(j){ return j.u; })).size; };
+  const t1 = since(day), t7 = since(7 * day), t30 = since(30 * day);
+  const act = Object.keys(GATE.chats).map(function(k){ return Object.assign({ id: k }, GATE.chats[k]); })
+    .filter(function(c){ return (c.st === "administrator" || c.st === "member") && c.type !== "channel"; });
+  let s = "\uD83D\uDEE1 @" + (GATE.un || "?") + " \u2014 A'ZO BO'L BOTI\n\n";
+  s += "Guruhlar: " + act.length + " ta (ishlayotgan: " + act.filter(function(c){ return c.canDel; }).length + ")\n";
+  s += "Guruhlardagi a'zolar: " + act.reduce(function(a, c){ return a + (c.n || 0); }, 0) + "\n";
+  s += "O'chirilgan xabarlar: " + act.reduce(function(a, c){ return a + (c.del || 0); }, 0) + "\n\n";
+  s += "Shu bot orqali Start bosganlar:\n";
+  s += "\u2022 Bugun: " + ppl(t1) + " kishi (yangi: " + nw(t1) + ")\n";
+  s += "\u2022 7 kun: " + ppl(t7) + " kishi (yangi: " + nw(t7) + ")\n";
+  s += "\u2022 30 kun: " + ppl(t30) + " kishi (yangi: " + nw(t30) + ")\n";
+  s += "\u2022 Jami: " + ppl(J) + " kishi (yangi: " + nw(J) + ")\n";
+  s += "(yangi = @" + MAIN_BOT + " ga birinchi marta kelganlar)\n";
+  const by = {};
+  J.forEach(function(j){ const b = by[j.c] || (by[j.c] = { n: 0, nw: 0 }); b.n++; if(j.nw) b.nw++; });
+  const top = Object.keys(by).sort(function(a, b){ return by[b].n - by[a].n; }).slice(0, full ? 30 : 5);
+  if(top.length){
+    s += "\nEng ko'p olib kelgan guruhlar:\n";
+    top.forEach(function(k, i){ const c = GATE.chats[k] || {}; s += (i + 1) + ". " + (c.t || k) + " \u2014 " + by[k].n + " (yangi " + by[k].nw + ")\n"; });
+  }
+  return s;
+}
+function gateGroupsText(){
+  const by = {};
+  GATE.joins.forEach(function(j){ by[j.c] = (by[j.c] || 0) + 1; });
+  const L = Object.keys(GATE.chats).map(function(k){ return Object.assign({ id: k }, GATE.chats[k]); })
+    .sort(function(a, b){ return (by[b.id] || 0) - (by[a.id] || 0); });
+  if(!L.length) return "Bot hali hech qaysi guruhga qo'shilmagan.";
+  let s = "\uD83D\uDCCB GURUHLAR (" + L.length + ")\n\n";
+  L.slice(0, 60).forEach(function(c, i){
+    const on = c.st === "administrator" || c.st === "member";
+    s += (i + 1) + ". " + (c.t || c.id) + (c.un ? " (@" + c.un + ")" : "") + "\n   " +
+      (!on ? "\u274C chiqarilgan" : c.type === "channel" ? "\u2139\uFE0F kanal" : c.canDel ? "\u2705 ishlayapti" : "\u26A0\uFE0F huquq yo'q") +
+      " \u00B7 a'zolar " + (c.n || "?") + " \u00B7 Start " + (by[c.id] || 0) + " \u00B7 o'chirilgan " + (c.del || 0) +
+      (c.by ? "\n   qo'shgan: " + c.by.nm : "") + "\n";
+  });
+  return s;
+}
+async function gateConnect(chatId, msg, text){
+  if(msg && msg.message_id) tgCall("deleteMessage", { chat_id: chatId, message_id: msg.message_id });   /* token chatda qolmasin */
+  const tok = (String(text).match(/(\d{6,}:[A-Za-z0-9_-]{30,})/) || [])[1];
+  if(!tok){
+    if(!GATE.token){ send(chatId, "Ulash: /azobot <token>\n(tokenni @BotFather beradi)"); return; }
+    /* Holat: webhook yetib kelyaptimi, oxirgi xato (bot guruhda javob bermasa - sababi shu yerda) */
+    const wi = await gateApi("getWebhookInfo", {});
+    const r = (wi && wi.result && typeof wi.result === "object") ? wi.result : {};
+    send(chatId, "\u2705 @" + (GATE.un || "?") + " ulangan.\nWebhook: " + (r.url || "?") +
+      (r.last_error_message ? "\n\u26A0\uFE0F Oxirgi xato: " + r.last_error_message : "\nXato yo'q \u2705") +
+      (r.pending_update_count ? "\nKutilayotgan yangilanishlar: " + r.pending_update_count : "") +
+      "\n\nQayta ulash: /azobot <token>\nStatistika: /azo");
+    return;
+  }
+  const prev = GATE.token; GATE.token = tok;
+  const me = await gateApi("getMe", {});
+  if(!(me && me.ok)){ GATE.token = prev; send(chatId, "\u274C Token ishlamadi: " + ((me && me.description) || "?")); return; }
+  GATE.un = me.result.username;
+  GATE.secret = crypto.randomBytes(24).toString("hex");
+  const wh = await gateApi("setWebhook", { url: GATE_URL, secret_token: GATE.secret, drop_pending_updates: true,
+    allowed_updates: ["message", "edited_message", "my_chat_member"] });
+  gateSave();
+  gateApi("setMyDescription", { description: "Guruhingizda faqat @" + MAIN_BOT + " ga a'zo bo'lganlar yoza oladi. Meni guruhga qo'shing va admin qiling." });
+  gateApi("setMyShortDescription", { short_description: "Guruhda yozish uchun @" + MAIN_BOT + " ga a'zo bo'lish sharti" });
+  gateApi("setMyDefaultAdministratorRights", { rights: { is_anonymous: false, can_manage_chat: true, can_delete_messages: true,
+    can_manage_video_chats: false, can_restrict_members: false, can_promote_members: false, can_change_info: false,
+    can_invite_users: false, can_post_stories: false, can_edit_stories: false, can_delete_stories: false } });
+  send(chatId, (wh && wh.ok)
+    ? "\u2705 @" + GATE.un + " ulandi va ishga tushdi.\n\nGuruhga qo'shish havolasi:\nhttps://t.me/" + GATE.un + "?startgroup=true&admin=delete_messages\n\nStatistika: /azo"
+    : "\u26A0\uFE0F Bot topildi, lekin webhook o'rnatilmadi: " + ((wh && wh.description) || "?"));
+}
+app.post("/gate-webhook", function(req, res){
+  res.sendStatus(200);
+  if(!GATE.token || !GATE.secret || (req.get("X-Telegram-Bot-Api-Secret-Token") || "") !== GATE.secret) return;
+  const up = req.body || {};
+  try{
+    if(up.my_chat_member) gateOnMember(up.my_chat_member).catch(function(e){ console.log("gate a'zo:", e.message); });
+    const m = up.message || up.edited_message;
+    if(m){
+      if(m.chat && m.chat.type === "private") gateOnPrivate(m);
+      else gateOnMessage(m).catch(function(e){ console.log("gate xabar:", e.message); });
+    }
+  }catch(e){ console.log("gate xato:", e.message); }
+});
+
 app.post("/webhook", (req,res)=>{
   res.sendStatus(200);
   const hdr = req.get("X-Telegram-Bot-Api-Secret-Token") || "";
@@ -6292,6 +6573,10 @@ app.post("/webhook", (req,res)=>{
     /* /bloklar - bloklangan hisoblar ro'yxati */
     /* /foyda - davr bo'yicha foyda va statistika */
     /* /manba - joriy manba;  /manba s2t - zaxiraga;  /manba fzr - asosiyga */
+    /* /azo - a'zo bo'l boti statistikasi; /azo guruhlar; /azobot <token> - ulash */
+    if(/^\/azobot(@\w+)?(\s|$)/i.test(text)){ if(ADMIN_ID && fromId !== ADMIN_ID) return; gateConnect(fromId, msg, text); return; }
+    if(/^\/azo(@\w+)?(\s|$)/i.test(text)){ if(ADMIN_ID && fromId !== ADMIN_ID) return;
+      send(fromId, !GATE.token ? "A'zo bo'l boti hali ulanmagan.\nUlash: /azobot <token>" : (/guruh/i.test(text) ? gateGroupsText() : gateStatText(true))); return; }
     if(/^\/manba(@\w+)?(\s|$)/i.test(text)){
       if(ADMIN_ID && fromId !== ADMIN_ID) return;
       manbaCmd(fromId, text); return;
@@ -6875,6 +7160,10 @@ app.post("/webhook", (req,res)=>{
       /* Referal havolasi: t.me/BOT?start=ref_<taklif qilgan id>
          Referal FAQAT shu yerda, ya'ni Start bosilgandan keyin hisoblanadi. */
       const pay = String(text.slice(6) || "").trim();
+      /* A'zo bo'l boti: t.me/minatoh_bot?start=g<guruh> - guruhdan kelib Start bosdi */
+      gOk.set(fromId, Date.now());
+      const gmm = pay.match(/^g(\d{5,})$/);
+      if(gmm) gateJoined(fromId, "-" + gmm[1], first);
       /* Oxirida "n" bo'lsa — havola NFT bo'limidan olingan (ref_123n).
          Bosh sahifa havolasi (ref_123) avvalgidek ishlaydi. */
       const pm  = pay.match(/^ref_?(\d+)(n)?$/) || [];
