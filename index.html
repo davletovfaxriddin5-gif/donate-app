@@ -10234,8 +10234,10 @@ function mgHowTo(pic){
     let hh = vh - 6;
     if(top > 0) hh = Math.min(hh, full - top - 6);
     const H = Math.max(Math.round(vh * 0.9), hh);
-    /* umumiy .sheet qoidasidagi max-height (84vh !important) bu oynani kesmasin */
-    sh.style.setProperty('height', H + 'px', 'important');
+    /* Balandlik mazmunga qarab: rasm + qutilar + tugma qancha joy olsa, shuncha (ortiqcha bo'sh joy qolmaydi).
+       Matn uzun tillarda oyna o'sadi, lekin Telegram paneli ostidan (H) oshmaydi - undan keyin ichi aylanadi.
+       umumiy .sheet qoidasidagi max-height (84vh !important) bu oynani kesmasin. */
+    sh.style.setProperty('height', 'auto', 'important');
     sh.style.setProperty('max-height', H + 'px', 'important');
   }catch(e){}
   /* matn sig'masa rasmni mutanosib kichraytiramiz - hammasi bir qarashda ko'rinsin (uzun tillarda) */
