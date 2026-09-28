@@ -3371,6 +3371,102 @@ app.post("/chat/send", (req,res)=>{
   }catch(e){ console.log("CHATSEND XATO:", e.message); res.json({ ok:false, error:"server" }); }
 });
 
+/* ======================= shop2topup: ZAXIRA MANBA - 1-bosqich (katalog) =======================
+   Rasmiy API (shop2topup.com/en/reseller-api): /account, /catalog/big-categories,
+   /catalog/categories?bigCategoryId=, /catalog/subcategories?categoryId=,
+   /catalog/category/:id/requirements, /player/validate, /orders/create, /orders/:id.
+   /s2t          - kalit va hamyon holati
+   /s2t katalog  - bizdagi o'yinlarga mos shop2topup katalogi (narx, region, talablar) +
+                   bizning joriy paket/narx/tannarxlarimiz -> bitta JSON fayl adminga.
+   Faqat O'QIYDI: buyurtma bermaydi, pul harakat qilmaydi. */
+const S2T_WANT = ["pubg", "free fire", "freefire", "mobile legends", "mlbb", "magic chess", "honor of kings", "genshin",
+  "zenless", "blood strike", "arena breakout", "call of duty", "codm", "delta force", "fc mobile", "ea sports fc", "eafc",
+  "undawn", "neverland", "modern strike", "rainbow six", "sword of justice", "standoff", "point blank", "valorant",
+  "where winds", "roblox", "steam", "telegram", "stars", "premium"];
+let s2tBusy = false;
+async function s2tGet(path){
+  const ac = new AbortController(); const tm = setTimeout(function(){ ac.abort(); }, 30000);
+  try{
+    const r = await fetch(S2T_BASE + path, { headers: { "Authorization": "Bearer " + S2T_KEY }, signal: ac.signal });
+    const j = await r.json().catch(function(){ return null; });
+    return { status: r.status, j: j };
+  }catch(e){ return { status: 0, j: null, err: e.message }; }
+  finally{ clearTimeout(tm); }
+}
+function s2tList(j, keys){
+  if(!j) return [];
+  for(let i = 0; i < keys.length; i++){ const v = j[keys[i]]; if(Array.isArray(v)) return v; }
+  if(j.data && typeof j.data === "object"){ for(let i = 0; i < keys.length; i++){ const v = j.data[keys[i]]; if(Array.isArray(v)) return v; } }
+  return Array.isArray(j.data) ? j.data : [];
+}
+function s2tWanted(name){ const n = String(name || "").toLowerCase(); return S2T_WANT.some(function(w){ return n.indexOf(w) > -1; }); }
+async function tgDoc(chatId, name, buf, caption, mime){
+  try{
+    const fd = new FormData();
+    fd.append("chat_id", String(chatId)); if(caption) fd.append("caption", caption);
+    fd.append("document", new Blob([buf], { type: mime || "application/json" }), name);
+    const r = await fetch("https://api.telegram.org/bot" + TOKEN + "/sendDocument", { method: "POST", body: fd });
+    const j = await r.json().catch(function(){ return null; });
+    return !!(j && j.ok);
+  }catch(e){ console.log("tgDoc xato:", e.message); return false; }
+}
+async function s2tStatus(chatId){
+  if(!S2T_KEY){ send(chatId, "\u274C S2T_KEY .env da yo'q"); return; }
+  const a = await s2tGet("/account");
+  if(!(a.j && a.j.success)){ send(chatId, "\u274C shop2topup javob bermadi (HTTP " + a.status + ")\n" + JSON.stringify(a.j || a.err || "").slice(0, 300)); return; }
+  const acc = a.j.account || a.j.data || a.j;
+  send(chatId, "\u2705 shop2topup kaliti ishlayapti\n\nHamyon: " + (acc.wallet != null ? acc.wallet : (acc.balance != null ? acc.balance : "?")) + " " + (acc.currency || "USD") +
+    "\n\nKatalogni yig'ish: /s2t katalog");
+}
+async function s2tCatalog(chatId){
+  if(!S2T_KEY){ send(chatId, "\u274C S2T_KEY .env da yo'q"); return; }
+  if(s2tBusy){ send(chatId, "Katalog allaqachon yig'ilyapti\u2026"); return; }
+  s2tBusy = true;
+  const pause = function(ms){ return new Promise(function(r){ setTimeout(r, ms); }); };
+  try{
+    send(chatId, "\uD83D\uDD0E shop2topup katalogi yig'ilmoqda\u2026 (1-3 daqiqa)");
+    const acc = await s2tGet("/account");
+    const bc = await s2tGet("/catalog/big-categories");
+    const bigs = s2tList(bc.j, ["big_categories", "bigCategories", "categories", "items"]);
+    const out = { at: new Date().toISOString(), cost_rate: COST_RATE, account: acc.j,
+                  big_categories_raw_status: bc.status, big_categories: bigs.map(function(b){ return { id: b.id, name: b.name }; }),
+                  games: [], ours: {} };
+    let nCat = 0, nItem = 0;
+    for(let i = 0; i < bigs.length; i++){
+      const b = bigs[i];
+      const cs = await s2tGet("/catalog/categories?bigCategoryId=" + encodeURIComponent(b.id));
+      const cats = s2tList(cs.j, ["categories", "items"]);
+      const bigHit = s2tWanted(b.name);
+      const g = { big_id: b.id, name: b.name, categories: [] };
+      for(let k = 0; k < cats.length; k++){
+        const c = cats[k];
+        if(!bigHit && !s2tWanted(c.name)) continue;
+        const ss = await s2tGet("/catalog/subcategories?categoryId=" + encodeURIComponent(c.id));
+        let req = c.requirements || null;
+        if(!req){ const rq = await s2tGet("/catalog/category/" + encodeURIComponent(c.id) + "/requirements"); req = rq.j ? (rq.j.requirements || rq.j.data || rq.j) : null; }
+        const items = s2tList(ss.j, ["subcategories", "items", "products"]);
+        g.categories.push({ id: c.id, name: c.name, description: c.description || "", requirements: req, items: items });
+        nCat++; nItem += items.length;
+        await pause(60);
+      }
+      if(g.categories.length) out.games.push(g);
+      await pause(40);
+    }
+    /* bizning joriy katalogimiz - solishtirish uchun */
+    let gj = null; try{ gj = JSON.parse(fs.readFileSync(GAMES_FILE, "utf8")); }catch(e){}
+    let fo = null; try{ fo = JSON.parse(fs.readFileSync("/root/donate-app/fzr-offers.json", "utf8")); }catch(e){}
+    out.ours = { catalog: CATALOG, games_json: gj, fzr_offers: fo,
+                 gifts: (typeof GIFTS !== "undefined" ? GIFTS : null), tg_quote: (typeof tgQ !== "undefined" ? tgQ : null) };
+    const buf = Buffer.from(JSON.stringify(out));
+    const ok = await tgDoc(chatId, "s2t-katalog-" + new Date().toISOString().slice(0, 10) + ".json", buf,
+      "\uD83D\uDCE6 shop2topup katalogi: " + out.games.length + " o'yin, " + nCat + " toifa, " + nItem + " paket.\nShu faylni Claude'ga yuboring.");
+    if(!ok) send(chatId, "\u274C Faylni yuborib bo'lmadi (" + Math.round(buf.length / 1024) + " KB)");
+    if(!bigs.length) send(chatId, "\u26A0\uFE0F big-categories bo'sh keldi (HTTP " + bc.status + "): " + JSON.stringify(bc.j || bc.err || "").slice(0, 300));
+  }catch(e){ console.log("s2tCatalog xato:", e.message); send(chatId, "\u274C Katalog xatosi: " + e.message); }
+  finally{ s2tBusy = false; }
+}
+/* ===================== /shop2topup katalog ===================== */
+
 /* ======================= TO'LOV ESLATMALARI (faqat admin) =======================
    Oylik/yillik to'lovlar (FazerCards tarifi, VPS, Claude va h.k.) muddati yaqinlashganda
    bot adminga BIR NECHA MARTA eslatadi: 3 kun, 2 kun, 1 kun, 12 soat, 3 soat, 1 soat qolganda
@@ -5932,6 +6028,12 @@ app.post("/webhook", (req,res)=>{
        /nakrutka @user tozala -> soxta referallarni uzadi va bloklaydi */
     /* /bloklar - bloklangan hisoblar ro'yxati */
     /* /foyda - davr bo'yicha foyda va statistika */
+    /* /s2t - shop2topup holati;  /s2t katalog - zaxira manba katalogi (faqat o'qiydi) */
+    if(/^\/s2t(@\w+)?(\s|$)/i.test(text)){
+      if(ADMIN_ID && fromId !== ADMIN_ID) return;
+      if(/katalog/i.test(text)) s2tCatalog(fromId); else s2tStatus(fromId);
+      return;
+    }
     /* /kurs — dollar kursini ko'rish;  /kurs 11900 — o'zgartirish (tannarx, foyda, Roblox narxlari) */
     if(text.indexOf("/kurs") === 0){
       if(ADMIN_ID && fromId !== ADMIN_ID) return;
