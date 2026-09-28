@@ -2544,7 +2544,6 @@ body.light .rc-code{ color:#1a2236 }
     padding-left: max(20px, var(--sa-left, env(safe-area-inset-left, 0px))) !important;
     padding-right: max(20px, var(--sa-right, env(safe-area-inset-right, 0px))) !important }
   .games{ grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) !important; gap: 14px !important }
-  .pkg-grid{ grid-template-columns: repeat(auto-fill, minmax(165px, 1fr)) !important }
   .pay-grid{ grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) !important }
   .nftm-grid, .mg-grid, .mg2-grid{ grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)) !important }
   #histList, #nftList{ display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; align-items: start }
@@ -2562,12 +2561,13 @@ body.light .rc-code{ color:#1a2236 }
           max-height: calc(100dvh - var(--sa-top, env(safe-area-inset-top, 0px)) - var(--tg-top, 46px) - 18px) !important;
           padding-bottom: 16px !important }
   .sheet:not(.hw-sh){ overflow-y: auto !important; overscroll-behavior: contain }
-  /* O'yin sahifasi (forma) markazda, o'rta kenglikdagi ustunda - maydon va tugmalar cho'zilib ketmaydi */
-  body[data-view="game"] .wrap{ max-width: 640px !important }
-  /* O'yin sarlavhasi (oltin ramkali rasm): tik holatdagi 4:1 nisbati saqlanadi - ustidagi
-     "chiqib turgan" rasm (mototsikl, mashina) cho'zilmaydi, tekis kattalashadi */
-  .gd-head.hasbg, .gd-head.haspop{ aspect-ratio: 4 / 1; padding-top: 0 !important; padding-bottom: 0 !important }
-  .gd-hero{ max-height: 46dvh }
+  /* O'yin, to'ldirish va hisobni tiklash sahifalari yotiq holatda ham AYNAN tik holatdagi
+     ko'rinishida qoladi: 460px ustun markazda - sarlavha rasmi, paketlar, tugmalar avvalgidek */
+  body[data-view="game"] .wrap, body[data-view="topup"] .wrap, body[data-view="acct_rec"] .wrap{ max-width: 460px !important }
+  body .wrap .balance{ background:
+      radial-gradient(90% 170% at 100% 100%, rgba(66,92,255,.55) 0%, rgba(66,92,255,.22) 40%, rgba(66,92,255,0) 72%),
+      linear-gradient(90deg, rgba(60,74,240,.40) 0%, rgba(60,74,240,.28) 40%, rgba(60,74,240,.14) 70%, rgba(60,74,240,.08) 100%),
+      linear-gradient(135deg, #1C2233 0%, #171D2D 48%, #141A29 100%) !important }
   .sheet-bg.on{ background: rgba(4,8,18,.72) !important; backdrop-filter: blur(8px) !important; -webkit-backdrop-filter: blur(8px) !important }
   /* "Sovg'alarni qanday qo'shish?" oynasi: rasm ekran balandligining 44% idan oshmaydi */
   .hw-sh{ padding-bottom: 12px !important }
@@ -2595,10 +2595,10 @@ body.light .rc-code{ color:#1a2236 }
     linear-gradient(135deg, #1C2233 0%, #171D2D 48%, #141A29 100%) !important;
   border: 1px solid rgba(255,255,255,.07);
   box-shadow: 0 18px 40px -26px rgba(40,70,255,.6) !important }
-.balance .bal-art{ position:absolute; top:0; right:0; bottom:0; width:min(64%, 360px); z-index:0; pointer-events:none;
-  background-repeat:no-repeat; background-size:auto 108%; background-position:right -30px center; opacity:.92;
-  -webkit-mask-image:linear-gradient(90deg, transparent 0%, rgba(0,0,0,.25) 28%, rgba(0,0,0,.8) 58%, #000 78%);
-          mask-image:linear-gradient(90deg, transparent 0%, rgba(0,0,0,.25) 28%, rgba(0,0,0,.8) 58%, #000 78%) }
+.balance .bal-art{ position:absolute; top:-4%; right:-30px; height:108%; width:auto; max-width:none; z-index:0; pointer-events:none; opacity:.95;
+  /* o'tish rasmning O'Z chap chetidan boshlanadi - karta qancha keng bo'lmasin, chiziq qolmaydi */
+  -webkit-mask-image:linear-gradient(90deg, transparent 0%, rgba(0,0,0,.35) 18%, rgba(0,0,0,.8) 36%, #000 52%);
+          mask-image:linear-gradient(90deg, transparent 0%, rgba(0,0,0,.35) 18%, rgba(0,0,0,.8) 36%, #000 52%) }
 .balance > :not(.bal-art){ position:relative; z-index:1 }
 .balance::after{ background:rgba(255,255,255,.035) !important; z-index:0 }
 </style>
@@ -5288,7 +5288,7 @@ function profileRow(){
 
 function renderHome(){
   app.innerHTML = profileRow() + `
-  <div class="balance"><i class="bal-art" style="background-image:url('${IMG('/banner-x9.webp')}')"></i>
+  <div class="balance"><img class="bal-art" src="${IMG('/banner-x9.webp')}" alt="">
     <div class="lbl">Balans</div>
     <div class="amt">${money(balance,false)}</div>
     <div class="bal-actions">
