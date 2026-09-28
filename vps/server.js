@@ -3456,6 +3456,18 @@ function ustozAdminReply(msg){
     return true;
   }catch(e){ console.log("USTOZ reply xato:", e.message); return false; }
 }
+/* Suhbat yopilganda mijozga - AI ohangidagi xayrlashuv, qo'llab-quvvatlash va fikr tugmalari */
+function ustozBye(uid){
+  ustozTg("sendMessage", { chat_id: uid, parse_mode:"HTML", link_preview_options:{ is_disabled:true },
+    text: "<b>" + USTOZ_HDR + "</b>\n\n" +
+          "Suhbatimiz shu yerda yakunlandi. Sizga yordam bera olgan bo'lsam, men ham xursandman \uD83D\uDE0A\n\n" +
+          "Yana savol tug'ilsa yoki biror narsa tushunarsiz qolgan bo'lsa \u2014 qo'llab-quvvatlash xizmatimiz doim yoningizda.\n\n" +
+          "Ustoz AI sizga foydali bo'lgan bo'lsa, fikringizni qoldiring \u2014 har bir izoh bizni yanada yaxshiroq qiladi \uD83D\uDC99",
+    reply_markup: { inline_keyboard: [[
+      { text: "\uD83D\uDCAC Qo'llab-quvvatlash", url: "https://t.me/dv1mm_garant" },
+      { text: "\u2B50 Fikr qoldirish", url: "https://t.me/mlbb_otzivv" }
+    ]]}});
+}
 function ustozAgo(ms){ const m = Math.round(ms / 60000); return m < 60 ? m + " daq oldin" : Math.round(m / 60) + " soat oldin"; }
 /* Admin buyruqlari. true - xabar shu yerda ishlandi */
 function ustozAdminCmd(msg, text){
@@ -3480,6 +3492,7 @@ function ustozAdminCmd(msg, text){
     const uid = q ? findUser(load(), q) : "";
     if(!uid){ send(ADMIN_ID, "Ishlatilishi: /ustozyop @username yoki /ustozyop 123456789"); return true; }
     delete USTOZ.open[uid]; ustozSave();
+    ustozBye(uid);
     send(ADMIN_ID, "\uD83D\uDD12 Suhbat yopildi: " + ustozWho(uid));
     return true;
   }
@@ -6207,13 +6220,144 @@ function pwMiss(id){
 }
 function pwResetOk(u){ return !!(u && u.pwReset && (Date.now() - u.pwReset) < 10*60*1000); }
 
+/* ======================= HISOBNI TIKLASH =======================
+   Telefon yo'qolsa / buzilsa - boshqa Telegram hisobidan o'z MinatoUz hisobini qaytarish.
+   Uch bosqich: 1) eski username + ID   2) tiklash kodi   3) o'zi qo'ygan parol.
+   Tiklash kodi tasodifiy (100 bit), faqat XESHI saqlanadi - uni hech kim, admin ham
+   ko'ra olmaydi va tiklab bera olmaydi. Kod yoki parol bo'lmasa - tiklab bo'lmaydi.
+   Muvaffaqiyatda butun yozuv yangi ID ga ko'chadi, eskisi bo'sh "ko'chirildi" yozuviga
+   aylanadi; referal, taklif va savdo bog'lanishlari yangi ID ga o'tkaziladi. */
+const RC_ABC = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";          /* 32 belgi, adashtiradiganlarsiz */
+function rcNew(){
+  const b = crypto.randomBytes(20); let x = "";
+  for(let i = 0; i < 20; i++) x += RC_ABC[b[i] % 32];
+  return "MZ-" + x.match(/.{4}/g).join("-");
+}
+function rcNorm(c){ return String(c || "").toUpperCase().replace(/[^A-Z0-9]/g, "").replace(/^MZ/, ""); }
+function acctEmpty(u){
+  if(!u || u.moved) return true;
+  const money = (Number(u.balance) || 0) + (Number(u.cashback) || 0) + (Number(u.nftSom) || 0) + (Number(u.gram) || 0);
+  const hist = (u.orders || []).length + (u.topups || []).length + (u.nftHist || []).length + (u.gifts || []).length;
+  return money <= 0 && hist === 0;
+}
+function acctBusy(u){
+  return (u.orders || []).some(function(o){ return o.status === "wait" || o.status === "sent"; }) ||
+         (u.topups || []).some(function(t){ return t.status === "wait"; }) ||
+         (u.nftHist || []).some(function(r){ return (r.kind === "som_out" || r.kind === "gram_out") && r.status === "wait"; });
+}
+function acctMove(db, from, to, who){
+  const o = db[from], n = db[to] || {};
+  const rec = JSON.parse(JSON.stringify(o));
+  rec.un = String(who.username || "").toLowerCase() || rec.un || "";
+  rec.nm = String(who.name || "").trim() || rec.nm || "";
+  rec.movedFrom = from; rec.movedAt = new Date().toISOString();
+  if(n.firstAt && !rec.firstAt) rec.firstAt = n.firstAt;
+  delete rec.rc; delete rec.moved; delete rec.kicked; delete rec.kickedAt;   /* kod ishlatildi - yangisi olinadi */
+  db[to] = rec;
+  db[from] = { moved: to, movedAt: rec.movedAt, un: o.un || "", nm: o.nm || "" };
+  Object.keys(db).forEach(function(k){
+    const r = db[k]; if(!r || typeof r !== "object" || Array.isArray(r) || k === to) return;
+    if(String(r.refBy || "") === from) r.refBy = to;
+    if(Array.isArray(r.refs)) r.refs = r.refs.map(function(x){ return String(x) === from ? to : x; });
+  });
+  if(String(rec.refBy || "") === from) delete rec.refBy;
+  [db._offers, db._sales].forEach(function(L){
+    (Array.isArray(L) ? L : []).forEach(function(x){
+      if(!x) return;
+      if(String(x.seller) === from) x.seller = to;
+      if(String(x.buyer) === from) x.buyer = to;
+    });
+  });
+  return { balance: Number(rec.balance) || 0, nftSom: Number(rec.nftSom) || 0, gram: Number(rec.gram) || 0,
+           orders: (rec.orders || []).length };
+}
+/* Tiklash kodi: joriy parol bilan beriladi. info:true - faqat holat */
+app.post("/acct/code", (req,res)=>{
+  const b = req.body || {};
+  const who = checkInit(b.initData);
+  if(!who) return res.json({ ok:false, why:"auth" });
+  const db = load(); const u = urec(db, String(who.id));
+  if(u.moved) return res.json({ ok:false, why:"moved" });
+  if(b.info) return res.json({ ok:true, has: !!u.rc, at: u.rc ? u.rc.at : null, pw: !!u.pw });
+  if(!u.pw) return res.json({ ok:false, why:"nopw" });
+  const wait = pwBlocked(String(who.id));
+  if(wait) return res.json({ ok:false, why:"wait", wait: wait });
+  if(!pwOk(u.pw, String(b.pass || ""))){ pwMiss(String(who.id)); return res.json({ ok:false, why:"bad" }); }
+  pwFail.delete(String(who.id));
+  const code = rcNew();
+  u.rc = pwMake(rcNorm(code));
+  save(db);
+  res.json({ ok:true, code: code, at: u.rc.at });
+});
+/* Kodni bot chatiga yuborish (faqat haqiqiy kod bo'lsa) */
+app.post("/acct/sendcode", (req,res)=>{
+  const b = req.body || {};
+  const who = checkInit(b.initData);
+  if(!who) return res.json({ ok:false, why:"auth" });
+  const u = load()[String(who.id)];
+  if(!u || !u.rc || !pwOk(u.rc, rcNorm(b.code))) return res.json({ ok:false, why:"bad" });
+  send(String(who.id), "\uD83D\uDD10 MinatoUz \u2014 hisobni tiklash kodi\n\n" + String(b.code).toUpperCase() + "\n" +
+    "Hisob: " + (who.username ? "@" + who.username : "\u2014") + " \u00B7 ID " + who.id + "\n\n" +
+    "Bu kod telefoningiz yo'qolsa yoki buzilsa hisobingizni boshqa Telegram hisobidan tiklash uchun kerak.\n\n" +
+    "\u2022 Uni ishonchli joyga saqlang: yaqin odamingiz telefoniga yuboring yoki yozib qo'ying.\n" +
+    "\u2022 Hech kimga bermang \u2014 qo'llab-quvvatlash ham bu kodni hech qachon so'ramaydi.\n" +
+    "\u2022 Tiklash uchun kod bilan birga parolingiz ham kerak bo'ladi.");
+  res.json({ ok:true });
+});
+/* Tiklash. step 1: username+ID, step 2: +kod, step 3: +parol -> ko'chirish */
+app.post("/acct/rec", (req,res)=>{
+  const b = req.body || {};
+  const who = checkInit(b.initData);
+  if(!who) return res.json({ ok:false, why:"auth" });
+  const me = String(who.id), tid = String(b.id || "").replace(/\D/g, ""),
+        un = String(b.un || "").replace(/^@/, "").trim().toLowerCase(), step = Number(b.step) || 1;
+  const kMe = "rc:" + me, kT = "rt:" + tid;
+  const wait = Math.max(pwBlocked(kMe), tid ? pwBlocked(kT) : 0);
+  if(wait) return res.json({ ok:false, why:"wait", wait: wait });
+  const miss = function(why){ pwMiss(kMe); if(tid) pwMiss(kT); return res.json({ ok:false, why: why }); };
+  if(!tid || !un) return res.json({ ok:false, why:"fields" });
+  if(tid === me) return res.json({ ok:false, why:"same" });
+  const db = load(); const t = db[tid];
+  if(!t || t.moved || t.banned || String(t.un || "").toLowerCase() !== un) return miss("match");
+  if(!t.rc || !t.pw) return res.json({ ok:false, why:"norc" });
+  if(step >= 2 && !pwOk(t.rc, rcNorm(b.code))) return miss("code");
+  if(step >= 3 && !pwOk(t.pw, String(b.pass || ""))) return miss("pass");
+  if(step < 3) return res.json({ ok:true, step: step });
+  if(!acctEmpty(db[me])) return res.json({ ok:false, why:"notempty" });
+  if(acctBusy(t)) return res.json({ ok:false, why:"busy" });
+  const sum = acctMove(db, tid, me, who);
+  save(db);
+  pwFail.delete(kMe); pwFail.delete(kT);
+  if(ADMIN_ID) send(ADMIN_ID, "\uD83D\uDD01 HISOB TIKLANDI\n" +
+    "Eski: " + (t.nm || tid) + (t.un ? " (@" + t.un + ")" : "") + " \u00B7 ID " + tid + "\n" +
+    "Yangi: " + (who.name || me) + (who.username ? " (@" + who.username + ")" : "") + " \u00B7 ID " + me + "\n" +
+    "Balans: " + sum.balance + " so'm \u00B7 NFT: " + sum.nftSom + " so'm, " + sum.gram + " GRAM \u00B7 buyurtmalar: " + sum.orders);
+  res.json({ ok:true, step: 3, moved: sum });
+});
+/* Eski qurilmani chiqarish: eski hisob butunlay bloklanadi */
+app.post("/acct/kick", (req,res)=>{
+  const who = checkInit((req.body || {}).initData);
+  if(!who) return res.json({ ok:false, why:"auth" });
+  const db = load(); const u = db[String(who.id)];
+  if(!u || !u.movedFrom) return res.json({ ok:false, why:"none" });
+  const old = db[u.movedFrom];
+  if(old && old.moved === String(who.id) && !old.kicked){
+    old.kicked = true; old.kickedAt = new Date().toISOString(); save(db);
+    send(u.movedFrom, "\uD83D\uDD12 MinatoUz hisobingiz boshqa Telegram hisobiga ko'chirildi va bu qurilmadan chiqarildi.");
+  }
+  res.json({ ok:true });
+});
+/* ===================== /HISOBNI TIKLASH ===================== */
+
 app.post("/pw/status", (req,res)=>{
   const who = checkInit((req.body||{}).initData);
   if(!who) return res.json({ ok:false, why:"auth" });
   const db = load();
   const u  = db[who.id];
   res.json({ ok:true, has: !!(u && u.pw), google: !!(u && u.google && u.google.email),
-             resetOk: pwResetOk(u), wait: pwBlocked(who.id) });
+             resetOk: pwResetOk(u), wait: pwBlocked(who.id),
+             rc: !!(u && u.rc), rcAt: (u && u.rc && u.rc.at) || null,
+             moved: !!(u && u.moved), kicked: !!(u && u.kicked) });
 });
 
 app.post("/pw/check", (req,res)=>{
