@@ -4864,6 +4864,11 @@ app.post("/topup", (req,res)=>{
     const db = load();
     expireOld(db);
     const u = urec(db, uid);
+    /* Bitta odamga (har bir hamyon uchun) bitta ochiq to'lov: ochiq to'lovi bor odam
+       yangisini so'rasa - yangisi ochilmaydi, o'sha mavjudi qaytariladi (adminga ham
+       yangi xabar ketmaydi). Mijoz uni to'laydi yoki "Bekor qilish" ni bosadi. */
+    const ex = tpPending(u, dest);
+    if(ex) return res.json(tpOut(ex, true));
     if(u.topups.filter(function(t){ return t.status==="wait"; }).length >= 3)
       return res.json({ ok:false, error:"pending" });
 
@@ -4958,6 +4963,29 @@ app.post("/topup-status", (req,res)=>{
 });
 
 /* Mijoz "Bekor qilish" bosganda yoki 10 daqiqa tugaganda */
+/* Ochiq to'lov (status "wait") - ilova qayta ochilganda o'sha to'lov ekranini tiklash uchun */
+function tpPending(u, dest){
+  return (u.topups || []).find(function(t){ return t.status === "wait" && (t.dest || "main") === dest; }) || null;
+}
+function tpOut(t, existing){
+  const o = { ok:true, id:t.id, base:t.base || t.amount, method:t.method || "", dest:t.dest || "main", at:t.at, existing: !!existing };
+  if(t.memo){ o.memo = t.memo; o.usdt = Number(t.usdtWant || 0).toFixed(2); o.addr = TON_ADDR; o.min = TON_MIN; }
+  else { o.pay = t.amount; if(t.send){ o.send = t.send; o.fee = TBC_FEE; } }
+  return o;
+}
+app.post("/topup-pending", (req,res)=>{
+  try{
+    const b = req.body || {};
+    const who = checkInit(b.initData);
+    if(!who) return res.json({ ok:false, error:"auth" });
+    const dest = (String(b.dest || "") === "nft") ? "nft" : "main";
+    const db = load();
+    if(expireOld(db)) save(db);
+    const ex = tpPending(urec(db, who.id), dest);
+    res.json({ ok:true, pending: ex ? tpOut(ex, true) : null });
+  }catch(e){ console.log("TOPPEND XATO:", e.message); res.json({ ok:false, error:"server" }); }
+});
+
 app.post("/topup-cancel", (req,res)=>{
   try{
     const b = req.body || {};
