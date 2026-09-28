@@ -468,6 +468,16 @@ async function validateId(req,res){
     const hit = vCache.get(key);
     if(hit && Date.now() - hit.at < 300000) return res.json(hit.data);
 
+    /* Zaxira manba yoqilgan: tekshiruv ham shop2topup orqali */
+    if(s2tMode()){
+      const vc = dynCat || ({ pubg:"pubg_mobile_auto", freefire:"free_fire_cis", mlbb:"mobile_legends_global" })[game] || "";
+      const vi = S2T_DATA.vitem[vc];
+      if(!vi) return res.json({ ok:false, reason:"unsupported" });
+      const dv = await s2tValidate(vi, fields);
+      if(dv.ok) vCache.set(key, { at: Date.now(), data: dv });
+      return res.json(dv);
+    }
+
     /* shop2topup tekshiradigan kategoriyalar shu yerda hal bo'ladi —
        FazerCards'ga umuman bormaydi va uning limitini yemaydi */
     /* aluu.in tekshiradigan kategoriyalar — birinchi navbatda shu yerda hal bo'ladi */
@@ -1154,7 +1164,7 @@ function giftCodes(ord){
 }
 
 app.get("/games", (req,res)=>{
-  res.json({ ok:true, games: APPGAMES });
+  res.json(gamesView());
 });
 
 /* Maydonlarni kategoriya talabiga qarab yig'amiz \u2014 nomlar o'yinga qarab
@@ -3467,6 +3477,189 @@ async function s2tCatalog(chatId){
 }
 /* ===================== /shop2topup katalog ===================== */
 
+const S2T_DATA = {"at":"2026-09-28","cats":{"pubg_mobile_auto":2,"free_fire_cis":5,"mobile_legends_global":474,"mobile_legends_ru":477,"mobile_legends_indonesia":472,"mobile_legends_brazil":473,"telegram_premium":1736,"arena_breakout":447,"arena_breakout_infinite":542,"blood_strike":491,"blood_strike_mena":445,"eafc_mobile_kh":479,"eafc_mobile_my":480,"eafc_mobile_sg":478,"undawn_garena_sg":470,"genshin_impact_global":6,"honor_of_kings":446,"legend_of_neverland":556,"legend_of_neverland_naeu":556,"magic_chess_gogo_global":528,"magic_chess_gogo_ru":563,"modern_strike_online":522,"r6_mobile_global":482,"r6_mobile_sg":481,"gift:roblox_global":2740,"telegram_stars":1736},"px":{"pubg_mobile_auto|60_uc":[13,0.884766],"pubg_mobile_auto|325_uc":[14,4.437075],"pubg_mobile_auto|660_uc":[15,8.87415],"pubg_mobile_auto|1800_uc":[16,22.185375],"pubg_mobile_auto|3850_uc":[17,44.19415],"pubg_mobile_auto|8100_uc":[18,88.3883],"pubg_mobile_auto|elite_pass_lv1_50":[3418,5.214603],"pubg_mobile_auto|elite_pass_lv1_100":[3417,10.591151],"pubg_mobile_auto|elite_pass_plus_lv1_100":[3419,26.056823],"pubg_mobile_auto|prime_1_month":[3422,0.866402],"pubg_mobile_auto|prime_3_months":[3424,2.599205],"pubg_mobile_auto|prime_6_months":[3425,5.198409],"pubg_mobile_auto|prime_12_months":[3423,10.38872],"pubg_mobile_auto|prime_plus_1_month":[3426,8.655918],"pubg_mobile_auto|prime_plus_3_months":[3428,25.983948],"pubg_mobile_auto|prime_plus_6_months":[3429,51.959799],"pubg_mobile_auto|prime_plus_12_months":[3427,103.919597],"pubg_mobile_auto|first_purchase_pack":[3420,0.866402],"pubg_mobile_auto|weekly_deal_pack_1":[3431,0.866402],"pubg_mobile_auto|weekly_deal_pack_2":[3432,2.607302],"pubg_mobile_auto|weekly_mythic_emblem_value_pack":[3433,2.607302],"pubg_mobile_auto|upgradable_firearm_materials_pack":[3430,2.599205],"pubg_mobile_auto|mythic_emblem_pack":[3421,4.332008],"free_fire_cis|110_diamonds":[33,0.818645],"free_fire_cis|341_diamonds":[34,2.47748],"free_fire_cis|572_diamonds":[35,4.028597],"free_fire_cis|1166_diamonds":[36,8.078737],"free_fire_cis|2398_diamonds":[37,16.157475],"free_fire_cis|6160_diamonds":[38,40.93227],"free_fire_cis|newbie_bundle":[1001,0.215433],"free_fire_cis|level_up_package_6":[45,0.301606],"free_fire_cis|weekly_lite":[41,0.387779],"free_fire_cis|evo_access_3d":[42,0.430866],"free_fire_cis|level_up_package_10":[46,0.538583],"free_fire_cis|level_up_package_20":[48,0.538583],"free_fire_cis|level_up_package_25":[49,0.538583],"free_fire_cis|evo_access_7d":[43,0.732472],"free_fire_cis|level_up_package_30":[50,0.775559],"free_fire_cis|weekly_membership":[39,1.615748],"free_fire_cis|evo_access_30d":[44,2.15433],"free_fire_cis|monthly_membership":[40,5.816691],"mobile_legends_global|50_5_diamonds_first_top_up_bonus":[242,0.750107],"mobile_legends_global|150_15_diamonds_first_top_up_bonus":[244,2.234361],"mobile_legends_global|78_8_diamonds":[243,1.17304],"mobile_legends_global|156_16_diamonds":[245,2.330119],"mobile_legends_global|234_23_diamonds":[246,3.35154],"mobile_legends_global|625_81_diamonds":[247,9.184818],"mobile_legends_global|1860_335_diamonds":[248,27.80183],"mobile_legends_global|3099_589_diamonds":[249,46.378943],"mobile_legends_global|4649_883_diamonds":[250,70.023267],"mobile_legends_global|7740_1548_diamonds":[251,116.298472],"mobile_legends_global|weekly_pass":[254,1.452334],"mobile_legends_global|twilight_pass":[253,7.700564],"mobile_legends_global|weekly_elite_pack":[255,0.766067],"mobile_legends_global|monthly_elite_pack":[252,3.782454],"mobile_legends_ru|35_diamonds":[284,0.60647],"mobile_legends_ru|55_diamonds":[285,0.957583],"mobile_legends_ru|super_value_pass":[293,1.077281],"mobile_legends_ru|weekly_pass":[294,1.923146],"mobile_legends_ru|165_diamonds":[286,2.872749],"mobile_legends_ru|275_diamonds":[287,4.787916],"mobile_legends_ru|565_diamonds":[288,9.631691],"mobile_legends_ru|1155_diamonds":[289,19.32722],"mobile_legends_ru|1765_diamonds":[290,28.895071],"mobile_legends_ru|2975_diamonds":[291,48.222291],"mobile_legends_ru|6000_diamonds":[292,96.316904],"mobile_legends_indonesia|17_2_diamonds":[632,0.343134],"mobile_legends_indonesia|25_3_diamonds":[633,0.502731],"mobile_legends_indonesia|53_6_diamonds":[635,0.997482],"mobile_legends_indonesia|77_8_diamonds":[636,1.436374],"mobile_legends_indonesia|weekly_pass":[646,1.803449],"mobile_legends_indonesia|154_16_diamonds":[637,2.86477],"mobile_legends_indonesia|217_23_diamonds":[638,4.061748],"mobile_legends_indonesia|367_41_diamonds":[640,6.862679],"mobile_legends_indonesia|503_65_diamonds":[641,9.360375],"mobile_legends_indonesia|twilight_pass":[645,9.336435],"mobile_legends_indonesia|774_101_diamonds":[642,14.363747],"mobile_legends_indonesia|1708_302_diamonds":[643,31.22519],"mobile_legends_indonesia|4003_827_diamonds":[644,74.9229],"mobile_legends_brazil|50_5_diamonds":[647,0.774046],"mobile_legends_brazil|78_8_diamonds":[648,1.077281],"mobile_legends_brazil|weekly_pass":[662,1.388495],"mobile_legends_brazil|156_16_diamonds":[650,2.146582],"mobile_legends_brazil|310_34_diamonds":[653,3.43932],"mobile_legends_brazil|250_25_diamonds":[652,3.910131],"mobile_legends_brazil|465_51_diamonds":[655,5.154989],"mobile_legends_brazil|500_65_diamonds":[656,7.852181],"mobile_legends_brazil|625_81_diamonds":[657,8.594309],"mobile_legends_brazil|1860_335_diamonds":[658,25.790906],"mobile_legends_brazil|3099_589_diamonds":[659,42.987503],"mobile_legends_brazil|4649_883_diamonds":[660,64.477264],"mobile_legends_brazil|7740_1548_diamonds":[661,107.464767],"telegram_premium|premium_3":[3454,13.623106],"telegram_premium|premium_6":[3455,18.167089],"telegram_premium|premium_12":[3456,32.948293],"arena_breakout|66_bonds":[214,0.812694],"arena_breakout|335_bonds":[215,4.12152],"arena_breakout|675_bonds":[216,8.243038],"arena_breakout|1690_bonds":[217,20.599303],"arena_breakout|3400_bonds":[218,41.256655],"arena_breakout|6820_bonds":[219,82.380626],"arena_breakout|bulletproof_case_30d":[224,2.297731],"arena_breakout|composition_case_30d":[225,6.936219],"arena_breakout|beginner_select":[223,0.746351],"arena_breakout_infinite|100_bonds":[2798,1.069771],"arena_breakout_infinite|500_bonds":[2799,5.13324],"arena_breakout_infinite|1000_bonds":[2800,10.307945],"arena_breakout_infinite|2500_bonds":[2801,25.434003],"arena_breakout_infinite|5000_bonds":[2802,50.6441],"arena_breakout_infinite|10000_bonds":[2803,101.047709],"arena_breakout_infinite|premium_battle_pass_activation_card":[2809,15.432892],"arena_breakout_infinite|copper_works_skin_bundle_i":[2807,5.083483],"arena_breakout_infinite|copper_works_skin_bundle_ii":[2808,5.083483],"blood_strike|51_bc":[1638,0.398993],"blood_strike|105_bc":[1639,0.774046],"blood_strike|320_bc":[1640,2.362038],"blood_strike|540_bc":[1641,3.950031],"blood_strike|1100_bc":[1642,7.91602],"blood_strike|2260_bc":[1643,15.848001],"blood_strike|5800_bc":[1644,39.6998],"blood_strike|0_99_deal":[1645,0.782026],"blood_strike|lucky_bag_week":[1648,0.782026],"blood_strike|strike_pass_elite":[1649,3.175984],"blood_strike|strike_pass_premium":[1650,7.157934],"blood_strike|bloodstrike_pre_order_item":[1646,1.669512],"blood_strike_mena|51_gold":[183,0.5],"blood_strike_mena|105_gold":[184,1.0],"blood_strike_mena|320_gold":[185,3.0],"blood_strike_mena|540_gold":[186,5.0],"blood_strike_mena|1100_gold":[187,10.0],"blood_strike_mena|2260_gold":[188,20.0],"blood_strike_mena|5800_gold":[189,50.0],"blood_strike_mena|0_99_deal":[190,1.0],"blood_strike_mena|lucky_bag_week":[193,1.0],"blood_strike_mena|strike_pass_elite":[194,5.0],"blood_strike_mena|strike_pass_premium":[195,10.0],"eafc_mobile_kh|100_fc_points":[666,0.995135],"eafc_mobile_kh|520_fc_points":[668,5.025434],"eafc_mobile_kh|1070_fc_points":[670,10.05916],"eafc_mobile_kh|2200_fc_points":[672,20.126613],"eafc_mobile_kh|5750_fc_points":[674,50.337266],"eafc_mobile_kh|99_silver":[665,0.995135],"eafc_mobile_kh|499_silver":[667,5.025434],"eafc_mobile_kh|999_silver":[669,10.05916],"eafc_mobile_kh|1999_silver":[671,20.126613],"eafc_mobile_kh|4999_silver":[673,50.337266],"eafc_mobile_my|100_fc_points":[680,1.210748],"eafc_mobile_my|520_fc_points":[682,5.90447],"eafc_mobile_my|1070_fc_points":[684,11.087468],"eafc_mobile_my|2200_fc_points":[686,23.427146],"eafc_mobile_my|5750_fc_points":[688,59.227143],"eafc_mobile_my|99_silver":[679,1.210748],"eafc_mobile_my|499_silver":[681,5.90447],"eafc_mobile_my|999_silver":[683,11.087468],"eafc_mobile_my|1999_silver":[685,23.427146],"eafc_mobile_my|4999_silver":[687,59.227143],"eafc_mobile_sg|100_fc_points":[608,1.160992],"eafc_mobile_sg|520_fc_points":[610,5.498124],"eafc_mobile_sg|1070_fc_points":[612,11.792355],"eafc_mobile_sg|2200_fc_points":[614,22.813479],"eafc_mobile_sg|5750_fc_points":[616,54.309516],"eafc_mobile_sg|99_silver":[607,1.160992],"eafc_mobile_sg|499_silver":[609,5.498124],"eafc_mobile_sg|999_silver":[611,11.792355],"eafc_mobile_sg|1999_silver":[613,22.813479],"eafc_mobile_sg|4999_silver":[615,54.309516],"undawn_garena_sg|148_rc":[1078,2.034816],"undawn_garena_sg|208_rc":[1079,2.848742],"undawn_garena_sg|445_rc":[1081,6.104448],"undawn_garena_sg|1040_rc":[1085,14.243712],"undawn_garena_sg|2080_rc":[1088,28.487424],"undawn_garena_sg|4500_rc":[1091,61.04448],"undawn_garena_sg|7500_rc":[1092,101.7408],"undawn_garena_sg|weekly_card":[1095,2.909787],"undawn_garena_sg|monthly_card":[1096,4.53764],"undawn_garena_sg|growth_fund":[1097,9.095628],"undawn_garena_sg|elite_fund":[1099,12.351333],"undawn_garena_sg|ace_fund":[1102,13.002474],"undawn_garena_sg|dragongate_knight":[1100,7.142204],"genshin_impact_global|60_genesis_crystals":[51,0.869179],"genshin_impact_global|300_30_genesis_crystals":[52,4.41474],"genshin_impact_global|980_110_genesis_crystals":[53,13.097922],"genshin_impact_global|1980_260_genesis_crystals":[54,26.350747],"genshin_impact_global|3280_600_genesis_crystals":[55,44.181822],"genshin_impact_global|6480_1600_genesis_crystals":[56,86.788795],"genshin_impact_global|60_chronal_nexus":[57,0.869179],"genshin_impact_global|300_30_chronal_nexus":[58,4.41474],"genshin_impact_global|980_110_chronal_nexus":[59,13.097922],"genshin_impact_global|1980_260_chronal_nexus":[60,26.350747],"genshin_impact_global|3280_600_chronal_nexus":[61,44.181822],"genshin_impact_global|6480_1600_chronal_nexus":[62,86.788795],"genshin_impact_global|blessing_of_the_welkin_moon":[63,4.41474],"honor_of_kings|80_tokens":[199,0.845866],"honor_of_kings|240_tokens":[200,2.561535],"honor_of_kings|400_tokens":[201,4.269225],"honor_of_kings|560_tokens":[202,5.984895],"honor_of_kings|830_tokens":[203,8.546429],"honor_of_kings|1245_tokens":[204,12.823634],"honor_of_kings|2508_tokens":[205,25.663228],"honor_of_kings|4180_tokens":[206,42.772047],"honor_of_kings|8360_tokens":[207,85.552074],"honor_of_kings|weekly_card":[212,0.949604],"honor_of_kings|weekly_card_plus":[213,2.784971],"honor_of_kings|honor_point_value_pack":[209,0.263335],"honor_of_kings|standard_purchase_rebate_pack":[211,1.153167],"honor_of_kings|premium_purchase_rebate_pack":[210,1.170379],"legend_of_neverland|120_cabala_crystals":[3191,1.874172],"legend_of_neverland|300_cabala_crystals":[3192,4.702015],"legend_of_neverland|600_cabala_crystals":[3193,9.420615],"legend_of_neverland|1200_cabala_crystals":[3194,18.849523],"legend_of_neverland|3000_cabala_crystals":[3195,47.127955],"legend_of_neverland|6000_cabala_crystals":[3196,94.264203],"legend_of_neverland|cabala_crystal_investment_weekly_card":[3222,1.874172],"legend_of_neverland|monthly_pack_ii":[3246,2.769794],"legend_of_neverland|star_guard":[3269,2.81955],"legend_of_neverland|flower_fairy_link_weekly_card":[3235,4.702015],"legend_of_neverland|monthly_pack_iii":[3247,4.62738],"legend_of_neverland|moon_blessing":[3248,4.702015],"legend_of_neverland|privilege_pack":[3251,4.702015],"legend_of_neverland|sapphire_investment_weekly_card":[3254,9.420615],"legend_of_neverland|flower_fairy_progress_weekly_card":[3236,14.130923],"legend_of_neverland|path_of_fire_sword_battle_pass":[3249,14.130923],"legend_of_neverland|candock_wish_pack":[3223,0.937086],"legend_of_neverland|superb_flower_fairy_sale_pack":[3270,0.937086],"legend_of_neverland|growth_pack":[3239,1.874172],"legend_of_neverland|fighter_pack":[3232,2.81955],"legend_of_neverland|premium_flower_fairy_pack":[3250,2.81955],"legend_of_neverland|rename_card":[3252,2.81955],"legend_of_neverland|flower_fairy_accessory_pack":[3233,4.702015],"legend_of_neverland|flower_fairy_exp_pack":[3234,9.420615],"legend_of_neverland|weekly_limited_pack":[3272,12.248458],"legend_of_neverland|fantasy_beast_cultivation_pack":[3230,14.130923],"legend_of_neverland|monthly_limited_pack":[3245,14.130923],"legend_of_neverland|sakura_pack":[3253,51.838262],"legend_of_neverland|fantasy_beast_summoning_pack":[3231,92.738328],"legend_of_neverland_naeu|120_cabala_crystals":[3191,1.874172],"legend_of_neverland_naeu|300_cabala_crystals":[3192,4.702015],"legend_of_neverland_naeu|600_cabala_crystals":[3193,9.420615],"legend_of_neverland_naeu|1200_cabala_crystals":[3194,18.849523],"legend_of_neverland_naeu|3000_cabala_crystals":[3195,47.127955],"legend_of_neverland_naeu|6000_cabala_crystals":[3196,94.264203],"legend_of_neverland_naeu|cabala_crystal_investment_weekly_card":[3222,1.874172],"legend_of_neverland_naeu|monthly_pack_ii":[3246,2.769794],"legend_of_neverland_naeu|star_guard":[3269,2.81955],"legend_of_neverland_naeu|flower_fairy_link_weekly_card":[3235,4.702015],"legend_of_neverland_naeu|monthly_pack_iii":[3247,4.62738],"legend_of_neverland_naeu|moon_blessing":[3248,4.702015],"legend_of_neverland_naeu|privilege_pack":[3251,4.702015],"legend_of_neverland_naeu|sapphire_investment_weekly_card":[3254,9.420615],"legend_of_neverland_naeu|flower_fairy_progress_weekly_card":[3236,14.130923],"legend_of_neverland_naeu|path_of_fire_sword_battle_pass":[3249,14.130923],"legend_of_neverland_naeu|candock_wish_pack":[3223,0.937086],"legend_of_neverland_naeu|superb_flower_fairy_sale_pack":[3270,0.937086],"legend_of_neverland_naeu|growth_pack":[3239,1.874172],"legend_of_neverland_naeu|fighter_pack":[3232,2.81955],"legend_of_neverland_naeu|premium_flower_fairy_pack":[3250,2.81955],"legend_of_neverland_naeu|rename_card":[3252,2.81955],"legend_of_neverland_naeu|flower_fairy_accessory_pack":[3233,4.702015],"legend_of_neverland_naeu|flower_fairy_exp_pack":[3234,9.420615],"legend_of_neverland_naeu|weekly_limited_pack":[3272,12.248458],"legend_of_neverland_naeu|fantasy_beast_cultivation_pack":[3230,14.130923],"legend_of_neverland_naeu|monthly_limited_pack":[3245,14.130923],"legend_of_neverland_naeu|sakura_pack":[3253,51.838262],"legend_of_neverland_naeu|fantasy_beast_summoning_pack":[3231,92.738328],"magic_chess_gogo_global|22_diamonds":[2511,0.367074],"magic_chess_gogo_global|56_diamonds":[2513,0.726168],"magic_chess_gogo_global|165_diamonds":[2516,2.545575],"magic_chess_gogo_global|275_diamonds":[2520,3.630836],"magic_chess_gogo_global|336_diamonds":[2521,4.357003],"magic_chess_gogo_global|565_diamonds":[2524,7.261672],"magic_chess_gogo_global|706_diamonds":[2526,9.440173],"magic_chess_gogo_global|1163_diamonds":[2528,14.523344],"magic_chess_gogo_global|weekly_card":[2540,1.923146],"magic_chess_gogo_global|battle_for_discounts":[2537,0.766067],"magic_chess_gogo_global|lukas_s_battle_bounty":[2539,0.766067],"magic_chess_gogo_global|lancelot_s_limited_time_gift":[2538,0.829906],"magic_chess_gogo_ru|55_diamonds":[3358,0.957583],"magic_chess_gogo_ru|165_diamonds":[3359,2.872749],"magic_chess_gogo_ru|275_diamonds":[3360,4.787916],"magic_chess_gogo_ru|565_diamonds":[3361,9.631691],"magic_chess_gogo_ru|1155_diamonds":[3363,19.32722],"magic_chess_gogo_ru|weekly_diamond_pass":[3369,1.827388],"magic_chess_gogo_ru|battle_for_discounts":[3367,0.957583],"magic_chess_gogo_ru|lukas_s_battle_bounty":[3368,0.957583],"modern_strike_online|10000_gold":[2284,5.033727],"modern_strike_online|16000_gold":[2285,7.247903],"modern_strike_online|35000_gold":[2286,13.550427],"modern_strike_online|60000_gold":[2287,20.698817],"modern_strike_online|300000_gold":[2288,63.033536],"modern_strike_online|10000_credits":[2289,3.665415],"modern_strike_online|25000_credits":[2290,7.247903],"modern_strike_online|55000_credits":[2291,11.477228],"modern_strike_online|100000_credits":[2292,16.560712],"modern_strike_online|vip_7_days":[2294,2.637109],"modern_strike_online|vip_14_days":[2295,4.09664],"modern_strike_online|vip_30_days":[2296,6.393745],"modern_strike_online|vip_60_days":[2297,9.221588],"r6_mobile_global|50_platinum":[703,0.722882],"r6_mobile_global|110_platinum":[704,0.972447],"r6_mobile_global|300_platinum":[705,2.788257],"r6_mobile_global|650_platinum":[706,5.292525],"r6_mobile_global|1350_platinum":[707,10.516204],"r6_mobile_global|3500_platinum":[708,27.305984],"r6_mobile_global|250_first_purchase":[711,0.722882],"r6_mobile_global|600_first_purchase":[712,3.476715],"r6_mobile_global|2700_first_purchase":[713,13.691718],"r6_mobile_global|7000_first_purchase":[714,34.113116],"r6_mobile_sg|50_platinum":[691,1.196196],"r6_mobile_sg|110_platinum":[692,2.409605],"r6_mobile_sg|300_platinum":[693,5.64536],"r6_mobile_sg|650_platinum":[694,12.116869],"r6_mobile_sg|1350_platinum":[695,24.259555],"r6_mobile_sg|3500_platinum":[696,59.852858],"r6_mobile_sg|250_first_purchase":[699,1.196196],"r6_mobile_sg|600_first_purchase":[700,5.64536],"r6_mobile_sg|2700_first_purchase":[701,24.259555],"r6_mobile_sg|7000_first_purchase":[702,59.852858],"gift:roblox_global|800_robux":[3882,9.45],"gift:roblox_global|1000_robux":[3883,11.55],"gift:roblox_global|2000_robux":[3884,23.1],"gift:roblox_global|4500_robux":[3885,49.875],"gift:roblox_global|10000_robux":[3886,102.375]},"stars":[[10000,3453,170.46122],[5000,3452,85.23061],[2500,3451,42.610885],[1500,3450,25.566531],[1000,3449,17.044354],[750,3448,12.783265],[500,3447,8.522178],[350,3446,5.967292],[250,3445,4.261089],[150,3444,2.554885],[100,3443,1.706204],[75,3442,1.281863],[50,3441,0.848682]],"req":{"2":["player_id"],"5":["player_id"],"6":["player_id","zone_id","charname"],"522":["player_id"],"528":["player_id","zone_id"],"542":["player_id"],"556":["player_id"],"563":["player_id"],"2740":[],"445":["player_id"],"446":["player_id"],"447":["player_id"],"1736":["player_id"],"470":["player_id"],"472":["player_id","zone_id"],"473":["player_id","zone_id"],"474":["player_id","zone_id"],"477":["player_id","zone_id"],"478":["player_id"],"479":["player_id"],"480":["player_id"],"481":["player_id"],"482":["player_id"],"491":["player_id"]},"vitem":{"pubg_mobile_auto":13,"free_fire_cis":33,"mobile_legends_global":242,"mobile_legends_ru":284,"mobile_legends_indonesia":632,"mobile_legends_brazil":647,"telegram_premium":3454,"arena_breakout":214,"arena_breakout_infinite":2798,"blood_strike":1638,"blood_strike_mena":183,"eafc_mobile_kh":666,"eafc_mobile_my":680,"eafc_mobile_sg":608,"undawn_garena_sg":1078,"genshin_impact_global":51,"honor_of_kings":199,"legend_of_neverland":3191,"legend_of_neverland_naeu":3191,"magic_chess_gogo_global":2511,"magic_chess_gogo_ru":3358,"modern_strike_online":2284,"r6_mobile_global":703,"r6_mobile_sg":691,"gift:roblox_global":3882}};
+/* ======================= ZAXIRA MANBA: FazerCards <-> shop2topup =======================
+   /manba s2t  - hamma buyurtma, ID tekshiruvi va narxlar shop2topup orqali. shop2topup'da
+                 yo'q o'yinlar "TEXNIK ISH", yo'q paketlar yashiriladi.
+   /manba fzr  - hammasi FazerCards'ga, avvalgi holatiga qaytadi.
+   Zaxira narx = MAX(hozirgi narx, YUQORIGA_100(s2t tannarxi + foyda)); foyda: <=15k: 2500,
+   <=60k: 3500, <=300k: 5000, undan katta: 1.5%. Tannarx COST_RATE (/kurs) bilan.
+   Buyurtma: order_id (UUID) oldindan saqlanadi - qayta yuborilsa ham ikki marta yechilmaydi;
+   yuborishdan oldin joriy narx tekshiriladi (zarar bo'lsa yuborilmaydi). */
+const MANBA_FILE = "/root/donate-app/manba.json";
+let MANBA = "fzr";
+try{ const z = JSON.parse(fs.readFileSync(MANBA_FILE, "utf8")); if(z && z.src === "s2t") MANBA = "s2t"; }catch(e){}
+function manbaSave(){ try{ fs.writeFileSync(MANBA_FILE, JSON.stringify({ src: MANBA, at: new Date().toISOString() })); }catch(e){} }
+function s2tMode(){ return MANBA === "s2t"; }
+function s2tTier(cost){ return cost <= 15000 ? 2500 : cost <= 60000 ? 3500 : cost <= 300000 ? 5000 : Math.round(cost * 0.015); }
+function s2tSell(usd, cur){ const c = Number(usd) * COST_RATE; return Math.max(Math.round(Number(cur) || 0), Math.ceil((c + s2tTier(c)) / 100) * 100); }
+/* buyurtma uchun shop2topup yozuvi: { item, qty, unit, usd, price, sc } yoki null */
+function s2tEntry(cat, oid, stars, cur){
+  if(stars){
+    if(stars % 50) return null;
+    const pk = S2T_DATA.stars.filter(function(p){ return stars % p[0] === 0; })[0];
+    if(!pk) return null;
+    const q = stars / pk[0];
+    return { item: pk[1], qty: q, unit: pk[2], usd: pk[2] * q, price: Math.round(Number(cur) || 0), sc: 1736 };
+  }
+  const e = S2T_DATA.px[cat + "|" + oid];
+  if(!e) return null;
+  return { item: e[0], qty: 1, unit: e[1], usd: e[1], price: s2tSell(e[1], cur), sc: S2T_DATA.cats[cat] };
+}
+/* Genshin server nomlari shop2topup kodlariga */
+const S2T_GI_ZONE = { america: "os_usa", asia: "os_asia", europe: "os_euro", tw_hk_mo: "os_cht" };
+function s2tReqs(sc, fields, tgu, rec){
+  const need = S2T_DATA.req[String(sc)] || ["player_id"], out = {};
+  const pid = String(s2tPid(fields || {}) || rec.pid || "").replace(/^@/, "");
+  need.forEach(function(k){
+    if(k === "player_id") out.player_id = tgu ? String(tgu).replace(/^@/, "") : pid;
+    else if(k === "zone_id") out.zone_id = String((fields && (fields.zone_id || fields.server_id || fields.server)) || rec.srv || "");
+    else if(k === "charname") out.charname = String(rec.nick || "");
+    else if(fields && fields[k]) out[k] = String(fields[k]);
+  });
+  if(sc === 6 && out.zone_id) out.zone_id = S2T_GI_ZONE[out.zone_id] || out.zone_id;
+  return out;
+}
+async function s2tCreate(rec, sE, fields, tgu){
+  if(!S2T_KEY) return { ok:false, why:"S2T_KEY yo'q" };
+  let unit = sE.unit;
+  const pr = await s2tGet("/catalog/subcategory/" + sE.item + "/price");
+  const pu = pr.j && pr.j.success && pr.j.price ? Number(pr.j.price.unit_price) : 0;
+  if(pu > 0) unit = pu;
+  const cost = Math.round(unit * sE.qty * COST_RATE);
+  if(cost >= rec.price){
+    if(ADMIN_ID) send(ADMIN_ID, "\u26A0\uFE0F shop2topup narxi oshdi: " + rec.package + " \u2014 tannarx " + cost + " so'm, sotuv " + rec.price + " so'm.\nBuyurtma yuborilmadi, pul mijozga qaytarildi.");
+    return { ok:false, why:"S2T_PRICE" };
+  }
+  const body = { order_id: rec.s2t, sub_category_id: sE.item, quantity: sE.qty,
+                 requirements: s2tReqs(sE.sc, fields, tgu, rec), expected_unit_price: unit.toFixed(6) };
+  const ac = new AbortController(); const tm = setTimeout(function(){ ac.abort(); }, 30000);
+  let j = null, st = 0;
+  try{
+    const r = await fetch(S2T_BASE + "/orders/create", { method:"POST", signal: ac.signal,
+      headers:{ "Authorization":"Bearer " + S2T_KEY, "Content-Type":"application/json" }, body: JSON.stringify(body) });
+    st = r.status; j = await r.json().catch(function(){ return null; });
+  }catch(e){ console.log("S2T order tarmoq:", e.message); return { ok:true, id: rec.s2t, unsure:true }; }   /* sweep aniqlaydi */
+  finally{ clearTimeout(tm); }
+  if(j && j.success) return { ok:true, id: rec.s2t, unit: unit };
+  const code = String((j && j.error && j.error.code) || ("HTTP_" + st));
+  console.log("S2T order rad:", code, JSON.stringify(j || {}).slice(0, 200));
+  if(code === "DUPLICATE_ORDER") return { ok:true, id: rec.s2t };
+  if(code === "INTERNAL_ERROR" || (st >= 500 && !j)) return { ok:true, id: rec.s2t, unsure:true };
+  if(code === "INSUFFICIENT_BALANCE" && ADMIN_ID) send(ADMIN_ID, "\uD83D\uDEA8 shop2topup hamyonida pul yetmadi! Buyurtma bajarilmadi, pul mijozga qaytarildi.\nHamyonni to'ldiring. Holat: /s2t");
+  return { ok:false, why: code };
+}
+/* bajarilmagan qismni o'sha hamyonga qaytarish (qisman bajarilgan buyurtma) */
+function s2tRefundPart(u, rec, amt){
+  const pay = String(rec.pay || "main");
+  if(pay === "gram"){ const g = Math.round((Number(rec.gram) || 0) * amt / (Number(rec.price) || 1) * 1e9) / 1e9; u.gram = Math.round((Number(u.gram || 0) + g) * 1e9) / 1e9; return { cur:"GRAM", amount:g, left:u.gram }; }
+  if(pay === "nftsom"){ u.nftSom = Math.round(Number(u.nftSom || 0) + amt); return { cur:"so'm", amount:amt, left:u.nftSom }; }
+  u.balance = Math.round(Number(u.balance || 0) + amt); return { cur:"so'm", amount:amt, left:u.balance };
+}
+async function s2tCheckOne(uid, ordId){
+  const d0 = load(); const u0 = d0[uid];
+  const r0 = u0 && (u0.orders || []).find(function(x){ return x.id === ordId; });
+  if(!r0 || !r0.s2t) return;
+  const g = await s2tGet("/orders/" + encodeURIComponent(r0.s2t));
+  const db = load(); const u = urec(db, uid);
+  const r = u.orders.find(function(x){ return x.id === ordId; });
+  if(!r || (r.status !== "sent" && r.status !== "stuck" && r.status !== "wait")) return;
+  const age = Date.now() - new Date(r.at).getTime();
+  if(!(g.j && g.j.success && g.j.order)){
+    const code = g.j && g.j.error && g.j.error.code;
+    if(code === "ORDER_NOT_FOUND" && age > 180000){
+      const rf = refundOrder(u, r); r.status = "refund"; r.fail = "shop2topup: buyurtma yaratilmagan"; save(db);
+      send(uid, "\u274C Buyurtmani bajarib bo'lmadi. " + rf.amount + " " + rf.cur + " qaytarildi.\nJoriy qoldiq: " + rf.left + " " + rf.cur);
+    }
+    return;
+  }
+  const o = g.j.order, s = String(o.status || "").toLowerCase();
+  if(r.status === "wait") r.status = "sent";
+  if(s === "completed" || s === "partial"){
+    const sm = o.sub_transaction_summary || {};
+    const part = (s === "partial" && Number(sm.total) > 0) ? Math.round(r.price * (Number(sm.refunded) || 0) / Number(sm.total)) : 0;
+    r.status = "done"; r.doneAt = new Date().toISOString();
+    let rfP = null; if(part > 0){ rfP = s2tRefundPart(u, r, part); r.partRefund = part; }
+    if(r.gift){
+      r.code = (o.vouchers || []).map(function(v){ return v && v.code; }).filter(Boolean).join("\n");
+      save(db);
+      if(r.code) send(uid, "\uD83C\uDF81 " + r.package + " tayyor!\n\nKod: " + r.code + "\n\nIshlatish: " + (r.redeem || "roblox.com/redeem") +
+                         " saytiga kiring, hisobingizga kirib kodni kiriting.\nKod tarixda ham saqlanadi.");
+      else {
+        send(uid, "\uD83C\uDF81 " + r.package + " tayyor. Kod tez orada yuboriladi.");
+        if(ADMIN_ID) send(ADMIN_ID, "\uD83C\uDF81 KOD TOPILMADI (shop2topup " + r.s2t + ", id " + uid + ")\n" + JSON.stringify(o).slice(0, 1000));
+      }
+      return;
+    }
+    save(db);
+    send(uid, "\u2705 " + r.package + " hisobingizga tushdi!\nID: " + (r.pid || r.gameId || "") +
+      (rfP ? "\n\n\u21A9\uFE0F Bir qismi yetkazilmadi \u2014 " + rfP.amount + " " + rfP.cur + " qaytarildi." : ""));
+    return;
+  }
+  if(s === "refunded"){
+    const rf = refundOrder(u, r); r.status = "refund"; r.fail = "shop2topup: qaytarildi"; save(db);
+    send(uid, "\u274C Buyurtma bajarilmadi. " + rf.amount + " " + rf.cur + " qaytarildi.\nJoriy qoldiq: " + rf.left + " " + rf.cur);
+    if(ADMIN_ID) send(ADMIN_ID, "\u26A0\uFE0F shop2topup qaytardi: " + r.package + " \u2014 id " + uid + "\nMijozga qaytarildi: " + r.price + " so'm");
+    return;
+  }
+  if(age > 30 * 60000 && !r.warned){
+    r.status = "stuck"; r.warned = true; save(db);
+    if(ADMIN_ID) send(ADMIN_ID, "\u23F0 30 daqiqadan beri tugamadi (shop2topup): " + r.s2t + "\n" + r.package + " \u2014 id " + uid + "\nTekshirish davom etadi.");
+    return;
+  }
+  save(db);
+}
+/* Ilovaga o'yinlar ro'yxati: zaxira rejimida narxlar almashadi, yo'qlari yashiriladi / TEXNIK ISH */
+function s2tOver(){
+  const pm = function(cat, items){ const m = {}; Object.keys(items || {}).forEach(function(oid){ const e = S2T_DATA.px[cat + "|" + oid]; if(e) m[oid] = s2tSell(e[1], items[oid]); }); return m; };
+  const ml = { _global: pm(CATALOG.mlbb.cat, CATALOG.mlbb.items) };
+  Object.keys(MLBB_REG).forEach(function(k){ ml[k] = pm(MLBB_REG[k].cat, MLBB_REG[k].items); });
+  return { pubg: pm(CATALOG.pubg.cat, CATALOG.pubg.items), freefire: pm(CATALOG.freefire.cat, CATALOG.freefire.items),
+           mlbb: ml, tgpremium: pm(CATALOG.tgpremium.cat, CATALOG.tgpremium.items) };
+}
+function gamesView(){
+  if(!s2tMode()) return { ok:true, games: APPGAMES, src:"fzr" };
+  const games = APPGAMES.map(function(g){
+    if(g.maint) return g;
+    if(g.custom === "steam") return Object.assign({}, g, { maint:true });
+    const cats = (g.cats || []).map(function(c){
+      const offers = (c.offers || []).filter(function(of){ return !!S2T_DATA.px[c.cat + "|" + of.oid]; })
+        .map(function(of){ return Object.assign({}, of, { price: s2tSell(S2T_DATA.px[c.cat + "|" + of.oid][1], of.price) }); });
+      return offers.length ? Object.assign({}, c, { offers: offers }) : null;
+    }).filter(Boolean);
+    return cats.length ? Object.assign({}, g, { cats: cats }) : Object.assign({}, g, { maint:true });
+  });
+  return { ok:true, games: games, src:"s2t", over: s2tOver(), starsStep: 50 };
+}
+function s2tOffNames(){
+  return gamesView().games.filter(function(g){ return g.maint && !(APPGAMES.filter(function(x){ return x.id === g.id; })[0] || {}).maint; })
+    .map(function(g){ return g.name; });
+}
+async function manbaCmd(chatId, text){
+  const arg = String(text || "").replace(/^\/manba(@\w+)?/i, "").trim().toLowerCase();
+  if(arg === "s2t" || arg === "shop2topup" || arg === "zaxira"){
+    MANBA = "s2t"; manbaSave();
+    let wal = "?"; try{ const a = await s2tGet("/account"); const ac = a.j && (a.j.account || a.j.data); if(ac) wal = ac.wallet != null ? ac.wallet : ac.balance; }catch(e){}
+    const offs = s2tOffNames();
+    send(chatId, "\uD83D\uDD01 ZAXIRA MANBA YOQILDI \u2014 shop2topup\n\nBuyurtmalar, ID tekshiruvi va narxlar endi shop2topup orqali.\n" +
+      "Stars: 50 ga karrali miqdorlar.\n\nTexnik ishga o'tganlar: " + (offs.length ? offs.join(", ") : "yo'q") +
+      "\n(PUBG, Free Fire, MLBB'ning shop2topup'da yo'q paketlari/regionlari yashirildi)" +
+      "\n\nshop2topup hamyoni: " + wal + " USD" + (Number(wal) > 0 ? "" : "\n\u26A0\uFE0F Hamyon bo'sh \u2014 buyurtmalar bajarilmaydi (pul mijozga qaytadi)!") +
+      "\n\nMijozlar ilovani qayta ochganda yangi narxlarni ko'radi.\nQaytarish: /manba fzr");
+    return;
+  }
+  if(arg === "fzr" || arg === "fazercards" || arg === "asosiy"){
+    MANBA = "fzr"; manbaSave();
+    send(chatId, "\u2705 ASOSIY MANBA \u2014 FazerCards\n\nBarcha o'yinlar, Stars va Premium avvalgi holatiga qaytdi (narxlar ham).\n" +
+      "shop2topup'dagi tugallanmagan buyurtmalar kuzatishda davom etadi.");
+    return;
+  }
+  send(chatId, "\u2699\uFE0F Joriy manba: " + (s2tMode() ? "shop2topup (ZAXIRA)" : "FazerCards (asosiy)") +
+    "\n\nZaxiraga o'tish: /manba s2t\nAsosiyga qaytish: /manba fzr\nshop2topup hamyoni: /s2t");
+}
+/* ===================== /ZAXIRA MANBA ===================== */
+
+
 /* ======================= TO'LOV ESLATMALARI (faqat admin) =======================
    Oylik/yillik to'lovlar (FazerCards tarifi, VPS, Claude va h.k.) muddati yaqinlashganda
    bot adminga BIR NECHA MARTA eslatadi: 3 kun, 2 kun, 1 kun, 12 soat, 3 soat, 1 soat qolganda
@@ -4163,10 +4356,22 @@ app.post("/order", async (req,res)=>{
         ? { cat:"telegram_stars", price: starsPrice(stars), srv:false, tg:"stars" }
         : resolveOffer(game, oid, acc);
 
+    /* ---- ZAXIRA MANBA (shop2topup) ----
+       /manba s2t yoqilgan bo'lsa: paket shop2topup'da bo'lmasa - "texnik ish";
+       bo'lsa - zaxira narxi. Ekrandagi narxdan qimmat bo'lsa - ilova yangilanadi. */
+    let sE = null;
+    if(s2tMode() && !CD_GAMES[game]){
+      if(sUsd || !off) return res.json({ ok:false, error:"maint" });
+      sE = s2tEntry(off.cat, oid, stars, off.price);
+      if(!sE) return res.json({ ok:false, error: stars ? "qty50" : "maint" });
+      const shown = Math.round(Number(o.price) || 0);
+      if(!stars && shown > 0 && shown < sE.price) return res.json({ ok:false, error:"reload", price: sE.price });
+    }
+
     /* narxni server belgilaydi; katalogda yo'q narsalar qo'lda qoladi */
     const auto = !!off;
     const tg = auto ? off.tg : "";
-    const price = auto ? off.price : Math.round(Number(o.price) || 0);
+    const price = sE ? sE.price : (auto ? off.price : Math.round(Number(o.price) || 0));
     if(!(price > 0)) return res.json({ ok:false, error:"price" });
 
     const fields = nEnt ? catFields(nEnt.fields, o).fields
@@ -4178,7 +4383,7 @@ app.post("/order", async (req,res)=>{
     if(nEnt){
       const chk = catFields(nEnt.fields, o);
       if(chk.missing) return res.json({ ok:false, error:"fields", need: chk.missing });
-      if(price < nEnt.cost){
+      if(!sE && price < nEnt.cost){
         console.log("YANGI O'YIN narx past:", ncat, oid, price, "<", nEnt.cost);
         return res.json({ ok:false, error:"rate" });
       }
@@ -4200,7 +4405,7 @@ app.post("/order", async (req,res)=>{
       if(!(tgn > 0)) return res.json({ ok:false, error:"fields" });
       if(tg === "stars" && (tgn < STARS_MIN || tgn > STARS_MAX))
         return res.json({ ok:false, error:"qty" });
-      if(await tgTooCheap(tg, tgn, price)){
+      if(!sE && await tgTooCheap(tg, tgn, price)){
         console.log("TG narx past:", oid, price);
         if(ADMIN_ID) tgCall("sendMessage", { chat_id: ADMIN_ID,
           text: "\u26a0\ufe0f Kurs oshdi \u2014 "+oid+" tannarxdan arzon sotilyapti ("+price+" so'm).\nBuyurtma to'xtatildi. Narxni yangilang." });
@@ -4259,12 +4464,16 @@ app.post("/order", async (req,res)=>{
       cost: auto ? Math.round((nEnt && nEnt.gift ? nEnt.usd : sUsd ? sUsd * STEAM_DISC : orderUsd(tg, off.cat, oid, tgn)) * COST_RATE) : 0,
       fzr: "", status: "wait", at: new Date().toISOString()
     };
+    if(sE){   /* zaxira manba: UUID oldindan saqlanadi - qayta yuborilsa ham ikki marta yechilmaydi */
+      rec.src = "s2t"; rec.s2t = crypto.randomUUID(); rec.s2tItem = sE.item; rec.s2tQty = sE.qty;
+      rec.usd = Math.round(sE.usd * 1e6) / 1e6; rec.cost = Math.round(sE.usd * COST_RATE);
+    }
     u.orders.unshift(rec); u.orders = u.orders.slice(0,100);
     save(db);
 
     const det = Object.keys(rec.details).map(function(k){ return k+": "+rec.details[k]; }).join("\n");
     if(ADMIN_ID) tgCall("sendMessage", Object.assign({ chat_id: ADMIN_ID,
-      text: (auto ? "🤖 AVTO BUYURTMA " : "🧾 QO'LDA BUYURTMA ")+rec.id+"\n"+rec.game+" — "+rec.package+"\n"+
+      text: (auto ? ("🤖 AVTO BUYURTMA " + (sE ? "[shop2topup] " : "")) : "🧾 QO'LDA BUYURTMA ")+rec.id+"\n"+rec.game+" — "+rec.package+"\n"+
             (rec.nick ? ("👤 "+rec.nick+(rec.accRegion?" ("+rec.accRegion+")":"")+"\n") : "")+
             det+"\n💰 "+rec.price+" so'm\n👤 "+who2(who)+"\n👥 id: "+uid+"\nQoldiq: "+u.balance },
       auto ? {} : { reply_markup: { inline_keyboard: [[
@@ -4280,7 +4489,9 @@ app.post("/order", async (req,res)=>{
     /* Yetkazib beruvchiga yuboramiz \u2014 coindrop yoki FazerCards */
     const cdGame = CD_GAMES[game];
     const gCat = giftCat(rec.cat);          /* sovg'a kartasi bo'lsa - o'z manzili */
-    const r = sUsd
+    const r = sE
+      ? await s2tCreate(rec, sE, fields, tgu)
+      : sUsd
       ? await fzrSteam(fields.steamLogin, sUsd, "mt-" + rec.id)
       : gCat
       ? await fzrGift(gCat, rec.oid, "mt-" + rec.id)
@@ -4294,7 +4505,8 @@ app.post("/order", async (req,res)=>{
     const rec2 = u2.orders.find(function(x){ return x.id === rec.id; }) || rec;
 
     if(r.ok){
-      rec2.fzr = r.id; rec2.status = "sent";
+      if(sE) rec2.s2t = r.id; else rec2.fzr = r.id;
+      rec2.status = "sent";
       if(gCat){ rec2.gift = 1; rec2.redeem = (nEnt && nEnt.redeem) || ""; }
       if(sUsd){ rec2.steam = 1; rec2.usdQty = sUsd; }
       if(cdGame) rec2.cd = 1;                    /* kim yuborganini eslab qolamiz */
@@ -4315,7 +4527,7 @@ app.post("/order", async (req,res)=>{
     send(uid, "\u274C Buyurtmani bajarib bo'lmadi. " + rf.amount + " " + rf.cur +
               " qaytarildi.\nJoriy qoldiq: " + rf.left + " " + rf.cur);
     if(ADMIN_ID) tgCall("sendMessage", { chat_id: ADMIN_ID,
-      text: "⚠️ "+(cdGame ? "coindrop" : "FZR")+" rad etdi: "+r.why+"\n"+rec.package+" — id "+uid+"\nQaytarildi: "+rec2.price+" so'm" });
+      text: "⚠️ "+(sE ? "shop2topup" : cdGame ? "coindrop" : "FZR")+" rad etdi: "+r.why+"\n"+rec.package+" — id "+uid+"\nQaytarildi: "+rec2.price+" so'm" });
     res.json({ ok:false, error:"supplier", balance:u2.balance,
                nftSom:u2.nftSom, gram:u2.gram, pay:pay });
 
@@ -4427,12 +4639,18 @@ async function sweep(){
   sweepBusy = true;
   try{
     const db = load();
-    const jobs = [];
+    const jobs = [], s2tJobs = [];
     let changed = false;
     Object.keys(db).forEach(function(uid){
       const u = db[uid];
       if(!u || !Array.isArray(u.orders)) return;
       u.orders.forEach(function(r){
+        /* shop2topup buyurtmalari - o'z tekshiruvi (FazerCards'ga bormaydi) */
+        if(r.src === "s2t" && r.s2t){
+          const ag = Date.now() - new Date(r.at).getTime();
+          if((r.status === "sent" || r.status === "stuck" || (r.status === "wait" && ag > 120000)) && ag < 7*24*3600000) s2tJobs.push([uid, r.id]);
+          return;
+        }
         if((r.status === "sent" || r.status === "stuck") && r.fzr){
           /* 7 kundan eski bo'lsa cheksiz so'ramaymiz */
           if(Date.now() - new Date(r.at).getTime() < 7*24*3600000) jobs.push([uid, r.id]);
@@ -4450,6 +4668,7 @@ async function sweep(){
     });
     if(changed) save(db);
     for(let i = 0; i < jobs.length; i++){ await checkOne(jobs[i][0], jobs[i][1]); }
+    for(let i = 0; i < s2tJobs.length; i++){ await s2tCheckOne(s2tJobs[i][0], s2tJobs[i][1]); }
   }catch(e){ console.log("SWEEP xato:", e.message); }
   finally{ sweepBusy = false; }
 }
@@ -6028,6 +6247,11 @@ app.post("/webhook", (req,res)=>{
        /nakrutka @user tozala -> soxta referallarni uzadi va bloklaydi */
     /* /bloklar - bloklangan hisoblar ro'yxati */
     /* /foyda - davr bo'yicha foyda va statistika */
+    /* /manba - joriy manba;  /manba s2t - zaxiraga;  /manba fzr - asosiyga */
+    if(/^\/manba(@\w+)?(\s|$)/i.test(text)){
+      if(ADMIN_ID && fromId !== ADMIN_ID) return;
+      manbaCmd(fromId, text); return;
+    }
     /* /s2t - shop2topup holati;  /s2t katalog - zaxira manba katalogi (faqat o'qiydi) */
     if(/^\/s2t(@\w+)?(\s|$)/i.test(text)){
       if(ADMIN_ID && fromId !== ADMIN_ID) return;
