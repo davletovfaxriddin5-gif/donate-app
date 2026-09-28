@@ -2562,6 +2562,12 @@ body.light .rc-code{ color:#1a2236 }
           max-height: calc(100dvh - var(--sa-top, env(safe-area-inset-top, 0px)) - var(--tg-top, 46px) - 18px) !important;
           padding-bottom: 16px !important }
   .sheet:not(.hw-sh){ overflow-y: auto !important; overscroll-behavior: contain }
+  /* O'yin sahifasi (forma) markazda, o'rta kenglikdagi ustunda - maydon va tugmalar cho'zilib ketmaydi */
+  body[data-view="game"] .wrap{ max-width: 640px !important }
+  /* O'yin sarlavhasi (oltin ramkali rasm): tik holatdagi 4:1 nisbati saqlanadi - ustidagi
+     "chiqib turgan" rasm (mototsikl, mashina) cho'zilmaydi, tekis kattalashadi */
+  .gd-head.hasbg, .gd-head.haspop{ aspect-ratio: 4 / 1; padding-top: 0 !important; padding-bottom: 0 !important }
+  .gd-hero{ max-height: 46dvh }
   .sheet-bg.on{ background: rgba(4,8,18,.72) !important; backdrop-filter: blur(8px) !important; -webkit-backdrop-filter: blur(8px) !important }
   /* "Sovg'alarni qanday qo'shish?" oynasi: rasm ekran balandligining 44% idan oshmaydi */
   .hw-sh{ padding-bottom: 12px !important }
@@ -2579,6 +2585,22 @@ body.light .rc-code{ color:#1a2236 }
   .sheet .sh-box .sh-row .k{ font-size: 12px }
   .sheet .sh-box .sh-row .v{ text-align: left; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 14px }
 }
+/* ===== Balans kartasi - Portals uslubida: to'q fon, ko'k rang pastki o'ng burchakdan
+   yupqa nur bo'lib tarqaladi; "M" rasmi alohida qatlamda, chap cheti asta shaffoflashadi -
+   hech qanday tik chiziq qolmaydi (tik va yotiq holatda bir xil) ===== */
+.balance{
+  background:
+    radial-gradient(120% 150% at 100% 100%, rgba(66,92,255,.80) 0%, rgba(66,92,255,.42) 30%, rgba(66,92,255,.12) 55%, rgba(66,92,255,0) 72%),
+    radial-gradient(55% 80% at 95% 0%, rgba(130,150,255,.14) 0%, rgba(130,150,255,0) 70%),
+    linear-gradient(135deg, #1C2233 0%, #171D2D 48%, #141A29 100%) !important;
+  border: 1px solid rgba(255,255,255,.07);
+  box-shadow: 0 18px 40px -26px rgba(40,70,255,.6) !important }
+.balance .bal-art{ position:absolute; top:0; right:0; bottom:0; width:min(64%, 360px); z-index:0; pointer-events:none;
+  background-repeat:no-repeat; background-size:auto 108%; background-position:right -30px center; opacity:.92;
+  -webkit-mask-image:linear-gradient(90deg, transparent 0%, rgba(0,0,0,.25) 28%, rgba(0,0,0,.8) 58%, #000 78%);
+          mask-image:linear-gradient(90deg, transparent 0%, rgba(0,0,0,.25) 28%, rgba(0,0,0,.8) 58%, #000 78%) }
+.balance > :not(.bal-art){ position:relative; z-index:1 }
+.balance::after{ background:rgba(255,255,255,.035) !important; z-index:0 }
 </style>
 </head>
 <body>
@@ -4948,6 +4970,7 @@ function nftEnsure(){
 }
 function go(v){
   try{ kbSync(); }catch(e){}
+  try{ document.body.setAttribute('data-view', v); }catch(e){}
   /* Ayni shu ekranda turib o'sha tugmani bosish hech narsani o'zgartirmaydi.
      Qayta chizsak — karusel uziladi va ro'yxat bir lahza yo'qoladi. */
   if(v === view && (v === 'nft_market' || v === 'nft_gifts' || v === 'nft_hist')){
@@ -5265,7 +5288,7 @@ function profileRow(){
 
 function renderHome(){
   app.innerHTML = profileRow() + `
-  <div class="balance" style="background-image:linear-gradient(90deg,#2B2FE8 0%,rgba(43,47,232,.97) 22%,rgba(45,44,236,.74) 40%,rgba(52,46,238,.5) 56%,rgba(58,50,240,.34) 76%,rgba(60,52,242,.26) 100%),url('${IMG('/banner-x9.webp')}'),linear-gradient(150deg,#2B2FE8 0%,#3D33EE 55%,#4A3BF2 100%);background-size:cover,auto 108%,cover;background-position:center,right -30px center,center;background-repeat:no-repeat,no-repeat,no-repeat">
+  <div class="balance"><i class="bal-art" style="background-image:url('${IMG('/banner-x9.webp')}')"></i>
     <div class="lbl">Balans</div>
     <div class="amt">${money(balance,false)}</div>
     <div class="bal-actions">
