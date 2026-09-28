@@ -4902,9 +4902,10 @@ function activePkgs(){
       return { a:o.name, c:'', p:o.price, oid:o.oid, im:o.im||'', grp:o.grp||'', txt:!o.im };
     });
   }
-  if(curPkgs) return curPkgs;
-  if(g.pkgByRegion && g.pkgByRegion[curRegion]) return g.pkgByRegion[curRegion];
-  return g.packages;
+  /* zaxira rejimida yashirilgan paketlar ko'rsatilmaydi (chizish ham, sotib olish ham shu ro'yxatdan) */
+  if(curPkgs) return curPkgs.filter(pkgVis);
+  if(g.pkgByRegion && g.pkgByRegion[curRegion]) return g.pkgByRegion[curRegion].filter(pkgVis);
+  return (g.packages || []).filter(pkgVis);
 }
 function paintTabs(only){
   const tabs = document.querySelectorAll('.region-tabs .rt');
@@ -5877,6 +5878,7 @@ function buy(){
     if(stmPrice(stmN) > balance){ notify('error'); toastErr("\u274C Balans yetarli emas \u2014 " + money(balance,false) + " bor"); return; }
   } else if(custom){
     if(!starN){ notify('error'); toastErr("Yulduzlar sonini kiriting ("+STAR_MIN+"–"+fmt(STAR_MAX)+")"); return; }
+    if(STAR_STEP > 1 && starN % STAR_STEP){ notify('error'); toastErr("Hozir Stars faqat " + STAR_STEP + " ga karrali miqdorda: " + STAR_STEP + ", " + (STAR_STEP * 2) + ", " + (STAR_STEP * 3) + "\u2026"); return; }
     if(starPrice(starN) > balance){ notify('error'); toastErr("❌ Balans yetarli emas — "+money(balance,false)+" bor"); return; }
   } else if(selPkg===null){ notify('error'); toastErr('Paketni tanlang'); return; }
   if(steam && !idOk){ notify('error'); toastErr("Avval loginni tekshiring"); return; }
@@ -5917,11 +5919,14 @@ function buy(){
       buyDone();
     } else {
       notify('error');
+      if(d && d.error === 'reload'){ loadDynGames(); setTimeout(function(){ if(view === 'game'){ selPkg = null; renderGame(); } }, 900); }
       toastErr(
         d && d.error === 'login' ? "❌ Bunday Steam login topilmadi. Loginni tekshiring."
       : d && d.error === 'busy'  ? "⚠️ Yetkazib beruvchi javob bermadi. Bir daqiqadan keyin urinib ko'ring."
       : d && d.error === 'qty'   ? "Summa chegaradan chiqdi" + (d.min ? " (" + d.min + "–" + d.max + " $)" : "")
       : d && d.error === 'rate'  ? "⚠️ Bu mahsulot vaqtincha sotuvda yo'q"
+      : d && d.error === 'qty50' ? "Hozir Stars faqat 50 ga karrali miqdorda: 50, 100, 150\u2026"
+      : d && d.error === 'reload'? "Narxlar yangilandi \u2014 paketni qayta tanlang"
       : d && d.error === 'maint' ? "⚠️ Bu o'yinda texnik ish ketyapti"
       : d && d.error === 'fields'? "Ma'lumotlarni to'liq kiriting"
       : "⚠️ Xato: " + ((d && d.error) || 'yuborilmadi'));
@@ -11925,9 +11930,45 @@ function setPhoneText(txt){
 }
 /* Yangi o'yinlar serverdan keladi (games.json). Ilovada qo'lda yozilmagan —
    narx, region va maydonlar hammasi shu yerdan olinadi. */
+/* ===== Zaxira manba (shop2topup) =====
+   Server /games da manbani aytadi. Zaxirada: PUBG/Free Fire/MLBB/Premium narxlari
+   serverdagi zaxira narxlariga almashadi, shop2topup'da yo'q paketlar yashiriladi.
+   Asosiyga (FazerCards) qaytganda asl narx va paketlar tiklanadi. */
+let SRC = 'fzr', STAR_STEP = 1;
+function pkgVis(p){ return !(p && p.hide); }
+function applySrc(d){
+  const s2t = !!(d && d.src === 's2t');
+  SRC = s2t ? 's2t' : 'fzr';
+  STAR_STEP = s2t ? (Number(d.starsStep) || 50) : 1;
+  const over = (d && d.over) || {};
+  const fix = function(list, map){
+    (list || []).forEach(function(p){
+      if(p.p0 == null){ p.p0 = p.p; p.h0 = !!p.hide; }
+      if(!s2t){ p.p = p.p0; p.hide = p.h0; return; }
+      if(map && map[p.oid] != null){ p.p = map[p.oid]; p.hide = p.h0; } else p.hide = true;
+    });
+  };
+  GAMES.forEach(function(g){
+    if(g.cats && g.cats.length) return;              /* serverdan keladigan o'yinlar alohida */
+    const ov = over[g.id];
+    if(g.id === 'mlbb'){
+      fix(g.packages, ov && ov._global);
+      Object.keys(g.pkgByRegion || {}).forEach(function(k){ fix(g.pkgByRegion[k], ov && ov[k]); });
+      return;
+    }
+    if(ov || !s2t) fix(g.packages, ov);
+  });
+}
 function loadDynGames(){
   fetch(VBASE + '/games').then(function(r){ return r.json(); }).then(function(d){
     if(!d || !d.ok || !Array.isArray(d.games)) return;
+    try{ applySrc(d); }catch(e){}
+    /* avval qo'shilgan o'yinlar: paket, narx va texnik ish yangilanadi (manba almashganda) */
+    d.games.forEach(function(sg){
+      const ex = GAMES.filter(function(x){ return x.id === sg.id && x.cats && x.cats.length; })[0];
+      if(ex && sg.cats){ ex.cats = sg.cats; ex.maint = !!sg.maint; }
+    });
+    if(view === 'home') renderHome();
     const add = d.games.filter(function(g){
       return g && g.id && g.cats && g.cats.length && !GAMES.some(function(x){ return x.id === g.id; });
     }).map(function(g){
