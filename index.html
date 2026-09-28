@@ -6787,6 +6787,7 @@ function arKick(){
 function arHome(){ haptic(); rcSt = { step:1, un:'', id:'', code:'', res:null, kicked:false, busy:false }; go('home'); }
 /* Eski (chiqarilgan) qurilma: ilova ochilganda butun ekranda xabar */
 function acctBoot(){
+  try{ topSync(); }catch(e){}                 /* ochiq to'lov bo'lsa - oldindan bilib qo'yamiz */
   try{
     if(!(tg && tg.initData)) return;
     pwPost('/pw/status').then(function(d){
@@ -12251,6 +12252,8 @@ function topCard(){
 
 function renderTopup(){
   clearInterval(topTick);
+  if(topPend && topPend.dest && topPend.dest !== topDest) topPend = null;
+  if(!topPend) setTimeout(topSync, 0);        /* ilova yopib-ochilgan bo'lsa - serverdagi ochiq to'lov */
 
   if(topPend && topPend.memo){
     app.innerHTML = `
@@ -12704,7 +12707,54 @@ function topPaid(){
   }, 4000);
 }
 
+/* ===== Bitta ochiq to'lov =====
+   Mijoz summani kiritib "Davom etish" ni bosgach ilovani yopib qo'ysa, qaytib kirganda
+   yangi to'lov ochilmaydi - serverdagi o'sha ochiq to'lov ekrani tiklanadi (o'sha summa,
+   karta, vaqt). Uni to'laydi yoki "Bekor qilish" ni bosadi. Har bir hamyonga alohida. */
+function topKeyOf(bank){
+  const b = String(bank || '').toLowerCase();
+  if(/usdt|ton/.test(b)) return 'usdt';
+  const ks = Object.keys(CARDS);
+  for(let i = 0; i < ks.length; i++){ if(String(CARDS[ks[i]].bank || '').toLowerCase() === b) return ks[i]; }
+  return 'uz';
+}
+function topRestore(d){
+  if(!d || !d.id) return;
+  const m = topKeyOf(d.method);
+  topMethod = m;
+  topPend = d.memo
+    ? { id:d.id, base:d.base, m:m, memo:d.memo, usdt:d.usdt, addr:d.addr, dest:d.dest || topDest, restored:true }
+    : { id:d.id, pay:d.pay, base:d.base, m:m, until:(Date.parse(d.at) || Date.now()) + 600000,
+        send:d.send || 0, dest:d.dest || topDest, restored:true };
+}
+const topSyncAt = {};
+function topSync(){
+  if(!(tg && tg.initData)) return;
+  const dest = topDest;
+  if(Date.now() - (topSyncAt[dest] || 0) < 2500) return;
+  topSyncAt[dest] = Date.now();
+  fetch(VBASE + '/topup-pending', { method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ dest: dest, initData: tg.initData }) })
+  .then(function(r){ return r.json(); }).then(function(d){
+    if(!(d && d.ok) || topDest !== dest) return;
+    if(d.pending){
+      if(topPend && topPend.id === d.pending.id) return;
+      topRestore(d.pending);
+      if(view === 'topup'){ toastErr("Sizda ochiq to'lov bor \u2014 uni yakunlang yoki bekor qiling"); renderTopup(); }
+    } else if(topPend && topPend.restored && (topPend.dest || 'main') === dest && !payWatch){
+      topPend = null;                         /* serverda endi ochiq emas (tasdiqlangan/bekor/muddati o'tgan) */
+      if(view === 'topup') renderTopup();
+    }
+  }).catch(function(){});
+}
 function topCancel(){
+  /* Tiklangan (avval ochilgan) to'lov: pul o'tkazib bo'lgan odam adashib bekor qilmasin */
+  if(topPend && topPend.restored && !topCancel.ok){
+    const q = "Agar pul o'tkazgan bo'lsangiz, bekor qilmang \u2014 \u00ABTo'ladim\u00BB ni bosing.\n\nTo'lov bekor qilinsinmi?";
+    const go2 = function(ok){ if(ok){ topCancel.ok = true; try{ topCancel(); } finally { topCancel.ok = false; } } };
+    try{ if(tg && tg.showConfirm){ tg.showConfirm(q, go2); return; } }catch(e){}
+    go2(window.confirm(q)); return;
+  }
   haptic();
   const id = topPend ? topPend.id : '';
   topPend=null; clearInterval(topTick);
@@ -12733,14 +12783,20 @@ function sendTopup(){
                            initData: (tg && tg.initData) || '' })
   }).then(function(r){ return r.json(); }).then(function(d){
     if(btn){ btn.disabled = false; btn.textContent = tr('Davom etish'); }
+    if(d && d.ok && d.existing){
+      /* ochiq to'lov bor edi - yangisi ochilmadi, o'shasi ko'rsatiladi */
+      notify('error'); topRestore(d);
+      toastErr("Sizda ochiq to'lov bor \u2014 avval uni yakunlang yoki bekor qiling");
+      renderTopup(); return;
+    }
     if(d && d.ok){
       notify('success');
       if(d.memo){
         topPend = { id: d.id, base: amt, m: topMethod, memo: d.memo,
-                    usdt: d.usdt, addr: d.addr };
+                    usdt: d.usdt, addr: d.addr, dest: topDest };
       } else {
         topPend = { id: d.id, pay: d.pay, base: amt, m: topMethod, until: Date.now() + 600000,
-                    send: d.send || 0 };          /* TBC: komissiya bilan o'tkaziladigan summa */
+                    send: d.send || 0, dest: topDest };  /* TBC: komissiya bilan o'tkaziladigan summa */
       }
       renderTopup();
     } else {
