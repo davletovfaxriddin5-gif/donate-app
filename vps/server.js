@@ -3420,13 +3420,32 @@ async function tgDoc(chatId, name, buf, caption, mime){
     return !!(j && j.ok);
   }catch(e){ console.log("tgDoc xato:", e.message); return false; }
 }
+async function s2tCheckAll(chatId){
+  const db = load(), list = [];
+  Object.keys(db).forEach(function(uid){
+    const u = db[uid]; if(!u || !Array.isArray(u.orders)) return;
+    u.orders.forEach(function(r){ if(r.src === "s2t" && r.s2t && ["sent", "stuck", "wait"].indexOf(r.status) > -1) list.push([uid, r.id, r.s2t, r.package]); });
+  });
+  if(!list.length){ send(chatId, "\u2705 Ochiq (tugallanmagan) shop2topup buyurtmasi yo'q."); return; }
+  const lines = [];
+  for(let i = 0; i < list.length && i < 15; i++){
+    const it = list[i];
+    const g = await s2tGet("/orders/" + encodeURIComponent(it[2]));
+    await s2tCheckOne(it[0], it[1], g);
+    const r2 = ((load()[it[0]] || {}).orders || []).find(function(x){ return x.id === it[1]; }) || {};
+    const o = s2tOrderOf(g.j);
+    lines.push(it[3] + " (" + it[1] + ")\n  shop2topup: " + (o ? String(o.status) : ("HTTP " + g.status + " " + JSON.stringify(g.j || g.err || "").slice(0, 250))) +
+               "\n  bizda endi: " + ({ done:"Bajarildi", refund:"Pul qaytarildi", sent:"Yuborilmoqda", stuck:"Tekshirilmoqda", wait:"Kutilmoqda" }[r2.status] || r2.status));
+  }
+  send(chatId, "\uD83D\uDD0E shop2topup buyurtmalari tekshirildi (" + list.length + " ta):\n\n" + lines.join("\n\n"));
+}
 async function s2tStatus(chatId){
   if(!S2T_KEY){ send(chatId, "\u274C S2T_KEY .env da yo'q"); return; }
   const a = await s2tGet("/account");
   if(!(a.j && a.j.success)){ send(chatId, "\u274C shop2topup javob bermadi (HTTP " + a.status + ")\n" + JSON.stringify(a.j || a.err || "").slice(0, 300)); return; }
   const acc = a.j.account || a.j.data || a.j;
   send(chatId, "\u2705 shop2topup kaliti ishlayapti\n\nHamyon: " + (acc.wallet != null ? acc.wallet : (acc.balance != null ? acc.balance : "?")) + " " + (acc.currency || "USD") +
-    "\n\nKatalogni yig'ish: /s2t katalog");
+    "\n\nOchiq buyurtmalarni tekshirish: /s2t tekshir\nKatalogni yig'ish: /s2t katalog");
 }
 async function s2tCatalog(chatId){
   if(!S2T_KEY){ send(chatId, "\u274C S2T_KEY .env da yo'q"); return; }
@@ -3556,24 +3575,45 @@ function s2tRefundPart(u, rec, amt){
   if(pay === "nftsom"){ u.nftSom = Math.round(Number(u.nftSom || 0) + amt); return { cur:"so'm", amount:amt, left:u.nftSom }; }
   u.balance = Math.round(Number(u.balance || 0) + amt); return { cur:"so'm", amount:amt, left:u.balance };
 }
-async function s2tCheckOne(uid, ordId){
+/* Holat javobi: hujjatda { success, order:{status} }, lekin boshqa shakllar ham qabul qilinadi */
+function s2tOrderOf(j){
+  if(!j || j.success === false) return null;
+  const o = j.order || (j.data && (j.data.order || j.data)) || (j.status ? j : null);
+  return (o && typeof o === "object" && o.status != null) ? o : null;
+}
+function s2tStat(v){
+  const s = String(v || "").toLowerCase().trim();
+  if(/^(completed?|success(ful)?|succeeded|delivered|done|finished|fulfilled)$/.test(s)) return "completed";
+  if(/^partial/.test(s)) return "partial";
+  if(/^(refunded|refund|failed|fail|cancell?ed|rejected|error)$/.test(s)) return "refunded";
+  return "pending";
+}
+async function s2tCheckOne(uid, ordId, pre){
   const d0 = load(); const u0 = d0[uid];
   const r0 = u0 && (u0.orders || []).find(function(x){ return x.id === ordId; });
   if(!r0 || !r0.s2t) return;
-  const g = await s2tGet("/orders/" + encodeURIComponent(r0.s2t));
+  const g = pre || await s2tGet("/orders/" + encodeURIComponent(r0.s2t));
   const db = load(); const u = urec(db, uid);
   const r = u.orders.find(function(x){ return x.id === ordId; });
   if(!r || (r.status !== "sent" && r.status !== "stuck" && r.status !== "wait")) return;
   const age = Date.now() - new Date(r.at).getTime();
-  if(!(g.j && g.j.success && g.j.order)){
+  const o = s2tOrderOf(g.j);
+  if(!o){
     const code = g.j && g.j.error && g.j.error.code;
     if(code === "ORDER_NOT_FOUND" && age > 180000){
       const rf = refundOrder(u, r); r.status = "refund"; r.fail = "shop2topup: buyurtma yaratilmagan"; save(db);
       send(uid, "\u274C Buyurtmani bajarib bo'lmadi. " + rf.amount + " " + rf.cur + " qaytarildi.\nJoriy qoldiq: " + rf.left + " " + rf.cur);
+      return;
+    }
+    /* javob tushunilmadi (xato ham emas) - adminga BIR MARTA ko'rsatamiz */
+    if(g.status === 200 && g.j && !code && !r.s2tDbg){
+      r.s2tDbg = 1; save(db);
+      console.log("S2T holat javobi tushunilmadi:", JSON.stringify(g.j).slice(0, 400));
+      if(ADMIN_ID) send(ADMIN_ID, "\u26A0\uFE0F shop2topup holat javobi tushunilmadi (" + r.package + ", " + r.id + "):\n" + JSON.stringify(g.j).slice(0, 700));
     }
     return;
   }
-  const o = g.j.order, s = String(o.status || "").toLowerCase();
+  const s = s2tStat(o.status);
   if(r.status === "wait") r.status = "sent";
   if(s === "completed" || s === "partial"){
     const sm = o.sub_transaction_summary || {};
@@ -4634,9 +4674,12 @@ async function checkOne(uid, ordId){
 }
 
 let sweepBusy = false;
+let sweepAt = 0;
 async function sweep(){
-  if(sweepBusy) return;          /* ikkita sweep bir vaqtda ishlamasin */
-  sweepBusy = true;
+  /* ikkita sweep bir vaqtda ishlamasin; lekin biri 4 daqiqadan ko'p osilib qolsa - qayta boshlanadi */
+  if(sweepBusy && Date.now() - sweepAt < 240000) return;
+  if(sweepBusy) console.log("SWEEP: oldingisi osilib qoldi, qayta boshlandi");
+  sweepBusy = true; sweepAt = Date.now();
   try{
     const db = load();
     const jobs = [], s2tJobs = [];
@@ -4667,8 +4710,9 @@ async function sweep(){
       });
     });
     if(changed) save(db);
+    /* shop2topup birinchi - FazerCards sekinlashsa ham kechikmasin */
+    for(let i = 0; i < s2tJobs.length; i++){ try{ await s2tCheckOne(s2tJobs[i][0], s2tJobs[i][1]); }catch(e){ console.log("S2T check xato:", e.message); } }
     for(let i = 0; i < jobs.length; i++){ await checkOne(jobs[i][0], jobs[i][1]); }
-    for(let i = 0; i < s2tJobs.length; i++){ await s2tCheckOne(s2tJobs[i][0], s2tJobs[i][1]); }
   }catch(e){ console.log("SWEEP xato:", e.message); }
   finally{ sweepBusy = false; }
 }
@@ -6255,7 +6299,7 @@ app.post("/webhook", (req,res)=>{
     /* /s2t - shop2topup holati;  /s2t katalog - zaxira manba katalogi (faqat o'qiydi) */
     if(/^\/s2t(@\w+)?(\s|$)/i.test(text)){
       if(ADMIN_ID && fromId !== ADMIN_ID) return;
-      if(/katalog/i.test(text)) s2tCatalog(fromId); else s2tStatus(fromId);
+      if(/katalog/i.test(text)) s2tCatalog(fromId); else if(/tekshir/i.test(text)) s2tCheckAll(fromId); else s2tStatus(fromId);
       return;
     }
     /* /kurs — dollar kursini ko'rish;  /kurs 11900 — o'zgartirish (tannarx, foyda, Roblox narxlari) */
