@@ -6417,11 +6417,11 @@ app.post("/gate-webhook", function(req, res){
    Ma'lumot: /root/donate-app/news.json */
 const NEWS_FILE = "/root/donate-app/news.json";
 const NEWS_BASE = [   /* har biri rasmiy ekanligi tekshirilgan */
-  { k:"pubg",      g:"PUBG MOBILE",          yt:"UCKuBf7CRNf4OYoDyTtAL5fg" },
+  { k:"pubg",      g:"PUBG MOBILE",          yt:"UCKuBf7CRNf4OYoDyTtAL5fg", h:["@PUBGMOBILE"] },
   { k:"mlbb",      g:"MOBILE LEGENDS",       h:"@mobilelegends5v5moba" },
   { k:"freefire",  g:"FREE FIRE",            yt:"UC7qTEluetD2pDB7lUBBlKuw" },
   { k:"standoff2", g:"STANDOFF 2",           h:"@Standoff2Game" },
-  { k:"codm",      g:"CALL OF DUTY: MOBILE", h:"callofdutymobile" },
+  { k:"codm",      g:"CALL OF DUTY: MOBILE", h:["@CallofDutyMobile", "c/callofdutymobile", "user/callofdutymobile", "callofdutymobile"] },
   { k:"steam",     g:"STEAM",                steam:593110 }
 ];
 let NEWS = { off: [], seen: {}, ids: {}, err: {}, fail: {}, extra: [], last: "", aiD: "", aiN: 0, sent: 0 };
@@ -6456,19 +6456,51 @@ function xmlDec(s){
     .replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&#39;/g, "'").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&");
 }
 /* @handle (yoki eski manzil) -> kanal ID (UC...). Bir marta aniqlanadi va eslab qolinadi */
-async function nwChannelId(src){
-  if(src.yt) return src.yt;
-  if(NEWS.ids[src.k]) return NEWS.ids[src.k];
-  const path = String(src.h || "").replace(/^https?:\/\/(www\.|m\.)?youtube\.com\//i, "").replace(/^\/+/, "");
-  const r = await nwGet("https://www.youtube.com/" + path, { headers: NW_UA }, 20000);
-  const html = await r.text();
-  const m = html.match(/<link rel="canonical" href="https:\/\/www\.youtube\.com\/channel\/(UC[\w-]{22})"/) ||
-            html.match(/"externalId":"(UC[\w-]{22})"/) || html.match(/itemprop="identifier" content="(UC[\w-]{22})"/) ||
-            html.match(/"channelId":"(UC[\w-]{22})"/);
-  if(!m) throw new Error("kanal ID topilmadi (" + path + ")");
-  NEWS.ids[src.k] = m[1]; nwSave();
-  return m[1];
+async function nwChannelId(src, fresh){
+  if(!fresh){
+    if(NEWS.ids[src.k]) return NEWS.ids[src.k];
+    if(src.yt) return src.yt;
+  }
+  const paths = (Array.isArray(src.h) ? src.h : [src.h]).filter(Boolean)
+    .map(function(p){ return String(p).replace(/^https?:\/\/(www\.|m\.)?youtube\.com\//i, "").replace(/^\/+|\/+$/g, ""); });
+  if(!paths.length) throw new Error("kanal manzili yo'q");
+  let last = "";
+  for(const path of paths){
+    try{
+      const r = await nwGet("https://www.youtube.com/" + path, { headers: NW_UA }, 20000);
+      const html = await r.text();
+      const m = html.match(/<link rel="canonical" href="https:\/\/www\.youtube\.com\/channel\/(UC[\w-]{22})"/) ||
+                html.match(/"externalId":"(UC[\w-]{22})"/) || html.match(/itemprop="identifier" content="(UC[\w-]{22})"/) ||
+                html.match(/"channelId":"(UC[\w-]{22})"/);
+      if(m){ NEWS.ids[src.k] = m[1]; nwSave(); return m[1]; }
+      last = "sahifada kanal ID yo'q (" + path + ")";
+    }catch(e){ last = "sahifa ochilmadi: " + path + " (" + e.message + ")"; }
+  }
+  throw new Error(last);
 }
+/* Kanal lentasi: avval channel_id, 404 bo'lsa - yuklamalar ro'yxati (UU...), u ham bo'lmasa - ID'ni qayta aniqlaymiz */
+async function nwYtFeed(src){
+  const tryFeed = async function(cid){
+    const urls = ["https://www.youtube.com/feeds/videos.xml?channel_id=" + cid,
+                  "https://www.youtube.com/feeds/videos.xml?playlist_id=UU" + cid.slice(2)];
+    let err = "";
+    for(const u of urls){
+      try{ const r = await nwGet(u, { headers: NW_UA }, 20000); const x = await r.text(); if(x.indexOf("<feed") > -1) return x; err = "lenta noto'g'ri"; }
+      catch(e){ err = e.message; }
+    }
+    throw new Error("YouTube lentasi ochilmadi (" + err + ")");
+  };
+  const cid = await nwChannelId(src);
+  try{ return await tryFeed(cid); }
+  catch(e){
+    if(!src.h) throw e;
+    let cid2 = "";
+    try{ cid2 = await nwChannelId(src, true); }catch(e2){ throw new Error(e.message + "; " + e2.message); }
+    if(cid2 === cid) throw e;
+    return await tryFeed(cid2);   /* kanal ID o'zgargan ekan - yangisi eslab qolindi */
+  }
+}
+
 function nwParseYt(xml){
   const out = [];
   String(xml).split("<entry>").slice(1).forEach(function(e){
@@ -6504,10 +6536,8 @@ async function nwFetch(src){
     return L.map(function(n){ return { id: "st:" + n.gid, t: String(n.title || "").trim(), d: nwBB(n.contents),
       at: new Date((n.date || 0) * 1000).toISOString(), link: n.url, img: nwSteamImg(n.contents) }; });
   }
-  const cid = await nwChannelId(src);
-  const r = await nwGet("https://www.youtube.com/feeds/videos.xml?channel_id=" + cid, { headers: NW_UA }, 20000);
-  const xml = await r.text();
-  if(!src.cname){ const cm = xml.match(/<title>([\s\S]*?)<\/title>/); if(cm) src.cname = xmlDec(cm[1]).trim(); }
+  const xml = await nwYtFeed(src);
+  if(!src.cname){ const cm = xml.match(/<title>([\s\S]*?)<\/title>/); if(cm) src.cname = xmlDec(cm[1]).trim().replace(/^Uploads from\s+/i, ""); }
   return nwParseYt(xml);
 }
 /* Keraksizlari: esport, turnir, jonli efir, qayta ko'rish */
