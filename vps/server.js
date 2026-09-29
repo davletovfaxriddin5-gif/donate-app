@@ -6422,7 +6422,10 @@ const NEWS_BASE = [   /* har biri rasmiy ekanligi tekshirilgan */
   { k:"freefire",  g:"FREE FIRE",            yt:"UC7qTEluetD2pDB7lUBBlKuw" },
   { k:"standoff2", g:"STANDOFF 2",           h:"@Standoff2Game" },
   { k:"codm",      g:"CALL OF DUTY: MOBILE", h:["@CallofDutyMobile", "c/callofdutymobile", "user/callofdutymobile", "callofdutymobile"] },
-  { k:"steam",     g:"STEAM",                steam:593110 }
+  { k:"steam",     g:"STEAM",                steam:593110 },
+  { k:"pubg_ig",   g:"PUBG MOBILE",          ig:"pubgmobile",        min:1000000 },
+  { k:"mlbb_ig",   g:"MOBILE LEGENDS",       ig:"mobilelegendsgame", min:1000000 },
+  { k:"codm_ig",   g:"CALL OF DUTY: MOBILE", ig:"callofdutymobile",  min:1000000 }
 ];
 let NEWS = { off: [], seen: {}, ids: {}, err: {}, fail: {}, extra: [], last: "", aiD: "", aiN: 0, sent: 0 };
 try{ const z = JSON.parse(fs.readFileSync(NEWS_FILE, "utf8")); if(z && typeof z === "object") NEWS = Object.assign(NEWS, z); }catch(e){}
@@ -6527,7 +6530,128 @@ function nwSteamImg(s){
   m = s.match(/\[img\](https?:\/\/[^\[]+?\.(?:png|jpe?g|gif|webp))\[\/img\]/i) || s.match(/<img[^>]+src="(https?:\/\/[^"]+)"/i);
   return m ? m[1] : "";
 }
+/* ---------- Instagram (Meta rasmiy API - Business Discovery) va Telegram (ochiq kanal sahifasi) ---------- */
+const NW_GRAPH = "https://graph.facebook.com/";
+function nwNum(n){ return String(Math.round(Number(n) || 0)).replace(/\B(?=(\d{3})+(?!\d))/g, " "); }
+if(!NEWS.ig || typeof NEWS.ig !== "object") NEWS.ig = {};
+function nwIgOn(){ return !!(NEWS.ig && NEWS.ig.uid && (NEWS.ig.ptok || NEWS.ig.utok)); }
+async function nwGraph(path, tok){
+  const sep = path.indexOf("?") > -1 ? "&" : "?";
+  let r;
+  try{ r = await fetch(NW_GRAPH + path + sep + "access_token=" + encodeURIComponent(tok)); }
+  catch(e){ throw new Error("Meta javob bermadi: " + e.message); }
+  const j = await r.json().catch(function(){ return null; });
+  if(!j) throw new Error("Meta javobi o'qilmadi (http " + r.status + ")");
+  if(j.error){
+    const c = j.error.code;
+    const e = new Error(c === 190 ? "Instagram kaliti eskirgan yoki bekor qilingan \u2014 /instagram ulash bilan qayta ulang"
+      : (c === 4 || c === 17 || c === 32 || c === 613) ? "Meta cheklovi (juda ko'p so'rov) \u2014 keyingi safar urinib ko'riladi"
+      : ("Meta xatosi: " + String(j.error.message || c).slice(0, 140)));
+    e.code = c; throw e;
+  }
+  return j;
+}
+async function nwIgFetch(src){
+  if(!nwIgOn()) throw new Error("Instagram hali ulanmagan (/instagram)");
+  const f = "business_discovery.username(" + src.ig + "){username,name,followers_count,biography,media.limit(8){id,caption,media_type,media_url,thumbnail_url,permalink,timestamp}}";
+  let j, last;
+  for(const tok of [NEWS.ig.ptok, NEWS.ig.utok].filter(Boolean)){
+    try{ j = await nwGraph(NEWS.ig.uid + "?fields=" + encodeURIComponent(f), tok); break; }
+    catch(e){ last = e; if(e.code === 4 || e.code === 17 || e.code === 32 || e.code === 613) throw e; }
+  }
+  if(!j) throw last || new Error("Instagram javobi yo'q");
+  const bd = j.business_discovery || {};
+  src.cname = "@" + (bd.username || src.ig);
+  src.fol = bd.followers_count || 0;
+  if(src.min && src.fol < src.min && NEWS.off.indexOf(src.k) < 0){   /* rasmiy emas bo'lishi mumkin - avtomatik o'chiramiz */
+    NEWS.off.push(src.k); nwSave();
+    aiTg("sendMessage", { chat_id: ADMIN_ID, text: "\u23F8 Instagram @" + src.ig + " o'chirildi: obunachilari kam (" + src.fol + "), rasmiy akkaunt bo'lmasligi mumkin." });
+    return [];
+  }
+  return ((bd.media && bd.media.data) || []).map(function(m){
+    const cap = String(m.caption || "").trim();
+    const first = (cap.split("\n").filter(function(x){ return x.trim(); })[0] || (src.g + " \u2014 yangi post")).trim();
+    return { id: "ig:" + m.id, t: first.length > 140 ? first.slice(0, 137) + "\u2026" : first, d: cap, at: m.timestamp,
+      link: m.permalink, img: m.media_type === "VIDEO" ? (m.thumbnail_url || "") : (m.media_url || m.thumbnail_url || "") };
+  });
+}
+/* Telegram: https://t.me/s/<kanal> - ochiq veb sahifa, hech qanday akkaunt ishlatilmaydi */
+function nwTgText(h){
+  return xmlDec(String(h || "").replace(/<br\s*\/?>/gi, "\n").replace(/<[^>]+>/g, "")).replace(/[ \t]+/g, " ").replace(/\n{3,}/g, "\n\n").trim();
+}
+async function nwTgPage(name){
+  const r = await nwGet("https://t.me/s/" + encodeURIComponent(name), { headers: NW_UA }, 20000);
+  return await r.text();
+}
+function nwTgParse(html, name){
+  const out = [];
+  String(html).split('data-post="').slice(1).forEach(function(ch){
+    const post = ch.slice(0, ch.indexOf('"'));
+    if(!/^[\w]+\/\d+$/.test(post)) return;
+    const body = ch.slice(0, 20000);
+    const tm = body.match(/<div class="tgme_widget_message_text[^"]*"[^>]*>([\s\S]*?)<\/div>/);
+    const text = tm ? nwTgText(tm[1]) : "";
+    const pm = body.match(/tgme_widget_message_(?:photo_wrap|video_thumb)[^>]*background-image:url\('([^']+)'\)/);
+    const dm = body.match(/<time[^>]*datetime="([^"]+)"/);
+    if(!text && !pm) return;
+    const first = (text.split("\n").filter(function(x){ return x.trim(); })[0] || "Yangi post").trim();
+    out.push({ id: "tg:" + post, t: first.length > 140 ? first.slice(0, 137) + "\u2026" : first, d: text, at: dm ? dm[1] : "",
+      link: "https://t.me/" + post, img: pm ? pm[1] : "" });
+  });
+  return out.reverse();   /* yangisi birinchi */
+}
+async function nwTgFetch(src){
+  const html = await nwTgPage(src.tgc);
+  const tt = html.match(/<meta property="og:title" content="([^"]*)"/);
+  if(tt) src.cname = xmlDec(tt[1]);
+  return nwTgParse(html, src.tgc);
+}
+/* Instagram ulash: /instagram ulash <APP_ID> <APP_SECRET> <QISQA_TOKEN> */
+async function nwIgConnect(chatId, msg, a){
+  if(msg && msg.message_id) aiTg("deleteMessage", { chat_id: chatId, message_id: msg.message_id });   /* kalitlar chatda qolmasin */
+  const appId = a[0], sec = a[1], short = a[2];
+  if(!/^\d{5,}$/.test(appId || "") || !/^[0-9a-f]{20,}$/i.test(sec || "") || !(short || "").length){
+    send(chatId, "Namuna:\n/instagram ulash APP_ID APP_SECRET TOKEN\n\n(APP_ID va APP_SECRET \u2014 Meta ilovangizning Settings \u2192 Basic bo'limida; TOKEN \u2014 Graph API Explorer'dan)"); return;
+  }
+  try{
+    const ex = await nwGraph("oauth/access_token?grant_type=fb_exchange_token&client_id=" + appId + "&client_secret=" + sec + "&fb_exchange_token=" + encodeURIComponent(short), short);
+    const utok = ex.access_token;
+    const pages = await nwGraph("me/accounts?fields=name,access_token,instagram_business_account{id,username}", utok);
+    const pg = ((pages && pages.data) || []).filter(function(p){ return p.instagram_business_account; })[0];
+    if(!pg){ send(chatId, "\u274C Facebook sahifangizga ulangan Instagram (Professional) akkaunt topilmadi.\nInstagram'ni sahifaga ulab, token olishda sahifa va Instagram'ni belgilang."); return; }
+    NEWS.ig = { appId: appId, sec: sec, utok: utok, uexp: Date.now() + (Number(ex.expires_in) || 5184000) * 1000,
+                ptok: pg.access_token || "", uid: pg.instagram_business_account.id, un: pg.instagram_business_account.username || "", page: pg.name || "" };
+    nwSave();
+    let rep = "\u2705 Instagram ulandi: @" + NEWS.ig.un + " (sahifa: " + NEWS.ig.page + ")\n\nRasmiy akkauntlar tekshiruvi:";
+    for(const src of nwSources().filter(function(s){ return s.ig; })){
+      try{
+        const items = await nwIgFetch(src);
+        if(!Array.isArray(NEWS.seen[src.k])) NEWS.seen[src.k] = items.map(function(i){ return i.id; });
+        rep += "\n" + (NEWS.off.indexOf(src.k) > -1 ? "\u23F8 " : "\u2705 ") + src.g + " \u2014 " + src.cname + " \u00B7 " + nwNum(src.fol || 0) + " obunachi";
+      }catch(e){ rep += "\n\u26A0\uFE0F " + src.g + " (@" + src.ig + "): " + e.message; }
+    }
+    nwSave();
+    send(chatId, rep + "\n\nHolat: /yangilik");
+  }catch(e){ send(chatId, "\u274C Instagram ulanmadi: " + e.message); }
+}
+/* Kalit muddati: sahifa kaliti muddatsiz bo'ladi; faqat foydalanuvchi kaliti ishlatilsa - 7 kun oldin eslatamiz */
+setInterval(function(){
+  if(!nwIgOn() || NEWS.ig.ptok || !NEWS.ig.uexp) return;
+  const left = NEWS.ig.uexp - Date.now();
+  if(left < 7 * 864e5 && !NEWS.ig.warned){ NEWS.ig.warned = 1; nwSave();
+    aiTg("sendMessage", { chat_id: ADMIN_ID, text: "\u23F3 Instagram kaliti " + Math.max(0, Math.ceil(left / 864e5)) + " kunda tugaydi. Graph API Explorer'dan yangi token olib, /instagram ulash ... ni qayta yuboring." }); }
+}, 6 * 3600000);
+async function nwIgCmd(chatId, msg, text){
+  const a = String(text || "").trim().split(/\s+/).slice(1);
+  if((a[0] || "").toLowerCase() === "ulash"){ await nwIgConnect(chatId, msg, a.slice(1)); return; }
+  if(!nwIgOn()){ send(chatId, "\uD83D\uDCF7 Instagram hali ulanmagan.\nUlash: /instagram ulash APP_ID APP_SECRET TOKEN"); return; }
+  send(chatId, "\uD83D\uDCF7 Instagram ulangan: @" + NEWS.ig.un + " (sahifa: " + NEWS.ig.page + ")\nKalit: " + (NEWS.ig.ptok ? "sahifa kaliti (muddatsiz)" : "foydalanuvchi kaliti, " + Math.max(0, Math.ceil((NEWS.ig.uexp - Date.now()) / 864e5)) + " kun qoldi") +
+    "\nTekshiruv: soatiga bir marta\n\nRasmiy akkauntlar: /yangilik");
+}
+
 async function nwFetch(src){
+  if(src.ig) return nwIgFetch(src);
+  if(src.tgc) return nwTgFetch(src);
   if(src.steam){
     const r = await nwGet("https://api.steampowered.com/ISteamNews/GetNewsForApp/v2/?appid=" + src.steam +
       "&count=10&maxlength=3000&feeds=steam_community_announcements&format=json", {}, 20000);
@@ -6575,10 +6699,11 @@ async function nwSend(src, it){
   let cap = "\uD83C\uDFAE <b>" + esc(src.g) + "</b> \u2014 rasmiy yangilik\n\n<b>" + esc(it.t) + "</b>";
   const body = uz || nwClip(it.d, 380);
   if(body) cap += "\n\n" + esc(body);
-  cap += "\n\n\uD83D\uDCC5 " + nwDate(it.at) + "\n\uD83D\uDD17 Manba: " + (src.steam ? "Steam (rasmiy e'lon)" : "YouTube, " + esc(src.cname || "rasmiy kanal"));
+  cap += "\n\n\uD83D\uDCC5 " + nwDate(it.at) + "\n\uD83D\uDD17 Manba: " + (src.steam ? "Steam (rasmiy e'lon)" : src.ig ? "Instagram, " + esc(src.cname || "@" + src.ig)
+         : src.tgc ? "Telegram, " + esc(src.cname || "@" + src.tgc) : "YouTube, " + esc(src.cname || "rasmiy kanal"));
   if(cap.length > 1020) cap = cap.slice(0, 1017) + "\u2026";
-  const kb = { inline_keyboard: [[{ text: src.steam ? "\uD83D\uDCD6 Batafsil" : "\u25B6\uFE0F Videoni ko'rish", url: it.link }]] };
-  const pics = src.steam ? [it.img] : ["https://i.ytimg.com/vi/" + it.vid + "/maxresdefault.jpg", it.img, "https://i.ytimg.com/vi/" + it.vid + "/hqdefault.jpg"];
+  const kb = { inline_keyboard: [[{ text: src.steam ? "\uD83D\uDCD6 Batafsil" : (src.ig || src.tgc) ? "\uD83D\uDCF7 Postni ko'rish" : "\u25B6\uFE0F Videoni ko'rish", url: it.link }]] };
+  const pics = (src.steam || src.ig || src.tgc) ? [it.img] : ["https://i.ytimg.com/vi/" + it.vid + "/maxresdefault.jpg", it.img, "https://i.ytimg.com/vi/" + it.vid + "/hqdefault.jpg"];
   for(const p of pics.filter(Boolean)){
     const r = await aiTg("sendPhoto", { chat_id: ADMIN_ID, photo: p, caption: cap, parse_mode: "HTML", reply_markup: kb });
     if(r && r.ok){ NEWS.sent = (NEWS.sent || 0) + 1; return true; }
@@ -6591,8 +6716,11 @@ async function nwCheck(){
   if(!ADMIN_ID || nwBusy) return;
   nwBusy = true;
   try{
+    const igDue = nwIgOn() && Date.now() - (NEWS.igAt || 0) > 55 * 60000;
+    if(igDue) NEWS.igAt = Date.now();
     for(const src of nwSources()){
       if(NEWS.off.indexOf(src.k) > -1) continue;
+      if(src.ig && !igDue) continue;
       try{
         const items = await nwFetch(src);
         const seen = NEWS.seen[src.k];
@@ -6622,12 +6750,12 @@ function nwStatus(){
   let s = "\uD83D\uDCF0 O'YIN YANGILIKLARI (faqat rasmiy manbalar)\n\n";
   nwSources().forEach(function(src){
     const on = NEWS.off.indexOf(src.k) < 0, e = NEWS.err[src.k];
-    s += (on ? (e ? "\u26A0\uFE0F " : "\u2705 ") : "\u23F8 ") + src.g + "  (" + src.k + ")" + (src.steam ? " \u00B7 Steam" : " \u00B7 YouTube") +
+    s += (on ? (e ? "\u26A0\uFE0F " : "\u2705 ") : "\u23F8 ") + src.g + "  (" + src.k + ")" + (src.steam ? " \u00B7 Steam" : src.ig ? " \u00B7 Instagram" + (nwIgOn() ? "" : " (ulanmagan)") : src.tgc ? " \u00B7 Telegram" : " \u00B7 YouTube") +
       (on ? "" : " \u2014 o'chirilgan") + (e ? "\n     xato: " + e.m : "") + "\n";
   });
   s += "\nOxirgi tekshiruv: " + (NEWS.last ? nwDate(NEWS.last) : "hali yo'q") + " (har 20 daqiqada)";
   s += "\nJami yuborilgan: " + (NEWS.sent || 0) + " \u00B7 bugungi o'zbekcha izohlar: " + (NEWS.aiD === new Date().toISOString().slice(0, 10) ? NEWS.aiN : 0) + "/40";
-  s += "\n\nBuyruqlar:\n/yangilik tekshir \u2014 hozir tekshirish\n/yangilik oxirgi pubg \u2014 oxirgi rasmiy yangilikni ko'rish\n/yangilik o'chir pubg \u00B7 /yangilik yoq pubg\n/yangilik qo'sh genshin https://www.youtube.com/@GenshinImpact Genshin Impact\n/yangilik olib tashla genshin";
+  s += "\n\nBuyruqlar:\n/yangilik tekshir \u2014 hozir tekshirish\n/yangilik oxirgi pubg \u2014 oxirgi rasmiy yangilikni ko'rish\n/yangilik o'chir pubg \u00B7 /yangilik yoq pubg\n/yangilik qo'sh genshin https://www.youtube.com/@GenshinImpact Genshin Impact\n/yangilik olib tashla genshin\n\nInstagram yoki Telegram kanal ham qo'shsa bo'ladi:\n/yangilik qo'sh ff_ig https://instagram.com/... Free Fire\n/yangilik qo'sh ff_tg https://t.me/... Free Fire\nInstagram'ni ulash: /instagram";
   return s;
 }
 async function nwCmd(chatId, text){
@@ -6653,6 +6781,22 @@ async function nwCmd(chatId, text){
   }
   if(cmd === "qo'sh" || cmd === "qosh"){
     const k = String(a[1] || "").toLowerCase(), url = String(a[2] || ""), nm = a.slice(3).join(" ").trim();
+    const igm = url.match(/instagram\.com\/([\w.]{2,30})\/?$/i), tgm = url.match(/t\.me\/(?:s\/)?([A-Za-z]\w{3,31})\/?$/i);
+    if(/^[a-z0-9_]{2,20}$/.test(k) && nm && (igm || tgm)){
+      if(findSrc(k)){ send(chatId, "Bu kalit band: " + k); return; }
+      const src = igm ? { k: k, g: nm.toUpperCase(), ig: igm[1].toLowerCase() } : { k: k, g: nm.toUpperCase(), tgc: tgm[1] };
+      try{
+        const items = await nwFetch(src);
+        NEWS.extra.push(igm ? { k: k, g: src.g, ig: src.ig } : { k: k, g: src.g, tgc: src.tgc });
+        NEWS.seen[k] = items.map(function(i){ return i.id; }); nwSave();
+        let info = "";
+        if(tgm){ const h = await nwTgPage(src.tgc).catch(function(){ return ""; }); const c = h.match(/tgme_channel_info_counter"><span class="counter_value">([^<]+)<\/span>\s*<span class="counter_type">subscribers/); info = c ? "\nObunachilar: " + c[1] : ""; }
+        else info = "\nObunachilar: " + nwNum(src.fol || 0);
+        send(chatId, "\u2705 Qo'shildi: " + src.g + "\n" + (igm ? "Instagram" : "Telegram") + ": \u00AB" + (src.cname || "?") + "\u00BB" + info + "\nOxirgi post: " + (items[0] ? items[0].t : "\u2014") +
+          "\n\n\u2757 Tekshiring: bu o'yinning RASMIY sahifasimi? Bo'lmasa \u2014 /yangilik olib tashla " + k);
+      }catch(e){ send(chatId, "\u274C Qo'shib bo'lmadi: " + e.message); }
+      return;
+    }
     if(!/^[a-z0-9_]{2,20}$/.test(k) || !/youtube\.com\/(@[\w.-]+|channel\/UC[\w-]{22}|c\/[\w.-]+|user\/[\w.-]+|[\w.-]+)\/?$/i.test(url) || !nm){
       send(chatId, "Namuna:\n/yangilik qo'sh genshin https://www.youtube.com/@GenshinImpact Genshin Impact\n\nHavolani o'yinning rasmiy saytidan yoki Play Market/App Store sahifasidan oling \u2014 shunda aniq rasmiy bo'ladi."); return;
     }
@@ -6850,6 +6994,8 @@ app.post("/webhook", (req,res)=>{
     /* /bloklar - bloklangan hisoblar ro'yxati */
     /* /foyda - davr bo'yicha foyda va statistika */
     /* /manba - joriy manba;  /manba s2t - zaxiraga;  /manba fzr - asosiyga */
+    /* /instagram - Instagram (Meta rasmiy API) ulash va holat (faqat admin) */
+    if(/^\/instagram(@\w+)?(\s|$)/i.test(text)){ if(ADMIN_ID && fromId !== ADMIN_ID) return; nwIgCmd(fromId, msg, text); return; }
     /* /yangilik - rasmiy o'yin yangiliklari (faqat admin) */
     if(/^\/yangilik(@\w+)?(\s|$)/i.test(text)){ if(ADMIN_ID && fromId !== ADMIN_ID) return; nwCmd(fromId, text); return; }
     /* /azo - a'zo bo'l boti statistikasi; /azo guruhlar; /azobot <token> - ulash */
