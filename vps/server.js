@@ -6183,6 +6183,20 @@ function gateStarted(uid){
   const u = gSnap[uid];
   return !!(u && u.greeted && !u.left);
 }
+/* Bazada "Start bosgan" deb turgan odam botni keyin bloklagan bo'lishi mumkin - server buni kech bilardi.
+   Guruhga yozganda Telegram'dan jonli tekshiramiz (har odam 12 soatda bir marta). Bloklagan bo'lsa - belgilab, to'samiz. */
+const gLive = new Map();
+async function gateStillHere(uid){
+  uid = String(uid);
+  const t = gLive.get(uid);
+  if(t && Date.now() - t < 12 * 3600000) return true;
+  const bad = await tgBlocked(uid);
+  if(!bad){ gLive.set(uid, Date.now()); return true; }
+  try{ const db = load(); const u = db[uid]; if(u && !u.left){ u.left = true; u.leftAt = new Date().toISOString(); save(db); } }catch(e){}
+  if(gSnap && gSnap[uid]) gSnap[uid].left = true;
+  gOk.delete(uid);
+  return false;
+}
 /* Guruh adminlari - 10 daqiqa eslab qolinadi */
 const gAdm = {};
 async function gateAdmins(cid){
@@ -6250,9 +6264,11 @@ async function gateOnMessage(msg){
      msg.video_chat_started || msg.video_chat_ended || msg.video_chat_participants_invited) return;   /* xizmat xabarlari */
   const c = gateChat(chat);
   const uid = String(from.id);
-  if(gateStarted(uid)) return;
   const adm = await gateAdmins(cid);
-  if(adm.has(uid)) return;
+  if(adm.has(uid)) return;                                        /* guruh adminlari - tegilmaydi */
+  const fresh = gOk.get(uid);
+  if(fresh && Date.now() - fresh < 120000) return;                /* hozirgina Start bosdi */
+  if(gateStarted(uid) && await gateStillHere(uid)) return;        /* Start bosgan VA hozir ham botni bloklamagan */
   const d = await gateApi("deleteMessage", { chat_id: cid, message_id: msg.message_id });
   if(!(d && d.ok)){
     if(!c.noRights || c.canDel){ c.noRights = true; c.canDel = false; gateSave(); }
@@ -6971,6 +6987,19 @@ app.post("/webhook", (req,res)=>{
   const hdr = req.get("X-Telegram-Bot-Api-Secret-Token") || "";
   if(SECRET && hdr !== SECRET) return;
   try{
+    /* Foydalanuvchi botni blokladi / blokdan chiqardi (shaxsiy chat) - "a'zo bo'l" boti uchun ham muhim */
+    const pmcm = req.body && req.body.my_chat_member;
+    if(pmcm && pmcm.chat && pmcm.chat.type === "private"){
+      const st = pmcm.new_chat_member && pmcm.new_chat_member.status, bu = String(pmcm.chat.id);
+      try{
+        const dbM = load(), uM = dbM[bu];
+        if(uM && st === "kicked" && !uM.left){ uM.left = true; uM.leftAt = new Date().toISOString(); save(dbM); }
+        else if(uM && st === "member" && uM.left){ delete uM.left; save(dbM); }
+      }catch(e){}
+      if(st === "kicked"){ gLive.delete(bu); gOk.delete(bu); if(gSnap && gSnap[bu]) gSnap[bu].left = true; }
+      else if(st === "member" && gSnap && gSnap[bu]) delete gSnap[bu].left;
+      return;
+    }
     const cq = req.body && req.body.callback_query;
     if(cq){
       if(isBanned((cq.from && cq.from.id) || "")) return;
