@@ -4556,16 +4556,15 @@ app.post("/order", async (req,res)=>{
         text: "\u2757 "+rec.id+" yuborildi, lekin FZR id qaytarmadi.\n"+rec.package+" \u2014 "+rec.pid+"\nPanelda qo'lda tekshiring." });
       send(uid, gCat
         ? ("\u23F3 Buyurtma yuborildi: " + rec.package + "\nKod tayyor bo'lgach shu yerga yuboriladi.\nQoldiq balans: " + u2.balance + " so'm")
-        : ("\u23F3 Buyurtma yuborildi: " + rec.package + "\nOdatda 1-2 daqiqada tushadi.\nQoldiq balans: " + u2.balance + " so'm"));
+        : ("\u23F3 Buyurtma yuborildi: " + rec.package + "\nOdatda 1-2 daqiqada tushadi. Agar bajarilmasa, pul avtomatik balansingizga qaytariladi.\nQoldiq balans: " + u2.balance + " so'm"));
       return res.json({ ok:true, balance:u2.balance, nftSom:u2.nftSom, gram:u2.gram, pay:pay, order:rec2 });
     }
 
     /* rad etildi — pulni yechilgan hamyonga qaytaramiz */
-    const rf = refundOrder(u2, rec2);
-    rec2.status = "refund"; rec2.fail = r.why;
+    const fI = failOrder(u2, rec2, r.why);
+    const rf = fI.rf;
     save(db2);
-    send(uid, "\u274C Buyurtmani bajarib bo'lmadi. " + rf.amount + " " + rf.cur +
-              " qaytarildi.\nJoriy qoldiq: " + rf.left + " " + rf.cur);
+    failSend(uid, rec2, fI);
     if(ADMIN_ID) tgCall("sendMessage", { chat_id: ADMIN_ID,
       text: "⚠️ "+(sE ? "shop2topup" : cdGame ? "coindrop" : "FZR")+" rad etdi: "+r.why+"\n"+rec.package+" — id "+uid+"\nQaytarildi: "+rec2.price+" so'm" });
     res.json({ ok:false, error:"supplier", balance:u2.balance,
@@ -4575,6 +4574,46 @@ app.post("/order", async (req,res)=>{
 });
 
 /* ---------- Tugallanmagan buyurtmalarni kuzatish ---------- */
+/* ---------- Bajarilmagan buyurtma: sabab + pulni qaytarish + mijozga tushunarli xabar ----------
+   FazerCards rad etgan buyurtma (limit to'lgan, paket qolmagan...) endi "kutilmoqda"da qolib ketmaydi:
+   pul darhol mijoz balansiga qaytadi va unga sabab bilan xabar boradi. */
+const FZR_OK_ST  = /^(completed|complete|success|successful|succeeded|done|delivered|fulfilled)$/;
+const FZR_BAD_ST = /^(failed|fail|failure|error|errored|cancelled|canceled|cancel|rejected|reject|declined|refused|refunded|refund|returned|reversed|expired|voided|void|aborted|not_completed|unavailable)$/;
+const FZR_RUN_ST = /^(created|new|pending|queued|waiting|accepted|processing|in_progress|in-progress|running|sent|paid)$/;
+function failWhy(txt){
+  const t = String(txt || "").toLowerCase();
+  if(/limit|quota|\u043B\u0438\u043C\u0438\u0442|\u043F\u0440\u0435\u0432\u044B\u0448/.test(t)) return "limit";
+  if(/stock|out of|sold out|unavailable|not available|no offer|\u043D\u0435\u0442 \u0432 \u043D\u0430\u043B\u0438\u0447\u0438\u0438|\u0437\u0430\u043A\u043E\u043D\u0447|\u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F|\u043E\u0442\u0441\u0443\u0442\u0441\u0442\u0432/.test(t)) return "stock";
+  if(/region|country|\u0440\u0435\u0433\u0438\u043E\u043D|\u0441\u0442\u0440\u0430\u043D/.test(t)) return "region";
+  if(/account|player|user ?id|uid|not found|could not be confirmed|invalid|incorrect|wrong|\u0430\u043A\u043A\u0430\u0443\u043D\u0442|\u0438\u0433\u0440\u043E\u043A|\u043D\u0435 \u043D\u0430\u0439\u0434\u0435\u043D|\u043D\u0435\u0432\u0435\u0440|\u043D\u0435\u043A\u043E\u0440\u0440\u0435\u043A\u0442/.test(t)) return "id";
+  return "other";
+}
+const WHY_UZ = { limit: "bu paket hozircha limitga yetgan", stock: "bu paket hozircha qolmagan",
+  region: "o'yin hisobingiz mintaqasi bu paketga mos kelmadi", id: "o'yin ID'si tasdiqlanmadi",
+  other: "ta'minotchi buyurtmani hozircha bajara olmadi" };
+function nfmt(n){ n = Number(n) || 0; return Number.isInteger(n) ? String(n).replace(/\B(?=(\d{3})+(?!\d))/g, " ") : String(n); }
+/* pulni qaytaradi va yozuvga sabab qo'yadi (chaqiruvchi save() qiladi, keyin failSend) */
+function failOrder(u, rec, raw){
+  const why = failWhy(raw);
+  const rf = refundOrder(u, rec);
+  rec.status = "refund"; rec.fail = String(raw || ""); rec.why = why; rec.refAt = new Date().toISOString();
+  return { rf: rf, why: why };
+}
+function failSend(uid, rec, f){
+  let t = "\uD83D\uDE14 Uzr so'raymiz, buyurtmangiz bajarilmadi.\n\uD83C\uDFAE " + (rec.package || "") + (rec.pid ? " \u00B7 ID " + rec.pid : "") +
+          "\nSabab: " + WHY_UZ[f.why] + ".";
+  t += f.why === "id" ? "\n\uD83D\uDD0E ID to'g'riligini tekshirib, qayta buyurtma bering."
+     : f.why === "region" ? "\n\uD83D\uDD0E Boshqa paket tanlang yoki qo'llab-quvvatlashga yozing."
+     : "\n\u23F3 Iltimos, 5\u20136 soatdan keyin yoki ertaga qayta urinib ko'ring.";
+  t += "\n\n\uD83D\uDCB0 " + nfmt(f.rf.amount) + " " + f.rf.cur + " balansingizga qaytarildi. Joriy qoldiq: " + nfmt(f.rf.left) + " " + f.rf.cur +
+       "\n\nXavotir olmang \u2014 pulingiz hech qayerga yo'qolmaydi: buyurtma bajarilmasa, pul har doim balansingizga qaytariladi.";
+  send(uid, t, { inline_keyboard: [[{ text: "\uD83D\uDE80 Do'konni ochish", web_app: { url: APP_URL } }]] });
+}
+/* tiqilgan/notanish holatdagi buyurtma uchun admin tugmalari */
+function osKb(uid, id){ return { inline_keyboard: [[{ text: "\u2705 Tushdi", callback_data: "os_ok:" + uid + ":" + id },
+  { text: "\u21A9\uFE0F Pulni qaytarish", callback_data: "os_no:" + uid + ":" + id }]] }; }
+const fzrNextChk = new Map();   /* uzoq kutayotgan buyurtmalarni kamroq so'raymiz (FazerCards chegarasi 300/daq) */
+
 async function checkOne(uid, ordId){
   const d0 = load();
   const u0 = d0[uid]; if(!u0 || !Array.isArray(u0.orders)) return;
@@ -4605,11 +4644,9 @@ async function checkOne(uid, ordId){
       save(dC);
       send(uid, "\u2705 "+rC.package+" hisobingizga tushdi!\nID: "+(rC.pid||""));
     } else {
-      const rfC = refundOrder(uC, rC);
-      rC.status = "refund"; rC.fail = cs.why || "coindrop rad etdi";
+      const fC = failOrder(uC, rC, cs.why || "coindrop rad etdi");
       save(dC);
-      send(uid, "\u274C Buyurtma bajarilmadi. "+rfC.amount+" "+rfC.cur+
-                " qaytarildi.\nJoriy qoldiq: "+rfC.left+" "+rfC.cur);
+      failSend(uid, rC, fC);
       if(ADMIN_ID) tgCall("sendMessage", { chat_id: ADMIN_ID,
         text: "\u26A0\uFE0F coindrop rad etdi: "+(cs.why||"-")+"\n"+rC.package+" \u2014 id "+uid+"\nQaytarildi: "+rC.price+" so'm" });
     }
@@ -4625,7 +4662,9 @@ async function checkOne(uid, ordId){
   const r = u.orders.find(function(x){ return x.id === ordId; });
   if(!r || (r.status !== "sent" && r.status !== "stuck")) return;
 
-  if(s === "completed"){
+  const hs = (Array.isArray(st.status_history) && st.status_history.length) ? String(st.status_history[st.status_history.length - 1].status || "").toLowerCase() : "";
+  const failTxt = String(st.fail_reason || "").trim();
+  if(FZR_OK_ST.test(s)){
     r.status = "done"; r.doneAt = new Date().toISOString();
     if(r.gift){
       /* Sovg'a kartasi: mijozga hisobga emas, KOD yuboriladi */
@@ -4653,15 +4692,22 @@ async function checkOne(uid, ordId){
     send(uid, "\u2705 "+r.package+" hisobingizga tushdi!\nID: "+(r.pid || r.gameId || ""));
     return;
   }
-  if(s === "failed" || s === "cancelled" || s === "canceled" || s === "refunded"){
-    const rfS = refundOrder(u, r);
-    r.status = "refund"; r.fail = String(st.fail_reason||"");
+  /* rad etildi: holat nomi (failed, rejected, declined...) yoki rad etish sababi yozilgan bo'lsa */
+  if(FZR_BAD_ST.test(s) || FZR_BAD_ST.test(hs) || (failTxt && !FZR_RUN_ST.test(s))){
+    const f = failOrder(u, r, failTxt || s);
     save(db);
-    send(uid, "\u274C Buyurtma bajarilmadi. "+rfS.amount+" "+rfS.cur+
-              " qaytarildi.\nJoriy qoldiq: "+rfS.left+" "+rfS.cur);
+    failSend(uid, r, f);
     if(ADMIN_ID) tgCall("sendMessage", { chat_id: ADMIN_ID,
-      text: "⚠️ FZR fail "+r.fzr+"\n"+(st.fail_reason||"-")+"\n"+r.package+" — id "+uid+"\nQaytarildi: "+r.price+" so'm" });
+      text: "\u26A0\uFE0F FZR rad etdi (" + s + "): " + r.fzr + "\n" + (failTxt || "-") + "\n" + r.package + " \u2014 id " + uid +
+            "\nMijozga qaytarildi: " + nfmt(f.rf.amount) + " " + f.rf.cur + " \u00B7 sabab: " + f.why });
     return;
+  }
+  /* notanish holat - avtomatik qaror qilmaymiz, admin bir bosishda hal qiladi */
+  if(!FZR_RUN_ST.test(s) && !r.unk){
+    r.unk = s || "?"; save(db);
+    if(ADMIN_ID) tgCall("sendMessage", { chat_id: ADMIN_ID,
+      text: "\u2753 FazerCards notanish holat: \u00AB" + (s || "?") + "\u00BB\n" + r.fzr + " \u00B7 " + r.package + " \u2014 id " + uid +
+            (failTxt ? "\n" + failTxt : "") + "\nFazerCards'da tekshirib, tanlang:", reply_markup: osKb(uid, r.id) });
   }
   if(Date.now() - new Date(r.at).getTime() > 30*60000){
     r.status = "stuck";
@@ -4669,7 +4715,8 @@ async function checkOne(uid, ordId){
     r.warned = true;
     save(db);
     if(ADMIN_ID && yangi) tgCall("sendMessage", { chat_id: ADMIN_ID,
-      text: "⏰ 30 daqiqadan beri tugamadi: "+r.fzr+"\n"+r.package+" — id "+uid+"\nTekshirish davom etadi." });
+      text: "⏰ 30 daqiqadan beri tugamadi: "+r.fzr+"\n"+r.package+" — id "+uid+"\nTekshirish davom etadi. FazerCards'da tekshirib, kerak bo'lsa tanlang:",
+      reply_markup: osKb(uid, r.id) });
   }
 }
 
@@ -4695,17 +4742,18 @@ async function sweep(){
           return;
         }
         if((r.status === "sent" || r.status === "stuck") && r.fzr){
-          /* 7 kundan eski bo'lsa cheksiz so'ramaymiz */
-          if(Date.now() - new Date(r.at).getTime() < 7*24*3600000) jobs.push([uid, r.id]);
+          /* 7 kundan eski bo'lsa so'ramaymiz; 30 daq dan keyin 3 daqiqada, 6 soatdan keyin 15 daqiqada bir */
+          const ag2 = Date.now() - new Date(r.at).getTime();
+          const gap = ag2 < 30*60000 ? 0 : ag2 < 6*3600000 ? 3*60000 : 15*60000;
+          if(ag2 < 7*24*3600000 && Date.now() >= (fzrNextChk.get(r.id) || 0)){ jobs.push([uid, r.id]); if(gap) fzrNextChk.set(r.id, Date.now() + gap); }
           return;
         }
         /* yuborilmay osilib qolgan (server o'chib qolgan bo'lsa) — pulni qaytaramiz */
         if(r.status === "wait" && r.auto && !r.fzr &&
            Date.now() - new Date(r.at).getTime() > 300000){
-          const rfT = refundOrder(u, r);
-          r.status = "refund"; r.fail = "yuborilmadi";
+          const fT = failOrder(u, r, "yuborilmadi");
           changed = true;
-          send(uid, "\u21A9\uFE0F Buyurtma yuborilmadi, "+rfT.amount+" "+rfT.cur+" qaytarildi.");
+          failSend(uid, r, fT);
         }
       });
     });
@@ -4716,6 +4764,35 @@ async function sweep(){
   }catch(e){ console.log("SWEEP xato:", e.message); }
   finally{ sweepBusy = false; }
 }
+/* BIR MARTALIK: yangilanishdan OLDIN tiqilib qolgan FazerCards buyurtmalari uchun admin pulni
+   allaqachon QO'LDA qaytargan. Ular qayta avtomatik qaytarilmasin (ikki marta to'lanmasin) -
+   faqat belgilaymiz: balans o'zgarmaydi, mijozga xabar ketmaydi. Birinchi tekshiruvdan OLDIN ishlaydi.
+   Oxirgi 30 daqiqadagi buyurtmalar odatdagidek (yangi qoida bilan) ishlanadi. */
+(function(){
+  const MIG_FZR = "/root/donate-app/mig_fzr_manual.flag";
+  try{
+    if(fs.existsSync(MIG_FZR)) return;
+    const db = load(), cut = Date.now() - 30 * 60000, list = [];
+    Object.keys(db).forEach(function(uid){
+      const u = db[uid]; if(!u || !Array.isArray(u.orders)) return;
+      u.orders.forEach(function(r){
+        if(!r || !r.fzr || r.cd || r.src === "s2t") return;
+        if(r.status !== "sent" && r.status !== "stuck") return;
+        if(new Date(r.at).getTime() > cut) return;
+        r.status = "refund"; r.fail = "admin qo'lda qaytargan"; r.manual = true; r.refAt = new Date().toISOString();
+        list.push((r.package || "?") + " \u2014 id " + uid + " (" + r.fzr + ")");
+      });
+    });
+    if(list.length) save(db);
+    fs.writeFileSync(MIG_FZR, new Date().toISOString() + " " + list.length + "\n");
+    console.log("MIG_FZR: " + list.length + " ta eski buyurtma qo'lda qaytarilgan deb belgilandi");
+    if(ADMIN_ID && list.length) setTimeout(function(){
+      tgCall("sendMessage", { chat_id: ADMIN_ID, text: "\uD83D\uDD27 Yangilanish: " + list.length +
+        " ta eski tiqilgan buyurtma \u00ABqo'lda qaytarilgan\u00BB deb belgilandi.\nBalans o'zgarmadi, mijozlarga xabar yuborilmadi.\n\n" +
+        list.slice(0, 30).join("\n") + (list.length > 30 ? "\n\u2026 va yana " + (list.length - 30) + " ta" : "") });
+    }, 2000);
+  }catch(e){ console.log("MIG_FZR xato:", e.message); }
+})();
 setInterval(sweep, 30000);
 
 /* ---------- FazerCards webhook ----------
@@ -4732,7 +4809,7 @@ if(HOOK){
     const now = Date.now();
     if(now - hookAt < 3000) return;            /* ketma-ket xabarlarni bosamiz */
     hookAt = now;
-    setTimeout(function(){ sweep(); }, 400);   /* ta'minotchi yozib ulgursin */
+    setTimeout(function(){ fzrNextChk.clear(); sweep(); }, 400);   /* ta'minotchi yozib ulgursin; xabar kelsa hammasini darhol tekshiramiz */
   });
   console.log("FazerCards webhook yoqilgan");
 }
@@ -5744,6 +5821,30 @@ function handleCb(cq){
     return;
   }
   /* Qo'lda bajariladigan buyurtma — admin tasdiqlaydi yoki bekor qiladi */
+  /* FazerCards'da tiqilgan / notanish holatdagi buyurtma - admin qaror qiladi */
+  if(d.indexOf("os_ok:") === 0 || d.indexOf("os_no:") === 0){
+    const p = d.split(":");
+    if(p.length !== 3){ tgCall("answerCallbackQuery", { callback_query_id: cq.id }); return; }
+    const dbs = load(); const us = urec(dbs, p[1]);
+    const r = (us.orders || []).find(function(x){ return x.id === p[2]; });
+    if(!r || (r.status !== "sent" && r.status !== "stuck")){
+      tgCall("answerCallbackQuery", { callback_query_id: cq.id, text: "Allaqachon hal qilingan" }); return;
+    }
+    let nt;
+    if(p[0] === "os_ok"){
+      r.status = "done"; r.doneAt = new Date().toISOString(); save(dbs);
+      nt = "\u2705 Tushdi deb belgilandi";
+      send(p[1], "\u2705 " + r.package + " hisobingizga tushdi!" + (r.pid ? "\nID: " + r.pid : ""));
+    } else {
+      const f = failOrder(us, r, "admin qaytardi"); save(dbs);
+      failSend(p[1], r, f);
+      nt = "\u21A9\uFE0F Qaytarildi \u2014 " + nfmt(f.rf.amount) + " " + f.rf.cur;
+    }
+    tgCall("answerCallbackQuery", { callback_query_id: cq.id, text: nt });
+    const mo = cq.message;
+    if(mo && mo.chat) tgCall("editMessageText", { chat_id: mo.chat.id, message_id: mo.message_id, text: (mo.text || "") + "\n\n" + nt });
+    return;
+  }
   if(d.indexOf("od_ok:") === 0 || d.indexOf("od_no:") === 0){
     const p = d.split(":");
     if(p.length !== 3){ tgCall("answerCallbackQuery", { callback_query_id: cq.id }); return; }
