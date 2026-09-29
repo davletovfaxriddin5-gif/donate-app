@@ -6140,6 +6140,21 @@ try{ const z = JSON.parse(fs.readFileSync(GATE_FILE, "utf8")); if(z && typeof z 
 if(!GATE.token && process.env.GATE_TOKEN) GATE.token = process.env.GATE_TOKEN;
 if(!GATE.chats || typeof GATE.chats !== "object") GATE.chats = {};
 if(!Array.isArray(GATE.joins)) GATE.joins = [];
+if(!GATE.mig1 && GATE.joins.length){
+  try{
+    const db0 = load();
+    GATE.joins.forEach(function(j){
+      if(!j.nw) return;
+      const u = db0[j.u]; if(!u) return;
+      const t = Date.parse(j.at) - 60000;
+      const earlier = function(a){ return (Array.isArray(a) ? a : []).some(function(x){ const k = Date.parse(x && (x.at || x.date)); return k && k < t; }); };
+      const fresh = !!u.firstAt && Math.abs(Date.parse(u.firstAt) - Date.parse(j.at)) < 10 * 60000;
+      if(!fresh || (u.joined && Date.parse(u.joined) < t) || earlier(u.orders) || earlier(u.topups)) j.nw = false;
+    });
+  }catch(e){ console.log("gate mig1:", e.message); }
+  GATE.mig1 = 1;
+  setTimeout(function(){ try{ fs.writeFileSync(GATE_FILE, JSON.stringify(GATE)); }catch(e){} }, 1000);
+}
 let gateSaveT = null;
 function gateSave(){
   clearTimeout(gateSaveT);
@@ -6182,7 +6197,7 @@ async function gateAdmins(cid){
 function gateChat(chat){
   const cid = String(chat.id);
   let c = GATE.chats[cid], ch = false;
-  if(!c){ c = GATE.chats[cid] = { at: new Date().toISOString(), st: "member", del: 0 }; ch = true; }
+  if(!c){ c = GATE.chats[cid] = { at: new Date().toISOString(), st: "member", del: 0 }; ch = true; setTimeout(function(){ gateRefresh(cid); }, 50); }
   if(chat.title && c.t !== chat.title){ c.t = chat.title; ch = true; }
   if((chat.username || "") !== (c.un || "")){ c.un = chat.username || ""; ch = true; }
   if(chat.type && c.type !== chat.type){ c.type = chat.type; ch = true; }
@@ -6240,12 +6255,13 @@ async function gateOnMessage(msg){
   if(adm.has(uid)) return;
   const d = await gateApi("deleteMessage", { chat_id: cid, message_id: msg.message_id });
   if(!(d && d.ok)){
-    if(!c.noRights){ c.noRights = true; gateSave(); }
+    if(!c.noRights || c.canDel){ c.noRights = true; c.canDel = false; gateSave(); }
     gateAskRights(cid); return;
   }
   if(c.noRights) delete c.noRights;
+  if(!c.canDel || c.st !== "administrator"){ c.canDel = true; c.st = "administrator"; }   /* o'chira oldi = ishlayapti */
   c.del = (c.del || 0) + 1;
-  if(c.del % 20 === 1) gateSave();
+  gateSave();
   gateWarn(cid, from);
 }
 async function gateOnMember(u){
@@ -6298,11 +6314,14 @@ function gateOnPrivate(msg){
       [{ text: "\uD83E\uDD16 @" + MAIN_BOT, url: "https://t.me/" + MAIN_BOT }] ] } });
 }
 /* @minatoh_bot /start g<guruh> - guruhdan kelgan odam Start bosdi */
-function gateJoined(uid, cid, isNew){
+function gateJoined(uid, cid, info){
   uid = String(uid); cid = String(cid);
+  if(typeof info !== "object" || !info) info = { nw: !!info, was: false };
   gOk.set(uid, Date.now());
   if(!GATE.joins.some(function(j){ return j.u === uid && j.c === cid; })){
-    GATE.joins.push({ u: uid, c: cid, at: new Date().toISOString(), nw: !!isNew });
+    const rec = { u: uid, c: cid, at: new Date().toISOString(), nw: !!info.nw };
+    if(info.was) rec.was = 1;   /* allaqachon botda edi - statistikaga kirmaydi */
+    GATE.joins.push(rec);
     if(GATE.joins.length > 50000) GATE.joins.splice(0, GATE.joins.length - 50000);
     gateSave();
   }
@@ -6316,23 +6335,31 @@ function gateJoined(uid, cid, isNew){
   }, 1200);
 }
 function gateStatText(full){
-  const now = Date.now(), day = 864e5, J = GATE.joins;
-  const since = function(ms){ return J.filter(function(j){ return now - Date.parse(j.at) < ms; }); };
-  const nw = function(a){ return a.filter(function(j){ return j.nw; }).length; };
-  const ppl = function(a){ return new Set(a.map(function(j){ return j.u; })).size; };
-  const t1 = since(day), t7 = since(7 * day), t30 = since(30 * day);
+  const now = Date.now(), day = 864e5, tz = 5 * 3600e3;
+  const dayStart = Math.floor((now + tz) / day) * day - tz;          /* Toshkent vaqti bilan bugun 00:00 */
+  const ALL = GATE.joins, J = ALL.filter(function(j){ return !j.was; });
+  const was = new Set(ALL.filter(function(j){ return j.was; }).map(function(j){ return j.u; })).size;
+  const fromT = function(t){ return J.filter(function(j){ return Date.parse(j.at) >= t; }); };
+  const line = function(a){
+    const p = new Set(a.map(function(j){ return j.u; })).size;
+    const n = new Set(a.filter(function(j){ return j.nw; }).map(function(j){ return j.u; })).size;
+    return p + " kishi (yangi: " + n + ", eski mijoz: " + (p - n) + ")";
+  };
   const act = Object.keys(GATE.chats).map(function(k){ return Object.assign({ id: k }, GATE.chats[k]); })
     .filter(function(c){ return (c.st === "administrator" || c.st === "member") && c.type !== "channel"; });
+  const ok = act.filter(function(c){ return c.canDel; }).length;
   let s = "\uD83D\uDEE1 @" + (GATE.un || "?") + " \u2014 A'ZO BO'L BOTI\n\n";
-  s += "Guruhlar: " + act.length + " ta (ishlayotgan: " + act.filter(function(c){ return c.canDel; }).length + ")\n";
+  s += "Guruhlar: " + act.length + " ta (ishlayotgan: " + ok + ")\n";
+  if(ok < act.length) s += "\u26A0\uFE0F " + (act.length - ok) + " ta guruhda bot admin emas yoki \u00ABXabarlarni o'chirish\u00BB huquqi yo'q \u2014 ro'yxat: /azo guruhlar\n";
   s += "Guruhlardagi a'zolar: " + act.reduce(function(a, c){ return a + (c.n || 0); }, 0) + "\n";
   s += "O'chirilgan xabarlar: " + act.reduce(function(a, c){ return a + (c.del || 0); }, 0) + "\n\n";
   s += "Shu bot orqali Start bosganlar:\n";
-  s += "\u2022 Bugun: " + ppl(t1) + " kishi (yangi: " + nw(t1) + ")\n";
-  s += "\u2022 7 kun: " + ppl(t7) + " kishi (yangi: " + nw(t7) + ")\n";
-  s += "\u2022 30 kun: " + ppl(t30) + " kishi (yangi: " + nw(t30) + ")\n";
-  s += "\u2022 Jami: " + ppl(J) + " kishi (yangi: " + nw(J) + ")\n";
-  s += "(yangi = @" + MAIN_BOT + " ga birinchi marta kelganlar)\n";
+  s += "\u2022 Bugun: " + line(fromT(dayStart)) + "\n";
+  s += "\u2022 7 kun: " + line(fromT(now - 7 * day)) + "\n";
+  s += "\u2022 30 kun: " + line(fromT(now - 30 * day)) + "\n";
+  s += "\u2022 Jami: " + line(J) + "\n";
+  s += "(yangi \u2014 bazamizda umuman yo'q edi; eski mijoz \u2014 avval Mini App'dan foydalangan yoki botni tark etgan edi)\n";
+  if(was) s += "Allaqachon botda bo'lib, tugmani shunchaki bosganlar: " + was + " \u2014 hisobga olinmadi\n";
   const by = {};
   J.forEach(function(j){ const b = by[j.c] || (by[j.c] = { n: 0, nw: 0 }); b.n++; if(j.nw) b.nw++; });
   const top = Object.keys(by).sort(function(a, b){ return by[b].n - by[a].n; }).slice(0, full ? 30 : 5);
@@ -6341,6 +6368,28 @@ function gateStatText(full){
     top.forEach(function(k, i){ const c = GATE.chats[k] || {}; s += (i + 1) + ". " + (c.t || k) + " \u2014 " + by[k].n + " (yangi " + by[k].nw + ")\n"; });
   }
   return s;
+}
+/* Guruh holatini Telegram'dan aniq so'raymiz: bot admin/o'chira oladimi va a'zolar soni.
+   (Bot /azobot'dan OLDIN qo'shilgan guruhlarda "qo'shildi" xabari yo'qolgan bo'lishi mumkin) */
+async function gateRefresh(cid){
+  const c = GATE.chats[cid]; if(!c) return;
+  c.chk = Date.now();
+  try{
+    if(!GATE.botId){ const me = await gateApi("getMe", {}); if(me && me.ok){ GATE.botId = me.result.id; GATE.un = me.result.username || GATE.un; } }
+    if(GATE.botId){
+      const m = await gateApi("getChatMember", { chat_id: cid, user_id: GATE.botId });
+      if(m && m.ok && m.result){ c.st = m.result.status; c.canDel = m.result.status === "administrator" && !!m.result.can_delete_messages; if(c.canDel) delete c.noRights; }
+      else if(m && m.description && /kicked|not found|forbidden/i.test(m.description)){ c.st = "left"; c.canDel = false; }
+    }
+    const n = await gateApi("getChatMemberCount", { chat_id: cid });
+    if(n && n.ok) c.n = n.result;
+  }catch(e){}
+  gateSave();
+}
+async function gateStatsCmd(chatId, text){
+  const ids = Object.keys(GATE.chats).filter(function(k){ const c = GATE.chats[k]; return c.st !== "left" && c.st !== "kicked" && (!c.chk || Date.now() - c.chk > 30 * 60000); }).slice(0, 25);
+  for(const k of ids){ await gateRefresh(k); }
+  send(chatId, /guruh/i.test(text) ? gateGroupsText() : gateStatText(true));
 }
 function gateGroupsText(){
   const by = {};
@@ -6375,7 +6424,7 @@ async function gateConnect(chatId, msg, text){
   const prev = GATE.token; GATE.token = tok;
   const me = await gateApi("getMe", {});
   if(!(me && me.ok)){ GATE.token = prev; send(chatId, "\u274C Token ishlamadi: " + ((me && me.description) || "?")); return; }
-  GATE.un = me.result.username;
+  GATE.un = me.result.username; GATE.botId = me.result.id;
   GATE.secret = crypto.randomBytes(24).toString("hex");
   const wh = await gateApi("setWebhook", { url: GATE_URL, secret_token: GATE.secret, drop_pending_updates: true,
     allowed_updates: ["message", "edited_message", "my_chat_member"] });
@@ -7061,7 +7110,8 @@ app.post("/webhook", (req,res)=>{
     /* /azo - a'zo bo'l boti statistikasi; /azo guruhlar; /azobot <token> - ulash */
     if(/^\/azobot(@\w+)?(\s|$)/i.test(text)){ if(ADMIN_ID && fromId !== ADMIN_ID) return; gateConnect(fromId, msg, text); return; }
     if(/^\/azo(@\w+)?(\s|$)/i.test(text)){ if(ADMIN_ID && fromId !== ADMIN_ID) return;
-      send(fromId, !GATE.token ? "A'zo bo'l boti hali ulanmagan.\nUlash: /azobot <token>" : (/guruh/i.test(text) ? gateGroupsText() : gateStatText(true))); return; }
+      if(!GATE.token){ send(fromId, "A'zo bo'l boti hali ulanmagan.\nUlash: /azobot <token>"); return; }
+      gateStatsCmd(fromId, text); return; }
     if(/^\/manba(@\w+)?(\s|$)/i.test(text)){
       if(ADMIN_ID && fromId !== ADMIN_ID) return;
       manbaCmd(fromId, text); return;
@@ -7633,8 +7683,10 @@ app.post("/webhook", (req,res)=>{
     }
     if(text.indexOf("/start") === 0){
       const dbg = load();
+      const existed0 = !!dbg[fromId];            /* Start'dan OLDIN bazada bormidi (Mini App mijozi va h.k.) */
       const ug = urec(dbg, fromId);
       const first = !ug.greeted;
+      const wasActive0 = !!ug.greeted && !ug.left; /* allaqachon botda edi (tugmani shunchaki bosgan) */
       let chg = false;
       if(first){ ug.greeted = true; ug.joined = new Date().toISOString(); chg = true; }
 
@@ -7648,7 +7700,14 @@ app.post("/webhook", (req,res)=>{
       /* A'zo bo'l boti: t.me/minatoh_bot?start=g<guruh> - guruhdan kelib Start bosdi */
       gOk.set(fromId, Date.now());
       const gmm = pay.match(/^g(\d{5,})$/);
-      if(gmm) gateJoined(fromId, "-" + gmm[1], first);
+      if(gmm){
+        /* Haqiqiy yangi: yozuv shu Start bilan yaratilgan (firstAt yangi) va oldin hech qanday faoliyat yo'q.
+           Webhook boshida har xabarda yozuv yaratiladi, shuning uchun faqat "bazada bormi" yetarli emas. */
+        const fresh0 = !existed0 || (!!ug.firstAt && Date.now() - Date.parse(ug.firstAt) < 10 * 60000);
+        const used0 = (ug.orders || []).length > 0 || (ug.topups || []).length > 0 || (Number(ug.balance) || 0) > 0 ||
+                      !!ug.phone || (Number(ug.gram) || 0) > 0 || (Number(ug.nftSom) || 0) > 0;
+        gateJoined(fromId, "-" + gmm[1], { nw: first && fresh0 && !used0, was: wasActive0 });
+      }
       /* Oxirida "n" bo'lsa — havola NFT bo'limidan olingan (ref_123n).
          Bosh sahifa havolasi (ref_123) avvalgidek ishlaydi. */
       const pm  = pay.match(/^ref_?(\d+)(n)?$/) || [];
