@@ -6609,9 +6609,23 @@ async function nwTgFetch(src){
 /* Instagram ulash: /instagram ulash <APP_ID> <APP_SECRET> <QISQA_TOKEN> */
 async function nwIgConnect(chatId, msg, a){
   if(msg && msg.message_id) aiTg("deleteMessage", { chat_id: chatId, message_id: msg.message_id });   /* kalitlar chatda qolmasin */
-  const appId = a[0], sec = a[1], short = a[2];
-  if(!/^\d{5,}$/.test(appId || "") || !/^[0-9a-f]{20,}$/i.test(sec || "") || !(short || "").length){
-    send(chatId, "Namuna:\n/instagram ulash APP_ID APP_SECRET TOKEN\n\n(APP_ID va APP_SECRET \u2014 Meta ilovangizning Settings \u2192 Basic bo'limida; TOKEN \u2014 Graph API Explorer'dan)"); return;
+  /* Qiymatlarni ko'rinishidan taniymiz: tartib va namunadagi so'zlar (APP_ID, APP_SECRET, TOKEN) muhim emas */
+  const parts = (a || []).map(function(x){ return String(x).trim().replace(/^[<\[("'«]+|[>\])"'»,.;]+$/g, ""); }).filter(Boolean)
+    .filter(function(x){ return !/^(app_?id|app_?secret|secret|token|id|ulash)$/i.test(x); });
+  const appId = parts.filter(function(x){ return /^\d{10,20}$/.test(x); })[0] || "";
+  const sec = parts.filter(function(x){ return x !== appId && /^[0-9a-f]{32}$/i.test(x); })[0] ||
+              parts.filter(function(x){ return x !== appId && /^[0-9a-f]{20,64}$/i.test(x); })[0] || "";
+  const short = parts.filter(function(x){ return /^EA[A-Za-z0-9]{40,}$/.test(x); })[0] ||
+                parts.filter(function(x){ return x !== appId && x !== sec && x.length >= 60; }).sort(function(p, q){ return q.length - p.length; })[0] || "";
+  const miss = [];
+  if(!appId) miss.push("App ID \u2014 \u00ABID \u043F\u0440\u0438\u043B\u043E\u0436\u0435\u043D\u0438\u044F\u00BB dagi raqam (faqat raqamlar)");
+  if(!sec) miss.push("App Secret \u2014 \u00AB\u0421\u0435\u043A\u0440\u0435\u0442 \u043F\u0440\u0438\u043B\u043E\u0436\u0435\u043D\u0438\u044F\u00BB \u2192 \u00AB\u041F\u043E\u043A\u0430\u0437\u0430\u0442\u044C\u00BB (32 ta belgi)");
+  if(!short) miss.push("Token \u2014 Graph API Explorer'dagi uzun matn (\u00ABEAA\u00BB bilan boshlanadi)");
+  if(miss.length){
+    send(chatId, "\u274C Quyidagilar topilmadi:\n\u2022 " + miss.join("\n\u2022 ") +
+      "\n\nXabar shunday bo'lsin (so'zlarsiz, faqat qiymatlar, orasida bo'sh joy):\n/instagram ulash 1234567890123456 3f2a9c8b7d6e5f4a3b2c1d0e9f8a7b6c EAAG\u2026" +
+      "\n\n(Xabaringiz xavfsizlik uchun o'chirildi.)");
+    return;
   }
   try{
     const ex = await nwGraph("oauth/access_token?grant_type=fb_exchange_token&client_id=" + appId + "&client_secret=" + sec + "&fb_exchange_token=" + encodeURIComponent(short), short);
