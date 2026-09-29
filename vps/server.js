@@ -6203,9 +6203,10 @@ async function gateAdmins(cid){
   const c = gAdm[cid];
   if(c && Date.now() - c.at < 600000) return c.ids;
   const r = await gateApi("getChatAdministrators", { chat_id: cid });
-  const ids = new Set();
-  if(r && r.ok) r.result.forEach(function(m){ if(m.user) ids.add(String(m.user.id)); });
-  gAdm[cid] = { at: Date.now(), ids: ids };
+  if(!(r && r.ok)) return c ? c.ids : null;                        /* Telegram javob bermadi - eski ma'lumot yoki noma'lum */
+  const ids = new Set(); let own = "";
+  r.result.forEach(function(m){ if(m.user){ ids.add(String(m.user.id)); if(m.status === "creator") own = String(m.user.id); } });
+  gAdm[cid] = { at: Date.now(), ids: ids, own: own };
   return ids;
 }
 function gateChat(chat){
@@ -6265,7 +6266,8 @@ async function gateOnMessage(msg){
   const c = gateChat(chat);
   const uid = String(from.id);
   const adm = await gateAdmins(cid);
-  if(adm.has(uid)) return;                                        /* guruh adminlari - tegilmaydi */
+  if(!adm) return;                                                /* adminlar ro'yxati noma'lum - egasining xabarini adashib o'chirmaslik uchun tegmaymiz */
+  if(gAdm[cid] && gAdm[cid].own === uid) return;                  /* faqat guruh EGASI tekshirilmaydi; boshqa adminlar ham Start bosishi shart */
   const fresh = gOk.get(uid);
   if(fresh && Date.now() - fresh < 120000) return;                /* hozirgina Start bosdi */
   if(gateStarted(uid) && await gateStillHere(uid)) return;        /* Start bosgan VA hozir ham botni bloklamagan */
@@ -6410,7 +6412,7 @@ async function gateRefresh(cid){
     if(ad && ad.ok){
       const ids = new Set(); let own = null;
       ad.result.forEach(function(m){ if(m.user){ ids.add(String(m.user.id)); if(m.status === "creator") own = m.user; } });
-      gAdm[cid] = { at: Date.now(), ids: ids };
+      gAdm[cid] = { at: Date.now(), ids: ids, own: own ? String(own.id) : "" };
       if(own) c.own = { id: String(own.id), nm: [own.first_name, own.last_name].filter(Boolean).join(" "), un: own.username || "" };
     }
   }catch(e){}
