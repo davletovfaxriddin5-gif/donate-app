@@ -6617,6 +6617,10 @@ async function nwIgConnect(chatId, msg, a){
               parts.filter(function(x){ return x !== appId && /^[0-9a-f]{20,64}$/i.test(x); })[0] || "";
   const short = parts.filter(function(x){ return /^EA[A-Za-z0-9]{40,}$/.test(x); })[0] ||
                 parts.filter(function(x){ return x !== appId && x !== sec && x.length >= 60; }).sort(function(p, q){ return q.length - p.length; })[0] || "";
+  if(!appId || !sec || !short){
+    const g = parts.join("").match(/^(\d{10,20}?)([0-9a-f]{32})(EA[A-Za-z0-9]{40,})$/);
+    if(g) return nwIgConnect(chatId, null, [g[1], g[2], g[3]]);
+  }
   const miss = [];
   if(!appId) miss.push("App ID \u2014 \u00ABID \u043F\u0440\u0438\u043B\u043E\u0436\u0435\u043D\u0438\u044F\u00BB dagi raqam (faqat raqamlar)");
   if(!sec) miss.push("App Secret \u2014 \u00AB\u0421\u0435\u043A\u0440\u0435\u0442 \u043F\u0440\u0438\u043B\u043E\u0436\u0435\u043D\u0438\u044F\u00BB \u2192 \u00AB\u041F\u043E\u043A\u0430\u0437\u0430\u0442\u044C\u00BB (32 ta belgi)");
@@ -6655,9 +6659,50 @@ setInterval(function(){
   if(left < 7 * 864e5 && !NEWS.ig.warned){ NEWS.ig.warned = 1; nwSave();
     aiTg("sendMessage", { chat_id: ADMIN_ID, text: "\u23F3 Instagram kaliti " + Math.max(0, Math.ceil(left / 864e5)) + " kunda tugaydi. Graph API Explorer'dan yangi token olib, /instagram ulash ... ni qayta yuboring." }); }
 }, 6 * 3600000);
+/* Qadamma-qadam ulash: /instagram ulash -> bot ID, Secret, Tokenni birma-bir so'raydi (telefonda eng oson) */
+let nwWiz = null;
+function nwIgWizHook(msg, text){
+  if(!nwWiz) return false;
+  if(Date.now() - nwWiz.at > 15 * 60000){ nwWiz = null; return false; }
+  const t = String(text || "").trim();
+  if(!t) return false;
+  if(/^\/?bekor\b/i.test(t) || /^\/cancel\b/i.test(t)){ nwWiz = null; send(ADMIN_ID, "Instagram'ni ulash bekor qilindi."); return true; }
+  if(t.charAt(0) === "/"){ nwWiz = null; return false; }   /* boshqa buyruq yozildi - ulash to'xtatiladi */
+  if(msg && msg.message_id) aiTg("deleteMessage", { chat_id: ADMIN_ID, message_id: msg.message_id });   /* kalitlar chatda qolmasin */
+  const v = t.replace(/\s+/g, "").replace(/^[<\[("'\u00AB]+|[>\])"'\u00BB,.;]+$/g, "");
+  nwWiz.at = Date.now();
+  if(nwWiz.step === 1){
+    if(!/^\d{10,20}$/.test(v)){ send(ADMIN_ID, "\u274C Bu App ID emas. App ID \u2014 faqat raqamlar (masalan 1377271487729700).\nQayta yuboring yoki /bekor"); return true; }
+    nwWiz.id = v; nwWiz.step = 2;
+    send(ADMIN_ID, "\u2705 App ID qabul qilindi.\n\n2/3 \u2014 Endi App Secret'ni yuboring:\nMeta \u2192 \u00AB\u041D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438 \u043F\u0440\u0438\u043B\u043E\u0436\u0435\u043D\u0438\u044F\u00BB \u2192 \u00AB\u041E\u0441\u043D\u043E\u0432\u043D\u043E\u0435\u00BB \u2192 \u00AB\u0421\u0435\u043A\u0440\u0435\u0442 \u043F\u0440\u0438\u043B\u043E\u0436\u0435\u043D\u0438\u044F\u00BB \u2192 \u00AB\u041F\u043E\u043A\u0430\u0437\u0430\u0442\u044C\u00BB \u2192 nusxa oling.\n(32 ta belgi: raqamlar va a\u2013f harflari)");
+    return true;
+  }
+  if(nwWiz.step === 2){
+    if(!/^[0-9a-f]{32}$/i.test(v)){ send(ADMIN_ID, "\u274C Bu App Secret emas \u2014 u 32 ta belgidan (raqamlar va a\u2013f harflari) iborat bo'ladi." +
+      (/[\u2022*\u00B7]/.test(t) ? "\nNuqtalar ko'rinayotgan bo'lsa \u2014 avval \u00AB\u041F\u043E\u043A\u0430\u0437\u0430\u0442\u044C\u00BB ni bosing." : "") + "\nQayta yuboring yoki /bekor"); return true; }
+    nwWiz.sec = v; nwWiz.step = 3;
+    send(ADMIN_ID, "\u2705 App Secret qabul qilindi.\n\n3/3 \u2014 Endi tokenni yuboring:\nGraph API Explorer \u2192 \u00AB\u041C\u0430\u0440\u043A\u0435\u0440 \u0434\u043E\u0441\u0442\u0443\u043F\u0430\u00BB yonidagi \uD83D\uDCCB \u2192 nusxa oling.\n(Uzun matn, odatda \u00ABEAA\u00BB bilan boshlanadi. 1 soatdan eski bo'lsa \u2014 \u00ABGenerate Access Token\u00BB ni qayta bosing.)");
+    return true;
+  }
+  if(nwWiz.step === 3){
+    if(v.length < 60){ send(ADMIN_ID, "\u274C Bu token emas \u2014 token juda uzun bo'ladi (odatda \u00ABEAA\u00BB bilan boshlanadi).\nQayta yuboring yoki /bekor"); return true; }
+    const w = nwWiz; nwWiz = null;
+    send(ADMIN_ID, "\u23F3 Tekshirilmoqda\u2026");
+    nwIgConnect(ADMIN_ID, null, [w.id, w.sec, v]).catch(function(e){ send(ADMIN_ID, "\u274C " + e.message); });
+    return true;
+  }
+  return false;
+}
 async function nwIgCmd(chatId, msg, text){
   const a = String(text || "").trim().split(/\s+/).slice(1);
-  if((a[0] || "").toLowerCase() === "ulash"){ await nwIgConnect(chatId, msg, a.slice(1)); return; }
+  if((a[0] || "").toLowerCase() === "ulash"){
+    if(a.length <= 1){
+      nwWiz = { step: 1, at: Date.now() };
+      send(chatId, "\uD83D\uDCF7 Instagram'ni ulaymiz \u2014 3 ta qisqa qadam. Har birini alohida xabar qilib yuborasiz.\n\n1/3 \u2014 App ID ni yuboring:\nMeta \u2192 \u00AB\u041D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438 \u043F\u0440\u0438\u043B\u043E\u0436\u0435\u043D\u0438\u044F\u00BB \u2192 \u00AB\u041E\u0441\u043D\u043E\u0432\u043D\u043E\u0435\u00BB \u2192 \u00AB\u0418\u0414 \u043F\u0440\u0438\u043B\u043E\u0436\u0435\u043D\u0438\u044F\u00BB dagi raqam.\n\nBekor qilish: /bekor");
+      return;
+    }
+    await nwIgConnect(chatId, msg, a.slice(1)); return;
+  }
   if(!nwIgOn()){ send(chatId, "\uD83D\uDCF7 Instagram hali ulanmagan.\nUlash: /instagram ulash APP_ID APP_SECRET TOKEN"); return; }
   send(chatId, "\uD83D\uDCF7 Instagram ulangan: @" + NEWS.ig.un + " (sahifa: " + NEWS.ig.page + ")\nKalit: " + (NEWS.ig.ptok ? "sahifa kaliti (muddatsiz)" : "foydalanuvchi kaliti, " + Math.max(0, Math.ceil((NEWS.ig.uexp - Date.now()) / 864e5)) + " kun qoldi") +
     "\nTekshiruv: soatiga bir marta\n\nRasmiy akkauntlar: /yangilik");
@@ -6906,6 +6951,7 @@ app.post("/webhook", (req,res)=>{
     /* Yordamchi AI: /yordamchi bilan boshlangan suhbat - javobni sun'iy intellekt beradi */
     if(aiHook(msg, fromId)) return;
     /* To'lov eslatmalari: /eslatma buyrug'i va qo'shish bosqichlari (faqat admin) */
+    if(ADMIN_ID && fromId === ADMIN_ID && nwIgWizHook(msg, text)) return;   /* Instagram ulash bosqichlari - tarqatmadan oldin */
     if(ADMIN_ID && fromId === ADMIN_ID && esFlowHook(text)) return;
     if(ADMIN_ID && fromId === ADMIN_ID && text.indexOf("/aistat") === 0){ aiStat(); return; }
     /* Ustoz AI: ochiq suhbatdagi mijoz yozsa (reply qilmasa ham) - adminga boradi */
