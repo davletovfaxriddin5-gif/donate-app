@@ -6271,6 +6271,7 @@ async function gateOnMember(u){
   const st = (u.new_chat_member && u.new_chat_member.status) || "";
   const old = (u.old_chat_member && u.old_chat_member.status) || "";
   const c = gateChat(chat);
+  const who = u.from ? { id: String(u.from.id), nm: [u.from.first_name, u.from.last_name].filter(Boolean).join(" "), un: u.from.username || "" } : null;
   const wasIn = old === "member" || old === "administrator" || old === "creator";
   const isIn  = st === "member" || st === "administrator";
   c.st = st;
@@ -6282,13 +6283,19 @@ async function gateOnMember(u){
     if(n && n.ok) c.n = n.result;
     if(!wasIn){
       c.addAt = new Date().toISOString();
-      if(u.from) c.by = { id: String(u.from.id), nm: String(u.from.first_name || "") + (u.from.username ? " (@" + u.from.username + ")" : "") };
-      if(ADMIN_ID) tgCall("sendMessage", { chat_id: ADMIN_ID, text:
+      if(who) c.by = who;
+      if(ADMIN_ID) aiTg("sendMessage", { chat_id: ADMIN_ID, parse_mode: "HTML", disable_web_page_preview: true, text:
         "\u2795 @" + (GATE.un || "bot") + " yangi " + (chat.type === "channel" ? "kanalga" : "guruhga") + " qo'shildi\n" +
-        (c.t || cid) + (c.un ? " (@" + c.un + ")" : "") + "\nA'zolar: " + (c.n || "?") +
-        "\nQo'shgan: " + (c.by ? c.by.nm + " (id " + c.by.id + ")" : "?") +
+        gChat(c, cid) + "\nA'zolar: " + (c.n || "?") +
+        "\nQo'shgan: " + (c.by ? gUser(c.by) : "?") +
         (chat.type === "channel" ? "\n\u2139\uFE0F Kanalda obunachilar yozmaydi - botni kanalning izohlar guruhiga qo'shish kerak."
                                  : (c.canDel ? "" : "\n\u26A0\uFE0F Hali admin emas - o'chirish huquqi berilmagan")) });
+    }
+    if(st === "administrator" && old !== "administrator" && who){   /* kim admin qildi */
+      c.adm = Object.assign({ at: new Date().toISOString() }, who);
+      if(wasIn && ADMIN_ID) aiTg("sendMessage", { chat_id: ADMIN_ID, parse_mode: "HTML", disable_web_page_preview: true,
+        text: "\uD83D\uDEE1 @" + (GATE.un || "bot") + " admin qilindi\n" + gChat(c, cid) + "\nAdmin qilgan: " + gUser(who) +
+              (c.canDel ? "" : "\n\u26A0\uFE0F \u00ABXabarlarni o'chirish\u00BB huquqi berilmagan") });
     }
     if(chat.type !== "channel"){
       if(!c.canDel) gateAskRights(cid);
@@ -6383,29 +6390,57 @@ async function gateRefresh(cid){
     }
     const n = await gateApi("getChatMemberCount", { chat_id: cid });
     if(n && n.ok) c.n = n.result;
+    const ad = await gateApi("getChatAdministrators", { chat_id: cid });
+    if(ad && ad.ok){
+      const ids = new Set(); let own = null;
+      ad.result.forEach(function(m){ if(m.user){ ids.add(String(m.user.id)); if(m.status === "creator") own = m.user; } });
+      gAdm[cid] = { at: Date.now(), ids: ids };
+      if(own) c.own = { id: String(own.id), nm: [own.first_name, own.last_name].filter(Boolean).join(" "), un: own.username || "" };
+    }
   }catch(e){}
   gateSave();
 }
 async function gateStatsCmd(chatId, text){
   const ids = Object.keys(GATE.chats).filter(function(k){ const c = GATE.chats[k]; return c.st !== "left" && c.st !== "kicked" && (!c.chk || Date.now() - c.chk > 30 * 60000); }).slice(0, 25);
   for(const k of ids){ await gateRefresh(k); }
-  send(chatId, /guruh/i.test(text) ? gateGroupsText() : gateStatText(true));
+  if(/guruh/i.test(text)){
+    for(const part of gateGroupsText()){ await aiTg("sendMessage", { chat_id: chatId, text: part, parse_mode: "HTML", disable_web_page_preview: true }); }
+    return;
+  }
+  send(chatId, gateStatText(true));
+}
+function gUser(p){
+  if(!p) return "noma'lum";
+  let nm = String(p.nm || ""), un = p.un || "";
+  const m = !un && nm.match(/^(.*?)\s*\(@(\w+)\)\s*$/);   /* eski yozuvlar: "Ism (@user)" */
+  if(m){ nm = m[1]; un = m[2]; }
+  return '<a href="tg://user?id=' + esc(String(p.id)) + '">' + esc(nm || ("id " + p.id)) + "</a>" + (un ? " @" + esc(un) : "") + " \u00B7 id " + esc(String(p.id));
+}
+function gChat(c, cid){
+  const t = esc(c.t || cid);
+  return c.un ? '<a href="https://t.me/' + esc(c.un) + '">' + t + "</a> (@" + esc(c.un) + ")" : "<b>" + t + "</b> (yopiq guruh)";
 }
 function gateGroupsText(){
   const by = {};
-  GATE.joins.forEach(function(j){ by[j.c] = (by[j.c] || 0) + 1; });
+  GATE.joins.forEach(function(j){ if(!j.was) by[j.c] = (by[j.c] || 0) + 1; });
   const L = Object.keys(GATE.chats).map(function(k){ return Object.assign({ id: k }, GATE.chats[k]); })
     .sort(function(a, b){ return (by[b.id] || 0) - (by[a.id] || 0); });
-  if(!L.length) return "Bot hali hech qaysi guruhga qo'shilmagan.";
-  let s = "\uD83D\uDCCB GURUHLAR (" + L.length + ")\n\n";
-  L.slice(0, 60).forEach(function(c, i){
+  if(!L.length) return ["Bot hali hech qaysi guruhga qo'shilmagan."];
+  const parts = []; let s = "\uD83D\uDCCB <b>GURUHLAR (" + L.length + ")</b>\n\n";
+  L.slice(0, 80).forEach(function(c, i){
     const on = c.st === "administrator" || c.st === "member";
-    s += (i + 1) + ". " + (c.t || c.id) + (c.un ? " (@" + c.un + ")" : "") + "\n   " +
-      (!on ? "\u274C chiqarilgan" : c.type === "channel" ? "\u2139\uFE0F kanal" : c.canDel ? "\u2705 ishlayapti" : "\u26A0\uFE0F huquq yo'q") +
+    let b = (i + 1) + ". " + gChat(c, c.id) + "\n   " +
+      (!on ? "\u274C chiqarilgan" : c.type === "channel" ? "\u2139\uFE0F kanal" : c.canDel ? "\u2705 ishlayapti" : "\u26A0\uFE0F admin emas / o'chirish huquqi yo'q") +
       " \u00B7 a'zolar " + (c.n || "?") + " \u00B7 Start " + (by[c.id] || 0) + " \u00B7 o'chirilgan " + (c.del || 0) +
-      (c.by ? "\n   qo'shgan: " + c.by.nm : "") + "\n";
+      "\n   Qo'shgan: " + (c.by ? gUser(c.by) : "noma'lum (bot ulanishidan oldin qo'shilgan)") +
+      (c.adm && !(c.by && String(c.adm.id) === String(c.by.id)) ? "\n   Admin qilgan: " + gUser(c.adm) : "") +
+      (c.own ? "\n   Guruh egasi: " + gUser(c.own) : "") + "\n\n";
+    if((s + b).length > 3800){ parts.push(s); s = ""; }
+    s += b;
   });
-  return s;
+  parts.push(s + "Ismni bossangiz, profil ochiladi. Username bo'lmasa, Telegram uni ba'zan ochmasligi mumkin \u2014 unda ID orqali topasiz.");
+  return parts;
+
 }
 async function gateConnect(chatId, msg, text){
   if(msg && msg.message_id) tgCall("deleteMessage", { chat_id: chatId, message_id: msg.message_id });   /* token chatda qolmasin */
@@ -6780,7 +6815,7 @@ function nwRelevant(src, it){
   if(src.steam) return NW_STEAM.test(it.t);
   return !NW_SKIP.test(it.t) && !NW_SKIP.test(s.slice(0, 120));
 }
-function nwRecent(it){ const t = Date.parse(it.at); return !t || Date.now() - t < 3 * 864e5; }
+function nwRecent(it){ const t = Date.parse(it.at); return !!t && Date.now() - t < 3 * 864e5; }   /* sanasi aniq bo'lmasa - yubormaymiz */
 function nwDate(iso){
   const d = new Date(iso); if(isNaN(d)) return "";
   const M = ["yanvar","fevral","mart","aprel","may","iyun","iyul","avgust","sentabr","oktabr","noyabr","dekabr"];
