@@ -6403,6 +6403,252 @@ app.post("/gate-webhook", function(req, res){
   }catch(e){ console.log("gate xato:", e.message); }
 });
 
+/* ======================= O'YIN YANGILIKLARI (faqat rasmiy manbalar) =======================
+   Rasmiy YouTube kanallari (RSS) va Steam'ning rasmiy e'lonlaridan yangi event, skin, mavsum,
+   kollaboratsiya haqidagi xabarlarni FAQAT adminga (@minatoh_bot chatida) rasm + matn bilan yuboradi.
+   Muxlislar sahifalari, "leak"lar, mish-mishlar olinmaydi. Esport/turnir/jonli efirlar o'tkazib yuboriladi.
+   Buyruqlar (faqat admin):
+     /yangilik                      - holat
+     /yangilik tekshir              - hozir tekshirish
+     /yangilik oxirgi <kalit>       - shu o'yinning oxirgi rasmiy yangiligini hozir yuborish (sinov)
+     /yangilik o'chir <kalit>       - o'yinni o'chirish;  /yangilik yoq <kalit> - yoqish
+     /yangilik qo'sh <kalit> <rasmiy YouTube havola> <nomi>   - yangi o'yin qo'shish
+     /yangilik olib tashla <kalit>  - qo'shilgan o'yinni o'chirib tashlash
+   Ma'lumot: /root/donate-app/news.json */
+const NEWS_FILE = "/root/donate-app/news.json";
+const NEWS_BASE = [   /* har biri rasmiy ekanligi tekshirilgan */
+  { k:"pubg",      g:"PUBG MOBILE",          yt:"UCKuBf7CRNf4OYoDyTtAL5fg" },
+  { k:"mlbb",      g:"MOBILE LEGENDS",       h:"@mobilelegends5v5moba" },
+  { k:"freefire",  g:"FREE FIRE",            yt:"UC7qTEluetD2pDB7lUBBlKuw" },
+  { k:"standoff2", g:"STANDOFF 2",           h:"@Standoff2Game" },
+  { k:"codm",      g:"CALL OF DUTY: MOBILE", h:"callofdutymobile" },
+  { k:"steam",     g:"STEAM",                steam:593110 }
+];
+let NEWS = { off: [], seen: {}, ids: {}, err: {}, fail: {}, extra: [], last: "", aiD: "", aiN: 0, sent: 0 };
+try{ const z = JSON.parse(fs.readFileSync(NEWS_FILE, "utf8")); if(z && typeof z === "object") NEWS = Object.assign(NEWS, z); }catch(e){}
+["off", "extra"].forEach(function(k){ if(!Array.isArray(NEWS[k])) NEWS[k] = []; });
+["seen", "ids", "err", "fail"].forEach(function(k){ if(!NEWS[k] || typeof NEWS[k] !== "object") NEWS[k] = {}; });
+let nwSaveT = null, nwBusy = false;
+function nwSave(){
+  clearTimeout(nwSaveT);
+  nwSaveT = setTimeout(function(){
+    try{ fs.writeFileSync(NEWS_FILE + ".tmp", JSON.stringify(NEWS)); fs.renameSync(NEWS_FILE + ".tmp", NEWS_FILE); }
+    catch(e){ console.log("news saqlash xato:", e.message); }
+  }, 300);
+}
+function nwSources(){ return NEWS_BASE.concat(NEWS.extra); }
+function nwSleep(ms){ return new Promise(function(r){ setTimeout(r, ms); }); }
+async function nwGet(url, opt, ms){
+  const ctl = new AbortController(), tm = setTimeout(function(){ ctl.abort(); }, ms || 15000);
+  try{
+    const r = await fetch(url, Object.assign({ signal: ctl.signal }, opt || {}));
+    if(!r.ok) throw new Error("http " + r.status);
+    return r;
+  }catch(e){ throw new Error(e.name === "AbortError" ? "javob kelmadi (timeout)" : e.message); }
+  finally{ clearTimeout(tm); }
+}
+const NW_UA = { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36",
+                "Accept-Language": "en-US,en;q=0.9", "Cookie": "CONSENT=YES+cb; SOCS=CAI" };
+function xmlDec(s){
+  return String(s || "").replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1")
+    .replace(/&#x([0-9a-f]+);/gi, function(m, h){ return String.fromCodePoint(parseInt(h, 16)); })
+    .replace(/&#(\d+);/g, function(m, d){ return String.fromCodePoint(+d); })
+    .replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&#39;/g, "'").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&");
+}
+/* @handle (yoki eski manzil) -> kanal ID (UC...). Bir marta aniqlanadi va eslab qolinadi */
+async function nwChannelId(src){
+  if(src.yt) return src.yt;
+  if(NEWS.ids[src.k]) return NEWS.ids[src.k];
+  const path = String(src.h || "").replace(/^https?:\/\/(www\.|m\.)?youtube\.com\//i, "").replace(/^\/+/, "");
+  const r = await nwGet("https://www.youtube.com/" + path, { headers: NW_UA }, 20000);
+  const html = await r.text();
+  const m = html.match(/<link rel="canonical" href="https:\/\/www\.youtube\.com\/channel\/(UC[\w-]{22})"/) ||
+            html.match(/"externalId":"(UC[\w-]{22})"/) || html.match(/itemprop="identifier" content="(UC[\w-]{22})"/) ||
+            html.match(/"channelId":"(UC[\w-]{22})"/);
+  if(!m) throw new Error("kanal ID topilmadi (" + path + ")");
+  NEWS.ids[src.k] = m[1]; nwSave();
+  return m[1];
+}
+function nwParseYt(xml){
+  const out = [];
+  String(xml).split("<entry>").slice(1).forEach(function(e){
+    const g = function(re){ const m = e.match(re); return m ? m[1] : ""; };
+    const vid = g(/<yt:videoId>([^<]+)<\/yt:videoId>/);
+    if(!vid) return;
+    out.push({ id: "yt:" + vid, vid: vid,
+      t: xmlDec(g(/<title>([\s\S]*?)<\/title>/)).trim(),
+      d: xmlDec(g(/<media:description>([\s\S]*?)<\/media:description>/)).trim(),
+      at: g(/<published>([^<]+)<\/published>/),
+      link: g(/<link rel="alternate" href="([^"]+)"/) || ("https://www.youtube.com/watch?v=" + vid),
+      img: g(/<media:thumbnail url="([^"]+)"/) });
+  });
+  return out;
+}
+function nwBB(s){   /* Steam matni: BBCode va HTML tozalanadi */
+  return String(s || "").replace(/\{STEAM_CLAN_IMAGE\}\S*/g, "").replace(/\[\/?[a-z0-9*]+(=[^\]]*)?\]/gi, " ")
+    .replace(/<[^>]+>/g, " ").replace(/[ \t]+/g, " ").replace(/\s*\n\s*/g, "\n").trim();
+}
+function nwSteamImg(s){
+  s = String(s || "");
+  let m = s.match(/\{STEAM_CLAN_IMAGE\}\/(\d+)\/([\w.-]+\.(?:png|jpe?g|gif|webp))/i);
+  if(m) return "https://clan.fastly.steamstatic.com/images/" + m[1] + "/" + m[2];
+  m = s.match(/\[img\](https?:\/\/[^\[]+?\.(?:png|jpe?g|gif|webp))\[\/img\]/i) || s.match(/<img[^>]+src="(https?:\/\/[^"]+)"/i);
+  return m ? m[1] : "";
+}
+async function nwFetch(src){
+  if(src.steam){
+    const r = await nwGet("https://api.steampowered.com/ISteamNews/GetNewsForApp/v2/?appid=" + src.steam +
+      "&count=10&maxlength=3000&feeds=steam_community_announcements&format=json", {}, 20000);
+    const j = await r.json();
+    const L = (j && j.appnews && j.appnews.newsitems) || [];
+    return L.map(function(n){ return { id: "st:" + n.gid, t: String(n.title || "").trim(), d: nwBB(n.contents),
+      at: new Date((n.date || 0) * 1000).toISOString(), link: n.url, img: nwSteamImg(n.contents) }; });
+  }
+  const cid = await nwChannelId(src);
+  const r = await nwGet("https://www.youtube.com/feeds/videos.xml?channel_id=" + cid, { headers: NW_UA }, 20000);
+  const xml = await r.text();
+  if(!src.cname){ const cm = xml.match(/<title>([\s\S]*?)<\/title>/); if(cm) src.cname = xmlDec(cm[1]).trim(); }
+  return nwParseYt(xml);
+}
+/* Keraksizlari: esport, turnir, jonli efir, qayta ko'rish */
+const NW_SKIP = /(\uD83D\uDD34|\blive ?stream|\bstreaming\b|\besports?\b|\btournament|\bchampionships?\b|\bgrand ?finals?\b|\bfinals? day\b|\bqualifi(er|ers|cation)\b|\bplayoffs?\b|\bgroup stage\b|\bmatch ?day\b|\bday \d+\b|\bhighlights?\b|\brecap\b|\bpmgc\b|\bpmwc\b|\bpmsl\b|\bpmpl\b|\bpmcl\b|\bmpl\b|\bmsc\b|\bmdl\b|\bffws\b|\bffwc\b|\bworld series\b|\bscrims?\b|\bwatch party\b)/i;
+const NW_STEAM = /(sale|fest|festival|event|discount|deal|free weekend|awards|summer|autumn|winter|spring|halloween|lunar|next fest)/i;
+function nwRelevant(src, it){
+  const s = it.t + " " + (src.steam ? "" : (it.d || "").slice(0, 200));
+  if(src.steam) return NW_STEAM.test(it.t);
+  return !NW_SKIP.test(it.t) && !NW_SKIP.test(s.slice(0, 120));
+}
+function nwRecent(it){ const t = Date.parse(it.at); return !t || Date.now() - t < 3 * 864e5; }
+function nwDate(iso){
+  const d = new Date(iso); if(isNaN(d)) return "";
+  const M = ["yanvar","fevral","mart","aprel","may","iyun","iyul","avgust","sentabr","oktabr","noyabr","dekabr"];
+  const t = new Date(d.getTime() + 5 * 3600000);   /* Toshkent vaqti */
+  return t.getUTCDate() + "-" + M[t.getUTCMonth()] + ", " + String(t.getUTCHours()).padStart(2, "0") + ":" + String(t.getUTCMinutes()).padStart(2, "0");
+}
+/* Qisqa o'zbekcha izoh - FAQAT rasmiy matndan, o'zidan hech narsa qo'shmasdan (kuniga 40 tagacha) */
+async function nwUz(it, game){
+  if(!AI_KEY) return "";
+  const today = new Date().toISOString().slice(0, 10);
+  if(NEWS.aiD !== today){ NEWS.aiD = today; NEWS.aiN = 0; }
+  if(NEWS.aiN >= 40) return "";
+  const sys = "Sen o'yin yangiliklarini o'zbek tiliga (lotin yozuvida) qisqa bayon qilasan. QOIDALAR: faqat berilgan rasmiy " +
+    "sarlavha va tavsifdagi faktlarni yoz; o'zingdan hech narsa qo'shma, taxmin qilma, narx, sana yoki mukofot o'ylab topma. " +
+    "Matnda bo'lsa: event nomi, skin/qurol/qahramon nomi, sanalar, narx (UC, olmos va h.k.) va qanday olinishini saqla. " +
+    "Havolalar, hashteglar, obuna bo'lish chaqiriqlari va reklama gaplarini tashlab ket. 1-3 qisqa gap. Faqat natijani yoz.";
+  const r = await aiApi(sys, [{ role: "user", content: "O'yin: " + game + "\nSarlavha: " + it.t + "\nTavsif: " + String(it.d || "").slice(0, 1800) }]);
+  if(r && r.text){ NEWS.aiN++; return r.text.trim().slice(0, 600); }
+  return "";
+}
+function nwClip(s, n){ s = String(s || "").replace(/https?:\/\/\S+/g, "").replace(/#\S+/g, "").replace(/\n{2,}/g, "\n").trim(); return s.length > n ? s.slice(0, n).replace(/\s+\S*$/, "") + "\u2026" : s; }
+async function nwSend(src, it){
+  const uz = await nwUz(it, src.g);
+  let cap = "\uD83C\uDFAE <b>" + esc(src.g) + "</b> \u2014 rasmiy yangilik\n\n<b>" + esc(it.t) + "</b>";
+  const body = uz || nwClip(it.d, 380);
+  if(body) cap += "\n\n" + esc(body);
+  cap += "\n\n\uD83D\uDCC5 " + nwDate(it.at) + "\n\uD83D\uDD17 Manba: " + (src.steam ? "Steam (rasmiy e'lon)" : "YouTube, " + esc(src.cname || "rasmiy kanal"));
+  if(cap.length > 1020) cap = cap.slice(0, 1017) + "\u2026";
+  const kb = { inline_keyboard: [[{ text: src.steam ? "\uD83D\uDCD6 Batafsil" : "\u25B6\uFE0F Videoni ko'rish", url: it.link }]] };
+  const pics = src.steam ? [it.img] : ["https://i.ytimg.com/vi/" + it.vid + "/maxresdefault.jpg", it.img, "https://i.ytimg.com/vi/" + it.vid + "/hqdefault.jpg"];
+  for(const p of pics.filter(Boolean)){
+    const r = await aiTg("sendPhoto", { chat_id: ADMIN_ID, photo: p, caption: cap, parse_mode: "HTML", reply_markup: kb });
+    if(r && r.ok){ NEWS.sent = (NEWS.sent || 0) + 1; return true; }
+  }
+  const r2 = await aiTg("sendMessage", { chat_id: ADMIN_ID, text: cap, parse_mode: "HTML", reply_markup: kb, disable_web_page_preview: false });
+  if(r2 && r2.ok){ NEWS.sent = (NEWS.sent || 0) + 1; return true; }
+  return false;
+}
+async function nwCheck(){
+  if(!ADMIN_ID || nwBusy) return;
+  nwBusy = true;
+  try{
+    for(const src of nwSources()){
+      if(NEWS.off.indexOf(src.k) > -1) continue;
+      try{
+        const items = await nwFetch(src);
+        const seen = NEWS.seen[src.k];
+        if(!Array.isArray(seen)){ NEWS.seen[src.k] = items.map(function(i){ return i.id; }); }   /* birinchi marta: eskilarini yubormaymiz */
+        else{
+          const fresh = items.filter(function(i){ return seen.indexOf(i.id) < 0; });
+          fresh.forEach(function(i){ seen.unshift(i.id); });
+          if(seen.length > 300) seen.length = 300;
+          const good = fresh.filter(function(i){ return nwRelevant(src, i) && nwRecent(i); }).slice(0, 3).reverse();
+          for(const it of good){ await nwSend(src, it); await nwSleep(1500); }
+        }
+        delete NEWS.err[src.k]; delete NEWS.fail[src.k];
+      }catch(e){
+        NEWS.err[src.k] = { m: String(e.message || e).slice(0, 160), at: new Date().toISOString() };
+        NEWS.fail[src.k] = (NEWS.fail[src.k] || 0) + 1;
+        if(NEWS.fail[src.k] === 12) aiTg("sendMessage", { chat_id: ADMIN_ID, text: "\u26A0\uFE0F Yangiliklar: " + src.g + " manbasi 4 soatdan beri ochilmayapti.\nSabab: " + NEWS.err[src.k].m + "\nHolat: /yangilik" });
+      }
+      await nwSleep(800);
+    }
+    NEWS.last = new Date().toISOString();
+    nwSave();
+  }finally{ nwBusy = false; }
+}
+setTimeout(function(){ nwCheck().catch(function(e){ console.log("news:", e.message); }); }, 90 * 1000);
+setInterval(function(){ nwCheck().catch(function(e){ console.log("news:", e.message); }); }, 20 * 60000);
+function nwStatus(){
+  let s = "\uD83D\uDCF0 O'YIN YANGILIKLARI (faqat rasmiy manbalar)\n\n";
+  nwSources().forEach(function(src){
+    const on = NEWS.off.indexOf(src.k) < 0, e = NEWS.err[src.k];
+    s += (on ? (e ? "\u26A0\uFE0F " : "\u2705 ") : "\u23F8 ") + src.g + "  (" + src.k + ")" + (src.steam ? " \u00B7 Steam" : " \u00B7 YouTube") +
+      (on ? "" : " \u2014 o'chirilgan") + (e ? "\n     xato: " + e.m : "") + "\n";
+  });
+  s += "\nOxirgi tekshiruv: " + (NEWS.last ? nwDate(NEWS.last) : "hali yo'q") + " (har 20 daqiqada)";
+  s += "\nJami yuborilgan: " + (NEWS.sent || 0) + " \u00B7 bugungi o'zbekcha izohlar: " + (NEWS.aiD === new Date().toISOString().slice(0, 10) ? NEWS.aiN : 0) + "/40";
+  s += "\n\nBuyruqlar:\n/yangilik tekshir \u2014 hozir tekshirish\n/yangilik oxirgi pubg \u2014 oxirgi rasmiy yangilikni ko'rish\n/yangilik o'chir pubg \u00B7 /yangilik yoq pubg\n/yangilik qo'sh genshin https://www.youtube.com/@GenshinImpact Genshin Impact\n/yangilik olib tashla genshin";
+  return s;
+}
+async function nwCmd(chatId, text){
+  const a = String(text || "").trim().split(/\s+/).slice(1);
+  const cmd = (a[0] || "").toLowerCase().replace(/[\u2019`]/g, "'");
+  const findSrc = function(k){ k = String(k || "").toLowerCase(); return nwSources().filter(function(s){ return s.k === k; })[0]; };
+  if(!cmd){ send(chatId, nwStatus()); return; }
+  if(cmd === "tekshir"){ send(chatId, "\uD83D\uDD0D Tekshirilmoqda\u2026"); await nwCheck(); send(chatId, nwStatus()); return; }
+  if(cmd === "oxirgi"){
+    const src = findSrc(a[1]); if(!src){ send(chatId, "Kalit topilmadi. Ro'yxat: /yangilik"); return; }
+    try{
+      const items = (await nwFetch(src)).filter(function(i){ return nwRelevant(src, i); });
+      if(!items.length){ send(chatId, src.g + ": hozircha mos rasmiy yangilik topilmadi."); return; }
+      await nwSend(src, items[0]);
+    }catch(e){ send(chatId, "\u274C " + src.g + ": " + e.message); }
+    return;
+  }
+  if(cmd === "o'chir" || cmd === "ochir" || cmd === "yoq"){
+    const src = findSrc(a[1]); if(!src){ send(chatId, "Kalit topilmadi. Ro'yxat: /yangilik"); return; }
+    NEWS.off = NEWS.off.filter(function(k){ return k !== src.k; });
+    if(cmd !== "yoq") NEWS.off.push(src.k);
+    nwSave(); send(chatId, src.g + (cmd === "yoq" ? " yoqildi \u2705" : " o'chirildi \u23F8")); return;
+  }
+  if(cmd === "qo'sh" || cmd === "qosh"){
+    const k = String(a[1] || "").toLowerCase(), url = String(a[2] || ""), nm = a.slice(3).join(" ").trim();
+    if(!/^[a-z0-9_]{2,20}$/.test(k) || !/youtube\.com\/(@[\w.-]+|channel\/UC[\w-]{22}|c\/[\w.-]+|user\/[\w.-]+|[\w.-]+)\/?$/i.test(url) || !nm){
+      send(chatId, "Namuna:\n/yangilik qo'sh genshin https://www.youtube.com/@GenshinImpact Genshin Impact\n\nHavolani o'yinning rasmiy saytidan yoki Play Market/App Store sahifasidan oling \u2014 shunda aniq rasmiy bo'ladi."); return;
+    }
+    if(findSrc(k)){ send(chatId, "Bu kalit band: " + k); return; }
+    const cm = url.match(/channel\/(UC[\w-]{22})/);
+    const src = cm ? { k: k, g: nm.toUpperCase(), yt: cm[1] } : { k: k, g: nm.toUpperCase(), h: url.replace(/^https?:\/\/(www\.|m\.)?youtube\.com\//i, "").replace(/\/+$/, "") };
+    try{
+      const items = await nwFetch(src);
+      NEWS.extra.push({ k: src.k, g: src.g, yt: src.yt, h: src.h });
+      NEWS.seen[k] = items.map(function(i){ return i.id; });   /* eskilarini yubormaymiz */
+      nwSave();
+      send(chatId, "\u2705 Qo'shildi: " + src.g + "\nYouTube kanal nomi: \u00AB" + (src.cname || "?") + "\u00BB\nOxirgi video: " + (items[0] ? items[0].t : "\u2014") +
+        "\n\n\u2757 Kanal nomini tekshiring: agar bu o'yinning RASMIY kanali bo'lmasa \u2014 /yangilik olib tashla " + k);
+    }catch(e){ delete NEWS.ids[k]; send(chatId, "\u274C Qo'shib bo'lmadi: " + e.message); }
+    return;
+  }
+  if(cmd === "olib"){
+    const k = String(a[2] || a[1] || "").toLowerCase();
+    const n0 = NEWS.extra.length; NEWS.extra = NEWS.extra.filter(function(s){ return s.k !== k; });
+    if(NEWS.extra.length === n0){ send(chatId, "Faqat o'zingiz qo'shgan o'yinni olib tashlash mumkin. Asosiylarini: /yangilik o'chir " + k); return; }
+    delete NEWS.seen[k]; delete NEWS.ids[k]; delete NEWS.err[k]; delete NEWS.fail[k]; NEWS.off = NEWS.off.filter(function(x){ return x !== k; });
+    nwSave(); send(chatId, "\uD83D\uDDD1 Olib tashlandi: " + k); return;
+  }
+  send(chatId, nwStatus());
+}
+
 app.post("/webhook", (req,res)=>{
   res.sendStatus(200);
   const hdr = req.get("X-Telegram-Bot-Api-Secret-Token") || "";
@@ -6485,7 +6731,8 @@ app.post("/webhook", (req,res)=>{
       const arm = { "/xabar":"btn", "/bonus":"bonus", "/oyin":"oyin", "/yangi":"yangi",
                     "/albom":"plain", "/kirish":"kirish", "/minato":"minato" };
       let hit = null;
-      Object.keys(arm).forEach(function(c){ if(text.indexOf(c) === 0) hit = c; });
+      /* Buyruq ANIQ mos kelsin: "/yangi" tarqatmani yoqadi, "/yangilik" (yangiliklar) esa yoqmasin */
+      Object.keys(arm).forEach(function(c){ if(text.indexOf(c) === 0 && !/[A-Za-z0-9_']/.test(text.charAt(c.length))) hit = c; });
       if(hit){
         bcastReset();
         bcast.armed = true;
@@ -6573,6 +6820,8 @@ app.post("/webhook", (req,res)=>{
     /* /bloklar - bloklangan hisoblar ro'yxati */
     /* /foyda - davr bo'yicha foyda va statistika */
     /* /manba - joriy manba;  /manba s2t - zaxiraga;  /manba fzr - asosiyga */
+    /* /yangilik - rasmiy o'yin yangiliklari (faqat admin) */
+    if(/^\/yangilik(@\w+)?(\s|$)/i.test(text)){ if(ADMIN_ID && fromId !== ADMIN_ID) return; nwCmd(fromId, text); return; }
     /* /azo - a'zo bo'l boti statistikasi; /azo guruhlar; /azobot <token> - ulash */
     if(/^\/azobot(@\w+)?(\s|$)/i.test(text)){ if(ADMIN_ID && fromId !== ADMIN_ID) return; gateConnect(fromId, msg, text); return; }
     if(/^\/azo(@\w+)?(\s|$)/i.test(text)){ if(ADMIN_ID && fromId !== ADMIN_ID) return;
