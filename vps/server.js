@@ -6219,25 +6219,34 @@ function gateChat(chat){
   if(ch) gateSave();
   return c;
 }
-/* Ogohlantirish: bir odamga daqiqasiga 1 ta, guruhga daqiqasiga 20 tadan oshmaydi (spam bo'lmasin) */
+/* Ogohlantirish: har bir o'chirilgan xabardan keyin tugma yana ENG PASTDA chiqadi (faol guruhda tepaga chiqib ketmasin).
+   Eskisi o'chiriladi - har odam uchun doim bitta. Ketma-ket (3 soniya ichida) yozsa - qayta chiqarmaymiz (miltillamasin).
+   Telegram guruhga daqiqasiga ~20 xabardan ko'p ruxsat bermaydi - chegaraga yetsa eski tugma qoladi. */
 const gWarn = {}, gWarnMin = {}, gAsk = {};
 function gateWarn(cid, from){
   const key = cid + ":" + from.id, now = Date.now();
-  const w = gWarn[key]; if(w && now - w.at < 60000) return;
+  const w = gWarn[key];
+  if(w && now - w.at < 3000) return;
   const lst = (gWarnMin[cid] || []).filter(function(t){ return now - t < 60000; });
   gWarnMin[cid] = lst;
-  if(lst.length >= 20) return;
+  if(lst.length >= 18) return;
   lst.push(now);
+  if(w && w.mid) gateApi("deleteMessage", { chat_id: cid, message_id: w.mid });
   gWarn[key] = { at: now, mid: 0 };
   const nm = esc(String(from.first_name || from.username || "Do'stim").slice(0, 40));
   const link = "https://t.me/" + MAIN_BOT + "?start=g" + String(cid).replace("-", "");
   gateApi("sendMessage", { chat_id: cid, parse_mode: "HTML", disable_notification: true,
-    text: '<a href="tg://user?id=' + from.id + '">' + nm + "</a>, guruhda yozish uchun @" + MAIN_BOT +
+    text: '\u26A0\uFE0F <a href="tg://user?id=' + from.id + '">' + nm + "</a>, xabaringiz o'chirildi.\nGuruhda yozish uchun @" + MAIN_BOT +
           " ga a'zo bo'ling: pastdagi tugmani bosing va <b>Start</b> ni bosing \uD83D\uDC47",
     reply_markup: { inline_keyboard: [[{ text: "\u2705 A'zo bo'lish", url: link }]] } }).then(function(r){
       if(!(r && r.ok)) return;
-      if(gWarn[key]) gWarn[key].mid = r.result.message_id;
-      setTimeout(function(){ gateApi("deleteMessage", { chat_id: cid, message_id: r.result.message_id }); }, 60000);
+      const mid = r.result.message_id;
+      if(gWarn[key] && gWarn[key].at === now) gWarn[key].mid = mid;
+      else { gateApi("deleteMessage", { chat_id: cid, message_id: mid }); return; }   /* orada yangisi chiqib bo'lgan */
+      setTimeout(function(){
+        gateApi("deleteMessage", { chat_id: cid, message_id: mid });
+        if(gWarn[key] && gWarn[key].mid === mid) gWarn[key].mid = 0;
+      }, 120000);
   });
 }
 function gateAskRights(cid){
