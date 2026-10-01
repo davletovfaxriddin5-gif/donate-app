@@ -2571,6 +2571,27 @@ body.light .pw-code i.f{ background:linear-gradient(180deg, rgba(59,77,240,.20),
 .ot-in.ow-in .act{ color:#8B9BFF; font-size:15px; font-weight:600; padding:0 8px }
 .ot-in.ow-in .qr{ width:40px; height:40px }
 .ot-in.ow-in .qr svg{ width:23px; height:23px; stroke:#8B9BFF }
+/* Ikonkalar chetidagi "shisha" yorug'lik (profil rasmi halqasidagidek): chap/o'ng cheti yorqinroq, tepa/pasti xira.
+   Sozlamalar (.ic.ios), Admin bilan bog'lanish va NFT -> Yechib olish (.ic.gl) ikonkalari uchun. */
+.ic.ios, .ic.gl{ position:relative }
+.ic.ios::after, .ic.gl::after{ content:""; position:absolute; top:0; left:0; right:0; bottom:0; border-radius:inherit; padding:1px;
+  background:conic-gradient(rgba(255,255,255,.16), rgba(255,255,255,.58) 25%, rgba(255,255,255,.16) 50%, rgba(255,255,255,.58) 75%, rgba(255,255,255,.16));
+  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask-composite:exclude; pointer-events:none }
+/* Tashqi hamyon: TON manzili maydoni ixchamroq, chetida shisha chiziq, "O'zimga" va skaner kichikroq */
+.ot-in.ow-in{ position:relative; height:46px; border-color:transparent }
+.ot-in.ow-in::after{ content:""; position:absolute; top:-1px; left:-1px; right:-1px; bottom:-1px; border-radius:inherit; padding:1px;
+  background:conic-gradient(rgba(255,255,255,.13), rgba(255,255,255,.43) 25%, rgba(255,255,255,.13) 50%, rgba(255,255,255,.43) 75%, rgba(255,255,255,.13));
+  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask-composite:exclude; pointer-events:none }
+body.light .ot-in.ow-in::after{ background:conic-gradient(rgba(16,24,40,.10), rgba(16,24,40,.30) 25%, rgba(16,24,40,.10) 50%, rgba(16,24,40,.30) 75%, rgba(16,24,40,.10)) }
+.ot-in.ow-in:has(input.err)::after{ display:none }
+.ot-in.ow-in .act{ font-size:13.5px; padding:0 6px }
+.ot-in.ow-in .qr{ width:36px; height:36px }
+.ot-in.ow-in .qr svg{ width:21px; height:21px }
+/* Telegram Stars: username maydoni "Miqdorni kiriting" maydoni bilan bir xil ko'rinishda, "O'zimga" kichikroq */
+.ot-in.so-in{ height:45px; padding:0 6px 0 12px; gap:9px; background:var(--card); border:1px solid var(--stroke); border-radius:18px }
+.ot-in.so-in input{ font-size:15.5px; font-weight:600 }
+.ot-in.so-in input::placeholder{ font-weight:500 }
+.ot-in.so-in .act{ font-size:12.5px; height:30px; padding:0 8px }
 .ow-rec{ margin:2px 0 14px }
 .ow-rh{ display:flex; align-items:center; justify-content:space-between; margin:0 2px 4px }
 .ow-rh span{ font-size:15px; font-weight:700; color:var(--dim) }
@@ -11030,7 +11051,7 @@ function renderOut(){
   <div class="pf-sec">Kripto</div>
   <div class="pf-list">
     <button class="svc" onclick="go('nft_out_wallet')">
-      <span class="ic" style="background:#2D9CDB">
+      <span class="ic gl" style="background:#2D9CDB">
         <svg viewBox="0 0 24 24"><path d="M3.5 8A2.5 2.5 0 0 1 6 5.5h10.5A2.5 2.5 0 0 1 19 8"/><rect x="3.5" y="8" width="17" height="10.5" rx="2.5"/><path d="M20.5 11.6h-3a1.9 1.9 0 0 0 0 3.8h3"/></svg>
       </span>
       <span class="txt"><div class="t">Tashqi hamyon yoki birja</div><div class="s">Manzilga yuborish</div></span>
@@ -11040,7 +11061,7 @@ function renderOut(){
   <div class="pf-sec">Telegramda sarflash</div>
   <div class="pf-list">
     <button class="svc" onclick="go('nft_out_stars')">
-      <span class="ic" style="background:#F0A93C">
+      <span class="ic gl" style="background:#F0A93C">
         <svg viewBox="0 0 24 24"><path d="M12 3.2l2.7 5.6 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1L3.2 9.7l6.1-.9z"/></svg>
       </span>
       <span class="txt"><div class="t">Telegram Stars</div><div class="s">Sovg'a va mini ilovalar uchun</div></span>
@@ -11050,7 +11071,7 @@ function renderOut(){
   <div class="pf-sec">So'm</div>
   <div class="pf-list">
     <button class="svc" onclick="ocStep=1; go('nft_out_card')">
-      <span class="ic" style="background:#2FB574">
+      <span class="ic gl" style="background:#2FB574">
         <svg viewBox="0 0 24 24"><rect x="3" y="5.5" width="18" height="13" rx="2.5"/><path d="M3 10h18M6.5 15h3"/></svg>
       </span>
       <span class="txt"><div class="t">Kartaga chiqarish</div><div class="s">O'z kartangizga o'tkazish</div></span>
@@ -11227,7 +11248,7 @@ function renderOutStars(){
   const q = [100, 250, 500, 1000, 2500];
   app.innerHTML = `<div class="page-title">Telegram Stars</div>
   <div class="ot-hint">GRAM hisobingizdan Stars sotib oling — o'zingizga yoki do'stingizga.</div>
-  <div class="ot-in">
+  <div class="ot-in so-in">
     <input id="soUser" type="text" placeholder="@ Telegram username" autocomplete="off" spellcheck="false" oninput="soUserIn()">
     <button class="act" onclick="soMe()">O'zimga</button>
   </div>
@@ -12011,12 +12032,12 @@ function renderSpam(){
   <div class="page-title">Admin bilan bog'lanish</div>
   <div class="id-res wait" style="margin-bottom:16px"><div>Akkauntingiz cheklanmagan bo'lsa, to'g'ridan-to'g'ri adminga yozing.</div><div style="margin-top:6px">Telegram akkauntingiz spam sababli cheklangan va adminga yoza olmayotgan bo'lsangiz, Chat bo'limidan foydalaning.</div><div style="margin-top:6px">Chat bo'limidagi yozishmalarni faqat siz va admin ko'radi.</div></div>
   <button class="svc" onclick="openLink('https://t.me/${ADMIN_USERNAME}')">
-    <span class="ic" style="background:#2E7BC0"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H8l-4 4V5a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2z"/></svg></span>
+    <span class="ic gl" style="background:#2E7BC0"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H8l-4 4V5a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2z"/></svg></span>
     <span class="txt"><div class="t">@${ADMIN_USERNAME}</div><div class="s">Telegramda to'g'ridan-to'g'ri yozish</div></span>
     <span class="arw">›</span>
   </button>
   <button class="svc" onclick="go('chat')" style="margin-top:10px">
-    <span class="ic" style="background:#3AA76D"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H8l-4 4z"/></svg></span>
+    <span class="ic gl" style="background:#3AA76D"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H8l-4 4z"/></svg></span>
     <span class="txt"><div class="t">Chat bo'limi</div><div class="s">Ilova ichida yozish, cheklov ta'sir qilmaydi</div></span>
     <span class="arw">›</span>
   </button>`;
