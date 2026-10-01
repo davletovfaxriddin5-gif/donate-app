@@ -2368,6 +2368,18 @@ body.light .sz-my{ border-bottom-color:rgba(0,0,0,.08) } body.light .sz-lr{ bord
 .pf2-season .ic{ width:40px; height:40px; border-radius:12px }
 .pf2-season .ic svg{ width:21px; height:21px }
 .pf2-season .v{ font-size:16px }
+/* Mavsum tugmasi pastida NFT sovg'alar qatori. Rasmlar repo ildizida: mavsum-1.jpg ... mavsum-5.jpg */
+.pf2-season{ padding-bottom:50px }
+.pf2-gifts{ position:absolute; left:0; right:0; bottom:-18px; display:flex; align-items:flex-end;
+  justify-content:center; padding:0 12px; pointer-events:none }
+.pf2-gifts img{ flex:none; width:16.5%; max-width:62px; height:auto; display:block; border-radius:14px;
+  border:1.5px solid rgba(255,255,255,.3); box-shadow:0 8px 18px rgba(20,8,70,.38) }
+.pf2-gifts img + img{ margin-left:3% }
+.pf2-gifts img:nth-child(1){ transform:translateY(4px) rotate(-9deg) }
+.pf2-gifts img:nth-child(2){ transform:translateY(-2px) rotate(6deg) }
+.pf2-gifts img:nth-child(3){ transform:translateY(-6px) rotate(-3deg) }
+.pf2-gifts img:nth-child(4){ transform:translateY(-1px) rotate(7deg) }
+.pf2-gifts img:nth-child(5){ transform:translateY(5px) rotate(-7deg) }
 .pf2-ref{ padding:11px 12px; gap:10px; border-radius:16px; margin-bottom:8px }
 .pf2-ref .ic{ width:32px; height:32px; border-radius:10px }
 .pf2-ref .ic svg{ width:17px; height:17px }
@@ -8537,6 +8549,7 @@ function renderNftProfile(){
     <span class="ic"><svg viewBox="0 0 24 24"><path d="M8 4h8v5a4 4 0 0 1-8 0V4z"/><path d="M8 6H5.5a2.5 2.5 0 0 0 2.6 3.9M16 6h2.5a2.5 2.5 0 0 1-2.6 3.9"/><path d="M12 13v3.5M8.5 20h7M10 16.5h4"/></svg></span>
     <span><div class="t">MAVSUM #1</div><div class="v">${SZ_OPEN ? "Ochko to'plang" : 'Tez orada'}</div></span>
     <span class="go">Batafsil</span>
+    <span class="pf2-gifts" aria-hidden="true">${[1,2,3,4,5].map(n => `<img src="/mavsum-${n}.jpg" width="240" height="240" alt="" decoding="async" onerror="this.style.visibility='hidden'">`).join('')}</span>
   </button>
 
   <div class="pf-sec">Xavfsizlik</div>
