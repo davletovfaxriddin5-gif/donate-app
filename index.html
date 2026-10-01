@@ -2337,6 +2337,9 @@ body.light .ref-seg button.on b{ background:rgba(255,255,255,.25) }
 .sz-rk3 .sz-3d{ opacity:0 }
 .sz-fly.on3d .sz-3d{ opacity:1 }
 .sz-fly.on3d .sz-poster{ opacity:0 }
+/* Raketa burnidagi havo oqimi (2D qatlam, 3D raketa ustida) */
+.sz-rk3 .sz-air{ position:absolute; inset:0; width:100%; height:100%; display:block; pointer-events:none; opacity:0; transition:opacity .35s ease }
+.sz-fly.on3d .sz-air{ opacity:1 }
 /* Ochko belgisi: oltin tanga */
 .sz-coin{ display:inline-block; object-fit:contain; flex-shrink:0; pointer-events:none }
 .sz-big .sz-coin{ width:42px; height:42px; margin:-4px 0 -4px 0 }
@@ -9732,6 +9735,7 @@ function szRocket(){
     '<div class="sz-rk sz-rk3"><div class="sz-fly" id="szFly">' +
       '<img class="sz-poster" src="' + SZ_POSTER + '" alt="">' +
       '<canvas class="sz-3d" id="sz3d"></canvas>' +
+      '<canvas class="sz-air" id="szAir"></canvas>' +
     '</div></div></div>';
 }
 /* Ochkolar: xarid va sotuv serverdagi tarixdan; so'mdagi summa joriy
@@ -10092,7 +10096,7 @@ function sz3Load(st, b){
   const p = js.meshes[0].primitives[0], mat = js.materials[p.material || 0], pbr = mat.pbrMetallicRoughness;
   gl.bindVertexArray(gl.createVertexArray());
   const attr = function(d, loc, n){ gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer()); gl.bufferData(gl.ARRAY_BUFFER, d, gl.STATIC_DRAW); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, n, gl.FLOAT, false, 0, 0); };
-  attr(acc(p.attributes.POSITION, Float32Array, 3), 0, 3); attr(acc(p.attributes.NORMAL, Float32Array, 3), 1, 3); attr(acc(p.attributes.TEXCOORD_0, Float32Array, 2), 2, 2);
+  const pos3 = acc(p.attributes.POSITION, Float32Array, 3); attr(pos3, 0, 3); szAirGeo(st, pos3); attr(acc(p.attributes.NORMAL, Float32Array, 3), 1, 3); attr(acc(p.attributes.TEXCOORD_0, Float32Array, 2), 2, 2);
   const ia = js.accessors[p.indices], big = ia.componentType === 5125;
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, gl.createBuffer()); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, acc(p.indices, big ? Uint32Array : Uint16Array, 1), gl.STATIC_DRAW);
   st.n = ia.count; st.it = big ? gl.UNSIGNED_INT : gl.UNSIGNED_SHORT;
@@ -10153,13 +10157,128 @@ function szBump(u, c, hw, T){
 }
 /* Titrash: haqiqiy raketadek mayda qaltirash (11-27 Hz, takrorlanmaydigan),
    otilishda kuchliroq. Vaqt halqaga bog'lanmagan — har safar boshqacha. */
+/* Chayqalish (boshqa ilovadagi raketadan o'lchangan): burun ±3 gradus atrofida ~1 s va ~3,4 s
+   davrlarda chayqaladi, raketa yonga va oldinga-orqaga sekin suzadi. Davrlar 2,7 s halqaga karrali
+   emas, shuning uchun harakat har safar biroz boshqacha. */
+function szSway(t){
+  const P = 6.28319;
+  return { w: 2.6 * Math.sin(t * P / 1.02 + .7) + 1.1 * Math.sin(t * P / 3.4 + 2.1),
+           p: .028 * Math.sin(t * P / 1.37 + 1.3) + .018 * Math.sin(t * P / 3.4 + .4),
+           d: .016 * Math.sin(t * P / 1.7 + 2.6) };
+}
+/* Aylanish tezligi (0..1) — SZ_SPN dagi bilan bir xil egri */
+function szSpV(u){ if(u < .18) return 0; if(u < .30){ const y = (u - .18) / .12; return y * y * (3 - 2 * y); } if(u < .95) return 1; return Math.pow(Math.max(0, 1 - (u - .95) / 1.75), 1.4); }
 function szMo(t){
-  const u = ((t % SZ_T) + SZ_T) % SZ_T, ax = szFax(u), env = .6 + .8 * szBump(u, .36, .30, SZ_T);
+  const u = ((t % SZ_T) + SZ_T) % SZ_T, ax = szFax(u), env = .75 + .65 * szBump(u, .36, .30, SZ_T), sw = szSway(t);
   const n1 = Math.sin(t * 71.3 + .4) * .5 + Math.sin(t * 112.9 + 1.7) * .3 + Math.sin(t * 151.1 + 2.9) * .2;
   const n2 = Math.sin(t * 83.7 + 2.2) * .5 + Math.sin(t * 127.3 + .9) * .3 + Math.sin(t * 166.9 + .3) * .2;
   const n3 = Math.sin(t * 67.1 + 1.1) * .5 + Math.sin(t * 104.3 + 2.5) * .3 + Math.sin(t * 143.9 + .7) * .2;
-  return { ax: ax, rd: Math.pow(ax, -.6), d: (szFd(u) + .006 * env * n2) * 1.9, p: .010 * env * n1 * 1.9,
-           w: (szFw(u) + .9 * env * n3) * Math.PI / 180, sp: szSpin(u) };
+  /* Aylanish to'xtagan paytda ham raketa qotib qolmaydi: M belgisi bilan birga o'z o'qi atrofida
+     ±15 gradus sekin chayqaladi (aylanish tezlashgani sari bu chayqalish o'chadi). */
+  const rest = 1 - szSpV(u);
+  return { ax: ax, rd: Math.pow(ax, -.6), d: (szFd(u) + .006 * env * n2 + sw.d) * 1.9, p: (.013 * env * n1 + sw.p) * 1.9,
+           w: (szFw(u) + 1.2 * env * n3 + sw.w) * Math.PI / 180, sp: szSpin(u) + .26 * rest * Math.sin(t * 6.28319 / 1.7 + .9),
+           u: u, air: szAirA(u) };
+}
+/* ---------- Raketa burnidagi havo oqimi ----------
+   Raketa otilganda burnini yupqa "havo qobig'i" o'rab oladi: uchidan orqaga ikki tomonga
+   cho'zilgan yorug' chiziq, ichida havo oqimi chiziqlari orqaga oqadi, burun ustida yengil
+   yaltirash. Raketa aylanishi bilan ikki tomonning uzunligi almashib turadi (havo aylanib
+   o'tayotgandek). Sekinlashib qaytganda asta so'nadi. 3D chizgich bilan bir xil proyeksiya
+   ishlatiladi, shuning uchun burun bilan birga yuradi, titraydi va chayqaladi. */
+function szAirA(u){
+  if(u < .18) return 0;
+  if(u < .32){ const y = (u - .18) / .14; return y * y * (3 - 2 * y); }
+  if(u < .95) return 1;
+  return Math.pow(Math.max(0, 1 - (u - .95) / .95), 1.5);
+}
+function szAirGeo(st, pos){
+  let y0 = Infinity, y1 = -Infinity;
+  for(let i = 1; i < pos.length; i += 3){ const y = pos[i]; if(y < y0) y0 = y; if(y > y1) y1 = y; }
+  const L = (y1 - y0) || 1; let r = 0;
+  for(let i = 0; i < pos.length; i += 3){
+    const y = pos[i + 1];
+    if(y > y1 - .30 * L && y < y1 - .08 * L){ const q = Math.hypot(pos[i], pos[i + 2]); if(q > r) r = q; }
+  }
+  st.yTip = y1; st.len = L; st.rN = r || .12 * L;
+}
+function szAirDraw(st, M, VP, W, H, t, m, still, dpr){
+  let ac = st.ac;
+  if(!ac || !ac.isConnected){ ac = st.ac = document.getElementById('szAir'); st.acx = ac ? ac.getContext('2d') : null; }
+  const x = st.acx; if(!ac || !x) return;
+  if(ac.width !== W || ac.height !== H){ ac.width = W; ac.height = H; }
+  x.clearRect(0, 0, W, H);
+  const a = still ? 0 : (m.air || 0);
+  if(!(a > .01) || st.yTip == null) return;
+  /* model nuqtasini (o'q ustida) ekran pikseliga o'tkazish */
+  const pr = function(py){
+    const wx = M[4] * py + M[12], wy = M[5] * py + M[13], wz = M[6] * py + M[14];
+    const cw = VP[3] * wx + VP[7] * wy + VP[11] * wz + VP[15];
+    return [((VP[0] * wx + VP[4] * wy + VP[8] * wz + VP[12]) / cw * .5 + .5) * W,
+            (.5 - (VP[1] * wx + VP[5] * wy + VP[9] * wz + VP[13]) / cw * .5) * H];
+  };
+  const tip = pr(st.yTip), bk = pr(st.yTip - .25 * st.len);
+  let fx = tip[0] - bk[0], fy = tip[1] - bk[1]; const fl = Math.hypot(fx, fy) || 1; fx /= fl; fy /= fl;
+  const R = st.rN * (m.rd || 1) * fl / (.25 * st.len * (m.ax || 1));      /* burun radiusi, px */
+  const ux = fy, uy = -fx;                                                  /* "tepa" tomon */
+  const P = function(along, side){ return [tip[0] + fx * along + ux * side, tip[1] + fy * along + uy * side]; };
+  const Ln = 1.9 * R, g0 = .22 * R;
+  const hw = function(s){ return R * Math.sqrt(Math.min(s, Ln) / Ln); };    /* burun yarim kengligi */
+  const grow = .35 + .65 * a, br = .9 + .1 * Math.sin(t * 6.28319 * 2.7);
+  const b1 = .5 + .5 * Math.cos(m.sp || 0), b2 = .5 + .5 * Math.cos((m.sp || 0) + 2.1);
+  const S = [(2.0 * R + 1.8 * R * b1) * grow * br, (1.3 * R + 1.2 * R * b2) * grow * br];
+  const col = document.body.classList.contains('light') ? '112,130,186' : '255,255,255';
+  const N = 26, lines = [];
+  for(let k = 0; k < 2; k++){
+    /* burun chetidan tashqariga g masofada: uchida oldinga, orqada yon tomonga — yumaloq va silliq */
+    const sg = k ? -1 : 1, pts = [];
+    for(let i = 0; i <= N; i++){
+      const s = S[k] * Math.pow(i / N, 1.6), d1 = s < Ln ? R / (2 * Math.sqrt(Math.max(s, 1e-4 * R) * Ln)) : 0, nl = Math.hypot(d1, 1), g = g0 + .10 * s;
+      pts.push(P(-s + g * d1 / nl, sg * (hw(s) + g / nl)));
+    }
+    lines.push(pts);
+  }
+  const Smax = Math.max(S[0], S[1]) + 2 * R;
+  const grad = function(a0, a1){
+    const gr = x.createRadialGradient(tip[0], tip[1], 0, tip[0], tip[1], Smax);
+    gr.addColorStop(0, 'rgba(' + col + ',' + a0 + ')'); gr.addColorStop(.45, 'rgba(' + col + ',' + a1 + ')'); gr.addColorStop(1, 'rgba(' + col + ',0)');
+    return gr;
+  };
+  /* 1) burun ustidagi yengil havo yostig'i */
+  x.beginPath();
+  const cap = function(pts, rev){ const n = Math.round(pts.length * .55); const arr = pts.slice(0, n); (rev ? arr.reverse() : arr).forEach(function(q, i){ i || rev ? x.lineTo(q[0], q[1]) : x.moveTo(q[0], q[1]); }); };
+  cap(lines[0], false); cap(lines[1], true); x.closePath();
+  x.fillStyle = grad(.16 * a, .05 * a); x.fill();
+  /* 2) yupqa yorug' qobiq chizig'i (uchida qalinroq, orqaga ingichkalashadi) */
+  const th0 = Math.max(1.1 * dpr, .05 * R), th1 = .3 * dpr;
+  lines.forEach(function(pts){
+    const out = [], inn = [];
+    for(let i = 0; i < pts.length; i++){
+      const p0 = pts[Math.max(0, i - 1)], p1 = pts[Math.min(pts.length - 1, i + 1)];
+      let nx = -(p1[1] - p0[1]), ny = p1[0] - p0[0]; const nl = Math.hypot(nx, ny) || 1; nx /= nl; ny /= nl;
+      const th = th1 + (th0 - th1) * Math.pow(1 - i / (pts.length - 1), .8);
+      out.push([pts[i][0] + nx * th, pts[i][1] + ny * th]); inn.push([pts[i][0] - nx * th, pts[i][1] - ny * th]);
+    }
+    x.beginPath(); out.forEach(function(q, i){ i ? x.lineTo(q[0], q[1]) : x.moveTo(q[0], q[1]); });
+    for(let i = inn.length - 1; i >= 0; i--) x.lineTo(inn[i][0], inn[i][1]);
+    x.closePath(); x.fillStyle = grad(.9 * a, .45 * a); x.fill();
+  });
+  /* 3) havo oqimi: qobiq bo'ylab orqaga oqib ketadigan ingichka chiziqlar */
+  x.lineCap = 'round'; x.lineWidth = 1.1 * dpr;
+  lines.forEach(function(pts, k){
+    for(let j = 0; j < 2; j++){
+      const n = pts.length - 1, ph = ((t * 1.9 + j * .5 + k * .27) % 1 + 1) % 1, i0 = Math.floor(ph * .75 * n), i1 = Math.min(n, i0 + Math.ceil(.3 * n));
+      const al = a * .5 * Math.sin(Math.PI * ph); if(al < .02) continue;
+      x.beginPath();
+      for(let i = i0; i <= i1; i++){
+        const q = pts[i], p0 = pts[Math.max(0, i - 1)], p1 = pts[Math.min(n, i + 1)];
+        let nx = -(p1[1] - p0[1]), ny = p1[0] - p0[0]; const nl = Math.hypot(nx, ny) || 1; nx /= nl; ny /= nl;
+        const o = (k ? -1 : 1) * 3.2 * th0;
+        i === i0 ? x.moveTo(q[0] + nx * o, q[1] + ny * o) : x.lineTo(q[0] + nx * o, q[1] + ny * o);
+      }
+      x.strokeStyle = 'rgba(' + col + ',' + al.toFixed(3) + ')'; x.stroke();
+    }
+  });
 }
 function sz3Draw(st, cv, fly, now){
   if(sz3 !== st) return;
@@ -10169,7 +10288,7 @@ function sz3Draw(st, cv, fly, now){
   if(w && h && (cv.width !== w || cv.height !== h)){ cv.width = w; cv.height = h; }
   const still = document.body.classList.contains('reduce-motion');
   const t = window.SZ3_T != null ? window.SZ3_T : (now - st.t0) / 1000;
-  const m = still ? { ax: 1, rd: 1, d: 0, p: 0, w: 0, sp: 0 } : szMo(t);
+  const m = still ? { ax: 1, rd: 1, d: 0, p: 0, w: 0, sp: 0, u: 0, air: 0 } : szMo(t);
   const tl = -48.5 * Math.PI / 180 + m.w, cz = Math.cos(tl), sz = Math.sin(tl), cy = Math.cos(m.sp), sy = Math.sin(m.sp);
   /* M3 = Rz(tl) * S(eni, bo'yi, eni) * Ry(aylanish); normal uchun S teskarisi bilan */
   const mk3 = function(sx, syy){
@@ -10186,6 +10305,7 @@ function sz3Draw(st, cv, fly, now){
   gl.viewport(0, 0, cv.width, cv.height); gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT); gl.enable(gl.DEPTH_TEST);
   gl.uniformMatrix4fv(st.u.M, false, M); gl.uniformMatrix3fv(st.u.Nm, false, NM); gl.uniformMatrix4fv(st.u.VP, false, VP); gl.uniform3f(st.u.cam, 0, 0, D);
   gl.drawElements(gl.TRIANGLES, st.n, st.it, 0);
+  try{ szAirDraw(st, M, VP, cv.width, cv.height, t, m, still, dpr); }catch(e){}
   if(!st.on){ st.on = true; fly.classList.add('on3d'); }
   if(!still || window.SZ3_T != null) st.raf = requestAnimationFrame(function(n){ sz3Draw(st, cv, fly, n); });
 }
