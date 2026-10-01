@@ -47,6 +47,13 @@ body{ overflow-x:hidden; max-width:100%;
 button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:none}
 input{font-family:inherit}
 ::-webkit-scrollbar{display:none}
+/* iPhone: o'ng chetdagi aylanish chizig'i. iOS uni sahifaning o'z aylanishida yashira
+   olmaydi (WebKit bug 236586), faqat ichki konteynerda yashiradi. Shuning uchun html
+   qimirlamaydi, sahifa body ichida aylanadi. .wrap 1px balandroq - qisqa ekranlarda ham
+   iOS cho'zilishi (tortib yangilash) ishlashi uchun. JS tomoni: pgTop / pgBottom / pgY. */
+html{height:100%;overflow:hidden}
+body{height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.wrap{min-height:calc(100% + 1px)}
 
 .profile{display:flex;align-items:center;justify-content:space-between;margin-bottom:15px}
 .profile .who{display:flex;align-items:center;gap:10px;min-width:0}
@@ -256,6 +263,19 @@ input{font-family:inherit}
 .svc .s{color:var(--dim);font-size:12px;margin-top:2px;line-height:1.4}
 .svc .arw{color:var(--faint);font-size:20px;margin-left:auto;flex-shrink:0}
 .svc .txt{min-width:0}
+/* Sozlamalar ikonkalari - iOS uslubida: yuqoridan pastga gradientli kvadrat, oq to'la belgi */
+.svc .ic.ios, .big-btn .ic.ios{width:32px;height:32px;border-radius:8px;
+  box-shadow:inset 0 .5px 0 rgba(255,255,255,.3), 0 1px 1.5px rgba(0,0,0,.16)}
+.svc .ic.ios svg, .big-btn .ic.ios svg{width:19px;height:19px;fill:#fff;stroke:none}
+.ic.ios.g-phone{background:linear-gradient(180deg,#5B8CFF,#2F5BEA)}
+.ic.ios.g-lang{background:linear-gradient(180deg,#B07CFF,#7A45E6)}
+.ic.ios.g-invite{background:linear-gradient(180deg,#FFA63D,#F07A12)}
+.ic.ios.g-help{background:linear-gradient(180deg,#43D17E,#1FA85B)}
+.ic.ios.g-chan{background:linear-gradient(180deg,#41B8F5,#168BDB)}
+.ic.ios.g-spam{background:linear-gradient(180deg,#FF6A5F,#E2372C)}
+.ic.ios.g-anim{background:linear-gradient(180deg,#8F98AB,#5E677B)}
+.ic.ios.g-theme{background:linear-gradient(180deg,#7C83FF,#4A4FDB)}
+body.light .ic.ios.g-theme{background:linear-gradient(180deg,#FFC23F,#F0930A)}
 .switch{width:44px;height:26px;border-radius:999px;background:var(--stroke-2);margin-left:auto;flex-shrink:0;position:relative;transition:.2s}
 .switch::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.2s}
 .switch.on{background:var(--blue)}
@@ -5134,16 +5154,22 @@ function nftEnsure(){
   setTimeout(function(){ try{ mgLoad(); }catch(e){} }, 450);
   setTimeout(function(){ try{ mktLoad(); }catch(e){} }, 600);
 }
+/* Sahifa body ichida aylanadi (CSS dagi "iPhone: o'ng chetdagi aylanish chizig'i" izohi).
+   window.scrollTo / window.scrollY endi uni qimirlatmaydi - shu yordamchilar ishlatiladi.
+   window qismi zaxira: body aylanmayotgan holatda ham eski usulda ishlaydi. */
+function pgTop(){ try{ document.body.scrollTop = 0; }catch(e){} try{ window.scrollTo(0,0); }catch(e){} }
+function pgBottom(){ const b = document.body; try{ b.scrollTop = b.scrollHeight; }catch(e){} try{ window.scrollTo(0, b.scrollHeight); }catch(e){} }
+function pgY(){ const b = document.body; return (b && b.scrollTop) || window.scrollY || window.pageYOffset || 0; }
 function go(v){
   try{ kbSync(); }catch(e){}
   try{ document.body.setAttribute('data-view', v); }catch(e){}
   /* Ayni shu ekranda turib o'sha tugmani bosish hech narsani o'zgartirmaydi.
      Qayta chizsak — karusel uziladi va ro'yxat bir lahza yo'qoladi. */
   if(v === view && (v === 'nft_market' || v === 'nft_gifts' || v === 'nft_hist')){
-    window.scrollTo(0,0);
+    pgTop();
     return;
   }
-  view = v; window.scrollTo(0,0);
+  view = v; pgTop();
   setTimeout(function(){ try{ bindHistTaps(); }catch(e){} }, 0);
   const sub = (v==='game' || v==='topup' || v==='spam' || v==='chat' || v==='lang' || v==='profile' || v==='acct_rec' || isNftView(v));
   if(tg&&tg.BackButton){ sub ? tg.BackButton.show() : tg.BackButton.hide(); }
@@ -12022,7 +12048,7 @@ function loadChat(scroll){
      if(d.msgs.length !== chatLast || scroll){
        chatLast = d.msgs.length;
        box.innerHTML = chatHtml(d.msgs);
-       if(scroll) window.scrollTo(0, document.body.scrollHeight);
+       if(scroll) pgBottom();
      }
    }).catch(function(){});
 }
@@ -12075,44 +12101,44 @@ function renderSettings(){
   </div>
   <div class="sec-lbl" style="margin-top:0">Telefon raqami</div>
   <button class="big-btn" onclick="sharePhone()">
-    <span class="ic"><svg viewBox="0 0 24 24"><path d="M5 4h3l2 5-2.5 1.5a11 11 0 0 0 5 5L16 13l5 2v3a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg></span>
+    <span class="ic ios g-phone"><svg viewBox="0 0 24 24"><path d="M7.2 3.5c.6 0 1.1.4 1.3 1l1 3c.2.5 0 1.1-.4 1.4l-1.5 1.1a12.5 12.5 0 0 0 5.4 5.4l1.1-1.5c.3-.4.9-.6 1.4-.4l3 1c.6.2 1 .7 1 1.3v2.6c0 1-.8 1.8-1.8 1.8C9.6 20.2 3.8 14.4 3.8 7.2V5.3c0-1 .8-1.8 1.8-1.8z" stroke="#fff" stroke-width="1.3" stroke-linejoin="round"/></svg></span>
     Telefon raqamini ulashish
   </button>
   <div class="sec-lbl">Til</div>
   <div class="svc-list"><button class="svc" onclick="go('lang')" style="width:100%">
-    <span class="ic" style="background:#4A6BD8"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zM2 12h20M12 2c3 3.5 3 16.5 0 20M12 2c-3 3.5-3 16.5 0 20"/></svg></span>
+    <span class="ic ios g-lang"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.6" fill="none" stroke="#fff" stroke-width="2.2"/><path d="M3.8 12h16.4M12 3.6c2.3 2.3 3.5 5.1 3.5 8.4s-1.2 6.1-3.5 8.4M12 3.6c-2.3 2.3-3.5 5.1-3.5 8.4s1.2 6.1 3.5 8.4" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg></span>
     <span class="txt"><div class="t">Til</div><div class="s">${langInfo(currentLang).flag} ${langInfo(currentLang).name}</div></span>
     <span class="arw">›</span>
   </button></div>
   <div class="sec-lbl">Xizmatlar</div>
   <div class="svc-list">
     <button class="svc" onclick="invite()">
-      <span class="ic" style="background:#6C4BF0"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0M17 8h4M19 6v4"/></svg></span>
+      <span class="ic ios g-invite"><svg viewBox="0 0 24 24"><circle cx="9.5" cy="8" r="3.7"/><path d="M2.8 19.3c0-3.4 3-5.8 6.7-5.8s6.7 2.4 6.7 5.8c0 .6-.5 1-1 1H3.8c-.6 0-1-.4-1-1zM18.5 7.3v2.6h2.6a1 1 0 0 1 0 2h-2.6v2.6a1 1 0 0 1-2 0v-2.6h-2.6a1 1 0 0 1 0-2h2.6V7.3a1 1 0 0 1 2 0z"/></svg></span>
       <span class="txt"><div class="t">Do'stlarni taklif qilish</div><div class="s">Do'stlaringizni taklif qilib bonus tangalar yutib oling</div></span>
       <span class="arw">›</span>
     </button>
     <button class="svc" onclick="openLink('https://t.me/${ADMIN_USERNAME}')">
-      <span class="ic" style="background:#2E7BC0"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H8l-4 4V5a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2z"/></svg></span>
+      <span class="ic ios g-help"><svg viewBox="0 0 24 24"><path fill-rule="evenodd" d="M5 4h14a3 3 0 0 1 3 3v8a3 3 0 0 1-3 3h-7.5l-4.6 3.5c-.6.5-1.4 0-1.4-.7V18H5a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3zM8 9.7a1.3 1.3 0 1 0 0 2.6 1.3 1.3 0 0 0 0-2.6zm4 0a1.3 1.3 0 1 0 0 2.6 1.3 1.3 0 0 0 0-2.6zm4 0a1.3 1.3 0 1 0 0 2.6 1.3 1.3 0 0 0 0-2.6z"/></svg></span>
       <span class="txt"><div class="t">Qo'llab-quvvatlash</div><div class="s">Savollar bo'yicha 24/7 yordam chati orqali bog'laning</div></span>
       <span class="arw">›</span>
     </button>
     <button class="svc" onclick="openLink('${NEWS_URL}')">
-      <span class="ic" style="background:#229ED9"><svg viewBox="0 0 24 24"><path d="M3 11l18-7-7 18-2.5-7.5z"/><path d="M11.5 14.5L21 4"/></svg></span>
+      <span class="ic ios g-chan"><svg viewBox="0 0 24 24"><path d="M20.8 3.4 3 10.8l8 2.4 3.4 8z" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></svg></span>
       <span class="txt"><div class="t">Telegram kanalimiz</div><div class="s">Yangiliklar, chegirmalar va aksiyalardan xabardor bo'ling</div></span>
       <span class="arw">›</span>
     </button>
     <button class="svc" onclick="go('spam')">
-      <span class="ic" style="background:#E0574A"><svg viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg></span>
+      <span class="ic ios g-spam"><svg viewBox="0 0 24 24"><path fill-rule="evenodd" d="M10.6 4c.6-1.1 2.2-1.1 2.8 0l8.2 14.4c.6 1.1-.2 2.4-1.4 2.4H3.8c-1.2 0-2-1.3-1.4-2.4zM12 8.6c-.6 0-1 .5-1 1l.3 4.8c0 .4.3.7.7.7s.7-.3.7-.7l.3-4.8c0-.5-.4-1-1-1zm0 7.4a1.2 1.2 0 1 0 0 2.4 1.2 1.2 0 0 0 0-2.4z"/></svg></span>
       <span class="txt"><div class="t">Spamlar uchun qulay yozishmalar joyi</div><div class="s">Telegram akkauntingiz cheklangan bo'lsa shu yerdan yozing</div></span>
       <span class="arw">›</span>
     </button>
     <button class="svc" onclick="toggleMotion(this)">
-      <span class="ic" style="background:#3A4358"><svg viewBox="0 0 24 24"><path d="M12 3v2M12 19v2M5 12H3M21 12h-2M6 6l1.5 1.5M16.5 16.5L18 18"/></svg></span>
+      <span class="ic ios g-anim"><svg viewBox="0 0 24 24"><path d="M10.5 2.8c.6 4 3 6.4 7 7-4 .6-6.4 3-7 7-.6-4-3-6.4-7-7 4-.6 6.4-3 7-7zM18 13.6c.3 2 1.5 3.2 3.5 3.5-2 .3-3.2 1.5-3.5 3.5-.3-2-1.5-3.2-3.5-3.5 2-.3 3.2-1.5 3.5-3.5zM5.2 17.4a1.4 1.4 0 1 1 0 2.8 1.4 1.4 0 0 1 0-2.8z"/></svg></span>
       <span class="txt"><div class="t">Animatsiyalarni kamaytirish</div><div class="s">Sekin qurilmalarda tezroq ishlashi uchun</div></span>
       <span class="switch ${reduced?'on':''}"></span>
     </button>
     <button class="svc" onclick="toggleTheme(this)">
-      <span class="ic" style="background:#C9902A">${document.body.classList.contains('light') ? TH_SUN : TH_MOON}</span>
+      <span class="ic ios g-theme">${document.body.classList.contains('light') ? TH_SUN : TH_MOON}</span>
       <span class="txt"><div class="t">${document.body.classList.contains('light')?tr("Yorug' rejim"):tr("Tungi rejim")}</div><div class="s">${document.body.classList.contains('light')?tr("Tungi rejimga o'tish"):tr("Yorug' rejimga o'tish")}</div></span>
       <span class="switch ${document.body.classList.contains('light')?'on':''}"></span>
     </button>
@@ -12304,7 +12330,7 @@ function invite(){
   /* Bot CHATIGA olib boradi va Start tugmasi chiqadi. startapp ishlatilmaydi:
      u to'g'ridan-to'g'ri Mini App ni ochadi, odam botga qo'shilmay qoladi. */
   const link = uid ? `https://t.me/${BOT_USERNAME}?start=ref_${uid}` : `https://t.me/${BOT_USERNAME}`;
-  window.scrollTo(0,0);
+  pgTop();
   app.innerHTML = `
   <div class="page-title">Do'stlarni taklif qilish</div>
   <p style="color:var(--dim);font-size:13.5px;margin:-8px 2px 18px">Do'stlaringizni taklif qiling va har bir to'lovdan 1% bonus oling</p>
@@ -12456,8 +12482,8 @@ function toggleMotion(el){ haptic(); const on=document.body.classList.toggle('re
 }
 let themeT = null;
 /* Rejim belgisi: tungi rejimda oy, yorug' rejimda porlab turgan quyosh */
-const TH_MOON = '<svg viewBox="0 0 24 24"><path d="M21 12.8A8.5 8.5 0 1 1 11.2 3a6.6 6.6 0 0 0 9.8 9.8z"/></svg>';
-const TH_SUN  = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.3"/><path d="M12 2.6v2.3M12 19.1v2.3M2.6 12h2.3M19.1 12h2.3M5.35 5.35l1.62 1.62M17.03 17.03l1.62 1.62M5.35 18.65l1.62-1.62M17.03 6.97l1.62-1.62"/></svg>';
+const TH_MOON = '<svg viewBox="0 0 24 24"><path d="M20.48 12.75A8.2 8.2 0 1 1 11.75 4.02A6.4 6.4 0 0 0 20.48 12.75z"/></svg>';
+const TH_SUN  = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.4"/><path d="M12 2.6v2.3M12 19.1v2.3M2.6 12h2.3M19.1 12h2.3M5.35 5.35l1.62 1.62M17.03 17.03l1.62 1.62M5.35 18.65l1.62-1.62M17.03 6.97l1.62-1.62" fill="none" stroke="#fff" stroke-width="2.1" stroke-linecap="round"/></svg>';
 function toggleTheme(el){
   haptic();
   /* .theming \u2014 0.4s davomida ranglar silliq o'zgaradi */
@@ -13358,7 +13384,7 @@ const PTR_VIEWS = { home:1, history:1, settings:1,
 const PTR_PULL = 64;                 /* shuncha piksel tortilganda yangilanadi */
 let ptrEl = null, ptrSvg = null, ptrAnim = null;
 let ptrBusy = false, ptrEnding = false, ptrEp = 0, ptrT0 = 0, ptrCap = 0;
-let ptrRestT = (window.scrollY || 0) <= 0 ? Date.now() : 0;
+let ptrRestT = pgY() <= 0 ? Date.now() : 0;
 
 function ptrMake(){
   if(ptrEl) return;
@@ -13423,7 +13449,7 @@ function ptrEnd(){
              Math.max(0, 800 - (Date.now() - ptrT0)));
 }
 function ptrScroll(){
-  const y = window.scrollY || window.pageYOffset || 0;
+  const y = pgY();
   if(y > 0){ ptrRestT = 0; ptrEp = 0; if(!ptrBusy) ptrHide(); return; }
   if(!ptrRestT) ptrRestT = Date.now();             /* tepaga hozir keldi */
   if(y === 0){ ptrEp = 0; if(!ptrBusy) ptrHide(); return; }
@@ -13434,6 +13460,7 @@ function ptrScroll(){
   if(-y >= PTR_PULL) ptrStart();
 }
 window.addEventListener('scroll', ptrScroll, { passive:true });
+document.body.addEventListener('scroll', ptrScroll, { passive:true });   /* sahifa endi body ichida aylanadi */
 </script>
 </body>
 </html>
