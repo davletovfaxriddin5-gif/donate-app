@@ -2337,9 +2337,6 @@ body.light .ref-seg button.on b{ background:rgba(255,255,255,.25) }
 .sz-rk3 .sz-3d{ opacity:0 }
 .sz-fly.on3d .sz-3d{ opacity:1 }
 .sz-fly.on3d .sz-poster{ opacity:0 }
-/* Raketa burnidagi havo oqimi (2D qatlam, 3D raketa ustida) */
-.sz-rk3 .sz-air{ position:absolute; inset:0; width:100%; height:100%; display:block; pointer-events:none; opacity:0; transition:opacity .35s ease }
-.sz-fly.on3d .sz-air{ opacity:1 }
 /* Ochko belgisi: oltin tanga */
 .sz-coin{ display:inline-block; object-fit:contain; flex-shrink:0; pointer-events:none }
 .sz-big .sz-coin{ width:42px; height:42px; margin:-4px 0 -4px 0 }
@@ -9735,7 +9732,6 @@ function szRocket(){
     '<div class="sz-rk sz-rk3"><div class="sz-fly" id="szFly">' +
       '<img class="sz-poster" src="' + SZ_POSTER + '" alt="">' +
       '<canvas class="sz-3d" id="sz3d"></canvas>' +
-      '<canvas class="sz-air" id="szAir"></canvas>' +
     '</div></div></div>';
 }
 /* Ochkolar: xarid va sotuv serverdagi tarixdan; so'mdagi summa joriy
@@ -10060,7 +10056,7 @@ function sz3Start(){
   if(!gl) return;
   const VS = '#version 300 es\nlayout(location=0) in vec3 p;layout(location=1) in vec3 n;layout(location=2) in vec2 t;' +
     'uniform mat4 M,VP;uniform mat3 Nm;out vec3 wp,wn;out vec2 uv;void main(){uv=t;vec4 w=M*vec4(p,1.);wp=w.xyz;wn=Nm*n;gl_Position=VP*w;}';
-  const FS = '#version 300 es\nprecision highp float;in vec3 wp,wn;in vec2 uv;out vec4 o;uniform sampler2D tB,tM,tN;uniform vec3 cam;' +
+  const FS = '#version 300 es\nprecision highp float;in vec3 wp,wn;in vec2 uv;out vec4 o;uniform sampler2D tB,tM,tN;uniform vec3 cam;uniform float uW;' +
     'vec3 env(vec3 d,float r){float t=d.y*.5+.5;vec3 c=mix(vec3(.02,.025,.045),vec3(.42,.46,.58),smoothstep(.05,.95,t));' +
     'float s1=mix(260.,6.,r),s2=mix(90.,4.,r),k=mix(1.,.22,r);' +
     'c+=vec3(3.2,3.,2.8)*k*pow(max(dot(d,normalize(vec3(.55,.6,.6))),0.),s1);' +
@@ -10074,13 +10070,23 @@ function sz3Start(){
     'vec3 V=normalize(cam-wp),R=reflect(-V,N);float nv=max(dot(N,V),0.);vec3 F0=mix(vec3(.04),base,met);' +
     'vec3 F=F0+(max(vec3(1.-rou),F0)-F0)*pow(1.-nv,5.);vec3 col=base*(1.-met)*(env(N,1.)*.9+.06)+env(R,rou)*F;' +
     'vec3 L=normalize(vec3(.5,.8,.6)),H=normalize(L+V);col+=F*pow(max(dot(N,H),0.),mix(600.,18.,rou))*mix(3.,.2,rou);' +
-    'o=vec4(pow(aces(col*1.15),vec3(1./2.2)),1.);}';
+    'o=vec4(pow(aces(col*1.15),vec3(1./2.2))*uW,uW);}';
   const mk = function(ty, s){ const x = gl.createShader(ty); gl.shaderSource(x, s); gl.compileShader(x); return x; };
   const pr = gl.createProgram(); gl.attachShader(pr, mk(gl.VERTEX_SHADER, VS)); gl.attachShader(pr, mk(gl.FRAGMENT_SHADER, FS)); gl.linkProgram(pr);
   if(!gl.getProgramParameter(pr, gl.LINK_STATUS)) return;
   gl.useProgram(pr);
-  const st = sz3 = { gl: gl, raf: 0, n: 0, it: 0, on: false, t0: performance.now(),
-    u: { M: gl.getUniformLocation(pr, 'M'), Nm: gl.getUniformLocation(pr, 'Nm'), VP: gl.getUniformLocation(pr, 'VP'), cam: gl.getUniformLocation(pr, 'cam') } };
+  const st = sz3 = { gl: gl, raf: 0, n: 0, it: 0, on: false, t0: performance.now(), pr: pr, pa: null,
+    u: { M: gl.getUniformLocation(pr, 'M'), Nm: gl.getUniformLocation(pr, 'Nm'), VP: gl.getUniformLocation(pr, 'VP'), cam: gl.getUniformLocation(pr, 'cam'), W: gl.getUniformLocation(pr, 'uW') } };
+  gl.uniform1f(st.u.W, 1);
+  /* burundagi havo qobig'i — alohida kichik dastur (yaratilmasa, raketa havosiz chiziladi) */
+  try{
+    const pa = gl.createProgram(); gl.attachShader(pa, mk(gl.VERTEX_SHADER, SZ_AIR_VS)); gl.attachShader(pa, mk(gl.FRAGMENT_SHADER, SZ_AIR_FS)); gl.linkProgram(pa);
+    if(gl.getProgramParameter(pa, gl.LINK_STATUS)){
+      st.pa = pa; st.ua = {};
+      ['M', 'VP', 'Nm', 'yT', 'L', 'gr', 'cam', 'col', 'ud', 'a', 'tm'].forEach(function(k){ st.ua[k] = gl.getUniformLocation(pa, k); });
+    }
+  }catch(e){}
+  gl.useProgram(pr);
   gl.uniform1i(gl.getUniformLocation(pr, 'tB'), 0); gl.uniform1i(gl.getUniformLocation(pr, 'tM'), 1); gl.uniform1i(gl.getUniformLocation(pr, 'tN'), 2);
   const get = sz3Buf ? Promise.resolve(sz3Buf)
     : fetch('raketa-3d.glb').then(function(r){ if(!r.ok) throw new Error('glb'); return r.arrayBuffer(); }).then(function(b){ sz3Buf = b; return b; });
@@ -10096,7 +10102,7 @@ function sz3Load(st, b){
   const p = js.meshes[0].primitives[0], mat = js.materials[p.material || 0], pbr = mat.pbrMetallicRoughness;
   gl.bindVertexArray(gl.createVertexArray());
   const attr = function(d, loc, n){ gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer()); gl.bufferData(gl.ARRAY_BUFFER, d, gl.STATIC_DRAW); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, n, gl.FLOAT, false, 0, 0); };
-  const pos3 = acc(p.attributes.POSITION, Float32Array, 3); attr(pos3, 0, 3); szAirGeo(st, pos3); attr(acc(p.attributes.NORMAL, Float32Array, 3), 1, 3); attr(acc(p.attributes.TEXCOORD_0, Float32Array, 2), 2, 2);
+  const pos3 = acc(p.attributes.POSITION, Float32Array, 3); attr(pos3, 0, 3); szGeo(st, pos3); attr(acc(p.attributes.NORMAL, Float32Array, 3), 1, 3); attr(acc(p.attributes.TEXCOORD_0, Float32Array, 2), 2, 2);
   const ia = js.accessors[p.indices], big = ia.componentType === 5125;
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, gl.createBuffer()); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, acc(p.indices, big ? Uint32Array : Uint16Array, 1), gl.STATIC_DRAW);
   st.n = ia.count; st.it = big ? gl.UNSIGNED_INT : gl.UNSIGNED_SHORT;
@@ -10140,12 +10146,12 @@ function szCurve(K){
   };
 }
 const szFd = szCurve(SZ_D), szFax = szCurve(SZ_AX), szFw = szCurve(SZ_W);
-/* Aylanish: cho'kishda (0-0,18 s) turadi, otilishda keskin tezlashadi, 0,70 s dan
-   keyin yumshoq sekinlashib (ease-out) ~1,45 s da tugaydi — halqada roppa-rosa 2 marta.
-   Qolgan vaqtda raketa qotmaydi: szMo dagi chayqalish davom ettiradi. 1 ms qadamli jadval. */
+/* Aylanish uchun "yo'naltiruvchi" egri: cho'kishda turadi, otilishda tezlashadi, 0,55 s dan keyin
+   uzoq va yumshoq sekinlashadi (1,60 s gacha) — halqada roppa-rosa 2 marta. Raketaning o'zi bu egriga
+   prujina orqali, inersiya bilan ergashadi (szSim), shuning uchun keskin boshlanish/to'xtash yo'q. */
 const SZ_SPN = (function(){
   const N = 2700, a = new Float64Array(N + 1);
-  const v = function(u){ if(u < .18) return 0; if(u < .30){ const y = (u - .18) / .12; return y * y * (3 - 2 * y); } if(u < .70) return 1; if(u < 1.45){ const y = 1 - (u - .70) / .75; return y * y; } return 0; };
+  const v = function(u){ if(u < .18) return 0; if(u < .32){ const y = (u - .18) / .14; return y * y * (3 - 2 * y); } if(u < .55) return 1; if(u < 1.60){ const x = (u - .55) / 1.05; return Math.pow(1 - x, 2.2); } return 0; };
   for(let i = 1; i <= N; i++) a[i] = a[i - 1] + (v((i - 1) / 1000) + v(i / 1000)) / 2;
   const k = 4 * Math.PI / a[N]; for(let i = 0; i <= N; i++) a[i] *= k;
   return a;
@@ -10157,133 +10163,78 @@ function szBump(u, c, hw, T){
 }
 /* Titrash: haqiqiy raketadek mayda qaltirash (11-27 Hz, takrorlanmaydigan),
    otilishda kuchliroq. Vaqt halqaga bog'lanmagan — har safar boshqacha. */
-/* Aylanishdan keyingi harakat (raketa hech qachon qotib qolmaydi):
-   - aylanish tugashi bilan raketa inersiya bilan biroz oldinga o'tib ketadi va o'z o'qi atrofida
-     o'ngga-chapga ±17 gradus chayqaladi (M belgisi u yoqdan-bu yoqqa boradi). Bu bitta to'liq
-     tebranish bo'lib, keyingi otilishdagi aylanishga uzilmasdan ulanadi (har halqada bir xil);
-   - chayqalishga ergashib raketa yon tomonga siljiydi va ozgina yonboshlaydi (bir-biridan sal kech);
-   - ustidan sekin "suzish": After Effects'dagi wiggle kabi bir-biriga karrali bo'lmagan silliq
-     to'lqinlar — yo'l har safar biroz boshqacha, hech qayerda keskin to'xtash yo'q. */
-function szRockE(u){
-  const ss = function(a, b, x){ const y = Math.min(1, Math.max(0, (x - a) / (b - a))); return y * y * (3 - 2 * y); };
-  return u < .5 ? 1 - ss(.10, .30, u) : ss(1.30, 1.60, u);
-}
+/* ---------- Raketa harakati ----------
+   (1) Otilish yo'li (cho'kish-otilish-qaytish), cho'zilish, burun egilishi, mayda titrash va sekin
+       "suzish" — vaqtga bog'langan silliq egri chiziqlar (szMo).
+   (2) O'z o'qi atrofida aylanish, yonga siljish va yonboshlash — fizika (szSim): Blender'dagi
+       prujina / Rigid Body va After Effects'dagi inertsiya (overshoot) usuli. Raketa yo'naltiruvchi
+       egriga prujina orqali, massa va so'nish bilan ergashadi: tez aylanish asta sekinlashadi, M dan
+       sal o'tib ketadi, qaytadi va o'ngga-chapga yumshoq tebranib turadi. Tezlik ham, tezlanish ham
+       uzluksiz — hech qayerda keskin to'xtash, "qotib qolish" yoki silkinish yo'q. */
 function szMo(t){
-  const u = ((t % SZ_T) + SZ_T) % SZ_T, ax = szFax(u), env = .75 + .65 * szBump(u, .36, .30, SZ_T);
-  const n1 = Math.sin(t * 71.3 + .4) * .5 + Math.sin(t * 112.9 + 1.7) * .3 + Math.sin(t * 151.1 + 2.9) * .2;
-  const n2 = Math.sin(t * 83.7 + 2.2) * .5 + Math.sin(t * 127.3 + .9) * .3 + Math.sin(t * 166.9 + .3) * .2;
-  const n3 = Math.sin(t * 67.1 + 1.1) * .5 + Math.sin(t * 104.3 + 2.5) * .3 + Math.sin(t * 143.9 + .7) * .2;
-  const P = 6.28319, e = szRockE(u), ph = P * ((u < 1.30 ? u + SZ_T : u) - 1.30) / 1.40;
-  const rk = .30 * e * Math.sin(ph);                      /* o'z o'qi atrofida chayqalish, radian */
-  const rs = .045 * e * Math.sin(ph - .5);                /* chayqalishga ergashib yonga siljish */
-  const rb = 2.0 * e * Math.cos(ph);                      /* ... va yonboshlash, gradus */
-  const wp = .022 * Math.sin(t * P / 1.9 + 1.3) + .014 * Math.sin(t * P / 3.3 + .4);
-  const wd = .020 * Math.sin(t * P / 2.3 + 2.6) + .010 * Math.sin(t * P / 1.3 + .9);
-  const ww = 1.6 * Math.sin(t * P / 1.7 + .7) + .9 * Math.sin(t * P / 3.4 + 2.1);
-  return { ax: ax, rd: Math.pow(ax, -.6), d: (szFd(u) + .006 * env * n2 + wd) * 1.9, p: (.013 * env * n1 + rs + wp) * 1.9,
-           w: (szFw(u) + 1.2 * env * n3 + rb + ww) * Math.PI / 180, sp: szSpin(u) + rk,
-           u: u, air: szAirA(u) };
+  const u = ((t % SZ_T) + SZ_T) % SZ_T, ax = szFax(u), env = .55 + .9 * szBump(u, .36, .30, SZ_T);
+  /* mayda titrash — dvigatel gulduragidek, 7-15 Hz (ekranda silliq), otilishda kuchliroq */
+  const n1 = Math.sin(t * 48.1 + .4) * .5 + Math.sin(t * 67.9 + 1.7) * .3 + Math.sin(t * 93.7 + 2.9) * .2;
+  const n2 = Math.sin(t * 52.3 + 2.2) * .5 + Math.sin(t * 74.1 + .9) * .3 + Math.sin(t * 89.9 + .3) * .2;
+  const n3 = Math.sin(t * 44.7 + 1.1) * .5 + Math.sin(t * 63.3 + 2.5) * .3 + Math.sin(t * 85.1 + .7) * .2;
+  /* sekin suzish (AE wiggle / Blender Noise kabi): bir-biriga karrali bo'lmagan to'lqinlar */
+  const P = 6.28319;
+  const wp = .020 * Math.sin(t * P / 1.9 + 1.3) + .012 * Math.sin(t * P / 3.3 + .4);
+  const wd = .018 * Math.sin(t * P / 2.3 + 2.6) + .009 * Math.sin(t * P / 1.45 + .9);
+  const ww = 1.4 * Math.sin(t * P / 1.7 + .7) + .8 * Math.sin(t * P / 3.4 + 2.1);
+  return { u: u, ax: ax, rd: Math.pow(ax, -.6), d: (szFd(u) + .004 * env * n2 + wd) * 1.9, p: (.007 * env * n1 + wp) * 1.9,
+           w: (szFw(u) + .55 * env * n3 + ww) * Math.PI / 180, sp: 0, om: 0, air: 0 };
 }
-/* ---------- Raketa burnidagi havo oqimi ----------
-   Otilish paytida burunni yupqa havo qobig'i o'raydi: burun shaklidan biroz tashqarida, uchidan
-   orqaga burun konusi bo'ylab ikki tomonga ingichkalashib ketadi (faqat burun qismida). Ichida
-   havo oqimi chiziqlari orqaga oqadi, aylanish bilan ikki tomon navbatma-navbat uzayadi.
-   Aylanish tugashi bilan asta so'nadi. Burun shakli modelning o'zidan o'lchanadi, qobiq
-   3D chizgich bilan bir xil proyeksiyada chiziladi — burun bilan birga yuradi. */
+/* Fizika sozlamalari: k/c — aylanish prujinasi (~1,4 Hz, so'nish 0,34), A/Pr/r0 — aylanishdan keyingi
+   o'ng-chap tebranish (±15°, 1,4 s), W — yengil shamol, Kp/Cp va Kb/Cb — siljish va yonboshlash prujinalari. */
+const SZ_PH = { k: 81, c: 6.12, A: .27, Pr: 1.40, r0: 1.15, W: 2.5, Kp: 48, Cp: 8.4, Kb: 40, Cb: 7.5 };
+function szSS(a, b, x){ const y = Math.min(1, Math.max(0, (x - a) / (b - a))); return y * y * (3 - 2 * y); }
+function szTgt(t){
+  const H = SZ_PH, u = ((t % SZ_T) + SZ_T) % SZ_T, n = Math.floor(t / SZ_T);
+  const e = u < .6 ? 1 - szSS(.12, .32, u) : szSS(H.r0, H.r0 + .4, u);
+  const ph = 6.28319 * ((u < H.r0 ? u + SZ_T : u) - H.r0) / H.Pr;
+  return 4 * Math.PI * n + szSpin(u) + H.A * e * Math.sin(ph);
+}
+function szSimStep(st, t, dt){
+  const H = SZ_PH, g = szTgt(t);
+  const wind = H.W * (.6 * Math.sin(t * 3.05 + 1.1) + .4 * Math.sin(t * 4.9 + 2.3) + .25 * Math.sin(t * 6.6 + .4));
+  st.om += (H.k * (g - st.th) - H.c * st.om + wind) * dt; st.th += st.om * dt;
+  const pT = .05 * Math.sin(st.th), bT = 2.4 * Math.sin(st.th - .6);
+  st.pv += (H.Kp * (pT - st.ps) - H.Cp * st.pv) * dt; st.ps += st.pv * dt;
+  st.bv += (H.Kb * (bT - st.bk) - H.Cb * st.bv) * dt; st.bk += st.bv * dt;
+}
+function szSim(st, t){
+  const dt = 1 / 240;
+  if(st.simT == null || t < st.simT - 1e-6){ st.simT = 0; st.th = 0; st.om = 0; st.ps = 0; st.pv = 0; st.bk = 0; st.bv = 0; }
+  if(t - st.simT > 1.5){ st.simT = t - 1.5; st.th = szTgt(st.simT); st.om = 0; }     /* uzoq tanaffusdan keyin */
+  while(st.simT + dt <= t){ st.simT += dt; szSimStep(st, st.simT, dt); }
+}
+/* ---------- Raketa burnidagi havo qobig'i ----------
+   Blender usuli: burun konusining nusxasi normal bo'ylab biroz tashqariga surilib, Fresnel bilan
+   chiziladi — faqat chetlari (siluet) yorug', o'rtasi shaffof. Shu sababli yorug' yoy raketaning
+   haqiqiy burun shakliga aniq yopishadi, u bilan birga aylanadi va titraydi. Ichida havo oqimi
+   chiziqlari burama bo'lib orqaga oqadi; yorug'lik uchida va tepa tomonida (yoy shaklida). Otilishda paydo bo'lib, aylanish
+   sekinlashgani sari so'nadi. */
 function szAirA(u){
   if(u < .18) return 0;
   if(u < .32){ const y = (u - .18) / .14; return y * y * (3 - 2 * y); }
   if(u < .80) return 1;
   return Math.pow(Math.max(0, 1 - (u - .80) / .80), 1.6);
 }
-function szAirGeo(st, pos){
+function szGeo(st, pos){
   let y0 = Infinity, y1 = -Infinity;
   for(let i = 1; i < pos.length; i += 3){ const y = pos[i]; if(y < y0) y0 = y; if(y > y1) y1 = y; }
-  const L = (y1 - y0) || 1, NB = 24, top = .35 * L, pf = new Float32Array(NB + 1);
-  for(let i = 0; i < pos.length; i += 3){
-    const s = y1 - pos[i + 1]; if(s > top) continue;
-    const k = Math.min(NB, Math.round(s / top * NB)), r = Math.hypot(pos[i], pos[i + 2]); if(r > pf[k]) pf[k] = r;
-  }
-  for(let k = 1; k <= NB; k++) if(pf[k] < pf[k - 1]) pf[k] = pf[k - 1];        /* uchidan orqaga kamaymaydi */
-  st.yTip = y1; st.len = L; st.pf = pf; st.pfTop = top;
+  st.yTip = y1; st.len = (y1 - y0) || 1;
 }
-function szAirDraw(st, M, VP, W, H, t, m, still, dpr){
-  let ac = st.ac;
-  if(!ac || !ac.isConnected){ ac = st.ac = document.getElementById('szAir'); st.acx = ac ? ac.getContext('2d') : null; }
-  const x = st.acx; if(!ac || !x) return;
-  if(ac.width !== W || ac.height !== H){ ac.width = W; ac.height = H; }
-  x.clearRect(0, 0, W, H);
-  const a = still ? 0 : (m.air || 0);
-  if(!(a > .01) || st.yTip == null || !st.pf) return;
-  const pr = function(py){
-    const wx = M[4] * py + M[12], wy = M[5] * py + M[13], wz = M[6] * py + M[14];
-    const cw = VP[3] * wx + VP[7] * wy + VP[11] * wz + VP[15];
-    return [((VP[0] * wx + VP[4] * wy + VP[8] * wz + VP[12]) / cw * .5 + .5) * W,
-            (.5 - (VP[1] * wx + VP[5] * wy + VP[9] * wz + VP[13]) / cw * .5) * H];
-  };
-  const tip = pr(st.yTip), bk = pr(st.yTip - .25 * st.len);
-  let fx = tip[0] - bk[0], fy = tip[1] - bk[1]; const fl = Math.hypot(fx, fy) || 1; fx /= fl; fy /= fl;
-  const kA = fl / (.25 * st.len), kL = kA / (m.ax || 1) * (m.rd || 1), Lp = st.len * kA;   /* px o'lchovlari */
-  const ux = fy, uy = -fx;
-  const P = function(along, side){ return [tip[0] + fx * along + ux * side, tip[1] + fy * along + uy * side]; };
-  const pf = st.pf, nb = pf.length - 1;
-  const hw = function(s){ const q = Math.max(0, Math.min(st.pfTop, s / kA)) / st.pfTop * nb, i = Math.min(nb - 1, Math.floor(q)), f = q - i; return (pf[i] + (pf[i + 1] - pf[i]) * f) * kL; };
-  const ep = .004 * Lp, dh = function(s){ return (hw(s + ep) - hw(Math.max(0, s - ep))) / (s < ep ? s + ep : 2 * ep); };
-  const grow = .4 + .6 * a, br = .92 + .08 * Math.sin(t * 6.28319 * 2.7);
-  const b1 = .5 + .5 * Math.cos(m.sp || 0), b2 = .5 + .5 * Math.cos((m.sp || 0) + 2.1);
-  const S = [Lp * (.17 + .08 * b1) * grow * br, Lp * (.11 + .06 * b2) * grow * br];
-  const g0 = .012 * Lp, col = document.body.classList.contains('light') ? '112,130,186' : '255,255,255';
-  const N = 26, lines = [];
-  for(let k = 0; k < 2; k++){
-    const sg = k ? -1 : 1, pts = [];
-    for(let i = 0; i <= N; i++){
-      const s = S[k] * Math.pow(i / N, 1.5), d1 = dh(s), nl = Math.hypot(d1, 1), g = g0 + .05 * s;
-      pts.push(P(-s + g * d1 / nl, sg * (hw(s) + g / nl)));
-    }
-    lines.push(pts);
-  }
-  const Smax = Math.max(S[0], S[1]) + .05 * Lp;
-  const grad = function(a0, a1){
-    const gr = x.createRadialGradient(tip[0], tip[1], 0, tip[0], tip[1], Smax);
-    gr.addColorStop(0, 'rgba(' + col + ',' + a0 + ')'); gr.addColorStop(.45, 'rgba(' + col + ',' + a1 + ')'); gr.addColorStop(1, 'rgba(' + col + ',0)');
-    return gr;
-  };
-  /* 1) burun ustidagi yengil havo yostig'i */
-  x.beginPath();
-  const cap = function(pts, rev){ const n = Math.round(pts.length * .55), arr = pts.slice(0, n); (rev ? arr.reverse() : arr).forEach(function(q, i){ i || rev ? x.lineTo(q[0], q[1]) : x.moveTo(q[0], q[1]); }); };
-  cap(lines[0], false); cap(lines[1], true); x.closePath();
-  x.fillStyle = grad(.10 * a, .03 * a); x.fill();
-  /* 2) yupqa yorug' qobiq chizig'i: uchida biroz qalinroq, orqaga ingichkalashadi */
-  const th0 = Math.max(.9 * dpr, .006 * Lp), th1 = .25 * dpr;
-  lines.forEach(function(pts){
-    const out = [], inn = [];
-    for(let i = 0; i < pts.length; i++){
-      const p0 = pts[Math.max(0, i - 1)], p1 = pts[Math.min(pts.length - 1, i + 1)];
-      let nx = -(p1[1] - p0[1]), ny = p1[0] - p0[0]; const nl = Math.hypot(nx, ny) || 1; nx /= nl; ny /= nl;
-      const th = th1 + (th0 - th1) * Math.pow(1 - i / (pts.length - 1), .8);
-      out.push([pts[i][0] + nx * th, pts[i][1] + ny * th]); inn.push([pts[i][0] - nx * th, pts[i][1] - ny * th]);
-    }
-    x.beginPath(); out.forEach(function(q, i){ i ? x.lineTo(q[0], q[1]) : x.moveTo(q[0], q[1]); });
-    for(let i = inn.length - 1; i >= 0; i--) x.lineTo(inn[i][0], inn[i][1]);
-    x.closePath(); x.fillStyle = grad(.8 * a, .35 * a); x.fill();
-  });
-  /* 3) havo oqimi: qobiq bo'ylab orqaga oqib ketadigan ingichka chiziqlar */
-  x.lineCap = 'round'; x.lineWidth = 1 * dpr;
-  lines.forEach(function(pts, k){
-    for(let j = 0; j < 2; j++){
-      const n = pts.length - 1, ph = ((t * 1.9 + j * .5 + k * .27) % 1 + 1) % 1, i0 = Math.floor(ph * .75 * n), i1 = Math.min(n, i0 + Math.ceil(.3 * n));
-      const al = a * .35 * Math.sin(Math.PI * ph); if(al < .02) continue;
-      x.beginPath();
-      for(let i = i0; i <= i1; i++){
-        const q = pts[i], p0 = pts[Math.max(0, i - 1)], p1 = pts[Math.min(n, i + 1)];
-        let nx = -(p1[1] - p0[1]), ny = p1[0] - p0[0]; const nl = Math.hypot(nx, ny) || 1; nx /= nl; ny /= nl;
-        const o = (k ? -1 : 1) * 2.6 * th0;
-        i === i0 ? x.moveTo(q[0] + nx * o, q[1] + ny * o) : x.lineTo(q[0] + nx * o, q[1] + ny * o);
-      }
-      x.strokeStyle = 'rgba(' + col + ',' + al.toFixed(3) + ')'; x.stroke();
-    }
-  });
-}
+const SZ_AIR_VS = '#version 300 es\nlayout(location=0) in vec3 p;layout(location=1) in vec3 n;' +
+  'uniform mat4 M,VP;uniform mat3 Nm;uniform float yT,L,gr;out vec3 wp,wn;out float w,s,an;' +
+  'void main(){s=(yT-p.y)/L;w=1.-smoothstep(.14,.38,s);float off=L*(.020+.020*(1.-s/.38))*gr*w;' +
+  'vec3 q=p+normalize(n)*off;q.y+=L*.012*w*gr;vec4 W=M*vec4(q,1.);wp=W.xyz;wn=Nm*n;an=atan(p.z,p.x);gl_Position=VP*W;}';
+const SZ_AIR_FS = '#version 300 es\nprecision highp float;in vec3 wp,wn;in float w,s,an;out vec4 o;' +
+  'uniform vec3 cam,col,ud;uniform float a,tm;' +
+  'void main(){vec3 N=normalize(wn),V=normalize(cam-wp);float f=pow(1.-abs(dot(N,V)),2.4);' +
+  'float fl=.55+.45*sin(s*70.-tm*13.+an*2.);float dr=pow(clamp(dot(N,ud),0.,1.),1.3);' +
+  'float al=clamp(a*w*f*fl*(.12+.98*dr)*1.15,0.,1.);o=vec4(col*al,al);}';
 function sz3Draw(st, cv, fly, now){
   if(sz3 !== st) return;
   if(!document.body.contains(cv) || view !== 'nft_season'){ sz3Stop(); return; }
@@ -10292,24 +10243,48 @@ function sz3Draw(st, cv, fly, now){
   if(w && h && (cv.width !== w || cv.height !== h)){ cv.width = w; cv.height = h; }
   const still = document.body.classList.contains('reduce-motion');
   const t = window.SZ3_T != null ? window.SZ3_T : (now - st.t0) / 1000;
-  const m = still ? { ax: 1, rd: 1, d: 0, p: 0, w: 0, sp: 0, u: 0, air: 0 } : szMo(t);
-  const tl = -48.5 * Math.PI / 180 + m.w, cz = Math.cos(tl), sz = Math.sin(tl), cy = Math.cos(m.sp), sy = Math.sin(m.sp);
-  /* M3 = Rz(tl) * S(eni, bo'yi, eni) * Ry(aylanish); normal uchun S teskarisi bilan */
-  const mk3 = function(sx, syy){
-    const c0 = [cy * sx, 0, -sy * sx], c1 = [0, syy, 0], c2 = [sy * sx, 0, cy * sx];
-    const rz = function(v){ return [cz * v[0] - sz * v[1], sz * v[0] + cz * v[1], v[2]]; };
-    return [rz(c0), rz(c1), rz(c2)];
-  };
-  const A = mk3(m.rd, m.ax), Nn = mk3(1 / m.rd, 1 / m.ax);
+  const m = still ? { u: 0, ax: 1, rd: 1, d: 0, p: 0, w: 0, sp: 0, om: 0, air: 0 } : szMo(t);
+  if(!still){
+    szSim(st, t);
+    m.sp = st.th; m.om = st.om; m.p += st.ps * 1.9; m.w += st.bk * Math.PI / 180;
+    m.air = Math.max(szAirA(m.u), .9 * szSS(6, 18, Math.abs(st.om)));
+  }
+  const tl = -48.5 * Math.PI / 180 + m.w, cz = Math.cos(tl), sz = Math.sin(tl);
   const off = m.d - .25, tx = -sz * off + cz * m.p, ty = cz * off + sz * m.p - .3;
-  const M = new Float32Array([A[0][0], A[0][1], A[0][2], 0, A[1][0], A[1][1], A[1][2], 0, A[2][0], A[2][1], A[2][2], 0, tx, ty, 0, 1]);
-  const NM = new Float32Array([Nn[0][0], Nn[0][1], Nn[0][2], Nn[1][0], Nn[1][1], Nn[1][2], Nn[2][0], Nn[2][1], Nn[2][2]]);
+  /* M3 = Rz(tl) * S(eni, bo'yi, eni) * Ry(aylanish); normal uchun S teskarisi bilan */
+  const mats = function(sp){
+    const cy = Math.cos(sp), sy = Math.sin(sp);
+    const mk3 = function(sx, syy){
+      const c0 = [cy * sx, 0, -sy * sx], c1 = [0, syy, 0], c2 = [sy * sx, 0, cy * sx];
+      const rz = function(v){ return [cz * v[0] - sz * v[1], sz * v[0] + cz * v[1], v[2]]; };
+      return [rz(c0), rz(c1), rz(c2)];
+    };
+    const A = mk3(m.rd, m.ax), Nn = mk3(1 / m.rd, 1 / m.ax);
+    return [new Float32Array([A[0][0], A[0][1], A[0][2], 0, A[1][0], A[1][1], A[1][2], 0, A[2][0], A[2][1], A[2][2], 0, tx, ty, 0, 1]),
+            new Float32Array([Nn[0][0], Nn[0][1], Nn[0][2], Nn[1][0], Nn[1][1], Nn[1][2], Nn[2][0], Nn[2][1], Nn[2][2]])];
+  };
   const f = 1 / Math.tan(.31), asp = (w || 1) / (h || 1), nr = .1, fr = 20, D = 5.1;
   const VP = new Float32Array([f / asp, 0, 0, 0, 0, f, 0, 0, 0, 0, (fr + nr) / (nr - fr), -1, 0, 0, 2 * fr * nr / (nr - fr) - D * (fr + nr) / (nr - fr), D]);
-  gl.viewport(0, 0, cv.width, cv.height); gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT); gl.enable(gl.DEPTH_TEST);
-  gl.uniformMatrix4fv(st.u.M, false, M); gl.uniformMatrix3fv(st.u.Nm, false, NM); gl.uniformMatrix4fv(st.u.VP, false, VP); gl.uniform3f(st.u.cam, 0, 0, D);
+  gl.viewport(0, 0, cv.width, cv.height); gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+  gl.enable(gl.DEPTH_TEST); gl.depthFunc(gl.LEQUAL);
+  gl.useProgram(st.pr); gl.uniformMatrix4fv(st.u.VP, false, VP); gl.uniform3f(st.u.cam, 0, 0, D);
+  gl.disable(gl.BLEND); gl.uniform1f(st.u.W, 1);
+  const MM = mats(m.sp);
+  gl.uniformMatrix4fv(st.u.M, false, MM[0]); gl.uniformMatrix3fv(st.u.Nm, false, MM[1]);
   gl.drawElements(gl.TRIANGLES, st.n, st.it, 0);
-  try{ szAirDraw(st, M, VP, cv.width, cv.height, t, m, still, dpr); }catch(e){}
+  /* burundagi havo qobig'i */
+  if(st.pa && m.air > .01 && st.yTip != null){
+    const ua = st.ua, lt = document.body.classList.contains('light');
+    gl.useProgram(st.pa);
+    gl.uniformMatrix4fv(ua.M, false, MM[0]); gl.uniformMatrix4fv(ua.VP, false, VP); gl.uniformMatrix3fv(ua.Nm, false, MM[1]);
+    gl.uniform1f(ua.yT, st.yTip); gl.uniform1f(ua.L, st.len); gl.uniform1f(ua.gr, .5 + .5 * m.air);
+    gl.uniform3f(ua.cam, 0, 0, D); const ul = Math.hypot(-cz - .9 * sz, -sz + .9 * cz) || 1; gl.uniform3f(ua.ud, (-cz - .9 * sz) / ul, (-sz + .9 * cz) / ul, 0); gl.uniform1f(ua.a, m.air); gl.uniform1f(ua.tm, t);
+    if(lt) gl.uniform3f(ua.col, .44, .52, .74); else gl.uniform3f(ua.col, 1, 1, 1);
+    gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA); gl.depthMask(false);
+    gl.drawElements(gl.TRIANGLES, st.n, st.it, 0);
+    gl.depthMask(true); gl.useProgram(st.pr);
+  }
+  gl.disable(gl.BLEND);
   if(!st.on){ st.on = true; fly.classList.add('on3d'); }
   if(!still || window.SZ3_T != null) st.raf = requestAnimationFrame(function(n){ sz3Draw(st, cv, fly, n); });
 }
