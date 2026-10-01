@@ -1037,6 +1037,23 @@ body.nft-mode .nav-nft{ display:none }
   transition:.14s }
 .mg-bal .mg-pf img{ width:100%; height:100%; object-fit:cover; display:block }
 .mg-bal .mg-pf:active{ transform:scale(.94) }
+/* Profil rasmi: iOS "shisha" uslubidagi ramka (Walt ilovasidagidek). Rasm atrofida 2px yarim shaffof
+   hoshiya va 1px chet chizig'i: chap/o'ng tomoni yorqinroq, tepa/pasti xiraroq (conic-gradient).
+   Bosh sahifa tepasi (.profile .avatar) va NFT bo'limi tepasi (.mg-bal .mg-pf) uchun. */
+.profile .avatar{ width:46px; height:46px; padding:2px; border:1px solid transparent;
+  background:var(--blue-grad) content-box, linear-gradient(rgba(255,255,255,.06),rgba(255,255,255,.06)) padding-box, linear-gradient(var(--bg),var(--bg)) padding-box,
+    conic-gradient(rgba(255,255,255,.13), rgba(255,255,255,.43) 25%, rgba(255,255,255,.13) 50%, rgba(255,255,255,.43) 75%, rgba(255,255,255,.13)) border-box }
+.profile .avatar img{ border-radius:50% }
+body.light .profile .avatar{ background:var(--blue-grad) content-box, linear-gradient(rgba(255,255,255,.75),rgba(255,255,255,.75)) padding-box, linear-gradient(var(--bg),var(--bg)) padding-box,
+    conic-gradient(rgba(16,24,40,.10), rgba(16,24,40,.30) 25%, rgba(16,24,40,.10) 50%, rgba(16,24,40,.30) 75%, rgba(16,24,40,.10)) border-box }
+.mg-bal .mg-pf{ position:relative; width:42px; height:42px; padding:2px; border:1px solid transparent; font-size:14px;
+  background:linear-gradient(var(--card-2),var(--card-2)) content-box, linear-gradient(rgba(255,255,255,.06),rgba(255,255,255,.06)) padding-box, linear-gradient(var(--bg),var(--bg)) padding-box,
+    conic-gradient(rgba(255,255,255,.13), rgba(255,255,255,.43) 25%, rgba(255,255,255,.13) 50%, rgba(255,255,255,.43) 75%, rgba(255,255,255,.13)) border-box }
+body.light .mg-bal .mg-pf{ background:linear-gradient(var(--card-2),var(--card-2)) content-box, linear-gradient(rgba(255,255,255,.75),rgba(255,255,255,.75)) padding-box, linear-gradient(var(--bg),var(--bg)) padding-box,
+    conic-gradient(rgba(16,24,40,.10), rgba(16,24,40,.30) 25%, rgba(16,24,40,.10) 50%, rgba(16,24,40,.30) 75%, rgba(16,24,40,.10)) border-box }
+/* NFT tepasidagi rasm doirani to'liq to'ldirmasdi (tugma ichida grid foizlari noto'g'ri hisoblanardi) */
+.mg-bal .mg-pf img{ position:absolute; top:2px; left:2px; width:calc(100% - 4px); height:calc(100% - 4px);
+  object-fit:cover; border-radius:50% }
 
 .mg-tabs{ display:flex; gap:14px; overflow-x:auto; scrollbar-width:none;
   margin:0 0 11px; padding:0 2px 2px }
