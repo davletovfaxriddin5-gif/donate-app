@@ -10120,17 +10120,19 @@ function sz3Load(st, b){
   return Promise.all([tex(pbr.baseColorTexture.index, 0), tex(pbr.metallicRoughnessTexture.index, 1), tex(mat.normalTexture.index, 2)])
     .then(function(){ return sz3 === st; });
 }
-/* Raketa harakati — Telegram'dagi raketadan har 33 ms da o'lchab olingan
-   2,7 soniyalik halqa. Nuqtalar orasi tebranish bermaydigan (monoton) silliq
-   egri bilan to'ldiriladi: tezlik faqat ikki joyda nolga tushadi — 0,10 s
-   (eng orqada) va 0,50 s (eng oldinda); orqaga qaytishda to'xtash yo'q.
-   d — oldinga siljish, ax — bo'yi (1 = oddiy), w — burun burchagi (gradus),
-   hammasi raketa uzunligiga nisbatan. */
-const SZ_T = 2.7;
-const SZ_D  = [[0,0],[.033,-.114],[.05,-.169],[.10,-.189],[.133,-.174],[.167,-.099],[.20,.005],[.233,.04],[.267,.214],[.30,.288],
-               [.333,.342],[.383,.39],[.433,.42],[.467,.43],[.50,.435],[.60,.428],[.75,.405],[.95,.34],[1.20,.24],[1.50,.13],[1.80,.06],[2.10,.025],[2.40,.012],[2.60,.006],[2.70,0]];
-const SZ_AX = [[0,1],[.033,0.934],[.05,0.904],[.10,0.898],[.133,0.91],[.167,0.988],[.20,1.054],[.233,1.264],[.267,1.108],[.333,1.102],[.40,1.078],[.433,1.066],[.467,1.042],[.50,1.024],[.533,1.012],[.60,1],[2.70,1]];
-const SZ_W  = [[0,0],[.05,7],[.10,9],[.15,6.5],[.20,5],[.30,4],[.40,3.2],[.50,2.2],[.60,1.1],[.75,0],[2.70,0]];
+/* Raketa harakati — bitta tartibli, uzluksiz sahna (4,8 s halqa). Har bir harakat keyingisiga
+   ulanib ketadi (After Effects'dagi bitta kompozitsiya kabi), hech qayerda keskin turtki yoki to'xtash yo'q:
+     0,0-0,6 s  — tebranib turgan raketa sekin orqaga cho'kadi (tayyorlanish);
+     0,6-1,85 s — yumshoq tezlashib oldinga ko'tariladi va yumshoq sekinlashadi;
+     0,8-3,2 s  — shu bilan birga 2 marta aylanadi: sekin boshlanadi, o'rtada eng tez, sekin tugaydi;
+     1,85-4,2 s — kichik yoy bo'ylab asta orqaga qaytadi, aylanish shu payt so'nadi;
+     2,9-0,8 s  — M atrofida o'ngga-chapga yumshoq tebranadi va keyingi aylanishga uzilmasdan ulanadi.
+   Nuqtalar orasi tebranish bermaydigan (monoton) silliq egri bilan to'ldiriladi.
+   d — oldinga siljish, ax — bo'yi (cho'zilish yo'q), w — burun burchagi (gradus), raketa uzunligiga nisbatan. */
+const SZ_T = 4.8;
+const SZ_D  = [[0,0],[.30,-.025],[.60,-.06],[.85,-.055],[1.10,.02],[1.35,.12],[1.60,.19],[1.85,.215],[2.10,.20],[2.60,.13],[3.10,.06],[3.60,.02],[4.20,.004],[4.80,0]];
+const SZ_AX = [[0,1],[4.80,1]];
+const SZ_W  = [[0,0],[.60,-.8],[1.10,1.6],[1.60,2.4],[2.10,1.0],[2.80,-.6],[3.60,0],[4.80,0]];
 /* Davriy monoton kubik (Fritsch-Carlson): har nuqtadagi qiyalik oldindan hisoblanadi */
 function szCurve(K){
   const n = K.length, m = new Array(n).fill(0), sec = function(i){ return (K[i + 1][1] - K[i][1]) / (K[i + 1][0] - K[i][0]); };
@@ -10146,17 +10148,17 @@ function szCurve(K){
   };
 }
 const szFd = szCurve(SZ_D), szFax = szCurve(SZ_AX), szFw = szCurve(SZ_W);
-/* Aylanish uchun "yo'naltiruvchi" egri: cho'kishda turadi, otilishda tezlashadi, 0,55 s dan keyin
-   uzoq va yumshoq sekinlashadi (1,60 s gacha) — halqada roppa-rosa 2 marta. Raketaning o'zi bu egriga
-   prujina orqali, inersiya bilan ergashadi (szSim), shuning uchun keskin boshlanish/to'xtash yo'q. */
+/* Aylanish uchun "yo'naltiruvchi" egri: 0,8 s dan 3,2 s gacha roppa-rosa 2 marta; tezlik qo'ng'iroq
+   shaklida (sin²) — sekin boshlanadi, o'rtada eng tez (~1,7 aylanish/s), sekin tugaydi. Raketaning o'zi
+   bu egriga prujina orqali, inersiya bilan ergashadi (szSim). */
 const SZ_SPN = (function(){
-  const N = 2700, a = new Float64Array(N + 1);
-  const v = function(u){ if(u < .18) return 0; if(u < .32){ const y = (u - .18) / .14; return y * y * (3 - 2 * y); } if(u < .55) return 1; if(u < 1.60){ const x = (u - .55) / 1.05; return Math.pow(1 - x, 2.2); } return 0; };
+  const N = Math.round(SZ_T * 1000), a = new Float64Array(N + 1);
+  const v = function(u){ if(u < .8 || u > 3.2) return 0; const q = Math.sin(Math.PI * (u - .8) / 2.4); return q * q; };
   for(let i = 1; i <= N; i++) a[i] = a[i - 1] + (v((i - 1) / 1000) + v(i / 1000)) / 2;
   const k = 4 * Math.PI / a[N]; for(let i = 0; i <= N; i++) a[i] *= k;
   return a;
 })();
-function szSpin(u){ const x = u * 1000, i = Math.min(2699, Math.floor(x)), f = x - i; return SZ_SPN[i] + (SZ_SPN[i + 1] - SZ_SPN[i]) * f; }
+function szSpin(u){ const x = u * 1000, i = Math.min(SZ_SPN.length - 2, Math.floor(x)), f = x - i; return SZ_SPN[i] + (SZ_SPN[i + 1] - SZ_SPN[i]) * f; }
 function szBump(u, c, hw, T){
   let x = u - c; if(x > T / 2) x -= T; if(x < -T / 2) x += T;
   return Math.abs(x) < hw ? (1 + Math.cos(Math.PI * x / hw)) / 2 : 0;
@@ -10172,7 +10174,7 @@ function szBump(u, c, hw, T){
        sal o'tib ketadi, qaytadi va o'ngga-chapga yumshoq tebranib turadi. Tezlik ham, tezlanish ham
        uzluksiz — hech qayerda keskin to'xtash, "qotib qolish" yoki silkinish yo'q. */
 function szMo(t){
-  const u = ((t % SZ_T) + SZ_T) % SZ_T, ax = szFax(u), env = .55 + .9 * szBump(u, .36, .30, SZ_T);
+  const u = ((t % SZ_T) + SZ_T) % SZ_T, ax = szFax(u), env = .55 + .9 * szBump(u, 1.35, .60, SZ_T);
   /* mayda titrash — dvigatel gulduragidek, 7-15 Hz (ekranda silliq), otilishda kuchliroq */
   const n1 = Math.sin(t * 48.1 + .4) * .5 + Math.sin(t * 67.9 + 1.7) * .3 + Math.sin(t * 93.7 + 2.9) * .2;
   const n2 = Math.sin(t * 52.3 + 2.2) * .5 + Math.sin(t * 74.1 + .9) * .3 + Math.sin(t * 89.9 + .3) * .2;
@@ -10182,16 +10184,18 @@ function szMo(t){
   const wp = .020 * Math.sin(t * P / 1.9 + 1.3) + .012 * Math.sin(t * P / 3.3 + .4);
   const wd = .018 * Math.sin(t * P / 2.3 + 2.6) + .009 * Math.sin(t * P / 1.45 + .9);
   const ww = 1.4 * Math.sin(t * P / 1.7 + .7) + .8 * Math.sin(t * P / 3.4 + 2.1);
-  return { u: u, ax: ax, rd: Math.pow(ax, -.6), d: (szFd(u) + .004 * env * n2 + wd) * 1.9, p: (.007 * env * n1 + wp) * 1.9,
+  /* orqaga qaytish to'g'ri chiziq emas — kichik yoy bo'ylab */
+  const arc = u > 1.85 && u < 3.6 ? .03 * Math.sin(Math.PI * (u - 1.85) / 1.75) : 0;
+  return { u: u, ax: ax, rd: Math.pow(ax, -.6), d: (szFd(u) + .004 * env * n2 + wd) * 1.9, p: (.007 * env * n1 + wp + arc) * 1.9,
            w: (szFw(u) + .55 * env * n3 + ww) * Math.PI / 180, sp: 0, om: 0, air: 0 };
 }
 /* Fizika sozlamalari: k/c — aylanish prujinasi (~1,4 Hz, so'nish 0,34), A/Pr/r0 — aylanishdan keyingi
-   o'ng-chap tebranish (±15°, 1,4 s), W — yengil shamol, Kp/Cp va Kb/Cb — siljish va yonboshlash prujinalari. */
-const SZ_PH = { k: 81, c: 6.12, A: .27, Pr: 1.40, r0: 1.15, W: 2.5, Kp: 48, Cp: 8.4, Kb: 40, Cb: 7.5 };
+   o'ng-chap tebranish (±15°, 1,35 s, ikki marta), W — yengil shamol, Kp/Cp va Kb/Cb — siljish va yonboshlash prujinalari. */
+const SZ_PH = { k: 81, c: 6.12, A: .27, Pr: 1.35, r0: 2.9, W: 2.5, Kp: 48, Cp: 8.4, Kb: 40, Cb: 7.5 };
 function szSS(a, b, x){ const y = Math.min(1, Math.max(0, (x - a) / (b - a))); return y * y * (3 - 2 * y); }
 function szTgt(t){
   const H = SZ_PH, u = ((t % SZ_T) + SZ_T) % SZ_T, n = Math.floor(t / SZ_T);
-  const e = u < .6 ? 1 - szSS(.12, .32, u) : szSS(H.r0, H.r0 + .4, u);
+  const e = u < 1.5 ? 1 - szSS(.55, .85, u) : szSS(H.r0, H.r0 + .5, u);
   const ph = 6.28319 * ((u < H.r0 ? u + SZ_T : u) - H.r0) / H.Pr;
   return 4 * Math.PI * n + szSpin(u) + H.A * e * Math.sin(ph);
 }
@@ -10215,12 +10219,6 @@ function szSim(st, t){
    haqiqiy burun shakliga aniq yopishadi, u bilan birga aylanadi va titraydi. Ichida havo oqimi
    chiziqlari burama bo'lib orqaga oqadi; yorug'lik uchida va tepa tomonida (yoy shaklida). Otilishda paydo bo'lib, aylanish
    sekinlashgani sari so'nadi. */
-function szAirA(u){
-  if(u < .18) return 0;
-  if(u < .32){ const y = (u - .18) / .14; return y * y * (3 - 2 * y); }
-  if(u < .80) return 1;
-  return Math.pow(Math.max(0, 1 - (u - .80) / .80), 1.6);
-}
 function szGeo(st, pos){
   let y0 = Infinity, y1 = -Infinity;
   for(let i = 1; i < pos.length; i += 3){ const y = pos[i]; if(y < y0) y0 = y; if(y > y1) y1 = y; }
@@ -10247,7 +10245,7 @@ function sz3Draw(st, cv, fly, now){
   if(!still){
     szSim(st, t);
     m.sp = st.th; m.om = st.om; m.p += st.ps * 1.9; m.w += st.bk * Math.PI / 180;
-    m.air = Math.max(szAirA(m.u), .9 * szSS(6, 18, Math.abs(st.om)));
+    m.air = szSS(2.5, 7.5, Math.abs(st.om));
   }
   const tl = -48.5 * Math.PI / 180 + m.w, cz = Math.cos(tl), sz = Math.sin(tl);
   const off = m.d - .25, tx = -sz * off + cz * m.p, ty = cz * off + sz * m.p - .3;
