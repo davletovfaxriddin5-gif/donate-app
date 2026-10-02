@@ -2,6 +2,18 @@
 <html lang="uz">
 <head>
 <meta charset="UTF-8">
+<script>
+/* Brauzerda (Safari, Google) www.minatoh.uz ochilsa — sayt chiqadi, Telegram ichida (bot tugmasi) ochilsa — do'kon.
+   Telegram Mini App'ni ochganda manzil oxiriga #tgWebAppData… qo'shadi, Telegram skripti esa uni sessionStorage'da
+   saqlaydi (sahifa qayta yuklansa ham bilinadi). Brauzerda do'konni sinash uchun: www.minatoh.uz/?app=1 */
+(function(){
+  try{
+    var inTg = /tgWebApp(Data|Version|Platform)/.test(location.hash + location.search);
+    try{ inTg = inTg || !!sessionStorage.getItem('__telegram__initParams'); }catch(e){}
+    if(!inTg && !/(^|[?&])app=1(&|$)/.test(location.search)) location.replace('/sayt.html' + location.hash);
+  }catch(e){}
+})();
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
 <title>minatoh</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
