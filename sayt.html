@@ -19,7 +19,7 @@
 /* ===== MinatoUz sayti =====
    Rang: tungi siyoh fon, raketa oltini (asosiy tugmalar), elektr ko'k/binafsha (nur izlari).
    Harf: sarlavhalar Poppins, matn telefonning o'z shrifti (Mini App bilan bir xil).
-   Asosiy g'oya: orqadagi nurli chiziqlar — raketaning uchish izi; ular raketa dumida tutashadi. */
+*/
 :root{
   --ink:#060814; --ink2:#0B1024; --text:#EEF1FA; --dim:#9AA3BD; --faint:#6B7392;
   --line:rgba(255,255,255,.08); --glass:rgba(255,255,255,.035);
@@ -32,7 +32,6 @@ html{ background:var(--ink); color-scheme:dark; -webkit-text-size-adjust:100%; s
 body{ margin:0; font-family:var(--body); font-size:16px; line-height:1.6; color:var(--text); background:var(--ink);
       -webkit-font-smoothing:antialiased; overflow-x:hidden; padding-left:env(safe-area-inset-left); padding-right:env(safe-area-inset-right) }
 a{ color:inherit }
-#sky{ position:fixed; left:0; top:0; width:100%; height:100%; z-index:0; pointer-events:none }
 .page{ position:relative; z-index:1; overflow-x:clip }
 .wrap{ width:min(1180px, 100% - 40px); margin-inline:auto }
 section{ scroll-margin-top:84px }
@@ -341,7 +340,6 @@ h2{ font-family:var(--display); font-weight:600; font-size:clamp(30px, 5.6vw, 52
 </style>
 </head>
 <body>
-<canvas id="sky" aria-hidden="true"></canvas>
 <div class="page">
 
 <header class="nav" id="nav">
@@ -900,65 +898,6 @@ function sz3Draw(st, cv, fly, now){
   window.addEventListener('resize', onScroll);
   onNav(); track();
 
-  /* --- orqa fon: nurli chiziqlar — raketaning uchish izi. Pastki chap burchakdan keng tarqalib
-         chiqadi va raketa dumida ingichka nurga tutashadi; sahifa pastga tushganda so'nadi. --- */
-  const cv = document.getElementById('sky'), cx = cv.getContext('2d');
-  const COLS = [[76,107,255], [143,107,255], [63,200,255], [110,128,255]], GOLD = [242,179,61];
-  let W = 0, H = 0, strands = [];
-  let aW = 0, aH = 0;
-  const size = function(){
-    W = window.innerWidth; H = window.innerHeight;
-    const sameW = W === aW;
-    if(sameW && H <= aH && strands.length) return;
-    aH = sameW ? Math.max(H, aH) : H; aW = W;
-    const D = Math.min(window.devicePixelRatio || 1, W < 700 ? 1 : 1.5);
-    cv.width = Math.round(W * D); cv.height = Math.round(aH * D); cx.setTransform(D, 0, 0, D, 0, 0);
-    cv.style.height = aH + 'px';
-    const n = W < 700 ? 12 : 26; strands = [];
-    for(let i = 0; i < n; i++){
-      strands.push({ o:i / (n - 1) - .5, c:(i % 6 === 2 ? GOLD : COLS[i % 4]), ph:i * 1.7 % 6.28, w:.7 + (i * 37 % 10) / 12, a:.32 + (i * 53 % 10) / 28 });
-    }
-  };
-  const bez = function(P, s){ const u = 1 - s;
-    return [u*u*u*P[0][0] + 3*u*u*s*P[1][0] + 3*u*s*s*P[2][0] + s*s*s*P[3][0],
-            u*u*u*P[0][1] + 3*u*u*s*P[1][1] + 3*u*s*s*P[2][1] + s*s*s*P[3][1]]; };
-  let blank = false;
-  const draw = function(t){
-    const r = box.getBoundingClientRect();
-    const vis = Math.max(0, Math.min(1, (r.top + r.height * .5) / (H * .5)));
-    if(vis < .01){ if(!blank){ cx.clearRect(0, 0, W, H); blank = true; } return; }
-    blank = false; cx.clearRect(0, 0, W, H);
-    const A = [r.left + r.width * .37, r.top + r.height * .63];          /* raketa dumi */
-    /* keng ekranda iz matn ostidan emas, pastdan raketa tomonga ko'tariladi (yozuvlar ustidan o'tmaydi) */
-    const wide = W >= 1024;
-    const P = wide ? [[A[0] - W * .42, H * 1.12], [A[0] - W * .3, H * 1.0], [A[0] - W * .12, A[1] + H * .22], A]
-                   : [[-.14 * W, H * 1.1], [W * .1, H * .98], [A[0] - W * .2, A[1] + H * .2], A];
-    const N = 64, intro = RM ? 1 : Math.min(1, t / 1800);
-    cx.globalCompositeOperation = 'lighter'; cx.lineCap = 'round'; cx.lineJoin = 'round';
-    strands.forEach(function(sd){
-      const c = sd.c.join(','), a = sd.a * vis * intro;
-      const gr = cx.createLinearGradient(P[0][0], P[0][1], A[0], A[1]);
-      gr.addColorStop(0, 'rgba(' + c + ',0)'); gr.addColorStop(.3, 'rgba(' + c + ',' + (a * .5).toFixed(3) + ')');
-      gr.addColorStop(.9, 'rgba(' + c + ',' + a.toFixed(3) + ')'); gr.addColorStop(1, 'rgba(' + c + ',0)');
-      cx.beginPath();
-      for(let j = 0; j <= N; j++){
-        const s = j / N, p = bez(P, s), q = bez(P, Math.min(1, s + .01));
-        let tx = q[0] - p[0], ty = q[1] - p[1]; const l = Math.hypot(tx, ty) || 1; tx /= l; ty /= l;
-        const spread = (.004 + .17 * Math.pow(1 - s, 1.5)) * H * (1 + .22 * Math.sin(t * .00055 + sd.ph));
-        const off = sd.o * spread + .014 * H * Math.sin(s * 8.5 - t * .0011 + sd.ph) * (1 - s);
-        const x = p[0] - ty * off, y = p[1] + tx * off;
-        j ? cx.lineTo(x, y) : cx.moveTo(x, y);
-      }
-      cx.strokeStyle = gr;
-      cx.globalAlpha = .09; cx.lineWidth = 7 * sd.w; cx.stroke();
-      cx.globalAlpha = 1; cx.lineWidth = 1.1 * sd.w; cx.stroke();
-    });
-    cx.globalAlpha = 1; cx.globalCompositeOperation = 'source-over';
-  };
-  size();
-  window.addEventListener('resize', function(){ size(); if(RM) draw(4000); });
-  if(RM){ draw(4000); window.addEventListener('scroll', function(){ draw(4000); }, { passive:true }); }
-  else { const loop = function(t){ draw(t); requestAnimationFrame(loop); }; requestAnimationFrame(loop); }
 })();
 </script>
 <script>
