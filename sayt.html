@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MinatoUz — o'yin valyutasi va Telegram xizmatlari</title>
+<meta name="description" content="PUBG Mobile UC, Mobile Legends olmoslari, Free Fire, Telegram Stars va Premium — barchasi @minatoh_bot ichida.">
+<meta name="theme-color" content="#060814">
+<meta property="og:type" content="website">
+<meta property="og:title" content="MinatoUz — o'yin valyutasi va Telegram xizmatlari">
+<meta property="og:description" content="Paketni tanlang, ID'ni kiriting, qolganini bot o'zi bajaradi.">
+<meta property="og:url" content="https://www.minatoh.uz/">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23060814'/%3E%3Ccircle cx='32' cy='32' r='21' fill='none' stroke='%23F2B33D' stroke-width='4'/%3E%3Cpath d='M21 41V23l11 11 11-11v18' fill='none' stroke='%23F2B33D' stroke-width='5' stroke-linejoin='round' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+<script>document.documentElement.className = 'js';</script>
+<style>
+/* ===== MinatoUz sayti =====
+   Rang: tungi siyoh fon, raketa oltini (asosiy tugmalar), elektr ko'k/binafsha (nur izlari).
+   Harf: sarlavhalar Poppins, matn telefonning o'z shrifti (Mini App bilan bir xil).
+   Asosiy g'oya: orqadagi nurli chiziqlar — raketaning uchish izi; ular raketa dumida tutashadi. */
+:root{
+  --ink:#060814; --ink2:#0B1024; --text:#EEF1FA; --dim:#9AA3BD; --faint:#6B7392;
+  --line:rgba(255,255,255,.08); --glass:rgba(255,255,255,.035);
+  --blue:#4C6BFF; --violet:#8F6BFF; --gold:#F2B33D; --gold2:#FFD27A;
+  --display:'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --body:-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, system-ui, sans-serif;
+}
+*{ box-sizing:border-box }
+html{ background:var(--ink); color-scheme:dark; -webkit-text-size-adjust:100%; scroll-behavior:smooth }
+body{ margin:0; font-family:var(--body); font-size:16px; line-height:1.6; color:var(--text); background:var(--ink);
+      -webkit-font-smoothing:antialiased; overflow-x:hidden; padding-left:env(safe-area-inset-left); padding-right:env(safe-area-inset-right) }
+a{ color:inherit }
+#sky{ position:fixed; inset:0; width:100%; height:100%; z-index:0; pointer-events:none }
+.page{ position:relative; z-index:1; overflow-x:clip }
+.wrap{ width:min(1180px, 100% - 40px); margin-inline:auto }
+section{ scroll-margin-top:84px }
+a:focus-visible, button:focus-visible, summary:focus-visible{ outline:2px solid var(--gold); outline-offset:3px; border-radius:10px }
+
+/* ---- yuqori menyu ---- */
+.nav{ position:sticky; top:0; z-index:30; padding-top:env(safe-area-inset-top); transition:background .3s, border-color .3s; border-bottom:1px solid transparent }
+.nav.sc{ background:rgba(6,8,20,.72); -webkit-backdrop-filter:blur(16px) saturate(140%); backdrop-filter:blur(16px) saturate(140%); border-bottom-color:var(--line) }
+.nav-in{ display:flex; align-items:center; gap:28px; height:64px }
+.logo{ display:flex; align-items:center; gap:10px; text-decoration:none; font-family:var(--display); font-weight:600; font-size:17px; letter-spacing:-.01em }
+.logo svg{ width:30px; height:30px; flex-shrink:0 }
+.nav-links{ display:none; gap:28px }
+.nav-links a{ text-decoration:none; color:var(--dim); font-size:15px; transition:color .2s }
+.nav .btn{ margin-left:auto; height:40px; padding:0 18px; font-size:14px }
+@media (min-width:900px){ .nav-links{ display:flex } }
+
+/* ---- tugmalar ---- */
+.btn{ display:inline-flex; align-items:center; justify-content:center; gap:10px; height:52px; padding:0 26px; border-radius:999px;
+      font-weight:700; font-size:16px; text-decoration:none; white-space:nowrap; transition:transform .15s, box-shadow .25s, background .25s }
+.btn:active{ transform:scale(.97) }
+.btn svg{ width:18px; height:18px; flex-shrink:0 }
+.btn-gold{ color:#1A1204; background:linear-gradient(180deg, #FFD983, #F2B33D 70%); box-shadow:0 10px 34px rgba(242,179,61,.28), inset 0 1px 0 rgba(255,255,255,.55) }
+.btn-ghost{ color:var(--text); background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.14) }
+@media (hover:hover){
+  .btn-gold:hover{ box-shadow:0 14px 44px rgba(242,179,61,.42), inset 0 1px 0 rgba(255,255,255,.6) }
+  .btn-ghost:hover{ background:rgba(255,255,255,.08) }
+  .nav-links a:hover{ color:var(--text) }
+}
+
+/* ---- bosh qism ---- */
+.hero{ position:relative; padding:20px 0 48px; overflow-x:clip }
+.hero::before{ content:""; position:absolute; z-index:-1; right:-10%; top:-10%; width:70vw; height:70vw; max-width:900px; max-height:900px; pointer-events:none;
+               background:radial-gradient(closest-side, rgba(76,107,255,.20), rgba(143,107,255,.08) 55%, transparent) }
+.hero-grid{ display:grid; gap:8px; align-items:center }
+.chip{ display:inline-flex; align-items:center; gap:9px; padding:7px 14px; border-radius:999px; font-size:14px; color:var(--dim);
+       background:rgba(255,255,255,.04); border:1px solid var(--line) }
+.chip i{ width:7px; height:7px; border-radius:50%; background:#3BD48A; box-shadow:0 0 0 4px rgba(59,212,138,.16) }
+h1{ font-family:var(--display); font-weight:600; font-size:clamp(40px, 10.4vw, 80px); line-height:1.02; letter-spacing:-.04em; margin:20px 0 20px }
+h1 span{ display:block }
+.lead{ font-size:clamp(16.5px, 2.1vw, 19px); color:var(--dim); max-width:36ch; margin:0 0 28px }
+.lead b{ color:var(--text); font-weight:600 }
+.cta{ display:flex; flex-wrap:wrap; gap:12px }
+.note{ margin:16px 0 0; font-size:14px; color:var(--faint) }
+.rk-box{ position:relative; width:100%; max-width:640px; aspect-ratio:13/10; justify-self:center; margin-top:4px }
+@media (max-width:599px){
+  h1{ margin:16px 0 14px }
+  .lead{ margin-bottom:22px }
+  .cta .btn{ height:48px; padding:0 18px; font-size:15px }
+  .note{ margin-top:12px; font-size:13px }
+  .rk-box{ margin-top:-6px }
+}
+@media (min-width:1024px){
+  .hero{ padding:12px 0 64px }
+  .hero-grid{ grid-template-columns:1fr 1.05fr; min-height:calc(100svh - 64px - 76px) }
+  .rk-box{ margin-top:0 }
+}
+/* sahifa ochilganda: matn qatorlari ketma-ket ko'tariladi (bitta tartibli lahza) */
+.js .hero [data-l]{ opacity:0; transform:translateY(22px); animation:rise .9s cubic-bezier(.2,.7,.2,1) forwards; animation-delay:var(--d, 0s) }
+@keyframes rise{ to{ opacity:1; transform:none } }
+
+/* raketa (Mini App'dagi bilan bir xil 3D chizgich) */
+.sz-sp{ position:absolute; fill:#E9B44C; opacity:0; filter:drop-shadow(0 0 3px rgba(233,180,76,.55)); animation:szTw 5s ease-in-out infinite }
+@keyframes szTw{ 0%{ opacity:0; transform:scale(.4) rotate(0) } 30%{ opacity:1; transform:scale(1) rotate(18deg) }
+  48%{ opacity:1; transform:scale(1) rotate(26deg) } 78%{ opacity:0; transform:scale(.5) rotate(40deg) } 100%{ opacity:0; transform:scale(.4) rotate(45deg) } }
+.sz-rk3, .sz-fly{ position:absolute; inset:0 }
+.sz-poster, .sz-3d{ position:absolute; inset:0; width:100%; height:100%; display:block; pointer-events:none; transition:opacity .35s ease }
+.sz-poster{ object-fit:contain }
+.sz-3d{ opacity:0 }
+.sz-fly.on3d .sz-3d{ opacity:1 }
+.sz-fly.on3d .sz-poster{ opacity:0 }
+
+/* ---- o'yinlar lentasi ---- */
+.ticker{ border-block:1px solid var(--line); overflow:hidden; padding:18px 0;
+         -webkit-mask-image:linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); mask-image:linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent) }
+.ticker .row{ display:flex; align-items:center; gap:36px; width:max-content; animation:tick 42s linear infinite }
+.ticker span{ font-family:var(--display); font-weight:500; font-size:18px; color:#C9CFE3; white-space:nowrap }
+.ticker svg{ width:12px; height:12px; fill:var(--gold); flex-shrink:0; opacity:.85 }
+@keyframes tick{ to{ transform:translateX(-50%) } }
+
+/* ---- vitrina: aylantirganda mahsulotlar 3D da birin-ketin chiqadi ---- */
+.vt{ position:relative; height:500vh; height:500svh }
+.stage{ position:sticky; top:0; height:100vh; height:100svh; overflow:hidden; isolation:isolate }
+.stage .bg i{ position:absolute; inset:-10%; opacity:0; transition:opacity 1s ease; z-index:-2 }
+.stage .bg .g0{ background:radial-gradient(48% 52% at 72% 48%, rgba(255,150,40,.30), rgba(255,120,30,.07) 55%, transparent 75%) }
+.stage .bg .g1{ background:radial-gradient(48% 52% at 72% 48%, rgba(40,170,255,.30), rgba(60,120,255,.08) 55%, transparent 75%) }
+.stage .bg .g2{ background:radial-gradient(48% 52% at 72% 48%, rgba(255,200,70,.26), rgba(143,107,255,.12) 55%, transparent 75%) }
+.stage .bg .g3{ background:radial-gradient(52% 56% at 70% 48%, rgba(76,107,255,.30), rgba(143,107,255,.10) 55%, transparent 75%) }
+.stage[data-c="0"] .g0, .stage[data-c="1"] .g1, .stage[data-c="2"] .g2, .stage[data-c="3"] .g3{ opacity:1 }
+.wipe{ position:absolute; left:-25%; right:-25%; top:20%; height:60%; z-index:-1; pointer-events:none; opacity:0; filter:blur(14px);
+       background:linear-gradient(180deg, transparent, rgba(var(--wc),.16) 35%, rgba(var(--wc),.34) 50%, rgba(var(--wc),.16) 65%, transparent) }
+.wipe[data-c="1"]{ --wc:60,180,255 } .wipe[data-c="2"]{ --wc:255,200,80 } .wipe[data-c="3"]{ --wc:110,130,255 } .wipe{ --wc:255,170,70 }
+#vtp, #vt3d{ position:absolute; inset:0; width:100%; height:100%; display:block; pointer-events:none }
+.chs{ position:absolute; inset:0; display:grid; align-items:center }
+.ch{ grid-area:1/1; max-width:470px; opacity:0; transform:translateY(26px); filter:blur(8px); pointer-events:none;
+     transition:opacity .55s ease, transform .75s cubic-bezier(.2,.7,.2,1), filter .55s ease }
+.ch.on{ opacity:1; transform:none; filter:none; pointer-events:auto }
+.ch .k{ margin:0 0 12px; color:var(--gold2); font-weight:600; font-size:15px }
+/* sarlavha avval faqat chiziq (kontur) bo'lib chiqadi, keyin oq rang bilan to'ladi */
+.ch h3{ font-family:var(--display); font-weight:700; font-size:clamp(36px, 7.6vw, 78px); line-height:.98; letter-spacing:-.03em; margin:0 0 18px;
+        color:transparent; -webkit-text-stroke:1.3px rgba(255,255,255,.9); transition:color .8s ease .3s }
+.ch.on h3{ color:#fff }
+.ch p{ margin:0; color:#C9CFE3; font-size:clamp(16px, 1.9vw, 18px); max-width:38ch }
+.ch ul{ list-style:none; margin:20px 0 0; padding:0; display:grid; gap:10px }
+.ch li{ display:flex; align-items:center; gap:10px; font-weight:600; font-size:15.5px }
+.ch li svg{ width:20px; height:20px; flex-shrink:0; fill:none; stroke:var(--gold); stroke-width:2.4; stroke-linecap:round; stroke-linejoin:round }
+.vt-dots{ position:absolute; right:max(18px, env(safe-area-inset-right)); top:50%; transform:translateY(-50%); display:grid; gap:10px }
+.vt-dots i{ display:block; width:4px; height:22px; border-radius:4px; background:rgba(255,255,255,.18); transition:background .4s, height .4s }
+.vt-dots i.on{ background:var(--gold); height:34px }
+@media (max-aspect-ratio:9/10){
+  /* tik ekran (telefon, iPad tik): buyum tepada, matn pastda */
+  .chs{ align-items:end }
+  .ch{ padding-bottom:calc(30px + env(safe-area-inset-bottom)) }
+  .stage::after{ content:""; position:absolute; left:0; right:0; bottom:0; height:62%; z-index:0; pointer-events:none;
+                 background:linear-gradient(180deg, transparent, rgba(6,8,20,.82) 45%, rgba(6,8,20,.94)) }
+  .chs{ z-index:1 }
+  .stage .bg .g0, .stage .bg .g1, .stage .bg .g2, .stage .bg .g3{ background-position:center top }
+  .vt-dots{ top:28%; }
+}
+
+/* ---- bo'limlar ---- */
+.sec{ padding:clamp(76px, 12vw, 140px) 0 0 }
+h2{ font-family:var(--display); font-weight:600; font-size:clamp(30px, 5.6vw, 52px); line-height:1.08; letter-spacing:-.035em; margin:0 0 16px; max-width:17ch }
+.sub{ color:var(--dim); font-size:clamp(16px, 1.9vw, 18px); max-width:46ch; margin:0 0 40px }
+
+/* nimalar bor — narxlar taxtasidek ro'yxat */
+.menu{ display:grid; border-top:1px solid var(--line) }
+.item{ display:flex; align-items:baseline; justify-content:space-between; gap:16px; padding:22px 2px; border-bottom:1px solid var(--line); text-decoration:none }
+.item .g{ font-family:var(--display); font-weight:500; font-size:clamp(19px, 2.6vw, 25px); letter-spacing:-.02em; transition:color .2s }
+.item .c{ font-size:15px; color:var(--dim); white-space:nowrap }
+@media (min-width:760px){ .menu{ grid-template-columns:1fr 1fr; column-gap:56px } }
+@media (hover:hover){ .item:hover .g{ color:var(--gold2) } }
+
+/* qanday ishlaydi — uchish yo'li chizig'i aylantirish bilan to'ladi */
+.how{ display:grid; gap:12px }
+.how-head .sub{ margin-bottom:28px }
+.steps{ position:relative; padding-left:52px }
+.sl{ list-style:none; margin:0; padding:0 }
+.track{ position:absolute; left:15px; top:10px; bottom:46px; width:2px; border-radius:2px; background:rgba(255,255,255,.09) }
+.track .fill{ position:absolute; left:0; top:0; width:100%; height:0; border-radius:2px; background:linear-gradient(180deg, var(--blue), var(--violet) 55%, var(--gold)) }
+.track .dot{ position:absolute; left:50%; top:0; width:12px; height:12px; margin:-6px 0 0 -6px; border-radius:50%; background:var(--gold);
+             box-shadow:0 0 0 6px rgba(242,179,61,.16), 0 0 20px rgba(242,179,61,.75) }
+.step{ position:relative; padding:4px 0 44px }
+.step .n{ position:absolute; left:-52px; top:2px; width:32px; height:32px; border-radius:50%; display:grid; place-items:center;
+          font-family:var(--display); font-weight:600; font-size:13px; color:var(--dim); background:var(--ink); border:1px solid rgba(255,255,255,.16);
+          transition:color .35s, background .35s, border-color .35s }
+.step.on .n{ color:#1A1204; background:var(--gold); border-color:var(--gold) }
+.step h3{ font-family:var(--display); font-weight:500; font-size:clamp(20px, 2.6vw, 25px); letter-spacing:-.02em; line-height:1.25; margin:0 0 8px }
+.step p{ margin:0; color:var(--dim); max-width:40ch }
+@media (min-width:1024px){
+  .how{ grid-template-columns:.95fr 1.05fr; gap:64px }
+  .how-head{ position:sticky; top:120px; align-self:start }
+}
+
+/* afzalliklar — kartochka emas, chiziqlar bilan ajratilgan ro'yxat */
+.why{ display:grid; border-top:1px solid var(--line) }
+.w{ display:grid; grid-template-columns:44px 1fr; gap:18px; padding:28px 0; border-bottom:1px solid var(--line) }
+.w svg{ width:30px; height:30px; stroke:var(--gold); fill:none; stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; margin-top:2px }
+.w h3{ font-family:var(--display); font-weight:500; font-size:20px; letter-spacing:-.015em; margin:0 0 6px }
+.w p{ margin:0; color:var(--dim); max-width:44ch }
+@media (min-width:760px){ .why{ grid-template-columns:1fr 1fr; column-gap:56px } }
+
+/* raqamlar */
+.nums{ display:grid; grid-template-columns:repeat(3, 1fr); gap:16px; border-top:1px solid var(--line); padding-top:30px }
+.num .v{ font-family:var(--display); font-weight:600; font-size:clamp(34px, 8.4vw, 72px); letter-spacing:-.045em; line-height:1 }
+.num .k{ margin-top:10px; color:var(--dim); font-size:clamp(13.5px, 1.6vw, 16px); line-height:1.4 }
+
+/* sharhlar */
+.rev{ display:grid; gap:22px; align-items:center; padding:clamp(26px, 5vw, 48px); border-radius:28px; background:var(--glass); border:1px solid var(--line) }
+.rev h2{ margin-bottom:10px }
+.rev .sub{ margin:0 }
+@media (min-width:900px){ .rev{ grid-template-columns:1fr auto } }
+
+/* savollar */
+.faq{ border-top:1px solid var(--line); max-width:820px }
+.faq details{ border-bottom:1px solid var(--line) }
+.faq summary{ list-style:none; display:flex; align-items:center; justify-content:space-between; gap:18px; padding:22px 2px; cursor:pointer;
+              font-weight:600; font-size:clamp(16.5px, 2vw, 18.5px) }
+.faq summary::-webkit-details-marker{ display:none }
+.faq summary i{ position:relative; width:22px; height:22px; flex-shrink:0; transition:transform .3s cubic-bezier(.2,.7,.2,1) }
+.faq summary i::before, .faq summary i::after{ content:""; position:absolute; left:3px; right:3px; top:10px; height:2px; border-radius:2px; background:var(--gold) }
+.faq summary i::after{ transform:rotate(90deg) }
+.faq details[open] summary i{ transform:rotate(45deg) }
+.faq p{ margin:0 2px 22px; color:var(--dim); max-width:62ch }
+
+/* yakuniy chaqiriq — sahifadagi yagona oltin panel */
+.final{ display:grid; gap:22px; padding:clamp(32px, 6vw, 72px); border-radius:32px; color:#1A1204;
+        background:radial-gradient(120% 140% at 88% 8%, #FFE6A8 0%, #F2B33D 46%, #C9840F 100%);
+        box-shadow:0 30px 80px rgba(242,179,61,.18) }
+.final h2{ color:#140E03; max-width:15ch; margin:0 }
+.final p{ margin:0; font-size:17px; color:rgba(20,14,3,.72); max-width:40ch }
+.btn-dark{ color:#FFE3A3; background:#140E03 }
+.final .cta a.lnk{ align-self:center; color:#140E03; font-weight:600; text-underline-offset:4px }
+@media (min-width:900px){ .final{ grid-template-columns:1fr auto; align-items:end } }
+
+/* pastki qism */
+.foot{ margin-top:clamp(76px, 12vw, 140px); padding:44px 0 calc(34px + env(safe-area-inset-bottom)); border-top:1px solid var(--line); color:var(--dim); font-size:15px }
+.foot-in{ display:grid; gap:30px }
+.foot .logo{ color:var(--text) }
+.foot p{ margin:12px 0 0; max-width:30ch }
+.foot h4{ margin:0 0 12px; font-size:14px; font-weight:600; color:var(--text) }
+.foot ul{ list-style:none; margin:0; padding:0; display:grid; gap:9px }
+.foot ul a{ text-decoration:none; transition:color .2s }
+.foot .cp{ margin-top:36px; font-size:13.5px; color:var(--faint) }
+@media (hover:hover){ .foot ul a:hover{ color:var(--text) } }
+@media (min-width:760px){ .foot-in{ grid-template-columns:1.4fr 1fr 1fr } }
+
+/* aylantirganda yumshoq paydo bo'lish (faqat sarlavha va ro'yxatlar) */
+.js [data-r]{ opacity:0; transform:translateY(18px); transition:opacity .8s cubic-bezier(.2,.7,.2,1), transform .8s cubic-bezier(.2,.7,.2,1); transition-delay:var(--d, 0s) }
+.js [data-r].in{ opacity:1; transform:none }
+
+@media (prefers-reduced-motion:reduce){
+  html{ scroll-behavior:auto }
+  *, *::before, *::after{ animation:none !important; transition:none !important }
+  .js [data-r], .js .hero [data-l]{ opacity:1 !important; transform:none !important }
+}
+</style>
+</head>
+<body>
+<canvas id="sky" aria-hidden="true"></canvas>
+<div class="page">
+
+<header class="nav" id="nav">
+  <div class="wrap nav-in">
+    <a class="logo" href="#top" aria-label="MinatoUz">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="16" fill="#0E1430"/><circle cx="32" cy="32" r="21" fill="none" stroke="#F2B33D" stroke-width="4"/><path d="M21 41V23l11 11 11-11v18" fill="none" stroke="#F2B33D" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/></svg>
+      MinatoUz
+    </a>
+    <nav class="nav-links" aria-label="Bo'limlar">
+      <a href="#vitrina">Nimalar bor</a>
+      <a href="#qanday">Qanday ishlaydi</a>
+      <a href="#savollar">Savollar</a>
+    </nav>
+    <a class="btn btn-gold" href="https://t.me/minatoh_bot" target="_blank" rel="noopener">Botni ochish</a>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <div class="chip" data-l style="--d:.05s"><i></i>Telegram ichidagi do'kon</div>
+        <h1><span data-l style="--d:.15s">Donat qiling.</span><span data-l style="--d:.28s">O'yinga qayting.</span></h1>
+        <p class="lead" data-l style="--d:.42s">PUBG Mobile UC, Mobile Legends olmoslari, Free Fire, Telegram Stars va Premium — barchasi <b>@minatoh_bot</b> ichida. Paketni tanlang, ID'ni kiriting, qolganini bot o'zi bajaradi.</p>
+        <div class="cta" data-l style="--d:.55s">
+          <a class="btn btn-gold" href="https://t.me/minatoh_bot" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M21.6 4.2 2.9 11.4c-1.3.5-1.3 1.2-.2 1.6l4.8 1.5 1.8 5.6c.2.6.4.8.9.8.4 0 .6-.2.9-.5l2.3-2.2 4.8 3.5c.9.5 1.5.2 1.7-.8l3.1-14.7c.3-1.3-.5-1.9-1.4-1.5zM9.5 14.2l9.1-5.7c.4-.3.8-.1.5.2l-7.6 6.9-.3 3.2-1.7-4.6z"/></svg>
+            Botni ochish
+          </a>
+          <a class="btn btn-ghost" href="#qanday">Qanday ishlaydi</a>
+        </div>
+        <p class="note" data-l style="--d:.65s">Ro'yxatdan o'tish shart emas — Telegram hisobingiz yetarli.</p>
+      </div>
+      <div class="rk-box" data-l style="--d:.3s" aria-hidden="true">
+        <svg class="sz-sp" viewBox="0 0 24 24" style="left:6%;top:18%;width:8px;height:8px;animation-delay:0s"><path d="M12 1.5c.7 5.9 3.5 9 10.5 10.5-7 1.5-9.8 4.6-10.5 10.5C11.3 16.6 8.5 13.5 1.5 12 8.5 10.5 11.3 7.4 12 1.5z"/></svg><svg class="sz-sp" viewBox="0 0 24 24" style="left:17%;top:72%;width:10px;height:10px;animation-delay:1.1s"><path d="M12 1.5c.7 5.9 3.5 9 10.5 10.5-7 1.5-9.8 4.6-10.5 10.5C11.3 16.6 8.5 13.5 1.5 12 8.5 10.5 11.3 7.4 12 1.5z"/></svg><svg class="sz-sp" viewBox="0 0 24 24" style="left:27%;top:6%;width:7px;height:7px;animation-delay:2.4s"><path d="M12 1.5c.7 5.9 3.5 9 10.5 10.5-7 1.5-9.8 4.6-10.5 10.5C11.3 16.6 8.5 13.5 1.5 12 8.5 10.5 11.3 7.4 12 1.5z"/></svg><svg class="sz-sp" viewBox="0 0 24 24" style="left:33%;top:90%;width:8px;height:8px;animation-delay:3.3s"><path d="M12 1.5c.7 5.9 3.5 9 10.5 10.5-7 1.5-9.8 4.6-10.5 10.5C11.3 16.6 8.5 13.5 1.5 12 8.5 10.5 11.3 7.4 12 1.5z"/></svg><svg class="sz-sp" viewBox="0 0 24 24" style="left:70%;top:5%;width:9px;height:9px;animation-delay:0.5s"><path d="M12 1.5c.7 5.9 3.5 9 10.5 10.5-7 1.5-9.8 4.6-10.5 10.5C11.3 16.6 8.5 13.5 1.5 12 8.5 10.5 11.3 7.4 12 1.5z"/></svg><svg class="sz-sp" viewBox="0 0 24 24" style="left:79%;top:86%;width:8px;height:8px;animation-delay:1.8s"><path d="M12 1.5c.7 5.9 3.5 9 10.5 10.5-7 1.5-9.8 4.6-10.5 10.5C11.3 16.6 8.5 13.5 1.5 12 8.5 10.5 11.3 7.4 12 1.5z"/></svg><svg class="sz-sp" viewBox="0 0 24 24" style="left:89%;top:30%;width:11px;height:11px;animation-delay:2.9s"><path d="M12 1.5c.7 5.9 3.5 9 10.5 10.5-7 1.5-9.8 4.6-10.5 10.5C11.3 16.6 8.5 13.5 1.5 12 8.5 10.5 11.3 7.4 12 1.5z"/></svg><svg class="sz-sp" viewBox="0 0 24 24" style="left:95%;top:62%;width:8px;height:8px;animation-delay:4.1s"><path d="M12 1.5c.7 5.9 3.5 9 10.5 10.5-7 1.5-9.8 4.6-10.5 10.5C11.3 16.6 8.5 13.5 1.5 12 8.5 10.5 11.3 7.4 12 1.5z"/></svg><svg class="sz-sp" viewBox="0 0 24 24" style="left:58%;top:96%;width:7px;height:7px;animation-delay:3.8s"><path d="M12 1.5c.7 5.9 3.5 9 10.5 10.5-7 1.5-9.8 4.6-10.5 10.5C11.3 16.6 8.5 13.5 1.5 12 8.5 10.5 11.3 7.4 12 1.5z"/></svg><svg class="sz-sp" viewBox="0 0 24 24" style="left:3%;top:50%;width:6px;height:6px;animation-delay:4.5s"><path d="M12 1.5c.7 5.9 3.5 9 10.5 10.5-7 1.5-9.8 4.6-10.5 10.5C11.3 16.6 8.5 13.5 1.5 12 8.5 10.5 11.3 7.4 12 1.5z"/></svg><svg class="sz-sp" viewBox="0 0 24 24" style="left:92%;top:9%;width:6px;height:6px;animation-delay:1.5s"><path d="M12 1.5c.7 5.9 3.5 9 10.5 10.5-7 1.5-9.8 4.6-10.5 10.5C11.3 16.6 8.5 13.5 1.5 12 8.5 10.5 11.3 7.4 12 1.5z"/></svg><svg class="sz-sp" viewBox="0 0 24 24" style="left:48%;top:0%;width:6px;height:6px;animation-delay:0.9s"><path d="M12 1.5c.7 5.9 3.5 9 10.5 10.5-7 1.5-9.8 4.6-10.5 10.5C11.3 16.6 8.5 13.5 1.5 12 8.5 10.5 11.3 7.4 12 1.5z"/></svg>
+        <div class="sz-rk3"><div class="sz-fly" id="szFly">
+          <img class="sz-poster" src="data:image/webp;base64,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" alt="">
+          <canvas class="sz-3d" id="sz3d"></canvas>
+        </div></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="ticker" aria-label="O'yinlar va xizmatlar">
+    <div class="row"><span>PUBG Mobile</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.5c.7 5.9 3.5 9 10.5 10.5-7 1.5-9.8 4.6-10.5 10.5C11.3 16.6 8.5 13.5 1.5 12 8.5 10.5 11.3 7.4 12 1.5z"/></svg><span>Mobile Legends</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.5c.7 5.9 3.5 9 10.5 10.5-7 1.5-9.8 4.6-10.5 10.5C11.3 16.6 8.5 13.5 1.5 12 8.5 10.5 11.3 7.4 12 1.5z"/></svg><span>Free Fire</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.5c.7 5.9 3.5 9 10.5 10.5-7 1.5-9.8 4.6-10.5 10.5C11.3 16.6 8.5 13.5 1.5 12 8.5 10.5 11.3 7.4 12 1.5z"/></svg><span>Standoff 2</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.5c.7 5.9 3.5 9 10.5 10.5-7 1.5-9.8 4.6-10.5 10.5C11.3 16.6 8.5 13.5 1.5 12 8.5 10.5 11.3 7.4 12 1.5z"/></svg><span>Telegram Stars</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.5c.7 5.9 3.5 9 10.5 10.5-7 1.5-9.8 4.6-10.5 10.5C11.3 16.6 8.5 13.5 1.5 12 8.5 10.5 11.3 7.4 12 1.5z"/></svg><span>Telegram Premium</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.5c.7 5.9 3.5 9 10.5 10.5-7 1.5-9.8 4.6-10.5 10.5C11.3 16.6 8.5 13.5 1.5 12 8.5 10.5 11.3 7.4 12 1.5z"/></svg><span>Steam</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.5c.7 5.9 3.5 9 10.5 10.5-7 1.5-9.8 4.6-10.5 10.5C11.3 16.6 8.5 13.5 1.5 12 8.5 10.5 11.3 7.4 12 1.5z"/></svg><span>Roblox</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.5c.7 5.9 3.5 9 10.5 10.5-7 1.5-9.8 4.6-10.5 10.5C11.3 16.6 8.5 13.5 1.5 12 8.5 10.5 11.3 7.4 12 1.5z"/></svg><span>NFT sovg'alar</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.5c.7 5.9 3.5 9 10.5 10.5-7 1.5-9.8 4.6-10.5 10.5C11.3 16.6 8.5 13.5 1.5 12 8.5 10.5 11.3 7.4 12 1.5z"/></svg><span>PUBG Mobile</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.5c.7 5.9 3.5 9 10.5 10.5-7 1.5-9.8 4.6-10.5 10.5C11.3 16.6 8.5 13.5 1.5 12 8.5 10.5 11.3 7.4 12 1.5z"/></svg><span>Mobile Legends</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.5c.7 5.9 3.5 9 10.5 10.5-7 1.5-9.8 4.6-10.5 10.5C11.3 16.6 8.5 13.5 1.5 12 8.5 10.5 11.3 7.4 12 1.5z"/></svg><span>Free Fire</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.5c.7 5.9 3.5 9 10.5 10.5-7 1.5-9.8 4.6-10.5 10.5C11.3 16.6 8.5 13.5 1.5 12 8.5 10.5 11.3 7.4 12 1.5z"/></svg><span>Standoff 2</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.5c.7 5.9 3.5 9 10.5 10.5-7 1.5-9.8 4.6-10.5 10.5C11.3 16.6 8.5 13.5 1.5 12 8.5 10.5 11.3 7.4 12 1.5z"/></svg><span>Telegram Stars</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.5c.7 5.9 3.5 9 10.5 10.5-7 1.5-9.8 4.6-10.5 10.5C11.3 16.6 8.5 13.5 1.5 12 8.5 10.5 11.3 7.4 12 1.5z"/></svg><span>Telegram Premium</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.5c.7 5.9 3.5 9 10.5 10.5-7 1.5-9.8 4.6-10.5 10.5C11.3 16.6 8.5 13.5 1.5 12 8.5 10.5 11.3 7.4 12 1.5z"/></svg><span>Steam</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.5c.7 5.9 3.5 9 10.5 10.5-7 1.5-9.8 4.6-10.5 10.5C11.3 16.6 8.5 13.5 1.5 12 8.5 10.5 11.3 7.4 12 1.5z"/></svg><span>Roblox</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.5c.7 5.9 3.5 9 10.5 10.5-7 1.5-9.8 4.6-10.5 10.5C11.3 16.6 8.5 13.5 1.5 12 8.5 10.5 11.3 7.4 12 1.5z"/></svg><span>NFT sovg'alar</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.5c.7 5.9 3.5 9 10.5 10.5-7 1.5-9.8 4.6-10.5 10.5C11.3 16.6 8.5 13.5 1.5 12 8.5 10.5 11.3 7.4 12 1.5z"/></svg></div>
+  </div>
+
+  <section class="vt" id="vitrina" aria-label="Mahsulotlar">
+    <div class="stage" data-c="0">
+      <div class="bg" aria-hidden="true"><i class="g0"></i><i class="g1"></i><i class="g2"></i><i class="g3"></i></div>
+      <div class="wipe" aria-hidden="true"></div>
+      <canvas id="vtp" aria-hidden="true"></canvas>
+      <canvas id="vt3d" aria-hidden="true"></canvas>
+      <div class="chs wrap">
+        <article class="ch">
+          <p class="k">PUBG Mobile</p>
+          <h3>UC — BIR NECHA BOSISHDA.</h3>
+          <p>Royale Pass, skinlar va sandiqlar uchun o'yin valyutasi. Paketni tanlang, o'yin ID'ingizni kiriting — UC hisobingizga tushadi.</p>
+          <ul><li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg>Barcha UC paketlari</li><li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg>ID to'lovdan oldin tekshiriladi</li><li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg>Buyurtma avtomatik bajariladi</li></ul>
+        </article>
+        <article class="ch">
+          <p class="k">Mobile Legends va Free Fire</p>
+          <h3>OLMOSLAR.</h3>
+          <p>Qahramonlar, skinlar va passlar uchun olmoslar. Kerakli miqdorni tanlang — qolganini bot o'zi bajaradi.</p>
+          <ul><li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg>MLBB va Free Fire olmoslari</li><li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg>ID orqali to'g'ridan-to'g'ri hisobga</li><li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg>Holati «Tarix» bo'limida</li></ul>
+        </article>
+        <article class="ch">
+          <p class="k">Telegram</p>
+          <h3>STARS VA PREMIUM.</h3>
+          <p>Telegram ichidagi xaridlar, sovg'alar va obunalar uchun yulduzlar. Premium obuna ham shu yerda.</p>
+          <ul><li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg>Stars paketlari</li><li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg>Telegram Premium obunasi</li><li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg>O'zingizga yoki do'stingizga</li></ul>
+        </article>
+        <article class="ch">
+          <p class="k">Nega MinatoUz</p>
+          <h3>QULAYLIKLAR.</h3>
+          <p>Xarid tez, xatosiz va qulay bo'lishi uchun.</p>
+          <ul><li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg>Avtomatik bajarilish</li><li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg>ID oldindan tekshiriladi</li><li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg>Keshbek to'planadi</li><li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg>14 tilda ishlaydi</li></ul>
+        </article>
+      </div>
+      <div class="vt-dots" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+    </div>
+  </section>
+
+  <section class="sec" id="nimalar">
+    <div class="wrap">
+      <h2 data-r>Hammasi bitta botda.</h2>
+      <p class="sub" data-r style="--d:.08s">O'yinlar uchun valyuta, Telegram xizmatlari va sovg'a kartalari. Narxlar va paketlar botda doim yangilanib turadi.</p>
+      <div class="menu">
+        <a class="item" data-r style="--d:0s" href="https://t.me/minatoh_bot" target="_blank" rel="noopener"><span class="g">PUBG Mobile</span><span class="c">UC</span></a>
+        <a class="item" data-r style="--d:.05s" href="https://t.me/minatoh_bot" target="_blank" rel="noopener"><span class="g">Mobile Legends</span><span class="c">Olmoslar</span></a>
+        <a class="item" data-r style="--d:.1s" href="https://t.me/minatoh_bot" target="_blank" rel="noopener"><span class="g">Free Fire</span><span class="c">Olmoslar</span></a>
+        <a class="item" data-r style="--d:.15s" href="https://t.me/minatoh_bot" target="_blank" rel="noopener"><span class="g">Standoff 2</span><span class="c">Gold</span></a>
+        <a class="item" data-r style="--d:.2s" href="https://t.me/minatoh_bot" target="_blank" rel="noopener"><span class="g">Telegram Stars</span><span class="c">Yulduzlar</span></a>
+        <a class="item" data-r style="--d:.25s" href="https://t.me/minatoh_bot" target="_blank" rel="noopener"><span class="g">Telegram Premium</span><span class="c">Obuna</span></a>
+        <a class="item" data-r style="--d:.3s" href="https://t.me/minatoh_bot" target="_blank" rel="noopener"><span class="g">Steam va Roblox</span><span class="c">Sovg'a kartalari</span></a>
+        <a class="item" data-r style="--d:.35s" href="https://t.me/minatoh_bot" target="_blank" rel="noopener"><span class="g">NFT sovg'alar</span><span class="c">Market va hamyon</span></a>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="qanday">
+    <div class="wrap how">
+      <div class="how-head">
+        <h2 data-r>To'rt qadam va tayyor.</h2>
+        <p class="sub" data-r style="--d:.08s">Hammasi Telegram ichida bo'ladi — boshqa ilova yoki sayt kerak emas.</p>
+      </div>
+      <div class="steps" id="steps">
+        <div class="track" aria-hidden="true"><div class="fill"></div><div class="dot"></div></div>
+        <ol class="sl">
+        <li class="step"><span class="n">1</span><h3>Botni oching</h3><p>@minatoh_bot'ni oching va «Start» tugmasini bosing.</p></li>
+        <li class="step"><span class="n">2</span><h3>Paketni tanlang</h3><p>O'yin yoki xizmatni, so'ng kerakli paketni tanlang.</p></li>
+        <li class="step"><span class="n">3</span><h3>ID'ni kiriting</h3><p>O'yin ID'ingizni yozing — bot uni to'lovdan oldin tekshirib beradi.</p></li>
+        <li class="step"><span class="n">4</span><h3>To'lang va oling</h3><p>Balansdan to'lang. Buyurtma bajariladi, holatini «Tarix» bo'limida ko'rasiz.</p></li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="raqamlar">
+    <div class="wrap">
+      <h2 data-r>Raqamlarda.</h2>
+      <div class="nums">
+        <div class="num"><div class="v" data-count="789" data-suf="+">789+</div><div class="k">foydalanuvchi</div></div>
+        <div class="num"><div class="v" data-count="221">221</div><div class="k">buyurtma sentyabrda</div></div>
+        <div class="num"><div class="v" data-count="14">14</div><div class="k">tilda ishlaydi</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="sharhlar">
+    <div class="wrap">
+      <div class="rev" data-r>
+        <div>
+          <h2>Mijozlar fikri.</h2>
+          <p class="sub">Sharhlarni biz tanlamaymiz — ular ochiq Telegram guruhida turibdi. O'qing va o'zingiz baho bering.</p>
+        </div>
+        <a class="btn btn-ghost" href="https://t.me/mlbb_otzivv" target="_blank" rel="noopener">Sharhlarni o'qish</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="savollar">
+    <div class="wrap">
+      <h2 data-r>Ko'p beriladigan savollar.</h2>
+      <div class="faq" data-r style="--d:.08s">
+        <details><summary>To'lov qanday qilinadi?<i aria-hidden="true"></i></summary><p>Bot ichida balansingizni to'ldirasiz, xaridlar shu balansdan to'lanadi. To'ldirish yo'riqnomasi botda ko'rsatiladi.</p></details>
+        <details><summary>Buyurtma qachon tushadi?<i aria-hidden="true"></i></summary><p>Buyurtma to'langach avtomatik bajarila boshlaydi. Uning holatini botdagi «Tarix» bo'limida ko'rasiz.</p></details>
+        <details><summary>O'yin ID'imni qayerdan topaman?<i aria-hidden="true"></i></summary><p>ID o'yindagi profilingizda yozilgan bo'ladi. Uni botga kiritganingizda bot tekshirib beradi.</p></details>
+        <details><summary>Bu xavfsizmi?<i aria-hidden="true"></i></summary><p>Barcha xaridlar Telegram ichida, rasmiy @minatoh_bot orqali bo'ladi. Boshqa joyda yoki boshqa hisobdan to'lov so'ralsa — bu biz emasmiz.</p></details>
+        <details><summary>Savol yoki muammo bo'lsa-chi?<i aria-hidden="true"></i></summary><p>Qo'llab-quvvatlashga yozing: <a href="https://t.me/minatoh" target="_blank" rel="noopener">@minatoh</a>.</p></details>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="wrap">
+      <div class="final" data-r>
+        <div>
+          <h2>Keyingi donatingiz bir necha bosishda.</h2>
+          <p style="margin-top:14px">Botni oching va birinchi paketingizni tanlang.</p>
+        </div>
+        <div class="cta">
+          <a class="btn btn-dark" href="https://t.me/minatoh_bot" target="_blank" rel="noopener">Botni ochish</a>
+          <a class="lnk" href="https://t.me/minatoh_uz" target="_blank" rel="noopener">Kanalga obuna bo'lish</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot-in">
+      <div>
+        <a class="logo" href="#top" aria-label="MinatoUz">
+          <svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="16" fill="#0E1430"/><circle cx="32" cy="32" r="21" fill="none" stroke="#F2B33D" stroke-width="4"/><path d="M21 41V23l11 11 11-11v18" fill="none" stroke="#F2B33D" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/></svg>
+          MinatoUz
+        </a>
+        <p>O'yin valyutasi va Telegram xizmatlari do'koni.</p>
+      </div>
+      <div>
+        <h4>Telegram</h4>
+        <ul>
+          <li><a href="https://t.me/minatoh_bot" target="_blank" rel="noopener">Bot — @minatoh_bot</a></li>
+          <li><a href="https://t.me/minatoh_uz" target="_blank" rel="noopener">Kanal — @minatoh_uz</a></li>
+          <li><a href="https://t.me/mlbb_otzivv" target="_blank" rel="noopener">Sharhlar guruhi</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Aloqa</h4>
+        <ul>
+          <li><a href="https://t.me/minatoh" target="_blank" rel="noopener">Qo'llab-quvvatlash — @minatoh</a></li>
+          <li><a href="https://www.instagram.com/minatoh.uz/" target="_blank" rel="noopener">Instagram — @minatoh.uz</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="cp">© 2026 MinatoUz</div>
+  </div>
+</footer>
+</div>
+
+<script>
+/* ===== Raketaning 3D chizgichi — Mini App'dagi bilan aynan bir xil (raketa-3d.glb shu saytdan olinadi) ===== */
+const SZ_SPIN = 3;
+var sz3 = null, sz3Buf = null;
+function sz3Stop(){
+  const s = sz3; sz3 = null; if(!s) return;
+  try{ cancelAnimationFrame(s.raf); }catch(e){}
+  try{ const x = s.gl.getExtension('WEBGL_lose_context'); if(x) x.loseContext(); }catch(e){}
+}
+function sz3Start(){
+  sz3Stop();
+  const cv = document.getElementById('sz3d'), fly = document.getElementById('szFly');
+  if(!cv || !fly) return;
+  let gl = null;
+  try{ gl = cv.getContext('webgl2', { alpha:true, premultipliedAlpha:true, antialias:true }); }catch(e){}
+  if(!gl) return;
+  const VS = '#version 300 es\nlayout(location=0) in vec3 p;layout(location=1) in vec3 n;layout(location=2) in vec2 t;' +
+    'uniform mat4 M,VP;uniform mat3 Nm;out vec3 wp,wn;out vec2 uv;void main(){uv=t;vec4 w=M*vec4(p,1.);wp=w.xyz;wn=Nm*n;gl_Position=VP*w;}';
+  const FS = '#version 300 es\nprecision highp float;in vec3 wp,wn;in vec2 uv;out vec4 o;uniform sampler2D tB,tM,tN;uniform vec3 cam;uniform float uW;' +
+    'vec3 env(vec3 d,float r){float t=d.y*.5+.5;vec3 c=mix(vec3(.02,.025,.045),vec3(.42,.46,.58),smoothstep(.05,.95,t));' +
+    'float s1=mix(260.,6.,r),s2=mix(90.,4.,r),k=mix(1.,.22,r);' +
+    'c+=vec3(3.2,3.,2.8)*k*pow(max(dot(d,normalize(vec3(.55,.6,.6))),0.),s1);' +
+    'c+=vec3(1.3,1.35,1.5)*k*pow(max(dot(d,normalize(vec3(-.75,.15,.45))),0.),s2);' +
+    'c+=vec3(.9,.8,.7)*k*pow(max(dot(d,normalize(vec3(0.,-.3,-1.))),0.),s2);return c;}' +
+    'vec3 aces(vec3 x){return clamp((x*(2.51*x+.03))/(x*(2.43*x+.59)+.14),0.,1.);}' +
+    'void main(){vec3 base=pow(texture(tB,uv).rgb,vec3(2.2));vec4 mr=texture(tM,uv);float rou=clamp(mr.g,.04,1.),met=mr.b;' +
+    'vec3 N=normalize(wn),tn=texture(tN,uv).xyz*2.-1.;vec3 d1=dFdx(wp),d2=dFdy(wp);vec2 u1=dFdx(uv),u2=dFdy(uv);' +
+    'vec3 a=cross(d2,N),c2=cross(N,d1);vec3 T=a*u1.x+c2*u2.x,B=a*u1.y+c2*u2.y;float im=inversesqrt(max(max(dot(T,T),dot(B,B)),1e-12));' +
+    'N=normalize(mat3(T*im,B*im,N)*tn);if(!gl_FrontFacing)N=-N;' +
+    'vec3 V=normalize(cam-wp),R=reflect(-V,N);float nv=max(dot(N,V),0.);vec3 F0=mix(vec3(.04),base,met);' +
+    'vec3 F=F0+(max(vec3(1.-rou),F0)-F0)*pow(1.-nv,5.);vec3 col=base*(1.-met)*(env(N,1.)*.9+.06)+env(R,rou)*F;' +
+    'vec3 L=normalize(vec3(.5,.8,.6)),H=normalize(L+V);col+=F*pow(max(dot(N,H),0.),mix(600.,18.,rou))*mix(3.,.2,rou);' +
+    'o=vec4(pow(aces(col*1.15),vec3(1./2.2))*uW,uW);}';
+  const mk = function(ty, s){ const x = gl.createShader(ty); gl.shaderSource(x, s); gl.compileShader(x); return x; };
+  const pr = gl.createProgram(); gl.attachShader(pr, mk(gl.VERTEX_SHADER, VS)); gl.attachShader(pr, mk(gl.FRAGMENT_SHADER, FS)); gl.linkProgram(pr);
+  if(!gl.getProgramParameter(pr, gl.LINK_STATUS)) return;
+  gl.useProgram(pr);
+  const st = sz3 = { gl: gl, raf: 0, n: 0, it: 0, on: false, t0: performance.now(), pr: pr, pa: null,
+    u: { M: gl.getUniformLocation(pr, 'M'), Nm: gl.getUniformLocation(pr, 'Nm'), VP: gl.getUniformLocation(pr, 'VP'), cam: gl.getUniformLocation(pr, 'cam'), W: gl.getUniformLocation(pr, 'uW') } };
+  gl.uniform1f(st.u.W, 1);
+  /* burundagi havo qobig'i — alohida kichik dastur (yaratilmasa, raketa havosiz chiziladi) */
+  try{
+    const pa = gl.createProgram(); gl.attachShader(pa, mk(gl.VERTEX_SHADER, SZ_AIR_VS)); gl.attachShader(pa, mk(gl.FRAGMENT_SHADER, SZ_AIR_FS)); gl.linkProgram(pa);
+    if(gl.getProgramParameter(pa, gl.LINK_STATUS)){
+      st.pa = pa; st.ua = {};
+      ['M', 'VP', 'Nm', 'yT', 'L', 'gr', 'cam', 'col', 'ud', 'a', 'tm'].forEach(function(k){ st.ua[k] = gl.getUniformLocation(pa, k); });
+    }
+  }catch(e){}
+  gl.useProgram(pr);
+  gl.uniform1i(gl.getUniformLocation(pr, 'tB'), 0); gl.uniform1i(gl.getUniformLocation(pr, 'tM'), 1); gl.uniform1i(gl.getUniformLocation(pr, 'tN'), 2);
+  const get = sz3Buf ? Promise.resolve(sz3Buf)
+    : fetch('raketa-3d.glb').then(function(r){ if(!r.ok) throw new Error('glb'); return r.arrayBuffer(); }).then(function(b){ sz3Buf = b; return b; });
+  get.then(function(b){ return sz3 === st ? sz3Load(st, b) : false; })
+     .then(function(ok){ if(ok && sz3 === st) st.raf = requestAnimationFrame(function(now){ sz3Draw(st, cv, fly, now); }); })
+     .catch(function(){});
+}
+function sz3Load(st, b){
+  const gl = st.gl, jl = new DataView(b).getUint32(12, true);
+  const js = JSON.parse(new TextDecoder().decode(new Uint8Array(b, 20, jl))), bin = 20 + jl + 8;
+  const view = function(i){ const v = js.bufferViews[i]; return new Uint8Array(b, bin + (v.byteOffset || 0), v.byteLength); };
+  const acc = function(i, T, n){ const a = js.accessors[i], v = js.bufferViews[a.bufferView]; return new T(b, bin + (v.byteOffset || 0) + (a.byteOffset || 0), a.count * n); };
+  const p = js.meshes[0].primitives[0], mat = js.materials[p.material || 0], pbr = mat.pbrMetallicRoughness;
+  gl.bindVertexArray(gl.createVertexArray());
+  const attr = function(d, loc, n){ gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer()); gl.bufferData(gl.ARRAY_BUFFER, d, gl.STATIC_DRAW); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, n, gl.FLOAT, false, 0, 0); };
+  const pos3 = acc(p.attributes.POSITION, Float32Array, 3); attr(pos3, 0, 3); szGeo(st, pos3); attr(acc(p.attributes.NORMAL, Float32Array, 3), 1, 3); attr(acc(p.attributes.TEXCOORD_0, Float32Array, 2), 2, 2);
+  const ia = js.accessors[p.indices], big = ia.componentType === 5125;
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, gl.createBuffer()); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, acc(p.indices, big ? Uint32Array : Uint16Array, 1), gl.STATIC_DRAW);
+  st.n = ia.count; st.it = big ? gl.UNSIGNED_INT : gl.UNSIGNED_SHORT;
+  const pic = function(ti){
+    const im = js.images[js.textures[ti].source], blob = new Blob([view(im.bufferView)], { type: im.mimeType || 'image/jpeg' });
+    if(window.createImageBitmap) return createImageBitmap(blob);
+    return new Promise(function(res, rej){ const i = new Image(); i.onload = function(){ res(i); }; i.onerror = rej; i.src = URL.createObjectURL(blob); });
+  };
+  const tex = function(ti, unit){ return pic(ti).then(function(bm){
+    if(sz3 !== st) return;
+    gl.activeTexture(gl.TEXTURE0 + unit); gl.bindTexture(gl.TEXTURE_2D, gl.createTexture());
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, bm); gl.generateMipmap(gl.TEXTURE_2D);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  }); };
+  return Promise.all([tex(pbr.baseColorTexture.index, 0), tex(pbr.metallicRoughnessTexture.index, 1), tex(mat.normalTexture.index, 2)])
+    .then(function(){ return sz3 === st; });
+}
+/* Raketa harakati — bitta tartibli, uzluksiz sahna (3,3 s halqa). Raketa doim tekis ushlanadi:
+   burchagi o'zgarmaydi; bir butun bo'lib oldinga-orqaga va o'ngga-chapga siljiydi:
+     0,0-0,28 s  — biroz orqaga cho'kadi va siqiladi (7%);
+     0,28-0,8 s  — tezlashib oldinga ko'tariladi, shu payt tez cho'ziladi (13% gacha), sekinlashganda asl holiga qaytadi;
+     0,4-1,8 s   — shu bilan birga 2 marta aylanadi: sekin boshlanadi, o'rtada eng tez, sekin tugaydi;
+     0,8-1,9 s   — o'z o'qi bo'ylab tekis orqaga qaytadi;
+     doim       — butun raketa tekis holda o'ngga-chapga siljiydi (M tebranishi bilan bir vaqtda);
+     1,5-0,4 s   — M o'ngga-chapga yumshoq tebranadi, raketa o'qi bo'ylab ham sekin "suzib" turadi.
+   Nuqtalar orasi tebranish bermaydigan (monoton) silliq egri bilan to'ldiriladi.
+   d — oldinga siljish, ax — bo'yi (cho'zilish), w — burun burchagi (o'zgarmaydi), raketa uzunligiga nisbatan. */
+const SZ_T = 3.3;
+const SZ_D  = [[0,0],[.14,-.03],[.28,-.08],[.38,-.055],[.50,.07],[.65,.24],[.80,.32],[.95,.31],[1.15,.25],[1.40,.15],[1.65,.07],[1.90,.025],[2.20,.008],[2.60,.002],[3.30,0]];
+const SZ_AX = [[0,1],[.15,.97],[.28,.93],[.36,.99],[.46,1.11],[.54,1.13],[.66,1.05],[.80,.985],[.95,1],[3.30,1]];
+const SZ_W  = [[0,0],[3.30,0]];
+/* Davriy monoton kubik (Fritsch-Carlson): har nuqtadagi qiyalik oldindan hisoblanadi */
+function szCurve(K){
+  const n = K.length, m = new Array(n).fill(0), sec = function(i){ return (K[i + 1][1] - K[i][1]) / (K[i + 1][0] - K[i][0]); };
+  for(let i = 0; i < n; i++){
+    const a = i === 0 ? n - 2 : i - 1, b = i === n - 1 ? 0 : i;
+    const ha = K[a + 1][0] - K[a][0], hb = K[b + 1][0] - K[b][0], da = sec(a), db = sec(b);
+    if(da * db > 0){ const w1 = 2 * hb + ha, w2 = hb + 2 * ha; m[i] = (w1 + w2) / (w1 / da + w2 / db); }
+  }
+  return function(u){
+    let i = 0; while(i < n - 2 && u >= K[i + 1][0]) i++;
+    const h = K[i + 1][0] - K[i][0], x = Math.min(1, Math.max(0, (u - K[i][0]) / h)), x2 = x * x, x3 = x2 * x;
+    return (2 * x3 - 3 * x2 + 1) * K[i][1] + (x3 - 2 * x2 + x) * h * m[i] + (-2 * x3 + 3 * x2) * K[i + 1][1] + (x3 - x2) * h * m[i + 1];
+  };
+}
+const szFd = szCurve(SZ_D), szFax = szCurve(SZ_AX), szFw = szCurve(SZ_W);
+/* Aylanish uchun "yo'naltiruvchi" egri: 0,40 s dan 1,80 s gacha roppa-rosa 2 marta; tezlik qo'ng'iroq
+   shaklida (sin²) — sekin boshlanadi, o'rtada eng tez (~2,9 aylanish/s), sekin tugaydi. Raketaning o'zi
+   bu egriga prujina orqali, inersiya bilan ergashadi (szSim). */
+const SZ_SPN = (function(){
+  const N = Math.round(SZ_T * 1000), a = new Float64Array(N + 1);
+  const v = function(u){ if(u < .40 || u > 1.80) return 0; const q = Math.sin(Math.PI * (u - .40) / 1.4); return q * q; };
+  for(let i = 1; i <= N; i++) a[i] = a[i - 1] + (v((i - 1) / 1000) + v(i / 1000)) / 2;
+  const k = 4 * Math.PI / a[N]; for(let i = 0; i <= N; i++) a[i] *= k;
+  return a;
+})();
+function szSpin(u){ const x = u * 1000, i = Math.min(SZ_SPN.length - 2, Math.floor(x)), f = x - i; return SZ_SPN[i] + (SZ_SPN[i + 1] - SZ_SPN[i]) * f; }
+function szBump(u, c, hw, T){
+  let x = u - c; if(x > T / 2) x -= T; if(x < -T / 2) x += T;
+  return Math.abs(x) < hw ? (1 + Math.cos(Math.PI * x / hw)) / 2 : 0;
+}
+/* Titrash: haqiqiy raketadek mayda qaltirash (11-27 Hz, takrorlanmaydigan),
+   otilishda kuchliroq. Vaqt halqaga bog'lanmagan — har safar boshqacha. */
+/* ---------- Raketa harakati ----------
+   (1) Otilish yo'li (cho'kish-otilish-qaytish), cho'zilish, burun egilishi, mayda titrash va sekin
+       "suzish" — vaqtga bog'langan silliq egri chiziqlar (szMo).
+   (2) O'z o'qi atrofida aylanish, yonga siljish va yonboshlash — fizika (szSim): Blender'dagi
+       prujina / Rigid Body va After Effects'dagi inertsiya (overshoot) usuli. Raketa yo'naltiruvchi
+       egriga prujina orqali, massa va so'nish bilan ergashadi: tez aylanish asta sekinlashadi, M dan
+       sal o'tib ketadi, qaytadi va o'ngga-chapga yumshoq tebranib turadi. Tezlik ham, tezlanish ham
+       uzluksiz — hech qayerda keskin to'xtash, "qotib qolish" yoki silkinish yo'q. */
+function szMo(t){
+  const u = ((t % SZ_T) + SZ_T) % SZ_T, ax = szFax(u), env = .75 + .65 * szBump(u, .58, .35, SZ_T);
+  /* titrash — dvigatel kabi, 11-24 Hz, doim sezilib turadi, otilishda kuchliroq */
+  const n1 = Math.sin(t * 71.3 + .4) * .5 + Math.sin(t * 112.9 + 1.7) * .3 + Math.sin(t * 151.1 + 2.9) * .2;
+  const n2 = Math.sin(t * 83.7 + 2.2) * .5 + Math.sin(t * 127.3 + .9) * .3 + Math.sin(t * 166.9 + .3) * .2;
+  const n3 = Math.sin(t * 67.1 + 1.1) * .5 + Math.sin(t * 104.3 + 2.5) * .3 + Math.sin(t * 143.9 + .7) * .2;
+  /* sekin "suzish" faqat o'q bo'ylab (oldinga-orqaga) — raketa joyida qotmaydi, lekin yonga ham siljimaydi */
+  const P = 6.28319;
+  const wd = .020 * Math.sin(t * P / 1.9 + 2.6) + .010 * Math.sin(t * P / 1.2 + .9);
+  /* butun raketa bir butun bo'lib, tekis holda (burchagi o'zgarmay) ekranda o'ngga-chapga siljiydi —
+     M ning o'ngga-chapga tebranishi bilan bir vaqtda (M o'ngga burilsa, raketa ham o'ngga). Aylanish
+     paytida ham to'xtamaydi, faqat biroz kamroq siljiydi. */
+  const sx = (.035 + .025 * szRestE(u)) * Math.sin(szPh(t));
+  return { u: u, ax: ax, rd: Math.pow(ax, -.6), d: (szFd(u) + .006 * env * n2 + wd) * 1.9, p: .013 * env * n1 * 1.9,
+           x: sx * 1.9, w: (szFw(u) + 1.2 * env * n3) * Math.PI / 180, sp: 0, om: 0, air: 0 };
+}
+/* Fizika sozlamalari: k/c — aylanish prujinasi (inersiya va yumshoqlik); A — aylanishdan keyingi
+   M ning o'ngga-chapga tebranishi (±11°), Pr/r0 — tebranish davri (1,1 s, ikki marta) va boshlanishi;
+   W — yengil shamol. Raketa tanasi og'maydi va yonga siljimaydi. */
+const SZ_PH = { k: 81, c: 6.12, A: .19, Pr: 1.10, r0: 1.50, W: 2.0 };
+function szSS(a, b, x){ const y = Math.min(1, Math.max(0, (x - a) / (b - a))); return y * y * (3 - 2 * y); }
+/* tebranish signali (-1..1): aylanish tugay boshlaganda yumshoq kirib keladi, keyingisi boshlanganda so'nadi */
+function szRestE(u){ const H = SZ_PH; return u < .9 ? 1 - szSS(.12, .40, u) : szSS(H.r0, H.r0 + .45, u); }
+/* halqada roppa-rosa 3 ta to'liq davr (3,3 s / 1,1 s) — butun halqa bo'ylab uzluksiz */
+function szPh(t){ const H = SZ_PH, u = ((t % SZ_T) + SZ_T) % SZ_T; return 6.28319 * ((u < H.r0 ? u + SZ_T : u) - H.r0) / H.Pr; }
+function szSway(t){ const u = ((t % SZ_T) + SZ_T) % SZ_T; return szRestE(u) * Math.sin(szPh(t)); }
+function szTgt(t){
+  const u = ((t % SZ_T) + SZ_T) % SZ_T, n = Math.floor(t / SZ_T);
+  return 4 * Math.PI * n + szSpin(u) + SZ_PH.A * szSway(t);
+}
+function szSimStep(st, t, dt){
+  const H = SZ_PH, g = szTgt(t);
+  const wind = H.W * (.6 * Math.sin(t * 3.05 + 1.1) + .4 * Math.sin(t * 4.9 + 2.3) + .25 * Math.sin(t * 6.6 + .4));
+  st.om += (H.k * (g - st.th) - H.c * st.om + wind) * dt; st.th += st.om * dt;
+  st.ps = 0; st.bk = 0;
+}
+function szSim(st, t){
+  const dt = 1 / 240;
+  if(st.simT == null || t < st.simT - 1e-6){ st.simT = 0; st.th = 0; st.om = 0; st.ps = 0; st.pv = 0; st.bk = 0; st.bv = 0; }
+  if(t - st.simT > 1.5){ st.simT = t - 1.5; st.th = szTgt(st.simT); st.om = 0; }     /* uzoq tanaffusdan keyin */
+  while(st.simT + dt <= t){ st.simT += dt; szSimStep(st, st.simT, dt); }
+}
+/* ---------- Raketa burnidagi havo qobig'i ----------
+   Blender usuli: burun konusining nusxasi normal bo'ylab biroz tashqariga surilib, Fresnel bilan
+   chiziladi — faqat chetlari (siluet) yorug', o'rtasi shaffof. Shu sababli yorug' yoy raketaning
+   haqiqiy burun shakliga aniq yopishadi, u bilan birga aylanadi va titraydi. Ichida havo oqimi
+   chiziqlari burama bo'lib orqaga oqadi; yorug'lik uchida va tepa tomonida (yoy shaklida). Otilishda paydo bo'lib, aylanish
+   sekinlashgani sari so'nadi. */
+function szGeo(st, pos){
+  let y0 = Infinity, y1 = -Infinity;
+  for(let i = 1; i < pos.length; i += 3){ const y = pos[i]; if(y < y0) y0 = y; if(y > y1) y1 = y; }
+  st.yTip = y1; st.len = (y1 - y0) || 1;
+}
+const SZ_AIR_VS = '#version 300 es\nlayout(location=0) in vec3 p;layout(location=1) in vec3 n;' +
+  'uniform mat4 M,VP;uniform mat3 Nm;uniform float yT,L,gr;out vec3 wp,wn;out float w,s,an;' +
+  'void main(){s=(yT-p.y)/L;w=1.-smoothstep(.14,.38,s);float off=L*(.020+.020*(1.-s/.38))*gr*w;' +
+  'vec3 q=p+normalize(n)*off;q.y+=L*.012*w*gr;vec4 W=M*vec4(q,1.);wp=W.xyz;wn=Nm*n;an=atan(p.z,p.x);gl_Position=VP*W;}';
+const SZ_AIR_FS = '#version 300 es\nprecision highp float;in vec3 wp,wn;in float w,s,an;out vec4 o;' +
+  'uniform vec3 cam,col,ud;uniform float a,tm;' +
+  'void main(){vec3 N=normalize(wn),V=normalize(cam-wp);float f=pow(1.-abs(dot(N,V)),2.4);' +
+  'float fl=.55+.45*sin(s*70.-tm*13.+an*2.);float dr=pow(clamp(dot(N,ud),0.,1.),1.3);' +
+  'float al=clamp(a*w*f*fl*(.12+.98*dr)*1.15,0.,1.);o=vec4(col*al,al);}';
+function sz3Draw(st, cv, fly, now){
+  if(sz3 !== st) return;
+  if(!document.body.contains(cv)){ sz3Stop(); return; }
+  /* saytda: raketa ekrandan chiqsa chizmaymiz (batareya tejaladi), vaqt esa davom etadi */
+  if(!window.SZ_VIS){ st.raf = requestAnimationFrame(function(n){ sz3Draw(st, cv, fly, n); }); return; }
+  const gl = st.gl, dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const w = Math.round(cv.clientWidth * dpr), h = Math.round(cv.clientHeight * dpr);
+  if(w && h && (cv.width !== w || cv.height !== h)){ cv.width = w; cv.height = h; }
+  const still = document.body.classList.contains('reduce-motion');
+  const t = window.SZ3_T != null ? window.SZ3_T : (now - st.t0) / 1000;
+  const m = still ? { u: 0, ax: 1, rd: 1, d: 0, p: 0, w: 0, sp: 0, om: 0, air: 0 } : szMo(t);
+  if(!still){
+    szSim(st, t);
+    m.sp = st.th; m.om = st.om; m.p += st.ps * 1.9; m.w += st.bk * Math.PI / 180;
+    m.air = szSS(2.5, 7.5, Math.abs(st.om));
+  }
+  const tl = -48.5 * Math.PI / 180 + m.w, cz = Math.cos(tl), sz = Math.sin(tl);
+  const off = m.d - .25, tx = -sz * off + cz * m.p + (m.x || 0), ty = cz * off + sz * m.p - .3;
+  /* M3 = Rz(tl) * S(eni, bo'yi, eni) * Ry(aylanish); normal uchun S teskarisi bilan */
+  const mats = function(sp){
+    const cy = Math.cos(sp), sy = Math.sin(sp);
+    const mk3 = function(sx, syy){
+      const c0 = [cy * sx, 0, -sy * sx], c1 = [0, syy, 0], c2 = [sy * sx, 0, cy * sx];
+      const rz = function(v){ return [cz * v[0] - sz * v[1], sz * v[0] + cz * v[1], v[2]]; };
+      return [rz(c0), rz(c1), rz(c2)];
+    };
+    const A = mk3(m.rd, m.ax), Nn = mk3(1 / m.rd, 1 / m.ax);
+    return [new Float32Array([A[0][0], A[0][1], A[0][2], 0, A[1][0], A[1][1], A[1][2], 0, A[2][0], A[2][1], A[2][2], 0, tx, ty, 0, 1]),
+            new Float32Array([Nn[0][0], Nn[0][1], Nn[0][2], Nn[1][0], Nn[1][1], Nn[1][2], Nn[2][0], Nn[2][1], Nn[2][2]])];
+  };
+  const f = 1 / Math.tan(.31), asp = (w || 1) / (h || 1), nr = .1, fr = 20, D = 5.1;
+  const VP = new Float32Array([f / asp, 0, 0, 0, 0, f, 0, 0, 0, 0, (fr + nr) / (nr - fr), -1, 0, 0, 2 * fr * nr / (nr - fr) - D * (fr + nr) / (nr - fr), D]);
+  gl.viewport(0, 0, cv.width, cv.height); gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+  gl.enable(gl.DEPTH_TEST); gl.depthFunc(gl.LEQUAL);
+  gl.useProgram(st.pr); gl.uniformMatrix4fv(st.u.VP, false, VP); gl.uniform3f(st.u.cam, 0, 0, D);
+  gl.disable(gl.BLEND); gl.uniform1f(st.u.W, 1);
+  const MM = mats(m.sp);
+  gl.uniformMatrix4fv(st.u.M, false, MM[0]); gl.uniformMatrix3fv(st.u.Nm, false, MM[1]);
+  gl.drawElements(gl.TRIANGLES, st.n, st.it, 0);
+  /* burundagi havo qobig'i */
+  if(st.pa && m.air > .01 && st.yTip != null){
+    const ua = st.ua, lt = document.body.classList.contains('light');
+    gl.useProgram(st.pa);
+    gl.uniformMatrix4fv(ua.M, false, MM[0]); gl.uniformMatrix4fv(ua.VP, false, VP); gl.uniformMatrix3fv(ua.Nm, false, MM[1]);
+    gl.uniform1f(ua.yT, st.yTip); gl.uniform1f(ua.L, st.len); gl.uniform1f(ua.gr, .5 + .5 * m.air);
+    gl.uniform3f(ua.cam, 0, 0, D); const ul = Math.hypot(-cz - .9 * sz, -sz + .9 * cz) || 1; gl.uniform3f(ua.ud, (-cz - .9 * sz) / ul, (-sz + .9 * cz) / ul, 0); gl.uniform1f(ua.a, m.air); gl.uniform1f(ua.tm, t);
+    if(lt) gl.uniform3f(ua.col, .44, .52, .74); else gl.uniform3f(ua.col, 1, 1, 1);
+    gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA); gl.depthMask(false);
+    gl.drawElements(gl.TRIANGLES, st.n, st.it, 0);
+    gl.depthMask(true); gl.useProgram(st.pr);
+  }
+  gl.disable(gl.BLEND);
+  if(!st.on){ st.on = true; fly.classList.add('on3d'); }
+  if(!still || window.SZ3_T != null) st.raf = requestAnimationFrame(function(n){ sz3Draw(st, cv, fly, n); });
+}
+
+
+</script>
+<script>
+(function(){
+  'use strict';
+  const RM = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(RM) document.body.classList.add('reduce-motion');
+
+  /* --- menyu: aylantirilganda shishadek fon --- */
+  const nav = document.getElementById('nav');
+  const onNav = function(){ nav.classList.toggle('sc', window.scrollY > 8); };
+
+  /* --- raketa: faqat ekranda ko'rinib turganda chiziladi --- */
+  const box = document.querySelector('.rk-box');
+  window.SZ_VIS = true;
+  if('IntersectionObserver' in window){
+    new IntersectionObserver(function(es){ window.SZ_VIS = es[0].isIntersecting; }, { rootMargin:'80px' }).observe(box);
+  }
+  try{ sz3Start(); }catch(e){}
+
+  /* --- bo'limlar: bir marta, yumshoq paydo bo'ladi; raqamlar 0 dan sanaladi --- */
+  const count = function(el){
+    const to = +el.dataset.count, suf = el.dataset.suf || '';
+    if(RM){ el.textContent = to + suf; return; }
+    const t0 = performance.now(), d = 1500;
+    (function f(n){ const k = Math.min(1, (n - t0) / d), e = 1 - Math.pow(1 - k, 3);
+      el.textContent = Math.round(to * e) + suf; if(k < 1) requestAnimationFrame(f); })(t0);
+  };
+  const els = document.querySelectorAll('[data-r], [data-count]');
+  if(!('IntersectionObserver' in window) || RM){
+    els.forEach(function(el){ el.classList.add('in'); });
+  } else {
+    document.querySelectorAll('[data-count]').forEach(function(el){ el.textContent = '0' + (el.dataset.suf || ''); });
+    const io = new IntersectionObserver(function(es){
+      es.forEach(function(e){
+        if(!e.isIntersecting) return;
+        e.target.classList.add('in');
+        if(e.target.dataset.count) count(e.target);
+        io.unobserve(e.target);
+      });
+    }, { threshold:.15, rootMargin:'0px 0px -6% 0px' });
+    els.forEach(function(el){ io.observe(el); });
+  }
+
+  /* --- qanday ishlaydi: uchish yo'li chizig'i aylantirish bilan to'ladi --- */
+  const steps = document.getElementById('steps'), fill = steps.querySelector('.fill'), dot = steps.querySelector('.dot');
+  const items = Array.prototype.slice.call(steps.querySelectorAll('.step'));
+  const track = function(){
+    const tr = steps.querySelector('.track').getBoundingClientRect(), mid = window.innerHeight * .58;
+    const p = Math.max(0, Math.min(1, (mid - tr.top) / tr.height));
+    fill.style.height = (p * 100) + '%'; dot.style.top = (p * 100) + '%';
+    items.forEach(function(el){ const n = el.querySelector('.n').getBoundingClientRect(); el.classList.toggle('on', n.top + n.height / 2 <= mid); });
+  };
+
+  let tick = false;
+  const onScroll = function(){ if(tick) return; tick = true; requestAnimationFrame(function(){ tick = false; onNav(); track(); }); };
+  window.addEventListener('scroll', onScroll, { passive:true });
+  window.addEventListener('resize', onScroll);
+  onNav(); track();
+
+  /* --- orqa fon: nurli chiziqlar — raketaning uchish izi. Pastki chap burchakdan keng tarqalib
+         chiqadi va raketa dumida ingichka nurga tutashadi; sahifa pastga tushganda so'nadi. --- */
+  const cv = document.getElementById('sky'), cx = cv.getContext('2d');
+  const COLS = [[76,107,255], [143,107,255], [63,200,255], [110,128,255]], GOLD = [242,179,61];
+  let W = 0, H = 0, strands = [];
+  const size = function(){
+    const D = Math.min(window.devicePixelRatio || 1, 1.5);
+    W = window.innerWidth; H = window.innerHeight;
+    cv.width = Math.round(W * D); cv.height = Math.round(H * D); cx.setTransform(D, 0, 0, D, 0, 0);
+    const n = W < 700 ? 16 : 26; strands = [];
+    for(let i = 0; i < n; i++){
+      strands.push({ o:i / (n - 1) - .5, c:(i % 6 === 2 ? GOLD : COLS[i % 4]), ph:i * 1.7 % 6.28, w:.7 + (i * 37 % 10) / 12, a:.32 + (i * 53 % 10) / 28 });
+    }
+  };
+  const bez = function(P, s){ const u = 1 - s;
+    return [u*u*u*P[0][0] + 3*u*u*s*P[1][0] + 3*u*s*s*P[2][0] + s*s*s*P[3][0],
+            u*u*u*P[0][1] + 3*u*u*s*P[1][1] + 3*u*s*s*P[2][1] + s*s*s*P[3][1]]; };
+  const draw = function(t){
+    cx.clearRect(0, 0, W, H);
+    const r = box.getBoundingClientRect();
+    const vis = Math.max(0, Math.min(1, (r.top + r.height * .5) / (H * .5)));
+    if(vis < .01) return;
+    const A = [r.left + r.width * .37, r.top + r.height * .63];          /* raketa dumi */
+    /* keng ekranda iz matn ostidan emas, pastdan raketa tomonga ko'tariladi (yozuvlar ustidan o'tmaydi) */
+    const wide = W >= 1024;
+    const P = wide ? [[A[0] - W * .42, H * 1.12], [A[0] - W * .3, H * 1.0], [A[0] - W * .12, A[1] + H * .22], A]
+                   : [[-.14 * W, H * 1.1], [W * .1, H * .98], [A[0] - W * .2, A[1] + H * .2], A];
+    const N = 64, intro = RM ? 1 : Math.min(1, t / 1800);
+    cx.globalCompositeOperation = 'lighter'; cx.lineCap = 'round'; cx.lineJoin = 'round';
+    strands.forEach(function(sd){
+      const c = sd.c.join(','), a = sd.a * vis * intro;
+      const gr = cx.createLinearGradient(P[0][0], P[0][1], A[0], A[1]);
+      gr.addColorStop(0, 'rgba(' + c + ',0)'); gr.addColorStop(.3, 'rgba(' + c + ',' + (a * .5).toFixed(3) + ')');
+      gr.addColorStop(.9, 'rgba(' + c + ',' + a.toFixed(3) + ')'); gr.addColorStop(1, 'rgba(' + c + ',0)');
+      cx.beginPath();
+      for(let j = 0; j <= N; j++){
+        const s = j / N, p = bez(P, s), q = bez(P, Math.min(1, s + .01));
+        let tx = q[0] - p[0], ty = q[1] - p[1]; const l = Math.hypot(tx, ty) || 1; tx /= l; ty /= l;
+        const spread = (.004 + .17 * Math.pow(1 - s, 1.5)) * H * (1 + .22 * Math.sin(t * .00055 + sd.ph));
+        const off = sd.o * spread + .014 * H * Math.sin(s * 8.5 - t * .0011 + sd.ph) * (1 - s);
+        const x = p[0] - ty * off, y = p[1] + tx * off;
+        j ? cx.lineTo(x, y) : cx.moveTo(x, y);
+      }
+      cx.strokeStyle = gr;
+      cx.globalAlpha = .09; cx.lineWidth = 7 * sd.w; cx.stroke();
+      cx.globalAlpha = 1; cx.lineWidth = 1.1 * sd.w; cx.stroke();
+    });
+    cx.globalAlpha = 1; cx.globalCompositeOperation = 'source-over';
+  };
+  size();
+  window.addEventListener('resize', function(){ size(); if(RM) draw(4000); });
+  if(RM){ draw(4000); window.addEventListener('scroll', function(){ draw(4000); }, { passive:true }); }
+  else { const loop = function(t){ draw(t); requestAnimationFrame(loop); }; requestAnimationFrame(loop); }
+})();
+</script>
+<script>
+/* ===== Vitrina: aylantirgan sari mahsulotlar birin-ketin 3D da oldinga chiqadi =====
+   Sahna ekranga yopishib turadi (sticky), sahifa 4 ekran davomida aylantiriladi:
+     1) PUBG Mobile UC — oltin tanga (bo'rtma «UC» yozuvi, qirrasi tishli);
+     2) Olmoslar — qirralangan olmos (nur sinishi va kamalak uchqunlari);
+     3) Telegram Stars — oltin yulduz;
+     4) Qulayliklar — uchala buyum birga aylanib turadi.
+   Hammasi o'zimizning kichik WebGL2 chizgichida (tashqi kutubxonasiz), raketa bilan bir xil yorug'lik. */
+(function(){
+  'use strict';
+  const sec = document.getElementById('vitrina'); if(!sec) return;
+  const stage = sec.querySelector('.stage'), cv = document.getElementById('vt3d'), pc = document.getElementById('vtp');
+  const chs = Array.prototype.slice.call(sec.querySelectorAll('.ch'));
+  const dots = Array.prototype.slice.call(sec.querySelectorAll('.vt-dots i'));
+  const wipe = sec.querySelector('.wipe');
+  const RM = document.body.classList.contains('reduce-motion');
+  const SS = function(a, b, x){ const y = Math.min(1, Math.max(0, (x - a) / (b - a))); return y * y * (3 - 2 * y); };
+
+  /* ---------- matritsalar (ustun bo'yicha) ---------- */
+  const mul = function(a, b){ const o = new Float32Array(16);
+    for(let c = 0; c < 4; c++) for(let r = 0; r < 4; r++){ let s = 0; for(let k = 0; k < 4; k++) s += a[k * 4 + r] * b[c * 4 + k]; o[c * 4 + r] = s; }
+    return o; };
+  const T = function(x, y, z){ return new Float32Array([1,0,0,0, 0,1,0,0, 0,0,1,0, x,y,z,1]); };
+  const RX = function(a){ const c = Math.cos(a), s = Math.sin(a); return new Float32Array([1,0,0,0, 0,c,s,0, 0,-s,c,0, 0,0,0,1]); };
+  const RY = function(a){ const c = Math.cos(a), s = Math.sin(a); return new Float32Array([c,0,-s,0, 0,1,0,0, s,0,c,0, 0,0,0,1]); };
+  const RZ = function(a){ const c = Math.cos(a), s = Math.sin(a); return new Float32Array([c,s,0,0, -s,c,0,0, 0,0,1,0, 0,0,0,1]); };
+  const S = function(s){ return new Float32Array([s,0,0,0, 0,s,0,0, 0,0,s,0, 0,0,0,1]); };
+  const N3 = function(m){ return new Float32Array([m[0],m[1],m[2], m[4],m[5],m[6], m[8],m[9],m[10]]); };
+
+  /* ---------- sahna holati: bo'lim, matn, nuqtalar, fon ---------- */
+  let active = -1;
+  const setActive = function(c){
+    if(c === active) return; active = c;
+    stage.setAttribute('data-c', c);
+    chs.forEach(function(el, i){ el.classList.toggle('on', i === c); });
+    dots.forEach(function(el, i){ el.classList.toggle('on', i === c); });
+  };
+
+  /* ---------- uchib yurgan zarrachalar (2D) ---------- */
+  const px = pc.getContext('2d');
+  const TINT = [[255,170,70], [90,200,255], [255,205,90], [130,150,255]];
+  let parts = [], PW = 0, PH = 0;
+  const pSize = function(){
+    const D = Math.min(window.devicePixelRatio || 1, 2); PW = stage.clientWidth; PH = stage.clientHeight;
+    pc.width = Math.round(PW * D); pc.height = Math.round(PH * D); px.setTransform(D, 0, 0, D, 0, 0);
+    const n = PW < 700 ? 34 : 60; parts = [];
+    for(let i = 0; i < n; i++) parts.push({ x:Math.random(), y:Math.random(), z:.35 + Math.random() * .65, s:.6 + Math.random() * 1.8, ph:Math.random() * 6.28 });
+  };
+  const drawParts = function(t, f){
+    px.clearRect(0, 0, PW, PH);
+    const i0 = Math.min(3, Math.floor(f)), k = f - i0, a = TINT[i0], b = TINT[Math.min(3, i0 + 1)];
+    const m = SS(.7, 1, k), col = [0, 1, 2].map(function(j){ return Math.round(a[j] + (b[j] - a[j]) * m); }).join(',');
+    px.globalCompositeOperation = 'lighter';
+    parts.forEach(function(q){
+      const y = ((q.y - t * .012 * q.z - f * .18 * q.z) % 1 + 1) % 1;
+      const x = q.x + .015 * Math.sin(t * .4 + q.ph);
+      const al = (.25 + .45 * Math.abs(Math.sin(t * .9 + q.ph))) * q.z;
+      const r = q.s * q.z * 1.6;
+      const g = px.createRadialGradient(x * PW, y * PH, 0, x * PW, y * PH, r * 4);
+      g.addColorStop(0, 'rgba(' + col + ',' + al.toFixed(3) + ')'); g.addColorStop(1, 'rgba(' + col + ',0)');
+      px.fillStyle = g; px.beginPath(); px.arc(x * PW, y * PH, r * 4, 0, 6.2832); px.fill();
+    });
+    px.globalCompositeOperation = 'source-over';
+  };
+
+  /* ---------- 3D ---------- */
+  let gl = null;
+  try{ gl = cv.getContext('webgl2', { alpha:true, premultipliedAlpha:true, antialias:true }); }catch(e){}
+  let pm = null, pg = null, coin = null, gem = null, star = null, ready = false;
+  const ENV = 'vec3 env(vec3 d,float r){float t=d.y*.5+.5;vec3 c=mix(vec3(.02,.025,.045),vec3(.42,.46,.58),smoothstep(.05,.95,t));' +
+    'float s1=mix(260.,6.,r),s2=mix(90.,4.,r),k=mix(1.,.22,r);' +
+    'c+=vec3(3.2,3.,2.8)*k*pow(max(dot(d,normalize(vec3(.55,.6,.6))),0.),s1);' +
+    'c+=vec3(1.3,1.35,1.5)*k*pow(max(dot(d,normalize(vec3(-.75,.15,.45))),0.),s2);' +
+    'c+=vec3(.9,.8,.7)*k*pow(max(dot(d,normalize(vec3(0.,-.3,-1.))),0.),s2);return c;}' +
+    'vec3 aces(vec3 x){return clamp((x*(2.51*x+.03))/(x*(2.43*x+.59)+.14),0.,1.);}';
+  const VS = '#version 300 es\nlayout(location=0) in vec3 p;layout(location=1) in vec3 n;layout(location=2) in vec2 t;' +
+    'uniform mat4 M,VP;uniform mat3 Nm;out vec3 wp,wn,mp,mn;out vec2 uv;' +
+    'void main(){uv=t;mp=p;mn=n;vec4 w=M*vec4(p,1.);wp=w.xyz;wn=Nm*n;gl_Position=VP*w;}';
+  /* metall: tanga va yulduz. Tanga yuzida bo'rtma xarita (UC), qirrasida mayda tishlar */
+  const FSM = '#version 300 es\nprecision highp float;in vec3 wp,wn,mp,mn;in vec2 uv;out vec4 o;' +
+    'uniform vec3 cam,base;uniform float rough,uA,hasT;uniform mat3 Nm;uniform sampler2D tH;' + ENV +
+    'void main(){vec3 N=normalize(wn);float ao=1.;' +
+    'if(hasT>.5){if(uv.x>=0.){vec2 e=vec2(2./1024.,0.);float h=texture(tH,uv).r;' +
+    'float hx=texture(tH,uv+e.xy).r-texture(tH,uv-e.xy).r,hy=texture(tH,uv+e.yx).r-texture(tH,uv-e.yx).r;' +
+    'float sd=mn.z>0.?1.:-1.;vec3 Tt=normalize(Nm*vec3(sd,0.,0.)),Bt=normalize(Nm*vec3(0.,1.,0.));' +
+    'N=normalize(N-(hx*Tt+hy*Bt)*7.);ao=mix(.62,1.,h);}' +
+    'else if(uv.x>-1.5){float a=atan(mp.y,mp.x);vec3 rd=normalize(Nm*vec3(cos(a),sin(a),0.)),tg=normalize(Nm*vec3(-sin(a),cos(a),0.));' +
+    'N=normalize(rd+tg*.32*sin(a*150.));ao=.9;}}' +
+    'vec3 V=normalize(cam-wp),R=reflect(-V,N);float nv=max(dot(N,V),0.);' +
+    'vec3 F=base+(max(vec3(1.-rough),base)-base)*pow(1.-nv,5.);vec3 col=env(R,rough)*F*ao;' +
+    'vec3 L=normalize(vec3(.5,.8,.6)),H=normalize(L+V);col+=F*pow(max(dot(N,H),0.),mix(600.,18.,rough))*mix(3.,.2,rough);' +
+    'col=pow(aces(col*1.2),vec3(1./2.2));o=vec4(col*uA,uA);}';
+  /* olmos: qirralar bo'yicha aks, nur sinishi va rang tarqalishi (kamalak uchqunlar) */
+  const FSG = '#version 300 es\nprecision highp float;in vec3 wp,wn,mp,mn;in vec2 uv;out vec4 o;' +
+    'uniform vec3 cam,tint;uniform float uA;' + ENV +
+    'void main(){vec3 N=normalize(wn),V=normalize(cam-wp),I=-V,R=reflect(I,N);float nv=max(dot(N,V),0.),F=.06+.94*pow(1.-nv,5.);' +
+    'vec3 k=normalize(-N+vec3(.35,.6,.25));' +
+    'vec3 r1=reflect(refract(I,N,1./2.36),k),r2=reflect(refract(I,N,1./2.42),k),r3=reflect(refract(I,N,1./2.5),k);' +
+    'vec3 rf=vec3(env(r1,.02).r,env(r2,.02).g,env(r3,.02).b);' +
+    'vec3 col=rf*tint*2.+env(R,.02)*F*1.4;' +
+    'col+=.32*(.5+.5*cos(6.2832*(dot(N,vec3(1.7,2.3,1.1))+vec3(0.,.33,.67))))*pow(1.-nv,1.5);' +
+    'vec3 L=normalize(vec3(.5,.8,.6)),H=normalize(L+V);col+=vec3(1.)*pow(max(dot(N,H),0.),700.)*5.;' +
+    'col=pow(aces(col),vec3(1./2.2));o=vec4(col*uA,uA);}';
+
+  const prog = function(fs, names){
+    const mk = function(ty, s){ const x = gl.createShader(ty); gl.shaderSource(x, s); gl.compileShader(x); return x; };
+    const p = gl.createProgram(); gl.attachShader(p, mk(gl.VERTEX_SHADER, VS)); gl.attachShader(p, mk(gl.FRAGMENT_SHADER, fs)); gl.linkProgram(p);
+    if(!gl.getProgramParameter(p, gl.LINK_STATUS)) return null;
+    const u = {}; names.forEach(function(n){ u[n] = gl.getUniformLocation(p, n); }); return { p:p, u:u };
+  };
+  const mesh = function(P, Nn, U){
+    const vao = gl.createVertexArray(); gl.bindVertexArray(vao);
+    const buf = function(d, loc, n){ gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer()); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(d), gl.STATIC_DRAW);
+      gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, n, gl.FLOAT, false, 0, 0); };
+    buf(P, 0, 3); buf(Nn, 1, 3); buf(U, 2, 2); gl.bindVertexArray(null);
+    return { vao:vao, n:P.length / 3 };
+  };
+  /* tekis qirrali uchburchak (normal tashqariga qaratiladi) */
+  const flatTri = function(P, Nn, U, a, b, c){
+    const u = [b[0]-a[0], b[1]-a[1], b[2]-a[2]], w = [c[0]-a[0], c[1]-a[1], c[2]-a[2]];
+    let n = [u[1]*w[2]-u[2]*w[1], u[2]*w[0]-u[0]*w[2], u[0]*w[1]-u[1]*w[0]];
+    const m = [(a[0]+b[0]+c[0])/3, (a[1]+b[1]+c[1])/3, (a[2]+b[2]+c[2])/3];
+    if(n[0]*m[0] + n[1]*m[1] + n[2]*m[2] < 0) n = [-n[0], -n[1], -n[2]];
+    const l = Math.hypot(n[0], n[1], n[2]) || 1; n = [n[0]/l, n[1]/l, n[2]/l];
+    [a, b, c].forEach(function(p){ P.push(p[0], p[1], p[2]); Nn.push(n[0], n[1], n[2]); U.push(0, 0); });
+  };
+  const mkCoin = function(){
+    const P = [], Nn = [], U = [], seg = 96, h = .13, r = 1, ri = .93, zb = h - .06, W = 6.28319;
+    const v = function(p, n, u){ P.push(p[0], p[1], p[2]); Nn.push(n[0], n[1], n[2]); U.push(u[0], u[1]); };
+    const fu = function(x, y){ return [x * .475 / ri + .5, y * .475 / ri + .5]; }, bu = function(x, y){ return [-x * .475 / ri + .5, y * .475 / ri + .5]; };
+    for(let i = 0; i < seg; i++){
+      const a0 = i / seg * W, a1 = (i + 1) / seg * W, c0 = Math.cos(a0), s0 = Math.sin(a0), c1 = Math.cos(a1), s1 = Math.sin(a1);
+      v([0,0,h],[0,0,1],[.5,.5]); v([ri*c0,ri*s0,h],[0,0,1],fu(ri*c0,ri*s0)); v([ri*c1,ri*s1,h],[0,0,1],fu(ri*c1,ri*s1));
+      v([0,0,-h],[0,0,-1],[.5,.5]); v([ri*c1,ri*s1,-h],[0,0,-1],bu(ri*c1,ri*s1)); v([ri*c0,ri*s0,-h],[0,0,-1],bu(ri*c0,ri*s0));
+      const f0 = [c0*.7071, s0*.7071, .7071], f1 = [c1*.7071, s1*.7071, .7071], g0 = [c0*.7071, s0*.7071, -.7071], g1 = [c1*.7071, s1*.7071, -.7071];
+      v([ri*c0,ri*s0,h],f0,[-2,0]); v([r*c0,r*s0,zb],f0,[-2,0]); v([r*c1,r*s1,zb],f1,[-2,0]);
+      v([ri*c0,ri*s0,h],f0,[-2,0]); v([r*c1,r*s1,zb],f1,[-2,0]); v([ri*c1,ri*s1,h],f1,[-2,0]);
+      v([ri*c0,ri*s0,-h],g0,[-2,0]); v([r*c1,r*s1,-zb],g1,[-2,0]); v([r*c0,r*s0,-zb],g0,[-2,0]);
+      v([ri*c0,ri*s0,-h],g0,[-2,0]); v([ri*c1,ri*s1,-h],g1,[-2,0]); v([r*c1,r*s1,-zb],g1,[-2,0]);
+      v([r*c0,r*s0,zb],[c0,s0,0],[-1,0]); v([r*c0,r*s0,-zb],[c0,s0,0],[-1,0]); v([r*c1,r*s1,-zb],[c1,s1,0],[-1,0]);
+      v([r*c0,r*s0,zb],[c0,s0,0],[-1,0]); v([r*c1,r*s1,-zb],[c1,s1,0],[-1,0]); v([r*c1,r*s1,zb],[c1,s1,0],[-1,0]);
+    }
+    return mesh(P, Nn, U);
+  };
+  const mkGem = function(){
+    const P = [], Nn = [], U = [], k = 8, W = 6.28319, Tg = [], C = [], G = [];
+    for(let i = 0; i < k; i++){ const a = i / k * W, b = a + Math.PI / k;
+      Tg.push([.56 * Math.cos(a), .42, .56 * Math.sin(a)]); C.push([.82 * Math.cos(b), .24, .82 * Math.sin(b)]); }
+    for(let j = 0; j < 2 * k; j++){ const a = j / (2 * k) * W; G.push([Math.cos(a), 0, Math.sin(a)]); }
+    const top = [0, .42, 0], cul = [0, -1, 0];
+    for(let i = 0; i < k; i++){
+      const i1 = (i + 1) % k, im = (i + k - 1) % k;
+      flatTri(P, Nn, U, top, Tg[i], Tg[i1]); flatTri(P, Nn, U, Tg[i], Tg[i1], C[i]);
+      flatTri(P, Nn, U, Tg[i], C[i], G[2 * i]); flatTri(P, Nn, U, Tg[i], G[2 * i], C[im]);
+      flatTri(P, Nn, U, C[i], G[2 * i + 1], G[2 * i]); flatTri(P, Nn, U, C[i], G[(2 * i + 2) % (2 * k)], G[2 * i + 1]);
+    }
+    for(let j = 0; j < 2 * k; j++) flatTri(P, Nn, U, G[j], G[(j + 1) % (2 * k)], cul);
+    return mesh(P, Nn, U);
+  };
+  const mkStar = function(){
+    const P = [], Nn = [], U = [], O = [];
+    for(let i = 0; i < 10; i++){ const a = Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? .47 : 1; O.push([rr * Math.cos(a), rr * Math.sin(a), 0]); }
+    const F = [0, 0, .36], B = [0, 0, -.36];
+    for(let i = 0; i < 10; i++){ const j = (i + 1) % 10; flatTri(P, Nn, U, F, O[i], O[j]); flatTri(P, Nn, U, B, O[j], O[i]); }
+    return mesh(P, Nn, U);
+  };
+  /* tanga yuzining bo'rtma xaritasi: qirg'oq halqasi, nuqtali doira va «UC» yozuvi */
+  const coinTex = function(){
+    const c = document.createElement('canvas'); c.width = c.height = 1024; const x = c.getContext('2d'), C0 = 512, R = 486;
+    x.fillStyle = '#000'; x.fillRect(0, 0, 1024, 1024);
+    x.fillStyle = '#4a4a4a'; x.beginPath(); x.arc(C0, C0, R - 58, 0, 6.2832); x.fill();
+    x.shadowColor = '#fff'; x.shadowBlur = 16;
+    x.lineWidth = 40; x.strokeStyle = '#fff'; x.beginPath(); x.arc(C0, C0, R - 30, 0, 6.2832); x.stroke();
+    x.fillStyle = '#d8d8d8'; x.shadowBlur = 6;
+    for(let i = 0; i < 52; i++){ const a = i / 52 * 6.2832; x.beginPath(); x.arc(C0 + Math.cos(a) * (R - 94), C0 + Math.sin(a) * (R - 94), 7, 0, 6.2832); x.fill(); }
+    x.shadowBlur = 18; x.fillStyle = '#fff';
+    x.font = '800 330px -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle';
+    x.fillText('UC', C0, C0 + 16);
+    const tx = gl.createTexture(); gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, tx);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, c); gl.generateMipmap(gl.TEXTURE_2D);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    return tx;
+  };
+  if(gl){
+    try{
+      pm = prog(FSM, ['M', 'VP', 'Nm', 'cam', 'base', 'rough', 'uA', 'hasT', 'tH']);
+      pg = prog(FSG, ['M', 'VP', 'Nm', 'cam', 'tint', 'uA']);
+      if(pm && pg){ coin = mkCoin(); gem = mkGem(); star = mkStar(); coinTex(); ready = true; }
+    }catch(e){ ready = false; }
+  }
+  if(!ready) cv.style.display = 'none';
+
+  const draw = function(P, obj, M, a, setU){
+    gl.useProgram(P.p); gl.uniformMatrix4fv(P.u.M, false, M); gl.uniformMatrix3fv(P.u.Nm, false, N3(M));
+    gl.uniform1f(P.u.uA, a); setU(P.u);
+    gl.bindVertexArray(obj.vao); gl.drawArrays(gl.TRIANGLES, 0, obj.n);
+  };
+  const render3d = function(t, f){
+    const D = Math.min(window.devicePixelRatio || 1, 2), w = Math.round(cv.clientWidth * D), h = Math.round(cv.clientHeight * D);
+    if(w && h && (cv.width !== w || cv.height !== h)){ cv.width = w; cv.height = h; }
+    const asp = (w || 1) / (h || 1), fv = 1 / Math.tan(.31), nr = .1, fr = 60, Dc = 7.5;
+    const VP = new Float32Array([fv / asp, 0, 0, 0, 0, fv, 0, 0, 0, 0, (fr + nr) / (nr - fr), -1, 0, 0, 2 * fr * nr / (nr - fr) - Dc * (fr + nr) / (nr - fr), Dc]);
+    gl.viewport(0, 0, cv.width, cv.height); gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    gl.enable(gl.DEPTH_TEST); gl.disable(gl.CULL_FACE); gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+    [pm, pg].forEach(function(P){ gl.useProgram(P.p); gl.uniformMatrix4fv(P.u.VP, false, VP); gl.uniform3f(P.u.cam, 0, 0, Dc); });
+    gl.useProgram(pm.p); gl.uniform1i(pm.u.tH, 0);
+    const portrait = asp < .9, hw = Dc * Math.tan(.31) * asp;
+    const ax = portrait ? 0 : Math.min(2.3, hw * .45), ay = portrait ? .95 : -.05, k = portrait ? Math.max(.55, Math.min(1, asp * 1.6)) : 1;
+    const idle = RM ? 0 : t;
+    const ENT = function(i){ return i === 0 ? 1 : SS(i - .3, i + .15, f); }, EXT = function(i){ return i === 3 ? 0 : SS(i + .72, i + 1.08, f); };
+    const place = function(i, e, x, spinIn, spinOut){
+      const dir = i % 2 ? -1 : 1;
+      const px_ = ax + (1 - e) * 1.6 * dir - x * 3.2 * dir, py = ay - (1 - e) * 1.8 + x * 2.2 + .08 * Math.sin(idle * 1.1 + i);
+      const pz = -11 * (1 - e) + 2.8 * x;
+      return { pos:[px_, py, pz], spin:(1 - e) * spinIn + x * spinOut };
+    };
+    const metal = function(base, rough, tex){ return function(u){ gl.uniform3f(u.base, base[0], base[1], base[2]); gl.uniform1f(u.rough, rough); gl.uniform1f(u.hasT, tex); }; };
+    const GOLD = metal([1, .62, .16], .24, 1), STAR = metal([1, .64, .1], .16, 0);
+    const GEM = function(u){ gl.uniform3f(u.tint, .5, .86, 1.15); };
+    /* 1) tanga */
+    let e = ENT(0), x = EXT(0), a = e * (1 - x);
+    if(a > .01){ const pl = place(0, e, x, 7.5, 5);
+      const M = mul(T(pl.pos[0], pl.pos[1], pl.pos[2]), mul(RY(.55 * Math.sin(idle * .7) + pl.spin), mul(RX(-.22 + .06 * Math.sin(idle * .9)), mul(RZ(.1 * Math.sin(idle * .6)), S(1.15 * k)))));
+      draw(pm, coin, M, a, GOLD); }
+    /* 2) olmos */
+    e = ENT(1); x = EXT(1); a = e * (1 - x);
+    if(a > .01){ const pl = place(1, e, x, 6, 4);
+      const M = mul(T(pl.pos[0], pl.pos[1] + .1, pl.pos[2]), mul(RX(.42 + .06 * Math.sin(idle * .8)), mul(RY(idle * .45 + pl.spin), S(1.05 * k))));
+      draw(pg, gem, M, a, GEM); }
+    /* 3) yulduz */
+    e = ENT(2); x = EXT(2); a = e * (1 - x);
+    if(a > .01){ const pl = place(2, e, x, 7, 5);
+      const M = mul(T(pl.pos[0], pl.pos[1], pl.pos[2]), mul(RY(.6 * Math.sin(idle * .6) + pl.spin), mul(RX(.08), mul(RZ(.06 * Math.sin(idle * .7)), S(1.1 * k)))));
+      draw(pm, star, M, a, STAR); }
+    /* 4) qulayliklar: uchalasi kichrayib, aylanib turadi */
+    const e3 = SS(2.75, 3.2, f);
+    if(e3 > .01){
+      [[coin, pm, GOLD], [gem, pg, GEM], [star, pm, STAR]].forEach(function(it, j){
+        const ph = idle * .35 + j * 2.094, r = Math.min(1.25 * k, hw * .58) + (1 - e3) * 2 * k;
+        const M = mul(T(ax + Math.cos(ph) * r, ay + Math.sin(ph) * .35 * k + (1 - e3) * -1.2, Math.sin(ph) * .9 - (1 - e3) * 4),
+                   mul(RY(idle * .6 + j), mul(RX(j === 1 ? .42 : -.15), S((j === 1 ? .55 : .6) * k))));
+        draw(it[1], it[0], M, e3, it[2]);
+      });
+    }
+    gl.bindVertexArray(null);
+  };
+
+  /* ---------- aylantirish: yumshoq (silliq) kuzatish ---------- */
+  let pS = 0, last = performance.now(), vis = false;
+  const target = function(){ const r = sec.getBoundingClientRect(), range = r.height - window.innerHeight; return range > 0 ? Math.min(1, Math.max(0, -r.top / range)) : 0; };
+  if('IntersectionObserver' in window) new IntersectionObserver(function(es){ vis = es[0].isIntersecting; }, { rootMargin:'100px' }).observe(sec);
+  else vis = true;
+  pSize(); window.addEventListener('resize', pSize);
+  setActive(0);
+  const frame = function(now){
+    const dt = Math.min(.05, (now - last) / 1000); last = now;
+    const tg = target(); pS += (tg - pS) * (RM ? 1 : (1 - Math.exp(-dt * 7)));
+    if(vis){
+      const f = pS * 4, t = now / 1000;
+      setActive(Math.max(0, Math.min(3, Math.floor(f + .02))));
+      /* bo'limlar orasida egri nur chizig'i pastdan tepaga o'tadi (yangi sahna kirib kelayotgandek) */
+      let wy = 2, wc = 0;
+      for(let b = 1; b <= 3; b++){ const q = (f - (b - .25)) / .5; if(q > 0 && q < 1){ wy = 1.2 - q * 2.4; wc = b; } }
+      if(wipe){ wipe.style.transform = 'translateY(' + (wy * 100).toFixed(1) + '%) rotate(-8deg)'; wipe.style.opacity = (wy > 1.5 || RM) ? '0' : '1'; wipe.setAttribute('data-c', wc); }
+      drawParts(RM ? 0 : t, f);
+      if(ready) render3d(t, f);
+    }
+    requestAnimationFrame(frame);
+  };
+  requestAnimationFrame(frame);
+})();
+
+</script>
+</body>
+</html>
