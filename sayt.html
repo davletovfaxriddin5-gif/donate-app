@@ -32,13 +32,14 @@ html{ background:var(--ink); color-scheme:dark; -webkit-text-size-adjust:100%; s
 body{ margin:0; font-family:var(--body); font-size:16px; line-height:1.6; color:var(--text); background:var(--ink);
       -webkit-font-smoothing:antialiased; overflow-x:hidden; padding-left:env(safe-area-inset-left); padding-right:env(safe-area-inset-right) }
 a{ color:inherit }
-.page{ position:relative; z-index:1; overflow-x:clip }
+.page{ position:relative; z-index:1; padding-top:calc(64px + env(safe-area-inset-top)) }
 .wrap{ width:min(1180px, 100% - 40px); margin-inline:auto }
 section{ scroll-margin-top:84px }
 a:focus-visible, button:focus-visible, summary:focus-visible{ outline:2px solid var(--gold); outline-offset:3px; border-radius:10px }
 
 /* ---- yuqori menyu ---- */
-.nav{ position:sticky; top:0; z-index:30; padding-top:env(safe-area-inset-top); transition:background .3s, border-color .3s; border-bottom:1px solid transparent }
+.nav{ position:fixed; top:0; left:0; right:0; z-index:30; padding-top:env(safe-area-inset-top); transition:background .3s, border-color .3s;
+      border-bottom:1px solid transparent; transform:translateZ(0); -webkit-backface-visibility:hidden; backface-visibility:hidden }
 .nav.sc{ background:rgba(6,8,20,.94); border-bottom-color:var(--line) }
 .nav-in{ display:flex; align-items:center; gap:28px; height:64px }
 .logo{ display:flex; align-items:center; gap:10px; text-decoration:none; font-family:var(--display); font-weight:600; font-size:17px; letter-spacing:-.01em }
