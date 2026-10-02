@@ -10122,17 +10122,17 @@ function sz3Load(st, b){
 }
 /* Raketa harakati — bitta tartibli, uzluksiz sahna (3,3 s halqa). Raketa doim tekis ushlanadi:
    burchagi o'zgarmaydi; bir butun bo'lib oldinga-orqaga va o'ngga-chapga siljiydi:
-     0,0-0,32 s  — biroz orqaga cho'kadi va siqiladi (6%);
-     0,32-0,95 s — tezlashib oldinga ko'tariladi, shu payt cho'ziladi (12% gacha), sekinlashganda asl holiga qaytadi;
-     0,45-1,85 s — shu bilan birga 2 marta aylanadi: sekin boshlanadi, o'rtada eng tez, sekin tugaydi;
-     0,95-2,5 s  — o'z o'qi bo'ylab tekis orqaga qaytadi;
+     0,0-0,28 s  — biroz orqaga cho'kadi va siqiladi (7%);
+     0,28-0,8 s  — tezlashib oldinga ko'tariladi, shu payt tez cho'ziladi (13% gacha), sekinlashganda asl holiga qaytadi;
+     0,4-1,8 s   — shu bilan birga 2 marta aylanadi: sekin boshlanadi, o'rtada eng tez, sekin tugaydi;
+     0,8-1,9 s   — o'z o'qi bo'ylab tekis orqaga qaytadi;
      doim       — butun raketa tekis holda o'ngga-chapga siljiydi (M tebranishi bilan bir vaqtda);
-     1,55-0,45 s — M o'ngga-chapga yumshoq tebranadi, raketa o'qi bo'ylab ham sekin "suzib" turadi.
+     1,5-0,4 s   — M o'ngga-chapga yumshoq tebranadi, raketa o'qi bo'ylab ham sekin "suzib" turadi.
    Nuqtalar orasi tebranish bermaydigan (monoton) silliq egri bilan to'ldiriladi.
    d — oldinga siljish, ax — bo'yi (cho'zilish), w — burun burchagi (o'zgarmaydi), raketa uzunligiga nisbatan. */
 const SZ_T = 3.3;
-const SZ_D  = [[0,0],[.16,-.03],[.32,-.08],[.44,-.055],[.60,.07],[.78,.24],[.95,.32],[1.12,.305],[1.45,.21],[1.80,.11],[2.15,.045],[2.50,.015],[2.90,.004],[3.30,0]];
-const SZ_AX = [[0,1],[.18,.975],[.32,.94],[.45,.99],[.62,1.10],[.75,1.12],[.90,1.06],[1.05,.985],[1.25,1],[3.30,1]];
+const SZ_D  = [[0,0],[.14,-.03],[.28,-.08],[.38,-.055],[.50,.07],[.65,.24],[.80,.32],[.95,.31],[1.15,.25],[1.40,.15],[1.65,.07],[1.90,.025],[2.20,.008],[2.60,.002],[3.30,0]];
+const SZ_AX = [[0,1],[.15,.97],[.28,.93],[.36,.99],[.46,1.11],[.54,1.13],[.66,1.05],[.80,.985],[.95,1],[3.30,1]];
 const SZ_W  = [[0,0],[3.30,0]];
 /* Davriy monoton kubik (Fritsch-Carlson): har nuqtadagi qiyalik oldindan hisoblanadi */
 function szCurve(K){
@@ -10149,12 +10149,12 @@ function szCurve(K){
   };
 }
 const szFd = szCurve(SZ_D), szFax = szCurve(SZ_AX), szFw = szCurve(SZ_W);
-/* Aylanish uchun "yo'naltiruvchi" egri: 0,45 s dan 1,85 s gacha roppa-rosa 2 marta; tezlik qo'ng'iroq
+/* Aylanish uchun "yo'naltiruvchi" egri: 0,40 s dan 1,80 s gacha roppa-rosa 2 marta; tezlik qo'ng'iroq
    shaklida (sin²) — sekin boshlanadi, o'rtada eng tez (~2,9 aylanish/s), sekin tugaydi. Raketaning o'zi
    bu egriga prujina orqali, inersiya bilan ergashadi (szSim). */
 const SZ_SPN = (function(){
   const N = Math.round(SZ_T * 1000), a = new Float64Array(N + 1);
-  const v = function(u){ if(u < .45 || u > 1.85) return 0; const q = Math.sin(Math.PI * (u - .45) / 1.4); return q * q; };
+  const v = function(u){ if(u < .40 || u > 1.80) return 0; const q = Math.sin(Math.PI * (u - .40) / 1.4); return q * q; };
   for(let i = 1; i <= N; i++) a[i] = a[i - 1] + (v((i - 1) / 1000) + v(i / 1000)) / 2;
   const k = 4 * Math.PI / a[N]; for(let i = 0; i <= N; i++) a[i] *= k;
   return a;
@@ -10175,11 +10175,11 @@ function szBump(u, c, hw, T){
        sal o'tib ketadi, qaytadi va o'ngga-chapga yumshoq tebranib turadi. Tezlik ham, tezlanish ham
        uzluksiz — hech qayerda keskin to'xtash, "qotib qolish" yoki silkinish yo'q. */
 function szMo(t){
-  const u = ((t % SZ_T) + SZ_T) % SZ_T, ax = szFax(u), env = .55 + .9 * szBump(u, .70, .40, SZ_T);
-  /* mayda titrash — dvigatel gulduragidek, 7-15 Hz (ekranda silliq), otilishda kuchliroq */
-  const n1 = Math.sin(t * 48.1 + .4) * .5 + Math.sin(t * 67.9 + 1.7) * .3 + Math.sin(t * 93.7 + 2.9) * .2;
-  const n2 = Math.sin(t * 52.3 + 2.2) * .5 + Math.sin(t * 74.1 + .9) * .3 + Math.sin(t * 89.9 + .3) * .2;
-  const n3 = Math.sin(t * 44.7 + 1.1) * .5 + Math.sin(t * 63.3 + 2.5) * .3 + Math.sin(t * 85.1 + .7) * .2;
+  const u = ((t % SZ_T) + SZ_T) % SZ_T, ax = szFax(u), env = .75 + .65 * szBump(u, .58, .35, SZ_T);
+  /* titrash — dvigatel kabi, 11-24 Hz, doim sezilib turadi, otilishda kuchliroq */
+  const n1 = Math.sin(t * 71.3 + .4) * .5 + Math.sin(t * 112.9 + 1.7) * .3 + Math.sin(t * 151.1 + 2.9) * .2;
+  const n2 = Math.sin(t * 83.7 + 2.2) * .5 + Math.sin(t * 127.3 + .9) * .3 + Math.sin(t * 166.9 + .3) * .2;
+  const n3 = Math.sin(t * 67.1 + 1.1) * .5 + Math.sin(t * 104.3 + 2.5) * .3 + Math.sin(t * 143.9 + .7) * .2;
   /* sekin "suzish" faqat o'q bo'ylab (oldinga-orqaga) — raketa joyida qotmaydi, lekin yonga ham siljimaydi */
   const P = 6.28319;
   const wd = .020 * Math.sin(t * P / 1.9 + 2.6) + .010 * Math.sin(t * P / 1.2 + .9);
@@ -10187,16 +10187,16 @@ function szMo(t){
      M ning o'ngga-chapga tebranishi bilan bir vaqtda (M o'ngga burilsa, raketa ham o'ngga). Aylanish
      paytida ham to'xtamaydi, faqat biroz kamroq siljiydi. */
   const sx = (.035 + .025 * szRestE(u)) * Math.sin(szPh(t));
-  return { u: u, ax: ax, rd: Math.pow(ax, -.6), d: (szFd(u) + .004 * env * n2 + wd) * 1.9, p: .004 * env * n1 * 1.9,
-           x: sx * 1.9, w: (szFw(u) + .3 * env * n3) * Math.PI / 180, sp: 0, om: 0, air: 0 };
+  return { u: u, ax: ax, rd: Math.pow(ax, -.6), d: (szFd(u) + .006 * env * n2 + wd) * 1.9, p: .013 * env * n1 * 1.9,
+           x: sx * 1.9, w: (szFw(u) + 1.2 * env * n3) * Math.PI / 180, sp: 0, om: 0, air: 0 };
 }
 /* Fizika sozlamalari: k/c — aylanish prujinasi (inersiya va yumshoqlik); A — aylanishdan keyingi
    M ning o'ngga-chapga tebranishi (±11°), Pr/r0 — tebranish davri (1,1 s, ikki marta) va boshlanishi;
    W — yengil shamol. Raketa tanasi og'maydi va yonga siljimaydi. */
-const SZ_PH = { k: 81, c: 6.12, A: .19, Pr: 1.10, r0: 1.55, W: 2.0 };
+const SZ_PH = { k: 81, c: 6.12, A: .19, Pr: 1.10, r0: 1.50, W: 2.0 };
 function szSS(a, b, x){ const y = Math.min(1, Math.max(0, (x - a) / (b - a))); return y * y * (3 - 2 * y); }
 /* tebranish signali (-1..1): aylanish tugay boshlaganda yumshoq kirib keladi, keyingisi boshlanganda so'nadi */
-function szRestE(u){ const H = SZ_PH; return u < .9 ? 1 - szSS(.18, .45, u) : szSS(H.r0, H.r0 + .45, u); }
+function szRestE(u){ const H = SZ_PH; return u < .9 ? 1 - szSS(.12, .40, u) : szSS(H.r0, H.r0 + .45, u); }
 /* halqada roppa-rosa 3 ta to'liq davr (3,3 s / 1,1 s) — butun halqa bo'ylab uzluksiz */
 function szPh(t){ const H = SZ_PH, u = ((t % SZ_T) + SZ_T) % SZ_T; return 6.28319 * ((u < H.r0 ? u + SZ_T : u) - H.r0) / H.Pr; }
 function szSway(t){ const u = ((t % SZ_T) + SZ_T) % SZ_T; return szRestE(u) * Math.sin(szPh(t)); }
