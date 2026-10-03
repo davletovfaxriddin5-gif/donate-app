@@ -2788,6 +2788,93 @@ body.light #shBox.nm-sheet .svc .s, body.light #shBox.nm-sheet .nm-chk{ color:rg
 body.light #shBox.nm-sheet .svc .arw{ color:rgba(16,24,40,.3) }
 body.light #shBox.nm-sheet .switch:not(.on){ background:#D5D9E6 }
 body.light #shBox.nm-sheet .nm-chk .b{ border-color:rgba(16,24,40,.22); background:#fff }
+
+/* ===== KESHBEK: 3D tanga (aylanib-to'xtab turadi), tepadagi tugma, keshbek sahifasi ===== */
+.c3d{ --s:22px; position:relative; display:inline-block; width:var(--s); height:var(--s); perspective:calc(var(--s) * 8); flex-shrink:0; vertical-align:middle }
+.c3d::before{ content:""; position:absolute; inset:-35%; border-radius:50%; background:radial-gradient(circle, rgba(255,196,50,.45), rgba(255,196,50,0) 65%); pointer-events:none }
+.c3d-in{ position:absolute; inset:0; transform-style:preserve-3d; animation:c3dSpin 3.6s cubic-bezier(.5,.05,.2,1) infinite }
+.c3d i{ position:absolute; inset:0; border-radius:50% }
+.c3d .fc{ background:url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAxMDAgMTAwJz48ZGVmcz4KPHJhZGlhbEdyYWRpZW50IGlkPSdhJyBjeD0nMzQlJyBjeT0nMjglJyByPSc3OCUnPjxzdG9wIG9mZnNldD0nMCcgc3RvcC1jb2xvcj0nI0ZGRjRBOCcvPjxzdG9wIG9mZnNldD0nLjQ1JyBzdG9wLWNvbG9yPScjRkZDOTNDJy8+PHN0b3Agb2Zmc2V0PScxJyBzdG9wLWNvbG9yPScjRDk4MjBDJy8+PC9yYWRpYWxHcmFkaWVudD4KPHJhZGlhbEdyYWRpZW50IGlkPSdiJyBjeD0nNDAlJyBjeT0nMzQlJyByPSc3MiUnPjxzdG9wIG9mZnNldD0nMCcgc3RvcC1jb2xvcj0nI0ZGREE1RScvPjxzdG9wIG9mZnNldD0nMScgc3RvcC1jb2xvcj0nI0VFOUYxNCcvPjwvcmFkaWFsR3JhZGllbnQ+CjxsaW5lYXJHcmFkaWVudCBpZD0ncycgeDE9JzAnIHkxPScwJyB4Mj0nMScgeTI9JzEnPjxzdG9wIG9mZnNldD0nMCcgc3RvcC1jb2xvcj0nI0ZGRkNENicvPjxzdG9wIG9mZnNldD0nMScgc3RvcC1jb2xvcj0nI0ZGQ0YzNScvPjwvbGluZWFyR3JhZGllbnQ+PC9kZWZzPgo8Y2lyY2xlIGN4PSc1MCcgY3k9JzUwJyByPSc0OScgZmlsbD0ndXJsKCNhKScvPjxjaXJjbGUgY3g9JzUwJyBjeT0nNTAnIHI9JzM4LjUnIGZpbGw9J3VybCgjYiknIHN0cm9rZT0nI0Q0ODUwRicgc3Ryb2tlLXdpZHRoPScyLjQnLz4KPHBhdGggZD0nTTUwIDIxQzUzLjIgNDAgNjAgNDYuOCA3OSA1MEM2MCA1My4yIDUzLjIgNjAgNTAgNzlDNDYuOCA2MCA0MCA1My4yIDIxIDUwQzQwIDQ2LjggNDYuOCA0MCA1MCAyMVonIGZpbGw9JyNEOTg4MTAnIHRyYW5zZm9ybT0ndHJhbnNsYXRlKDEuOCAyLjIpJy8+CjxwYXRoIGQ9J001MCAyMUM1My4yIDQwIDYwIDQ2LjggNzkgNTBDNjAgNTMuMiA1My4yIDYwIDUwIDc5QzQ2LjggNjAgNDAgNTMuMiAyMSA1MEM0MCA0Ni44IDQ2LjggNDAgNTAgMjFaJyBmaWxsPSd1cmwoI3MpJy8+CjxlbGxpcHNlIGN4PSczNScgY3k9JzI2JyByeD0nMTUnIHJ5PSc2LjUnIGZpbGw9JyNmZmYnIG9wYWNpdHk9Jy4zOCcgdHJhbnNmb3JtPSdyb3RhdGUoLTMyIDM1IDI2KScvPjwvc3ZnPg==) center/100% 100% no-repeat; -webkit-backface-visibility:hidden; backface-visibility:hidden }
+.c3d .fr{ transform:translateZ(calc(var(--s) * .075)) }
+.c3d .bk{ transform:rotateY(180deg) translateZ(calc(var(--s) * .075)) }
+.c3d .ed{ background:linear-gradient(90deg,#9A5A08,#F4BF34 48%,#9A5A08); transform:translateZ(calc(var(--z) * var(--s) * .024)) }
+@keyframes c3dSpin{ 0%{ transform:rotateY(0deg) } 30%{ transform:rotateY(360deg) } 100%{ transform:rotateY(360deg) } }
+body.reduce-motion .c3d-in{ animation:none }
+.c3d.mini{ --s:15px } .c3d.big{ --s:74px }
+.profile .who > div{ min-width:0 }
+.profile .nm, .profile .un{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+.pr-btns{ display:flex; align-items:center; gap:7px; flex-shrink:0 }
+.cb-chip{ display:inline-flex; align-items:center; gap:6px; height:30px; padding:0 11px 0 6px; border-radius:999px; cursor:pointer;
+  background:linear-gradient(135deg, rgba(255,200,60,.16), rgba(255,150,30,.08)); border:1px solid rgba(255,196,60,.32);
+  color:#FFD36A; font-weight:700; font-size:13px; font-family:inherit; transition:transform .15s }
+.cb-chip:active{ transform:scale(.94) }
+body.light .cb-chip{ color:#A86A08; background:linear-gradient(135deg, rgba(255,200,60,.26), rgba(255,170,40,.14)); border-color:rgba(214,150,20,.35) }
+/* sozlamalardagi Keshbek plitkasi bosiladigan bo'ldi */
+button.stat.cb-st{ text-align:left; width:100%; font:inherit; color:inherit; cursor:pointer; border:inherit; position:relative }
+button.stat.cb-st .v{ display:flex; align-items:center; gap:6px }
+button.stat.cb-st::after{ content:"\203A"; position:absolute; right:12px; top:50%; transform:translateY(-50%); color:var(--faint); font-size:18px }
+/* sahifa */
+.cb-pg{ padding-bottom:120px }
+.cb-hero{ position:relative; overflow:hidden; display:flex; align-items:center; gap:18px; padding:20px 18px; border-radius:24px; margin-bottom:6px;
+  background:radial-gradient(120% 90% at 0% 0%, rgba(255,190,50,.20), rgba(255,190,50,0) 60%), radial-gradient(90% 80% at 100% 100%, rgba(120,80,240,.22), rgba(120,80,240,0) 65%), var(--card);
+  border:1px solid rgba(255,196,60,.22); box-shadow:0 18px 40px -22px rgba(255,170,40,.45) }
+.cb-orbit{ position:relative; width:96px; height:96px; flex-shrink:0; display:grid; place-items:center }
+.cb-orbit .ring{ position:absolute; left:-6px; right:-6px; top:36px; height:26px; border-radius:50%; border:2px solid rgba(255,206,70,.85);
+  box-shadow:0 0 10px rgba(255,190,40,.6); transform:rotate(-16deg); pointer-events:none;
+  -webkit-mask:linear-gradient(180deg, #000 0 48%, transparent 48% 100%); mask:linear-gradient(180deg, #000 0 48%, transparent 48% 100%) }
+.cb-orbit .ring.f{ -webkit-mask:linear-gradient(180deg, transparent 0 50%, #000 50% 100%); mask:linear-gradient(180deg, transparent 0 50%, #000 50% 100%); z-index:2 }
+.cb-orbit .spk{ position:absolute; width:12px; height:12px; background:#FFD54A; clip-path:polygon(50% 0,62% 38%,100% 50%,62% 62%,50% 100%,38% 62%,0 50%,38% 38%);
+  filter:drop-shadow(0 0 4px rgba(255,200,60,.9)); animation:cbTw 2.4s ease-in-out infinite }
+.cb-orbit .s1{ left:2px; top:10px } .cb-orbit .s2{ right:0; top:2px; width:15px; height:15px; animation-delay:.8s } .cb-orbit .s3{ right:6px; bottom:6px; width:9px; height:9px; animation-delay:1.5s }
+@keyframes cbTw{ 0%,100%{ opacity:.35; transform:scale(.7) } 50%{ opacity:1; transform:scale(1.1) } }
+body.reduce-motion .cb-orbit .spk{ animation:none }
+.cb-hk .l{ font-size:12px; letter-spacing:.06em; text-transform:uppercase; color:var(--dim) }
+.cb-hk .n{ font-size:38px; font-weight:800; line-height:1.1; color:#FFD36A; letter-spacing:-.02em }
+body.light .cb-hk .n{ color:#B8791A }
+.cb-hk .r{ font-size:12.5px; color:var(--dim); line-height:1.45; margin-top:4px }
+.cb-sec{ margin:20px 4px 10px; font-size:12px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--dim) }
+.cb-tk{ position:relative; display:flex; align-items:stretch; margin-bottom:10px; border-radius:18px; background:var(--card); border:1px solid var(--line); overflow:hidden }
+.cb-tk .stub{ width:86px; flex-shrink:0; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:12px 6px;
+  background:linear-gradient(160deg, #FFD65A, #F29A18); color:#2A1600; position:relative }
+.cb-tk .stub b{ font-size:22px; font-weight:800; letter-spacing:-.02em }
+.cb-tk .stub small{ font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; opacity:.75 }
+.cb-tk .stub::after{ content:""; position:absolute; right:-1px; top:6px; bottom:6px; border-right:2px dashed var(--card) }
+.cb-tk:not(.can) .stub{ filter:saturate(.35) brightness(.8) }
+.cb-tk .body{ flex:1; min-width:0; padding:12px 12px 12px 14px; display:flex; flex-direction:column; justify-content:center; gap:5px }
+.cb-tk .t{ font-weight:700; font-size:14.5px }
+.cb-tk .cost{ display:flex; align-items:center; gap:6px; font-size:13px; color:#FFD36A; font-weight:700 }
+body.light .cb-tk .cost{ color:#A86A08 }
+.cb-tk .bar{ height:5px; border-radius:5px; background:rgba(255,255,255,.08); overflow:hidden }
+body.light .cb-tk .bar{ background:rgba(16,24,40,.08) }
+.cb-tk .bar i{ display:block; height:100%; border-radius:inherit; background:linear-gradient(90deg,#F29A18,#FFD65A) }
+.cb-tk .need{ font-size:11.5px; color:var(--dim) }
+.cb-tk .get{ align-self:center; margin-right:12px; height:36px; padding:0 15px; border-radius:12px; border:0; font:inherit; font-weight:700; font-size:13.5px; cursor:pointer;
+  background:linear-gradient(135deg,#FFD65A,#F29A18); color:#2A1600; box-shadow:0 6px 16px -8px rgba(242,154,24,.8); transition:transform .15s }
+.cb-tk .get:active{ transform:scale(.94) }
+.cb-tk .get.arm{ background:linear-gradient(135deg,#5B6CFF,#8A4DF5); color:#fff; box-shadow:0 6px 16px -8px rgba(110,80,250,.8) }
+.cb-tk .get:disabled{ background:rgba(255,255,255,.08); color:var(--faint); box-shadow:none; cursor:default }
+body.light .cb-tk .get:disabled{ background:rgba(16,24,40,.06) }
+.cb-code{ display:flex; align-items:center; gap:10px; padding:12px 12px 12px 14px; margin-bottom:9px; border-radius:16px; background:var(--card); border:1px solid var(--line); transition:border-color .2s }
+.cb-code.on{ border-color:rgba(91,108,255,.75); box-shadow:0 0 0 3px rgba(91,108,255,.16) }
+.cb-code .ci{ flex:1; min-width:0 }
+.cb-code .cc{ font-family:ui-monospace, Menlo, monospace; font-weight:700; font-size:15px; letter-spacing:.06em }
+.cb-code .cm{ font-size:12px; color:var(--dim); margin-top:2px }
+.cb-code .cp{ width:36px; height:36px; border-radius:11px; border:1px solid var(--line); background:transparent; color:var(--dim); display:grid; place-items:center; cursor:pointer }
+.cb-code .cp svg{ width:17px; height:17px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round }
+.cb-code .ap{ height:36px; padding:0 14px; border-radius:11px; border:0; font:inherit; font-weight:700; font-size:13px; cursor:pointer;
+  background:linear-gradient(135deg,#5B6CFF,#8A4DF5); color:#fff }
+.cb-code.on .ap{ background:rgba(91,108,255,.16); color:#8EA0FF }
+.cb-code.past{ opacity:.5 } .cb-code.past .cc{ text-decoration:line-through }
+.cb-empty{ padding:16px; border-radius:16px; border:1px dashed var(--line); color:var(--dim); font-size:13px; text-align:center; line-height:1.5 }
+.cb-how{ margin-top:18px; padding:14px 15px; border-radius:16px; background:rgba(91,108,255,.08); border:1px solid rgba(91,108,255,.18); font-size:12.8px; line-height:1.6; color:var(--dim) }
+.cb-how b{ color:var(--text) }
+/* to'lov tugmasi ustida tanlangan kod */
+.cb-sel{ display:flex; align-items:center; gap:8px; margin:0 0 8px; padding:9px 10px 9px 12px; border-radius:14px; font-size:13px;
+  background:rgba(20,22,48,.92); border:1px solid rgba(255,196,60,.35); color:#FFE29A; box-shadow:0 8px 20px -10px rgba(0,0,0,.6) }
+.cb-sel .tx{ flex:1; min-width:0 } .cb-sel .tx small{ color:rgba(255,226,154,.65) }
+.cb-sel button{ width:26px; height:26px; border-radius:50%; border:0; background:rgba(255,255,255,.1); color:#fff; font-size:14px; cursor:pointer }
+body.light .cb-sel{ background:rgba(255,248,230,.97); color:#7A4D05; border-color:rgba(214,150,20,.35) }
+body.light .cb-sel .tx small{ color:rgba(122,77,5,.65) } body.light .cb-sel button{ background:rgba(16,24,40,.08); color:#333 }
 </style>
 </head>
 <body>
@@ -5297,7 +5384,7 @@ function go(v){
   }
   view = v; pgTop();
   setTimeout(function(){ try{ bindHistTaps(); }catch(e){} }, 0);
-  const sub = (v==='game' || v==='topup' || v==='spam' || v==='chat' || v==='lang' || v==='profile' || v==='acct_rec' || isNftView(v));
+  const sub = (v==='game' || v==='topup' || v==='spam' || v==='chat' || v==='lang' || v==='profile' || v==='acct_rec' || v==='cashback' || isNftView(v));
   if(tg&&tg.BackButton){ sub ? tg.BackButton.show() : tg.BackButton.hide(); }
   document.querySelector('.nav').style.display = (v==='game'||v==='chat') ? 'none' : 'flex';
   document.body.classList.toggle('nft-mode', isNftView(v) || (v === 'topup' && topDest === 'nft'));
@@ -5314,6 +5401,7 @@ function go(v){
   else if(v==='chat') renderChat();
   else if(v==='profile'){ pfLoaded = false; renderProfile(); }
   else if(v==='acct_rec') renderAcctRec();
+  else if(v==='cashback'){ renderCashback(); cbLoad(); }
   else if(v==='nft_profile') renderNftProfile();
   else if(v==='nft_item') renderNftItem();
   else if(v==='nft_cart') renderCart();
@@ -5327,12 +5415,14 @@ function go(v){
   else if(v==='nft_season') renderSeason();
   else if(isNftView(v)) renderNft(v);
   if(v==='home'||v==='settings'||v==='nft_gifts'||v==='profile') loadBalance();
+  if(v==='home'||v==='settings') cbLoad();
   syncNavPill(true);
 }
 function onBack(){
   const l = document.getElementById('pwLock');
   if(l && l.classList.contains('on')){ if(pwMode !== 'unlock') pwClose(); return; }
   if(view==='acct_rec'){ haptic(); go('profile'); return; }
+  if(view==='cashback'){ haptic(); go(cbFrom === 'settings' ? 'settings' : 'home'); return; }
   /* NFT profili — qaysi ekrandan kirilgan bo'lsa o'shanga qaytadi */
   if(view==='nft_item'){ haptic(); go('nft_market'); return; }
   if(view==='nft_cart'){ haptic(); go('nft_market'); return; }
@@ -5596,6 +5686,110 @@ function initFx(){
 
 function rent(){ haptic(); toast("Ijaraga bo'limi tez orada 🔜"); }
 
+/* ======================= KESHBEK: tangalar va chegirma kodlari =======================
+   Har buyurtmaga tanga (100 000 so'mdan katta buyurtmaga 2 ta). Tangalarga chegirma kodi olinadi.
+   "Qo'llash" bosilsa, kod keyingi buyurtmada o'zi ishlatiladi (to'lov tugmasi ustida ko'rinadi).
+   Kod bir marta ishlatiladi, 30 kun amal qiladi; buyurtma bekor bo'lsa qaytadi. */
+var cbCoins = 0, cbCodes = [], cbPacks = [], cbFrom = 'home', cbArm = -1, cbArmT = 0, cbBusy = false;
+var CB_COPY = '<svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>';
+function cbCoinHtml(cls){
+  var ed = ''; for(var z = -3; z <= 3; z++) ed += '<i class="ed" style="--z:' + z + '"></i>';
+  return '<span class="c3d ' + (cls || '') + '"><span class="c3d-in">' + ed + '<i class="fc fr"></i><i class="fc bk"></i></span></span>';
+}
+function cbPct(p){ return String(p).replace('.', ',') + '%'; }
+function cbSelGet(){ try{ return JSON.parse(localStorage.getItem('mz_cb_sel') || 'null'); }catch(e){ return null; } }
+function cbSelSet(v){ try{ if(v) localStorage.setItem('mz_cb_sel', JSON.stringify(v)); else localStorage.removeItem('mz_cb_sel'); }catch(e){} }
+function cbLeft(exp){
+  var d = Math.ceil((Date.parse(exp) - Date.now()) / 864e5);
+  return d > 1 ? (d + ' kun amal qiladi') : d === 1 ? 'ertaga tugaydi' : 'bugun tugaydi';
+}
+function cbLoad(){
+  if(!tg || !tg.initData) return;
+  fetch(VBASE + '/cb', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ initData: tg.initData }) })
+    .then(function(r){ return r.json(); }).then(function(d){
+      if(!(d && d.ok)) return;
+      cbCoins = d.coins || 0; cbCodes = d.codes || []; cbPacks = d.packs || [];
+      var s = cbSelGet();
+      if(s && !cbCodes.some(function(k){ return k.c === s.c && !k.used && !k.old; })) cbSelSet(null);
+      cbPaint();
+    }).catch(function(){});
+}
+function cbPaint(){
+  document.querySelectorAll('.cb-num').forEach(function(e){ e.textContent = fmt(cbCoins); });
+  if(view === 'cashback') renderCashback();
+}
+function openCb(from){ haptic(); cbFrom = from || 'home'; go('cashback'); }
+function renderCashback(){
+  var sel = cbSelGet();
+  var packs = cbPacks.length ? cbPacks : [{p:.5,c:30},{p:1,c:60},{p:2,c:110},{p:3,c:160}];
+  var act = cbCodes.filter(function(k){ return !k.used && !k.old; });
+  var past = cbCodes.filter(function(k){ return k.used || k.old; }).slice(0, 6);
+  app.innerHTML = '<div class="cb-pg">' +
+    '<div class="cb-hero"><div class="cb-orbit"><i class="ring"></i>' + cbCoinHtml('big') + '<i class="ring f"></i><i class="spk s1"></i><i class="spk s2"></i><i class="spk s3"></i></div>' +
+      '<div class="cb-hk"><div class="l">Tangalaringiz</div><div class="n cb-num">' + fmt(cbCoins) + '</div>' +
+      '<div class="r">Har buyurtma uchun +1 tanga, 100 000 so\'mdan katta buyurtma uchun +2</div></div></div>' +
+    '<div class="cb-sec">Chegirma olish</div>' +
+    packs.map(function(pk, i){
+      var can = cbCoins >= pk.c, pr = Math.min(100, Math.round(cbCoins / pk.c * 100));
+      return '<div class="cb-tk' + (can ? ' can' : '') + '"><div class="stub"><b>' + cbPct(pk.p) + '</b><small>chegirma</small></div>' +
+        '<div class="body"><div class="t">' + cbPct(pk.p) + ' chegirma kodi</div><div class="cost">' + cbCoinHtml('mini') + pk.c + ' tanga</div>' +
+        (can ? '' : '<div class="bar"><i style="width:' + pr + '%"></i></div><div class="need">Yana ' + (pk.c - cbCoins) + ' tanga kerak</div>') + '</div>' +
+        '<button class="get' + (cbArm === i ? ' arm' : '') + '"' + (can ? '' : ' disabled') + ' onclick="cbBuy(' + i + ', this)">' + (cbArm === i ? 'Tasdiqlash' : 'Olish') + '</button></div>';
+    }).join('') +
+    '<div class="cb-sec">Mening kodlarim</div>' +
+    (act.length ? act.map(function(k){
+      var on = !!(sel && sel.c === k.c);
+      return '<div class="cb-code' + (on ? ' on' : '') + '"><div class="ci"><div class="cc">' + esc(k.c) + '</div>' +
+        '<div class="cm">' + cbPct(k.p) + ' chegirma \u00b7 ' + (on ? 'keyingi buyurtmada qo\'llanadi' : cbLeft(k.exp)) + '</div></div>' +
+        '<button class="cp" onclick="cbCopy(\'' + esc(k.c) + '\')">' + CB_COPY + '</button>' +
+        '<button class="ap" onclick="cbApply(\'' + esc(k.c) + '\', ' + Number(k.p) + ')">' + (on ? '\u2713 Tanlangan' : 'Qo\'llash') + '</button></div>';
+    }).join('') : '<div class="cb-empty">Hali kod yo\'q. Tangalar yetarli bo\'lgach, yuqoridan chegirma kodi oling.</div>') +
+    (past.length ? past.map(function(k){
+      return '<div class="cb-code past"><div class="ci"><div class="cc">' + esc(k.c) + '</div><div class="cm">' + cbPct(k.p) + ' \u00b7 ' + (k.used ? 'ishlatilgan' : 'muddati tugagan') + '</div></div></div>';
+    }).join('') : '') +
+    '<div class="cb-how"><b>Kod qanday ishlaydi?</b> Kod yonidagi \u00ab<b>Qo\'llash</b>\u00bb tugmasini bosing \u2014 chegirma keyingi o\'yin yoki Telegram xaridingizda o\'zi hisoblanadi, ' +
+    'u \u00abSotib olish\u00bb tugmasi ustida ko\'rinib turadi. Har bir kod bir marta ishlatiladi va 30 kun amal qiladi. Buyurtma bajarilmasa, kod va tanga qaytadi.</div>' +
+  '</div>';
+}
+function cbBuy(i, b){
+  haptic();
+  if(cbBusy) return;
+  if(cbArm !== i){
+    cbArm = i; clearTimeout(cbArmT);
+    cbArmT = setTimeout(function(){ cbArm = -1; if(view === 'cashback') renderCashback(); }, 3500);
+    renderCashback(); return;
+  }
+  cbArm = -1; clearTimeout(cbArmT); cbBusy = true;
+  if(b){ b.disabled = true; b.textContent = '\u2026'; }
+  fetch(VBASE + '/cb/buy', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ initData: (tg && tg.initData) || '', i: i }) })
+    .then(function(r){ return r.json(); }).then(function(d){
+      cbBusy = false;
+      if(d && d.ok){ cbCoins = d.coins || 0; cbCodes = d.codes || []; notify('success'); toastOk('\uD83C\uDF89 Kod olindi: ' + d.code); cbPaint(); renderCashback(); return; }
+      notify('error');
+      toastErr(d && d.error === 'coins' ? 'Tangalar yetarli emas' : d && d.error === 'many' ? 'Faol kodlar ko\'p \u2014 avval borlarini ishlating' : 'Bajarilmadi, qayta urining');
+      renderCashback();
+    }).catch(function(){ cbBusy = false; toastErr('Aloqa yo\'q'); renderCashback(); });
+}
+function cbApply(c, p){
+  haptic();
+  var s = cbSelGet();
+  if(s && s.c === c){ cbSelSet(null); toast('Kod tanlovi bekor qilindi'); }
+  else { cbSelSet({ c:c, p:p }); notify('success'); toastOk('Kod tanlandi \u2014 keyingi buyurtmada qo\'llanadi'); }
+  renderCashback();
+}
+function cbCopy(c){
+  haptic();
+  try{ navigator.clipboard.writeText(c); }catch(e){}
+  toastOk('Nusxalandi: ' + c);
+}
+function cbBarHtml(){
+  var s = cbSelGet();
+  if(!s) return '';
+  return '<div class="cb-sel" id="cbSel">' + cbCoinHtml('mini') + '<div class="tx"><b>' + cbPct(s.p) + ' chegirma</b> qo\'llanadi <small>\u00b7 ' + esc(s.c) + '</small></div>' +
+         '<button onclick="cbUnsel()" aria-label="Bekor qilish">\u2715</button></div>';
+}
+function cbUnsel(){ haptic(); cbSelSet(null); var e = document.getElementById('cbSel'); if(e) e.remove(); toast('Chegirma kodi olib tashlandi'); }
+
 function profileRow(){
   const name = tgUser ? (tgUser.first_name||'Foydalanuvchi') : 'Foydalanuvchi';
   const un = tgUser && tgUser.username ? '@'+tgUser.username : '@user';
@@ -5607,7 +5801,8 @@ function profileRow(){
       <div><div class="nm">${name}</div><div class="un">${un}</div></div>
       <span class="who-arw">›</span>
     </div>
-    <button class="coin" onclick="openLink('https://t.me/mlbb_otzivv')">💬 Fikrlar</button>
+    <div class="pr-btns"><button class="cb-chip" onclick="openCb('home')" aria-label="Keshbek">${cbCoinHtml('')}<span class="cb-num">${fmt(cbCoins)}</span></button>
+    <button class="coin" onclick="openLink('https://t.me/mlbb_otzivv')">💬 Fikrlar</button></div>
   </div>`;
 }
 
@@ -5804,7 +5999,7 @@ function renderGame(){
         + '<div id="starHint" style="margin-top:11px;font-size:12.5px;line-height:1.6"></div>'
         + '</div>'
       : '<div class="pkg-grid">' + pkgHtml(activePkgs()) + '</div>')
-  + '<div class="buy-bar"><button class="buy-btn" id="buyBtn" disabled onclick="buy()">Sotib olish</button></div>';
+  + '<div class="buy-bar">' + cbBarHtml() + '<button class="buy-btn" id="buyBtn" disabled onclick="buy()">Sotib olish</button></div>';
 
   if(flds.length === 1 && flds[0].key === 'username' && tgUser && tgUser.username){
     const el = document.getElementById('fld_username');
@@ -6228,6 +6423,7 @@ function buy(){
     qty: custom ? starN : steam ? stmN : 0,
     tgUser: tgUser?{id:tgUser.id,username:tgUser.username,name:tgUser.first_name}:null,
     status:'wait', createdAt:new Date().toISOString() };
+  const _cbs = cbSelGet(); if(_cbs && _cbs.c) order.code = _cbs.c;
   if(buyBusy) return;
   buyBusy = true;
   const _bb = document.getElementById('buyBtn');
@@ -6241,7 +6437,9 @@ function buy(){
     if(d && d.ok){
       if(typeof d.balance === 'number') balance = d.balance;
       saveOrder(order); notify('success');
-      toastOk('✅ Buyurtma qabul qilindi');
+      if(order.code) cbSelSet(null);
+      toastOk(d.order && d.order.disc ? ('✅ Buyurtma qabul qilindi \u00b7 ' + fmt(d.order.disc) + " so'm chegirma") : '✅ Buyurtma qabul qilindi');
+      cbLoad();
       buyDone();
       setTimeout(function(){ go('history'); }, 700);
     } else if(d && d.error === 'balance'){
@@ -6252,6 +6450,10 @@ function buy(){
     } else {
       notify('error');
       if(d && d.error === 'reload'){ loadDynGames(); setTimeout(function(){ if(view === 'game'){ selPkg = null; renderGame(); } }, 900); }
+      if(d && (d.error === 'code' || d.error === 'code_na')){
+        cbSelSet(null); const _e = document.getElementById('cbSel'); if(_e) _e.remove(); cbLoad(); buyDone();
+        return toastErr(d.error === 'code' ? "Chegirma kodi yaroqsiz yoki ishlatilgan \u2014 olib tashlandi" : "Bu mahsulotga chegirma kodi qo'llanmaydi. Kod saqlanib qoldi, qayta bosing.");
+      }
       toastErr(
         d && d.error === 'login' ? "❌ Bunday Steam login topilmadi. Loginni tekshiring."
       : d && d.error === 'busy'  ? "⚠️ Yetkazib beruvchi javob bermadi. Bir daqiqadan keyin urinib ko'ring."
@@ -12323,7 +12525,7 @@ function renderSettings(){
     </div>
     <div class="stat-row">
       <div class="stat"><div class="k">Balans</div><div class="v">${money(balance,false)}</div></div>
-      <div class="stat"><div class="k">Keshbek</div><div class="v gold">${cashback}</div></div>
+      <button class="stat cb-st" onclick="openCb('settings')"><div class="k">Keshbek</div><div class="v gold">${cbCoinHtml('mini')}<span class="cb-num">${fmt(cbCoins)}</span><small>tanga</small></div></button>
     </div>
   </div>
   <div class="sec-lbl" style="margin-top:0">Telefon raqami</div>
