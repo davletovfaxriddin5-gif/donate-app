@@ -2732,6 +2732,62 @@ body.light .rc-code{ color:#1a2236 }
   background:linear-gradient(90deg,#2B2FE8 0%,rgba(43,47,232,.97) 22%,rgba(45,44,236,.74) 40%,rgba(52,46,238,.5) 56%,rgba(58,50,240,.34) 76%,rgba(60,52,242,.26) 100%) }
 .balance::after{ z-index:1 }
 .balance > :not(.bal-art){ position:relative; z-index:2 }
+
+/* ===== NFT "Menyu" oynasi: Mavsum tugmasidagi ranglardan yupqa rangli fon, shisha kartalar, yaltiroq ikonkalar ===== */
+#shBox.nm-sheet{
+  background:
+    radial-gradient(130% 55% at 100% 0%, rgba(180,90,232,.26), rgba(180,90,232,0) 60%),
+    radial-gradient(95% 50% at 0% 6%, rgba(59,44,184,.34), rgba(59,44,184,0) 62%),
+    radial-gradient(120% 45% at 30% 100%, rgba(106,63,224,.20), rgba(106,63,224,0) 65%),
+    linear-gradient(180deg, #141633, #0E1022) !important;
+  border-color:rgba(160,130,255,.22) !important;
+  box-shadow:0 24px 60px -24px rgba(70,40,190,.55), inset 0 1px 0 rgba(255,255,255,.06) !important }
+#shBox.nm-sheet .nm-h .t{ color:#fff }
+#shBox.nm-sheet .nm-x{ background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.08) }
+#shBox.nm-sheet .nm-l{ color:rgba(205,200,255,.62); margin:13px 6px 7px }
+#shBox.nm-sheet .nm-lg:not(.on){ background:rgba(255,255,255,.05); border-color:rgba(255,255,255,.09) }
+#shBox.nm-sheet .svc-box{ background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.08); border-radius:20px; overflow:hidden;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05) }
+#shBox.nm-sheet .svc{ padding:10px 14px !important; gap:13px; position:relative; border-top:0 !important }
+#shBox.nm-sheet .svc + .svc::before, #shBox.nm-sheet .nm-chk::before{ content:""; position:absolute; top:0; right:0; left:61px; height:1px;
+  background:rgba(255,255,255,.08) }
+#shBox.nm-sheet .svc .ic{ width:34px !important; height:34px !important; border-radius:10px !important; position:relative;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.38), inset 0 -1px 0 rgba(0,0,0,.14), 0 6px 14px -6px var(--g, rgba(0,0,0,.5)) }
+#shBox.nm-sheet .svc .ic::after{ content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+  background:linear-gradient(180deg, rgba(255,255,255,.26), rgba(255,255,255,0) 52%) }
+#shBox.nm-sheet .svc .ic svg{ width:19px !important; height:19px !important; fill:#fff; stroke:none; position:relative; z-index:1;
+  filter:drop-shadow(0 1px 1px rgba(0,0,0,.18)) }
+#shBox.nm-sheet .svc .t{ font-size:15px !important; font-weight:600; color:#fff }
+#shBox.nm-sheet .svc .s{ font-size:12px !important; color:rgba(210,212,235,.62); margin-top:2px }
+#shBox.nm-sheet .svc .arw{ color:rgba(255,255,255,.32); font-size:22px; line-height:1 }
+#shBox.nm-sheet .switch{ width:46px !important; height:28px !important; background:rgba(255,255,255,.14) }
+#shBox.nm-sheet .switch::after{ top:3px; left:3px; width:22px; height:22px; box-shadow:0 2px 6px rgba(0,0,0,.32) }
+#shBox.nm-sheet .switch.on{ background:linear-gradient(135deg,#5B6CFF,#8A4DF5); box-shadow:0 0 0 1px rgba(255,255,255,.06), 0 4px 14px -4px rgba(110,80,250,.7) }
+#shBox.nm-sheet .switch.on::after{ left:21px }
+#shBox.nm-sheet .nm-chk{ position:relative; border-top:0 !important; padding:10px 14px 11px 61px !important; color:rgba(210,212,235,.7); font-size:12.5px }
+#shBox.nm-sheet .nm-chk .b{ width:21px; height:21px; border-radius:7px; border-color:rgba(255,255,255,.22); background:rgba(255,255,255,.04) }
+#shBox.nm-sheet .nm-chk.on .b{ background:linear-gradient(135deg,#5B6CFF,#8A4DF5); border-color:transparent; box-shadow:0 3px 10px -3px rgba(110,80,250,.7) }
+#shBox.nm-sheet .nm-sup{ position:relative; overflow:hidden; height:48px; border-radius:16px; margin-top:14px;
+  background:linear-gradient(120deg,#3B2CB8 0%,#6A3FE0 55%,#B45AE8 100%); box-shadow:0 10px 26px -10px rgba(106,63,224,.75) }
+#shBox.nm-sheet .nm-sup::after{ content:""; position:absolute; right:-30px; top:-60px; width:150px; height:150px; border-radius:50%;
+  background:radial-gradient(circle, rgba(255,255,255,.22), rgba(255,255,255,0) 66%); pointer-events:none }
+body.light #shBox.nm-sheet{
+  background:
+    radial-gradient(130% 55% at 100% 0%, rgba(180,90,232,.14), rgba(180,90,232,0) 60%),
+    radial-gradient(95% 50% at 0% 6%, rgba(79,90,240,.14), rgba(79,90,240,0) 62%),
+    linear-gradient(180deg, #FFFFFF, #F6F5FF) !important;
+  border-color:rgba(120,100,230,.18) !important }
+body.light #shBox.nm-sheet .nm-h .t{ color:#141633 }
+body.light #shBox.nm-sheet .nm-x{ background:rgba(16,24,40,.06); border-color:rgba(16,24,40,.06) }
+body.light #shBox.nm-sheet .nm-l{ color:rgba(80,70,150,.6) }
+body.light #shBox.nm-sheet .nm-lg:not(.on){ background:rgba(16,24,40,.04); border-color:rgba(16,24,40,.08) }
+body.light #shBox.nm-sheet .svc-box{ background:rgba(255,255,255,.75); border-color:rgba(16,24,40,.07); box-shadow:0 2px 10px rgba(30,20,90,.05) }
+body.light #shBox.nm-sheet .svc + .svc::before, body.light #shBox.nm-sheet .nm-chk::before{ background:rgba(16,24,40,.08) }
+body.light #shBox.nm-sheet .svc .t{ color:#141633 }
+body.light #shBox.nm-sheet .svc .s, body.light #shBox.nm-sheet .nm-chk{ color:rgba(40,44,70,.6) }
+body.light #shBox.nm-sheet .svc .arw{ color:rgba(16,24,40,.3) }
+body.light #shBox.nm-sheet .switch:not(.on){ background:#D5D9E6 }
+body.light #shBox.nm-sheet .nm-chk .b{ border-color:rgba(16,24,40,.22); background:#fff }
 </style>
 </head>
 <body>
@@ -8671,7 +8727,7 @@ function nmHtml(){
     <div class="nm-l">Bildirishnomalar</div>
     <div class="svc-box">
       <button class="svc" onclick="nmSw('mt_ntf', this)">
-        <span class="ic" style="background:linear-gradient(140deg,#FF7A59,#E0493A)"><svg viewBox="0 0 24 24"><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 1.5h-15z"/><path d="M10 20.5a2.2 2.2 0 0 0 4 0"/></svg></span>
+        <span class="ic" style="background:linear-gradient(145deg,#FF8A5C,#E5423A);--g:rgba(229,66,58,.55)"><svg viewBox="0 0 24 24"><path d="M12 2.9c-3.2 0-5.8 2.6-5.8 5.8v3.5l-1.5 2.5c-.5.8.1 1.8 1 1.8h12.6c.9 0 1.5-1 1-1.8l-1.5-2.5V8.7c0-3.2-2.6-5.8-5.8-5.8z"/><path d="M9.5 18.2h5a2.5 2.5 0 0 1-5 0z"/></svg></span>
         <span class="txt"><div class="t">Bildirishnomalar</div><div class="s">Takliflar va sotuvlar haqida</div></span>
         <span class="switch ${nmPref('mt_ntf', true) ? 'on' : ''}"></span>
       </button>
@@ -8683,12 +8739,12 @@ function nmHtml(){
     <div class="nm-l">Qurilma</div>
     <div class="svc-box">
       <button class="svc" onclick="nmSw('mt_vib', this)">
-        <span class="ic" style="background:linear-gradient(140deg,#4FA3FF,#2B6BE0)"><svg viewBox="0 0 24 24"><rect x="8" y="3.5" width="8" height="17" rx="2.2"/><path d="M4.5 8v8M19.5 8v8"/></svg></span>
+        <span class="ic" style="background:linear-gradient(145deg,#5AB0FF,#2C6BE6);--g:rgba(44,107,230,.55)"><svg viewBox="0 0 24 24"><path d="M9 3.2h6c1 0 1.8.8 1.8 1.8v14c0 1-.8 1.8-1.8 1.8H9c-1 0-1.8-.8-1.8-1.8V5c0-1 .8-1.8 1.8-1.8z"/><path d="M10.6 5.4h2.8" stroke="#2C6BE6" stroke-width="1.4" stroke-linecap="round"/><path d="M4 8.8v6.4M20 8.8v6.4" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round"/></svg></span>
         <span class="txt"><div class="t">Tebranish</div><div class="s">Bosilganda yengil tebranish</div></span>
         <span class="switch ${vibOff() ? '' : 'on'}"></span>
       </button>
       <button class="svc" onclick="nmSw('mt_anim', this)">
-        <span class="ic" style="background:linear-gradient(140deg,#B26BFF,#7A3BE8)"><svg viewBox="0 0 24 24"><path d="M12 3.5l1.9 5.1 5.1 1.9-5.1 1.9-1.9 5.1-1.9-5.1-5.1-1.9 5.1-1.9z"/><path d="M18.5 16.5l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/></svg></span>
+        <span class="ic" style="background:linear-gradient(145deg,#C27BFF,#7B3BE9);--g:rgba(123,59,233,.55)"><svg viewBox="0 0 24 24"><path d="M10.5 3.2l1.8 4.9 4.9 1.8-4.9 1.8-1.8 4.9-1.8-4.9-4.9-1.8 4.9-1.8z"/><path d="M17.7 13.6l.95 2.45 2.45.95-2.45.95-.95 2.45-.95-2.45-2.45-.95 2.45-.95z"/><path d="M5.6 15.6l.6 1.5 1.5.6-1.5.6-.6 1.5-.6-1.5-1.5-.6 1.5-.6z"/></svg></span>
         <span class="txt"><div class="t">Animatsiyalar</div><div class="s">Darvoza va o'tish effektlari</div></span>
         <span class="switch ${animOn ? 'on' : ''}"></span>
       </button>
@@ -8696,17 +8752,17 @@ function nmHtml(){
     <div class="nm-l">Havolalar</div>
     <div class="svc-box">
       <button class="svc" onclick="nmGo('web')">
-        <span class="ic" style="background:linear-gradient(140deg,#3F55F6,#5A43F2)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.3 2.4 3.4 5.2 3.4 8.5s-1.1 6.1-3.4 8.5c-2.3-2.4-3.4-5.2-3.4-8.5s1.1-6.1 3.4-8.5z"/></svg></span>
+        <span class="ic" style="background:linear-gradient(145deg,#5B6CFF,#4636E0);--g:rgba(70,54,224,.55)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.8"/><path d="M15.9 8.1l-2.2 5.6-5.6 2.2 2.2-5.6z" fill="#4C45EE"/><circle cx="12" cy="12" r="1.15" fill="#fff"/></svg></span>
         <span class="txt"><div class="t">Minato Web</div><div class="s">minatoh.uz</div></span>
         <span class="arw">\u203A</span>
       </button>
       <button class="svc" onclick="nmGo('gifts')">
-        <span class="ic" style="background:linear-gradient(140deg,#FFB547,#F08A1C)"><svg viewBox="0 0 24 24"><rect x="3.5" y="9" width="17" height="11" rx="2"/><path d="M12 9v11M3.5 13h17M12 9c-1.5-3.5-5.5-4-5.5-1.5S12 9 12 9zm0 0c1.5-3.5 5.5-4 5.5-1.5S12 9 12 9z"/></svg></span>
+        <span class="ic" style="background:linear-gradient(145deg,#FFC155,#F0861A);--g:rgba(240,134,26,.55)"><svg viewBox="0 0 24 24"><path d="M3.8 8.4h16.4c.6 0 1 .4 1 1v2.1c0 .6-.4 1-1 1H3.8c-.6 0-1-.4-1-1V9.4c0-.6.4-1 1-1z"/><path d="M4.8 13.4h14.4v5.7c0 1-.8 1.8-1.8 1.8H6.6c-1 0-1.8-.8-1.8-1.8z"/><path d="M12 8.4v12.5" stroke="#F0861A" stroke-width="2.2"/><path d="M12 8.2C11.2 5.4 9.6 3.9 8.1 4c-1.2.1-1.9 1.1-1.6 2.2.4 1.3 2.1 2 5.5 2zm0 0c.8-2.8 2.4-4.3 3.9-4.2 1.2.1 1.9 1.1 1.6 2.2-.4 1.3-2.1 2-5.5 2z"/></svg></span>
         <span class="txt"><div class="t">Sovg'a hisobi</div><div class="s">@minato_Gifts</div></span>
         <span class="arw">\u203A</span>
       </button>
       <button class="svc" onclick="nmGo('channel')">
-        <span class="ic" style="background:linear-gradient(140deg,#2AABEE,#1C8ED0)"><svg viewBox="0 0 24 24"><path d="M4 10.5v3a1.5 1.5 0 0 0 1.5 1.5H7l6 4.5V4.5L7 9H5.5A1.5 1.5 0 0 0 4 10.5z"/><path d="M17 8.5a5 5 0 0 1 0 7"/></svg></span>
+        <span class="ic" style="background:linear-gradient(145deg,#3DBBF5,#1A86D6);--g:rgba(26,134,214,.55)"><svg viewBox="0 0 24 24"><path d="M3.6 10.3c0-.9.7-1.6 1.6-1.6h2.6l6.8-4.3c.7-.4 1.6.1 1.6.9v13.4c0 .8-.9 1.3-1.6.9l-6.8-4.3H5.2c-.9 0-1.6-.7-1.6-1.6z"/><path d="M7.9 15.5l1.4 4.1c.2.6.9 1 1.5.7.6-.2.9-.9.7-1.5l-1-3.3z"/><path d="M18.7 9.1a4.3 4.3 0 0 1 0 5.8" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round"/></svg></span>
         <span class="txt"><div class="t">Minato kanali</div><div class="s">@minatoh_uz</div></span>
         <span class="arw">\u203A</span>
       </button>
@@ -8717,7 +8773,7 @@ function openNftMenu(){
   haptic('medium');
   closeSheet();
   const bg = document.createElement('div'); bg.className='sheet-bg'; bg.id='shBg'; bg.onclick=closeSheet;
-  const sh = document.createElement('div'); sh.className='sheet'; sh.id='shBox';
+  const sh = document.createElement('div'); sh.className='sheet nm-sheet'; sh.id='shBox';
   sh.innerHTML = nmHtml();
   document.body.appendChild(bg);
   document.body.appendChild(sh);
