@@ -4010,12 +4010,12 @@ function aiCtx(uid, from){
     "Oxirgi to'ldirishlar:\n" + (top.join("\n") || "- yo'q") + "\n" +
     "Hozirgi vaqt (Toshkent): " + d(new Date().toISOString());
 }
-async function aiApi(system, messages){
+async function aiApi(system, messages, maxTok, model){
   const ctl = new AbortController(); const tm = setTimeout(function(){ ctl.abort(); }, 60000);
   try{
     const r = await fetch("https://api.anthropic.com/v1/messages", { method:"POST", signal: ctl.signal,
       headers:{ "content-type":"application/json", "x-api-key": AI_KEY, "anthropic-version":"2023-06-01" },
-      body: JSON.stringify({ model: AI_MODEL, max_tokens: 700, system: system, messages: messages }) });
+      body: JSON.stringify({ model: model || AI_MODEL, max_tokens: maxTok || 700, system: system, messages: messages }) });
     const j = await r.json().catch(function(){ return null; });
     if(!r.ok || !j) return { err: (j && j.error && (j.error.type || j.error.message)) || ("http " + r.status), status: r.status };
     const text = (j.content || []).filter(function(c){ return c.type === "text"; }).map(function(c){ return c.text; }).join("\n").trim();
@@ -6950,36 +6950,56 @@ function nwDate(iso){
   const t = new Date(d.getTime() + 5 * 3600000);   /* Toshkent vaqti */
   return t.getUTCDate() + "-" + M[t.getUTCMonth()] + ", " + String(t.getUTCHours()).padStart(2, "0") + ":" + String(t.getUTCMinutes()).padStart(2, "0");
 }
-/* Qisqa o'zbekcha izoh - FAQAT rasmiy matndan, o'zidan hech narsa qo'shmasdan (kuniga 40 tagacha) */
+/* O'zbekcha TO'LIQ tarjima (sarlavha + matn) - FAQAT rasmiy matndan, o'zidan hech narsa qo'shmasdan (kuniga 40 tagacha).
+   Aniqlik uchun kuchliroq model ishlatiladi (.env: NEWS_AI_MODEL); u javob bermasa - odatdagi AI_MODEL. */
+const NEWS_TR_MODEL = process.env.NEWS_AI_MODEL || "claude-sonnet-5-5";
 async function nwUz(it, game){
-  if(!AI_KEY) return "";
+  if(!AI_KEY) return null;
   const today = new Date().toISOString().slice(0, 10);
   if(NEWS.aiD !== today){ NEWS.aiD = today; NEWS.aiN = 0; }
-  if(NEWS.aiN >= 40) return "";
-  const sys = "Sen o'yin yangiliklarini o'zbek tiliga (lotin yozuvida) qisqa bayon qilasan. QOIDALAR: faqat berilgan rasmiy " +
-    "sarlavha va tavsifdagi faktlarni yoz; o'zingdan hech narsa qo'shma, taxmin qilma, narx, sana yoki mukofot o'ylab topma. " +
-    "Matnda bo'lsa: event nomi, skin/qurol/qahramon nomi, sanalar, narx (UC, olmos va h.k.) va qanday olinishini saqla. " +
-    "Havolalar, hashteglar, obuna bo'lish chaqiriqlari va reklama gaplarini tashlab ket. 1-3 qisqa gap. Faqat natijani yoz.";
-  const r = await aiApi(sys, [{ role: "user", content: "O'yin: " + game + "\nSarlavha: " + it.t + "\nTavsif: " + String(it.d || "").slice(0, 1800) }]);
-  if(r && r.text){ NEWS.aiN++; return r.text.trim().slice(0, 600); }
-  return "";
+  if(NEWS.aiN >= 40) return null;
+  const sys = "Sen professional tarjimonsan. Rasmiy o'yin yangiligini o'zbek tiliga (lotin yozuvida) TO'LIQ va ANIQ tarjima qilasan.\n" +
+    "QOIDALAR:\n" +
+    "1) Ma'noni aynan saqla: hech narsa qo'shma, hech narsani tashlab ketma, o'zingdan izoh yoki taxmin yozma.\n" +
+    "2) O'yin ichidagi nomlar - event, skin, qahramon, qurol, xarita, rejim, paket va valyuta nomlari (masalan Royale Pass, Elite Pass, Starlight, UC, Diamonds) - asl yozilishida qoladi, tarjima qilinmaydi.\n" +
+    "3) Raqamlar, sanalar, vaqtlar, foizlar va narxlar manbadagidek aniq yoziladi; sanani boshqa ko'rinishga o'tkazma, vaqt zonasini o'zgartirma.\n" +
+    "4) Havolalar, hashteglar, @ bilan boshlanadigan nomlar va 'obuna bo'ling', 'like bosing' kabi chaqiriqlarni tashlab ket.\n" +
+    "5) Matn qaysi tilda bo'lmasin, o'zbekchaga tarjima qil. Tabiiy, ravon o'zbek tilida yoz.\n" +
+    "6) Javobni FAQAT shu JSON ko'rinishida ber, boshqa hech narsa yozma: {\"title\":\"...\",\"text\":\"...\"}";
+  const msg = [{ role: "user", content: "O'yin: " + game + "\nSarlavha: " + it.t + "\nMatn: " + String(it.d || "").slice(0, 2500) }];
+  let r = await aiApi(sys, msg, 2000, NEWS_TR_MODEL);
+  if((!r || !r.text) && NEWS_TR_MODEL !== AI_MODEL) r = await aiApi(sys, msg, 2000);
+  if(!r || !r.text) return null;
+  let o = null;
+  try{ const x = r.text, i = x.indexOf("{"), j = x.lastIndexOf("}"); if(i > -1 && j > i) o = JSON.parse(x.slice(i, j + 1)); }catch(e){}
+  const t = o && typeof o.title === "string" ? o.title.trim() : "", d = o && typeof o.text === "string" ? o.text.trim() : "";
+  if(!t && !d) return null;
+  NEWS.aiN++;
+  return { t: t.slice(0, 300), d: d.slice(0, 3500) };
 }
 function nwClip(s, n){ s = String(s || "").replace(/https?:\/\/\S+/g, "").replace(/#\S+/g, "").replace(/\n{2,}/g, "\n").trim(); return s.length > n ? s.slice(0, n).replace(/\s+\S*$/, "") + "\u2026" : s; }
 async function nwSend(src, it){
   const uz = await nwUz(it, src.g);
-  let cap = "\uD83C\uDFAE <b>" + esc(src.g) + "</b> \u2014 rasmiy yangilik\n\n<b>" + esc(it.t) + "</b>";
-  const body = uz || nwClip(it.d, 380);
-  if(body) cap += "\n\n" + esc(body);
-  cap += "\n\n\uD83D\uDCC5 " + nwDate(it.at) + "\n\uD83D\uDD17 Manba: " + (src.steam ? "Steam (rasmiy e'lon)" : src.ig ? "Instagram, " + esc(src.cname || "@" + src.ig)
-         : src.tgc ? "Telegram, " + esc(src.cname || "@" + src.tgc) : "YouTube, " + esc(src.cname || "rasmiy kanal"));
+  const head = "\uD83C\uDFAE <b>" + esc(src.g) + "</b> \u2014 rasmiy yangilik\n\n<b>" + esc((uz && uz.t) || it.t) + "</b>";
+  const body = uz ? uz.d : nwClip(it.d, 380);
+  const foot = "\n\n\uD83D\uDCC5 " + nwDate(it.at) + "\n\uD83D\uDD17 Manba: " + (src.steam ? "Steam (rasmiy e'lon)" : src.ig ? "Instagram, " + esc(src.cname || "@" + src.ig)
+         : src.tgc ? "Telegram, " + esc(src.cname || "@" + src.tgc) : "YouTube, " + esc(src.cname || "rasmiy kanal")) +
+         (uz ? "" : "\n<i>(asl matn \u2014 tarjima qilinmadi)</i>");
+  let cap = head + (body ? "\n\n" + esc(body) : "") + foot, extra = "";
+  if(cap.length > 1020){ cap = head + foot; extra = esc(body); }   /* uzun tarjima: rasm ostida sarlavha, to'liq matn keyingi xabarda */
   if(cap.length > 1020) cap = cap.slice(0, 1017) + "\u2026";
   const kb = { inline_keyboard: [[{ text: src.steam ? "\uD83D\uDCD6 Batafsil" : (src.ig || src.tgc) ? "\uD83D\uDCF7 Postni ko'rish" : "\u25B6\uFE0F Videoni ko'rish", url: it.link }]] };
   const pics = (src.steam || src.ig || src.tgc) ? [it.img] : ["https://i.ytimg.com/vi/" + it.vid + "/maxresdefault.jpg", it.img, "https://i.ytimg.com/vi/" + it.vid + "/hqdefault.jpg"];
   for(const p of pics.filter(Boolean)){
     const r = await aiTg("sendPhoto", { chat_id: ADMIN_ID, photo: p, caption: cap, parse_mode: "HTML", reply_markup: kb });
-    if(r && r.ok){ NEWS.sent = (NEWS.sent || 0) + 1; return true; }
+    if(r && r.ok){
+      NEWS.sent = (NEWS.sent || 0) + 1;
+      if(extra) await aiTg("sendMessage", { chat_id: ADMIN_ID, text: extra, parse_mode: "HTML", disable_web_page_preview: true,
+                                            reply_to_message_id: r.result && r.result.message_id });
+      return true;
+    }
   }
-  const r2 = await aiTg("sendMessage", { chat_id: ADMIN_ID, text: cap, parse_mode: "HTML", reply_markup: kb, disable_web_page_preview: false });
+  const r2 = await aiTg("sendMessage", { chat_id: ADMIN_ID, text: cap + (extra ? "\n\n" + extra : ""), parse_mode: "HTML", reply_markup: kb, disable_web_page_preview: false });
   if(r2 && r2.ok){ NEWS.sent = (NEWS.sent || 0) + 1; return true; }
   return false;
 }
@@ -7025,7 +7045,7 @@ function nwStatus(){
       (on ? "" : " \u2014 o'chirilgan") + (e ? "\n     xato: " + e.m : "") + "\n";
   });
   s += "\nOxirgi tekshiruv: " + (NEWS.last ? nwDate(NEWS.last) : "hali yo'q") + " (har 20 daqiqada)";
-  s += "\nJami yuborilgan: " + (NEWS.sent || 0) + " \u00B7 bugungi o'zbekcha izohlar: " + (NEWS.aiD === new Date().toISOString().slice(0, 10) ? NEWS.aiN : 0) + "/40";
+  s += "\nJami yuborilgan: " + (NEWS.sent || 0) + " \u00B7 bugungi tarjimalar: " + (NEWS.aiD === new Date().toISOString().slice(0, 10) ? NEWS.aiN : 0) + "/40";
   s += "\n\nBuyruqlar:\n/yangilik tekshir \u2014 hozir tekshirish\n/yangilik oxirgi pubg \u2014 oxirgi rasmiy yangilikni ko'rish\n/yangilik o'chir pubg \u00B7 /yangilik yoq pubg\n/yangilik qo'sh genshin https://www.youtube.com/@GenshinImpact Genshin Impact\n/yangilik olib tashla genshin\n\nInstagram yoki Telegram kanal ham qo'shsa bo'ladi:\n/yangilik qo'sh ff_ig https://instagram.com/... Free Fire\n/yangilik qo'sh ff_tg https://t.me/... Free Fire\nInstagram'ni ulash: /instagram";
   return s;
 }
