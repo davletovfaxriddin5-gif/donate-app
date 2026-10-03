@@ -2789,88 +2789,78 @@ body.light #shBox.nm-sheet .svc .arw{ color:rgba(16,24,40,.3) }
 body.light #shBox.nm-sheet .switch:not(.on){ background:#D5D9E6 }
 body.light #shBox.nm-sheet .nm-chk .b{ border-color:rgba(16,24,40,.22); background:#fff }
 
-/* ===== KESHBEK: 3D tanga (aylanib-to'xtab turadi), tepadagi tugma, keshbek sahifasi ===== */
-.c3d{ --s:22px; position:relative; display:inline-block; width:var(--s); height:var(--s); perspective:calc(var(--s) * 8); flex-shrink:0; vertical-align:middle }
-.c3d::before{ content:""; position:absolute; inset:-35%; border-radius:50%; background:radial-gradient(circle, rgba(255,196,50,.45), rgba(255,196,50,0) 65%); pointer-events:none }
-.c3d-in{ position:absolute; inset:0; transform-style:preserve-3d; animation:c3dSpin 3.6s cubic-bezier(.5,.05,.2,1) infinite }
-.c3d i{ position:absolute; inset:0; border-radius:50% }
-.c3d .fc{ background:url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAxMDAgMTAwJz48ZGVmcz4KPHJhZGlhbEdyYWRpZW50IGlkPSdhJyBjeD0nMzQlJyBjeT0nMjglJyByPSc3OCUnPjxzdG9wIG9mZnNldD0nMCcgc3RvcC1jb2xvcj0nI0ZGRjRBOCcvPjxzdG9wIG9mZnNldD0nLjQ1JyBzdG9wLWNvbG9yPScjRkZDOTNDJy8+PHN0b3Agb2Zmc2V0PScxJyBzdG9wLWNvbG9yPScjRDk4MjBDJy8+PC9yYWRpYWxHcmFkaWVudD4KPHJhZGlhbEdyYWRpZW50IGlkPSdiJyBjeD0nNDAlJyBjeT0nMzQlJyByPSc3MiUnPjxzdG9wIG9mZnNldD0nMCcgc3RvcC1jb2xvcj0nI0ZGREE1RScvPjxzdG9wIG9mZnNldD0nMScgc3RvcC1jb2xvcj0nI0VFOUYxNCcvPjwvcmFkaWFsR3JhZGllbnQ+CjxsaW5lYXJHcmFkaWVudCBpZD0ncycgeDE9JzAnIHkxPScwJyB4Mj0nMScgeTI9JzEnPjxzdG9wIG9mZnNldD0nMCcgc3RvcC1jb2xvcj0nI0ZGRkNENicvPjxzdG9wIG9mZnNldD0nMScgc3RvcC1jb2xvcj0nI0ZGQ0YzNScvPjwvbGluZWFyR3JhZGllbnQ+PC9kZWZzPgo8Y2lyY2xlIGN4PSc1MCcgY3k9JzUwJyByPSc0OScgZmlsbD0ndXJsKCNhKScvPjxjaXJjbGUgY3g9JzUwJyBjeT0nNTAnIHI9JzM4LjUnIGZpbGw9J3VybCgjYiknIHN0cm9rZT0nI0Q0ODUwRicgc3Ryb2tlLXdpZHRoPScyLjQnLz4KPHBhdGggZD0nTTUwIDIxQzUzLjIgNDAgNjAgNDYuOCA3OSA1MEM2MCA1My4yIDUzLjIgNjAgNTAgNzlDNDYuOCA2MCA0MCA1My4yIDIxIDUwQzQwIDQ2LjggNDYuOCA0MCA1MCAyMVonIGZpbGw9JyNEOTg4MTAnIHRyYW5zZm9ybT0ndHJhbnNsYXRlKDEuOCAyLjIpJy8+CjxwYXRoIGQ9J001MCAyMUM1My4yIDQwIDYwIDQ2LjggNzkgNTBDNjAgNTMuMiA1My4yIDYwIDUwIDc5QzQ2LjggNjAgNDAgNTMuMiAyMSA1MEM0MCA0Ni44IDQ2LjggNDAgNTAgMjFaJyBmaWxsPSd1cmwoI3MpJy8+CjxlbGxpcHNlIGN4PSczNScgY3k9JzI2JyByeD0nMTUnIHJ5PSc2LjUnIGZpbGw9JyNmZmYnIG9wYWNpdHk9Jy4zOCcgdHJhbnNmb3JtPSdyb3RhdGUoLTMyIDM1IDI2KScvPjwvc3ZnPg==) center/100% 100% no-repeat; -webkit-backface-visibility:hidden; backface-visibility:hidden }
-.c3d .fr{ transform:translateZ(calc(var(--s) * .075)) }
-.c3d .bk{ transform:rotateY(180deg) translateZ(calc(var(--s) * .075)) }
-.c3d .ed{ background:linear-gradient(90deg,#9A5A08,#F4BF34 48%,#9A5A08); transform:translateZ(calc(var(--z) * var(--s) * .024)) }
-@keyframes c3dSpin{ 0%{ transform:rotateY(0deg) } 30%{ transform:rotateY(360deg) } 100%{ transform:rotateY(360deg) } }
-body.reduce-motion .c3d-in{ animation:none }
-.c3d.mini{ --s:15px } .c3d.big{ --s:74px }
+/* ===== KESHBEK: haqiqiy 3D tanga (36 kadr, aylanadi-to'xtaydi, sekin tebranib turadi), tugma, sahifa ===== */
+.cbs{ --s:18px; position:relative; display:inline-block; width:var(--s); height:var(--s); flex-shrink:0; vertical-align:middle;
+  animation:cbBob 3.4s ease-in-out infinite }
+.cbs i{ position:absolute; inset:0; border-radius:50%; background:url('/cb-coin.webp') 0 0 / 600% 600% no-repeat,
+  radial-gradient(circle at 38% 32%, #F4D27A, #C9952E 60%, #8A6118) }
+.cbs.ok i{ background:url('/cb-coin.webp') 0 0 / 600% 600% no-repeat; border-radius:0 }
+.cbs.mini{ --s:15px } .cbs.big{ --s:88px; animation-name:cbBobBig }
+@keyframes cbBob{ 0%,100%{ transform:translateY(0) } 50%{ transform:translateY(-1.6px) } }
+@keyframes cbBobBig{ 0%,100%{ transform:translateY(0) } 50%{ transform:translateY(-6px) } }
+body.reduce-motion .cbs{ animation:none }
 .profile .who > div{ min-width:0 }
 .profile .nm, .profile .un{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
-.pr-btns{ display:flex; align-items:center; gap:7px; flex-shrink:0 }
-.cb-chip{ display:inline-flex; align-items:center; gap:6px; height:30px; padding:0 11px 0 6px; border-radius:999px; cursor:pointer;
-  background:linear-gradient(135deg, rgba(255,200,60,.16), rgba(255,150,30,.08)); border:1px solid rgba(255,196,60,.32);
-  color:#FFD36A; font-weight:700; font-size:13px; font-family:inherit; transition:transform .15s }
-.cb-chip:active{ transform:scale(.94) }
-body.light .cb-chip{ color:#A86A08; background:linear-gradient(135deg, rgba(255,200,60,.26), rgba(255,170,40,.14)); border-color:rgba(214,150,20,.35) }
-/* sozlamalardagi Keshbek plitkasi bosiladigan bo'ldi */
-button.stat.cb-st{ text-align:left; width:100%; font:inherit; color:inherit; cursor:pointer; border:inherit; position:relative }
-button.stat.cb-st .v{ display:flex; align-items:center; gap:6px }
-button.stat.cb-st::after{ content:"\203A"; position:absolute; right:12px; top:50%; transform:translateY(-50%); color:var(--faint); font-size:18px }
+.pr-btns{ display:flex; align-items:center; gap:6px; flex-shrink:0 }
+/* tanga tugmasi "Fikrlar" bilan bir xil o'lchamda (o'sha .coin uslubi), faqat raqam oltin rangda */
+.profile .coin.cb-chip{ padding-left:6px !important; color:#F2C14E; font-weight:700 !important; cursor:pointer }
+body.light .profile .coin.cb-chip{ color:#A86A08 }
+.stat.cb-st{ cursor:pointer; transition:opacity .15s } .stat.cb-st:active{ opacity:.7 }
+.stat.cb-st .v{ display:flex; align-items:center; gap:6px }
+.stat.cb-st .v small{ margin-left:0 !important }
 /* sahifa */
 .cb-pg{ padding-bottom:120px }
-.cb-hero{ position:relative; overflow:hidden; display:flex; align-items:center; gap:18px; padding:20px 18px; border-radius:24px; margin-bottom:6px;
-  background:radial-gradient(120% 90% at 0% 0%, rgba(255,190,50,.20), rgba(255,190,50,0) 60%), radial-gradient(90% 80% at 100% 100%, rgba(120,80,240,.22), rgba(120,80,240,0) 65%), var(--card);
-  border:1px solid rgba(255,196,60,.22); box-shadow:0 18px 40px -22px rgba(255,170,40,.45) }
-.cb-orbit{ position:relative; width:96px; height:96px; flex-shrink:0; display:grid; place-items:center }
-.cb-orbit .ring{ position:absolute; left:-6px; right:-6px; top:36px; height:26px; border-radius:50%; border:2px solid rgba(255,206,70,.85);
-  box-shadow:0 0 10px rgba(255,190,40,.6); transform:rotate(-16deg); pointer-events:none;
+.cb-hero{ position:relative; overflow:hidden; display:flex; align-items:center; gap:16px; padding:18px; border-radius:22px; margin-bottom:4px;
+  background:radial-gradient(120% 90% at 0% 0%, rgba(255,190,50,.16), rgba(255,190,50,0) 60%), radial-gradient(90% 80% at 100% 100%, rgba(120,80,240,.20), rgba(120,80,240,0) 65%), var(--card);
+  border:1px solid rgba(255,196,60,.18) }
+.cb-orbit{ position:relative; width:104px; height:104px; flex-shrink:0; display:grid; place-items:center }
+.cb-orbit .ring{ position:absolute; left:-4px; right:-4px; top:42px; height:24px; border-radius:50%; border:1.5px solid rgba(232,184,80,.7);
+  box-shadow:0 0 8px rgba(232,170,40,.35); transform:rotate(-14deg); pointer-events:none; animation:cbBobBig 3.4s ease-in-out infinite;
   -webkit-mask:linear-gradient(180deg, #000 0 48%, transparent 48% 100%); mask:linear-gradient(180deg, #000 0 48%, transparent 48% 100%) }
 .cb-orbit .ring.f{ -webkit-mask:linear-gradient(180deg, transparent 0 50%, #000 50% 100%); mask:linear-gradient(180deg, transparent 0 50%, #000 50% 100%); z-index:2 }
-.cb-orbit .spk{ position:absolute; width:12px; height:12px; background:#FFD54A; clip-path:polygon(50% 0,62% 38%,100% 50%,62% 62%,50% 100%,38% 62%,0 50%,38% 38%);
-  filter:drop-shadow(0 0 4px rgba(255,200,60,.9)); animation:cbTw 2.4s ease-in-out infinite }
-.cb-orbit .s1{ left:2px; top:10px } .cb-orbit .s2{ right:0; top:2px; width:15px; height:15px; animation-delay:.8s } .cb-orbit .s3{ right:6px; bottom:6px; width:9px; height:9px; animation-delay:1.5s }
-@keyframes cbTw{ 0%,100%{ opacity:.35; transform:scale(.7) } 50%{ opacity:1; transform:scale(1.1) } }
-body.reduce-motion .cb-orbit .spk{ animation:none }
+body.reduce-motion .cb-orbit .ring{ animation:none }
 .cb-hk .l{ font-size:12px; letter-spacing:.06em; text-transform:uppercase; color:var(--dim) }
-.cb-hk .n{ font-size:38px; font-weight:800; line-height:1.1; color:#FFD36A; letter-spacing:-.02em }
+.cb-hk .n{ font-size:36px; font-weight:800; line-height:1.1; color:#F2C14E; letter-spacing:-.02em }
 body.light .cb-hk .n{ color:#B8791A }
 .cb-hk .r{ font-size:12.5px; color:var(--dim); line-height:1.45; margin-top:4px }
-.cb-sec{ margin:20px 4px 10px; font-size:12px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--dim) }
-.cb-tk{ position:relative; display:flex; align-items:stretch; margin-bottom:10px; border-radius:18px; background:var(--card); border:1px solid var(--line); overflow:hidden }
-.cb-tk .stub{ width:86px; flex-shrink:0; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:12px 6px;
-  background:linear-gradient(160deg, #FFD65A, #F29A18); color:#2A1600; position:relative }
-.cb-tk .stub b{ font-size:22px; font-weight:800; letter-spacing:-.02em }
-.cb-tk .stub small{ font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; opacity:.75 }
-.cb-tk .stub::after{ content:""; position:absolute; right:-1px; top:6px; bottom:6px; border-right:2px dashed var(--card) }
-.cb-tk:not(.can) .stub{ filter:saturate(.35) brightness(.8) }
-.cb-tk .body{ flex:1; min-width:0; padding:12px 12px 12px 14px; display:flex; flex-direction:column; justify-content:center; gap:5px }
-.cb-tk .t{ font-weight:700; font-size:14.5px }
-.cb-tk .cost{ display:flex; align-items:center; gap:6px; font-size:13px; color:#FFD36A; font-weight:700 }
-body.light .cb-tk .cost{ color:#A86A08 }
-.cb-tk .bar{ height:5px; border-radius:5px; background:rgba(255,255,255,.08); overflow:hidden }
-body.light .cb-tk .bar{ background:rgba(16,24,40,.08) }
-.cb-tk .bar i{ display:block; height:100%; border-radius:inherit; background:linear-gradient(90deg,#F29A18,#FFD65A) }
-.cb-tk .need{ font-size:11.5px; color:var(--dim) }
-.cb-tk .get{ align-self:center; margin-right:12px; height:36px; padding:0 15px; border-radius:12px; border:0; font:inherit; font-weight:700; font-size:13.5px; cursor:pointer;
-  background:linear-gradient(135deg,#FFD65A,#F29A18); color:#2A1600; box-shadow:0 6px 16px -8px rgba(242,154,24,.8); transition:transform .15s }
-.cb-tk .get:active{ transform:scale(.94) }
-.cb-tk .get.arm{ background:linear-gradient(135deg,#5B6CFF,#8A4DF5); color:#fff; box-shadow:0 6px 16px -8px rgba(110,80,250,.8) }
-.cb-tk .get:disabled{ background:rgba(255,255,255,.08); color:var(--faint); box-shadow:none; cursor:default }
-body.light .cb-tk .get:disabled{ background:rgba(16,24,40,.06) }
-.cb-code{ display:flex; align-items:center; gap:10px; padding:12px 12px 12px 14px; margin-bottom:9px; border-radius:16px; background:var(--card); border:1px solid var(--line); transition:border-color .2s }
-.cb-code.on{ border-color:rgba(91,108,255,.75); box-shadow:0 0 0 3px rgba(91,108,255,.16) }
-.cb-code .ci{ flex:1; min-width:0 }
-.cb-code .cc{ font-family:ui-monospace, Menlo, monospace; font-weight:700; font-size:15px; letter-spacing:.06em }
-.cb-code .cm{ font-size:12px; color:var(--dim); margin-top:2px }
-.cb-code .cp{ width:36px; height:36px; border-radius:11px; border:1px solid var(--line); background:transparent; color:var(--dim); display:grid; place-items:center; cursor:pointer }
-.cb-code .cp svg{ width:17px; height:17px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round }
-.cb-code .ap{ height:36px; padding:0 14px; border-radius:11px; border:0; font:inherit; font-weight:700; font-size:13px; cursor:pointer;
-  background:linear-gradient(135deg,#5B6CFF,#8A4DF5); color:#fff }
-.cb-code.on .ap{ background:rgba(91,108,255,.16); color:#8EA0FF }
-.cb-code.past{ opacity:.5 } .cb-code.past .cc{ text-decoration:line-through }
-.cb-empty{ padding:16px; border-radius:16px; border:1px dashed var(--line); color:var(--dim); font-size:13px; text-align:center; line-height:1.5 }
-.cb-how{ margin-top:18px; padding:14px 15px; border-radius:16px; background:rgba(91,108,255,.08); border:1px solid rgba(91,108,255,.18); font-size:12.8px; line-height:1.6; color:var(--dim) }
-.cb-how b{ color:var(--text) }
+/* iOS uslubidagi guruhli ro'yxat */
+.cb-sec{ margin:22px 16px 8px; font-size:13px; font-weight:600; color:var(--dim) }
+.cb-grp{ border-radius:18px; background:var(--card); border:1px solid var(--line); overflow:hidden }
+.cb-row{ position:relative; display:flex; align-items:center; gap:12px; padding:11px 14px; min-height:60px }
+.cb-row + .cb-row::before{ content:""; position:absolute; top:0; right:0; left:66px; height:1px; background:var(--line) }
+.cb-ico{ width:40px; height:40px; border-radius:11px; flex-shrink:0; display:grid; place-items:center; font-weight:800; font-size:13px; letter-spacing:-.02em;
+  background:linear-gradient(150deg, #F7D774, #D99A22); color:#3A2300; box-shadow:inset 0 1px 0 rgba(255,255,255,.45), 0 4px 10px -6px rgba(217,154,34,.8) }
+.cb-ico.dim{ background:linear-gradient(150deg, rgba(247,215,116,.28), rgba(217,154,34,.22)); color:rgba(255,226,150,.8); box-shadow:none }
+body.light .cb-ico.dim{ color:#9A6A10 }
+.cb-ico.tag{ background:linear-gradient(150deg, #6F80FF, #5048E8); color:#fff; box-shadow:inset 0 1px 0 rgba(255,255,255,.3) }
+.cb-ico.tag svg{ width:20px; height:20px; fill:none; stroke:#fff; stroke-width:2; stroke-linecap:round; stroke-linejoin:round }
+.cb-ico.off{ background:rgba(255,255,255,.07); color:var(--faint); box-shadow:none } body.light .cb-ico.off{ background:rgba(16,24,40,.06) }
+.cb-tx{ flex:1; min-width:0 }
+.cb-tx .t{ font-size:15px; font-weight:600; letter-spacing:-.01em }
+.cb-tx .t.mono{ font-family:ui-monospace, "SF Mono", Menlo, monospace; letter-spacing:.04em }
+.cb-tx .s{ display:flex; align-items:center; gap:5px; font-size:13px; color:var(--dim); margin-top:2px; white-space:nowrap }
+.cb-tx .pg{ height:4px; border-radius:4px; background:rgba(255,255,255,.08); overflow:hidden; margin-top:7px; max-width:150px }
+body.light .cb-tx .pg{ background:rgba(16,24,40,.08) }
+.cb-tx .pg i{ display:block; height:100%; border-radius:inherit; background:linear-gradient(90deg,#D99A22,#F7D774) }
+.cb-btn{ flex-shrink:0; height:32px; min-width:72px; padding:0 14px; border-radius:16px; border:0; font:inherit; font-size:14px; font-weight:600; cursor:pointer;
+  background:rgba(242,193,78,.16); color:#F2C14E; transition:transform .15s, background .2s }
+.cb-btn:active{ transform:scale(.95) }
+body.light .cb-btn:not(.go):not(.arm):not(.on):not(.blue):not(:disabled){ background:rgba(217,154,34,.14); color:#9A6408 }
+body.light .cb-btn.blue{ background:rgba(91,108,255,.14) }
+.cb-btn.go{ background:linear-gradient(135deg,#F7D774,#D99A22); color:#3A2300 }
+.cb-btn.arm{ background:#5B6CFF; color:#fff }
+.cb-btn.blue{ background:rgba(91,108,255,.18); color:#9AA8FF } body.light .cb-btn.blue{ color:#3F4FD8 }
+.cb-btn.on{ background:#5B6CFF; color:#fff }
+.cb-btn:disabled{ background:transparent; color:var(--faint); cursor:default; min-width:0; padding:0 4px; font-weight:500; font-size:13px }
+.cb-cp{ flex-shrink:0; width:32px; height:32px; border-radius:16px; border:0; background:rgba(255,255,255,.06); color:var(--dim); display:grid; place-items:center; cursor:pointer }
+body.light .cb-cp{ background:rgba(16,24,40,.05) }
+.cb-cp svg{ width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round }
+.cb-row.past{ opacity:.5 } .cb-row.past .t{ text-decoration:line-through }
+.cb-empty{ padding:16px; color:var(--dim); font-size:13.5px; text-align:center; line-height:1.5 }
+.cb-note{ margin:12px 16px 0; font-size:12.5px; line-height:1.55; color:var(--dim) }
 /* to'lov tugmasi ustida tanlangan kod */
 .cb-sel{ display:flex; align-items:center; gap:8px; margin:0 0 8px; padding:9px 10px 9px 12px; border-radius:14px; font-size:13px;
-  background:rgba(20,22,48,.92); border:1px solid rgba(255,196,60,.35); color:#FFE29A; box-shadow:0 8px 20px -10px rgba(0,0,0,.6) }
+  background:rgba(20,22,48,.94); border:1px solid rgba(242,193,78,.32); color:#FFE29A; box-shadow:0 8px 20px -10px rgba(0,0,0,.6) }
 .cb-sel .tx{ flex:1; min-width:0 } .cb-sel .tx small{ color:rgba(255,226,154,.65) }
 .cb-sel button{ width:26px; height:26px; border-radius:50%; border:0; background:rgba(255,255,255,.1); color:#fff; font-size:14px; cursor:pointer }
 body.light .cb-sel{ background:rgba(255,248,230,.97); color:#7A4D05; border-color:rgba(214,150,20,.35) }
@@ -5692,16 +5682,41 @@ function rent(){ haptic(); toast("Ijaraga bo'limi tez orada 🔜"); }
    Kod bir marta ishlatiladi, 30 kun amal qiladi; buyurtma bekor bo'lsa qaytadi. */
 var cbCoins = 0, cbCodes = [], cbPacks = [], cbFrom = 'home', cbArm = -1, cbArmT = 0, cbBusy = false;
 var CB_COPY = '<svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>';
-function cbCoinHtml(cls){
-  var ed = ''; for(var z = -3; z <= 3; z++) ed += '<i class="ed" style="--z:' + z + '"></i>';
-  return '<span class="c3d ' + (cls || '') + '"><span class="c3d-in">' + ed + '<i class="fc fr"></i><i class="fc bk"></i></span></span>';
-}
+function cbCoinHtml(cls){ return '<span class="cbs ' + (cls || '') + '"><i></i></span>'; }
+var cbImgOk = false;
+(function(){
+  var im = new Image();
+  im.onload = function(){ cbImgOk = true; document.body.classList.add('cb-img'); };
+  im.src = '/cb-coin.webp';
+  var SPIN = 1100, REST = 2300, N = 36;
+  function ease(t){ return t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
+  var els = document.getElementsByClassName('cbs'), last = -1;
+  function tick(now){
+    if(els.length && cbImgOk){
+      var f = 0;
+      if(!document.body.classList.contains('reduce-motion')){
+        var t = now % (SPIN + REST);
+        if(t < SPIN) f = Math.floor(ease(t / SPIN) * N) % N;
+      }
+      if(f !== last || els[0].className.indexOf(' ok') < 0){
+        last = f;
+        var pos = ((f % 6) * 20) + '% ' + (Math.floor(f / 6) * 20) + '%';
+        for(var k = 0; k < els.length; k++){
+          var e = els[k]; if(e.className.indexOf(' ok') < 0) e.className += ' ok';
+          if(e.firstChild) e.firstChild.style.backgroundPosition = pos;
+        }
+      }
+    }
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+})();
 function cbPct(p){ return String(p).replace('.', ',') + '%'; }
 function cbSelGet(){ try{ return JSON.parse(localStorage.getItem('mz_cb_sel') || 'null'); }catch(e){ return null; } }
 function cbSelSet(v){ try{ if(v) localStorage.setItem('mz_cb_sel', JSON.stringify(v)); else localStorage.removeItem('mz_cb_sel'); }catch(e){} }
 function cbLeft(exp){
   var d = Math.ceil((Date.parse(exp) - Date.now()) / 864e5);
-  return d > 1 ? (d + ' kun amal qiladi') : d === 1 ? 'ertaga tugaydi' : 'bugun tugaydi';
+  return d > 1 ? (d + ' kun qoldi') : d === 1 ? 'ertaga tugaydi' : 'bugun tugaydi';
 }
 function cbLoad(){
   if(!tg || !tg.initData) return;
@@ -5724,31 +5739,34 @@ function renderCashback(){
   var packs = cbPacks.length ? cbPacks : [{p:.5,c:30},{p:1,c:60},{p:2,c:110},{p:3,c:160}];
   var act = cbCodes.filter(function(k){ return !k.used && !k.old; });
   var past = cbCodes.filter(function(k){ return k.used || k.old; }).slice(0, 6);
+  var TAG = '<svg viewBox="0 0 24 24"><path d="M3.5 12.4V5.6c0-1.2.9-2.1 2.1-2.1h6.8l8.1 8.1c.8.8.8 2.2 0 3l-5.8 5.8c-.8.8-2.2.8-3 0z"/><circle cx="8.2" cy="8.2" r="1.5"/></svg>';
   app.innerHTML = '<div class="cb-pg">' +
-    '<div class="cb-hero"><div class="cb-orbit"><i class="ring"></i>' + cbCoinHtml('big') + '<i class="ring f"></i><i class="spk s1"></i><i class="spk s2"></i><i class="spk s3"></i></div>' +
+    '<div class="cb-hero"><div class="cb-orbit"><i class="ring"></i>' + cbCoinHtml('big') + '<i class="ring f"></i></div>' +
       '<div class="cb-hk"><div class="l">Tangalaringiz</div><div class="n cb-num">' + fmt(cbCoins) + '</div>' +
       '<div class="r">Har buyurtma uchun +1 tanga, 100 000 so\'mdan katta buyurtma uchun +2</div></div></div>' +
-    '<div class="cb-sec">Chegirma olish</div>' +
+    '<div class="cb-sec">Chegirma kodini olish</div><div class="cb-grp">' +
     packs.map(function(pk, i){
       var can = cbCoins >= pk.c, pr = Math.min(100, Math.round(cbCoins / pk.c * 100));
-      return '<div class="cb-tk' + (can ? ' can' : '') + '"><div class="stub"><b>' + cbPct(pk.p) + '</b><small>chegirma</small></div>' +
-        '<div class="body"><div class="t">' + cbPct(pk.p) + ' chegirma kodi</div><div class="cost">' + cbCoinHtml('mini') + pk.c + ' tanga</div>' +
-        (can ? '' : '<div class="bar"><i style="width:' + pr + '%"></i></div><div class="need">Yana ' + (pk.c - cbCoins) + ' tanga kerak</div>') + '</div>' +
-        '<button class="get' + (cbArm === i ? ' arm' : '') + '"' + (can ? '' : ' disabled') + ' onclick="cbBuy(' + i + ', this)">' + (cbArm === i ? 'Tasdiqlash' : 'Olish') + '</button></div>';
-    }).join('') +
-    '<div class="cb-sec">Mening kodlarim</div>' +
+      return '<div class="cb-row"><div class="cb-ico' + (can ? '' : ' dim') + '">' + cbPct(pk.p) + '</div>' +
+        '<div class="cb-tx"><div class="t">' + cbPct(pk.p) + ' chegirma</div><div class="s">' + cbCoinHtml('mini') + pk.c + ' tanga</div>' +
+        (can ? '' : '<div class="pg"><i style="width:' + pr + '%"></i></div>') + '</div>' +
+        (can ? '<button class="cb-btn ' + (cbArm === i ? 'arm' : 'go') + '" onclick="cbBuy(' + i + ', this)">' + (cbArm === i ? 'Tasdiqlash' : 'Olish') + '</button>'
+             : '<button class="cb-btn" disabled>' + fmt(cbCoins) + ' / ' + pk.c + '</button>') + '</div>';
+    }).join('') + '</div>' +
+    '<div class="cb-sec">Mening kodlarim</div><div class="cb-grp">' +
     (act.length ? act.map(function(k){
       var on = !!(sel && sel.c === k.c);
-      return '<div class="cb-code' + (on ? ' on' : '') + '"><div class="ci"><div class="cc">' + esc(k.c) + '</div>' +
-        '<div class="cm">' + cbPct(k.p) + ' chegirma \u00b7 ' + (on ? 'keyingi buyurtmada qo\'llanadi' : cbLeft(k.exp)) + '</div></div>' +
-        '<button class="cp" onclick="cbCopy(\'' + esc(k.c) + '\')">' + CB_COPY + '</button>' +
-        '<button class="ap" onclick="cbApply(\'' + esc(k.c) + '\', ' + Number(k.p) + ')">' + (on ? '\u2713 Tanlangan' : 'Qo\'llash') + '</button></div>';
+      return '<div class="cb-row"><div class="cb-ico tag">' + TAG + '</div>' +
+        '<div class="cb-tx"><div class="t mono">' + esc(k.c) + '</div><div class="s">' + cbPct(k.p) + ' \u00b7 ' + (on ? 'tanlangan' : cbLeft(k.exp)) + '</div></div>' +
+        '<button class="cb-cp" onclick="cbCopy(\'' + esc(k.c) + '\')" aria-label="Nusxalash">' + CB_COPY + '</button>' +
+        '<button class="cb-btn ' + (on ? 'on' : 'blue') + '" onclick="cbApply(\'' + esc(k.c) + '\', ' + Number(k.p) + ')">' + (on ? '\u2713 Tanlandi' : 'Qo\'llash') + '</button></div>';
     }).join('') : '<div class="cb-empty">Hali kod yo\'q. Tangalar yetarli bo\'lgach, yuqoridan chegirma kodi oling.</div>') +
-    (past.length ? past.map(function(k){
-      return '<div class="cb-code past"><div class="ci"><div class="cc">' + esc(k.c) + '</div><div class="cm">' + cbPct(k.p) + ' \u00b7 ' + (k.used ? 'ishlatilgan' : 'muddati tugagan') + '</div></div></div>';
-    }).join('') : '') +
-    '<div class="cb-how"><b>Kod qanday ishlaydi?</b> Kod yonidagi \u00ab<b>Qo\'llash</b>\u00bb tugmasini bosing \u2014 chegirma keyingi o\'yin yoki Telegram xaridingizda o\'zi hisoblanadi, ' +
-    'u \u00abSotib olish\u00bb tugmasi ustida ko\'rinib turadi. Har bir kod bir marta ishlatiladi va 30 kun amal qiladi. Buyurtma bajarilmasa, kod va tanga qaytadi.</div>' +
+    past.map(function(k){
+      return '<div class="cb-row past"><div class="cb-ico off">' + cbPct(k.p) + '</div><div class="cb-tx"><div class="t mono">' + esc(k.c) + '</div>' +
+        '<div class="s">' + (k.used ? 'Ishlatilgan' : 'Muddati tugagan') + '</div></div></div>';
+    }).join('') + '</div>' +
+    '<div class="cb-note">\u00abQo\'llash\u00bb ni bosing \u2014 chegirma keyingi o\'yin yoki Telegram xaridingizda o\'zi hisoblanadi va \u00abSotib olish\u00bb tugmasi ustida ko\'rinadi. ' +
+    'Har bir kod bir marta ishlatiladi va 30 kun amal qiladi. Buyurtma bajarilmasa, kod va tanga qaytadi.</div>' +
   '</div>';
 }
 function cbBuy(i, b){
@@ -5801,7 +5819,7 @@ function profileRow(){
       <div><div class="nm">${name}</div><div class="un">${un}</div></div>
       <span class="who-arw">›</span>
     </div>
-    <div class="pr-btns"><button class="cb-chip" onclick="openCb('home')" aria-label="Keshbek">${cbCoinHtml('')}<span class="cb-num">${fmt(cbCoins)}</span></button>
+    <div class="pr-btns"><button class="coin cb-chip" onclick="openCb('home')" aria-label="Keshbek">${cbCoinHtml('')}<span class="cb-num">${fmt(cbCoins)}</span></button>
     <button class="coin" onclick="openLink('https://t.me/mlbb_otzivv')">💬 Fikrlar</button></div>
   </div>`;
 }
@@ -12525,7 +12543,7 @@ function renderSettings(){
     </div>
     <div class="stat-row">
       <div class="stat"><div class="k">Balans</div><div class="v">${money(balance,false)}</div></div>
-      <button class="stat cb-st" onclick="openCb('settings')"><div class="k">Keshbek</div><div class="v gold">${cbCoinHtml('mini')}<span class="cb-num">${fmt(cbCoins)}</span><small>tanga</small></div></button>
+      <div class="stat cb-st" onclick="openCb('settings')"><div class="k">Keshbek</div><div class="v gold">${cbCoinHtml('mini')}<span class="cb-num">${fmt(cbCoins)}</span><small>tanga</small></div></div>
     </div>
   </div>
   <div class="sec-lbl" style="margin-top:0">Telefon raqami</div>
